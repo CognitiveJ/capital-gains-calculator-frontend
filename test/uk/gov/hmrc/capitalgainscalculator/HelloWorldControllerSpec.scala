@@ -13,7 +13,7 @@ import uk.gov.hmrc.play.test.{WithFakeApplication, UnitSpec}
 
 class HelloWorldControllerSpec extends UnitSpec with WithFakeApplication{
 
-  val fakeRequest = FakeRequest("GET", "/")
+  val fakeRequest = FakeRequest("GET", "/capital-gains-calculator-frontend/hello-world")
 
 
   "GET /" should {
