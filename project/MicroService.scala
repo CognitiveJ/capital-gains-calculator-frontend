@@ -34,8 +34,20 @@ trait MicroService {
   lazy val plugins : Seq[Plugins] = Seq(play.PlayScala)
   lazy val playSettings : Seq[Setting[_]] = Seq.empty
 
+  lazy val scoverageSettings = {
+    import scoverage.ScoverageKeys
+    Seq(
+      // Semicolon-separated list of regexs matching classes to exclude
+      ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;.*AuthService.*;uk.gov.hmrc.capitalgainscalculator.models\\.data\\..*;uk.gov.hmrc.capitalgainscalculator.views.html.*;uk.gov.hmrc.BuildInfo;app.*;prod.*;uk.gov.hmrc.capitalgainscalculator.config.*;uk.gov.hmrc.capitalgainscalculator.controllers.SessionCacheController;uk.gov.hmrc.capitalgainscalculator.FrontendAppConfig;uk.gov.hmrc.capitalgainscalculator.FrontendGlobal;uk.gov.hmrc.capitalgainscalculator.AuditFilter;uk.gov.hmrc.capitalgainscalculator.ControllerConfiguration;uk.gov.hmrc.capitalgainscalculator.FrontendAuditConnector;uk.gov.hmrc.capitalgainscalculator.FrontendAuthConnector;uk.gov.hmrc.capitalgainscalculator.LoggingFilter;uk.gov.hmrc.capitalgainscalculator.WSHttp",
+      ScoverageKeys.coverageMinimum := 90,
+      ScoverageKeys.coverageFailOnMinimum := false,
+      ScoverageKeys.coverageHighlighting := true
+    )
+  }
+
   lazy val microservice = Project(appName, file("."))
     .enablePlugins(Seq(play.PlayScala) ++ plugins : _*)
+    .settings(playSettings ++ scoverageSettings : _*)
     .settings(playSettings : _*)
     .settings(scalaSettings: _*)
     .settings(publishingSettings: _*)

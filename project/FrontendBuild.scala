@@ -53,7 +53,9 @@ private object AppDependencies {
     "uk.gov.hmrc" %% "play-json-logger" % playJsonLoggerVersion,
     "uk.gov.hmrc" %% "govuk-template" % govukTemplateVersion,
     "uk.gov.hmrc" %% "play-health" % playHealthVersion,
-    "uk.gov.hmrc" %% "play-ui" % playUiVersion
+    "uk.gov.hmrc" %% "play-ui" % playUiVersion,
+    "uk.gov.hmrc" %% "http-caching-client" % "5.3.0",
+    "uk.gov.hmrc" %% "mongo-caching" % "3.0.0"
   )
 
   trait TestDependencies {
@@ -65,9 +67,9 @@ private object AppDependencies {
     def apply() = new TestDependencies {
       override lazy val test = Seq(
         "uk.gov.hmrc" %% "hmrctest" % hmrcTestVersion % scope,
-        "org.scalatest" %% "scalatest" % "2.2.2" % scope,
-        "org.pegdown" % "pegdown" % "1.4.2" % scope,
-        "org.jsoup" % "jsoup" % "1.7.3" % scope,
+        "org.scalatest" %% "scalatest" % "2.2.5" % scope,
+        "org.pegdown" % "pegdown" % "1.6.0" % scope,
+        "org.jsoup" % "jsoup" % "1.8.3" % scope,
         "com.typesafe.play" %% "play-test" % PlayVersion.current % scope
       )
     }.test
