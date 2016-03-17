@@ -1,5 +1,5 @@
 # Add all the application routes to the app.routes file
-->         /capital-gains-calculator-frontend       app.Routes
+->         /calculate-your-capital-gains            app.Routes
 ->         /                                        health.Routes
 ->     	   /template                                template.Routes
 
