@@ -1,6 +1,8 @@
 @()(implicit request: Request[_])
 
-@uk.gov.hmrc.capitalgainscalculator.views.html.main_template(title = "Hello from capital-gains-calculator-frontend", bodyClasses = None) {
+@import helper._
+
+@uk.gov.hmrc.capitalgainscalculator.views.html.main_template(title = "Capital Gains Tax for non-residents", bodyClasses = None) {
     <div class="phase-banner-alpha">
         <p>
             <strong class="phase-tag">ALPHA</strong>
@@ -11,20 +13,16 @@
     <div class="grid-row">
         <div class="column-two-thirds">
 
-            <a class="link-back" href="javascript: history.go(-1)">Back</a>
+            <a id="back" class="link-back" href="javascript: history.go(-1)">Back</a>
 
-            <h1 class="heading-large">Capital Gains Tax for non-residents</h1>
+            <h1 class="heading-large" id="heading">Capital Gains Tax for non-residents</h1>
 
-            @helper.form(routes.IntroductionController.start) {
-
-                @{play.filters.csrf.CSRF.getToken(request).map {token => CSRF.formField(token)}}
-
-                <fieldset class="form-group inline">
+                <fieldset id="contentIntroduction" class="form-group inline">
                     <h2 class="form-group">
                         <p class="lede">Capital Gains Tax for non-residents came into effect on 5 April 2015.</p>
                         <p>If you make or lose money on a UK residential property after that date you need to tell HMRC about it.</p>
                         <p>You should let them know less than 30 days after you stop owning the property.</p>
-                        <p>You can still be a non-resident if you live in the UK.  Read more about <a href="https://www.gov.uk/tax-foreign-income/residence" target="_blank">residence and tax</a>.</p>
+                        <p>You can still be a non-resident if you live in the UK.  Read more about <a id="helpLink1" href="https://www.gov.uk/tax-foreign-income/residence" target="_blank">residence and tax</a>.</p>
                     </h2>
                     <h2 class="heading-medium">Residential properties</h2>
                     <p>Residential properties can be:</p>
@@ -49,8 +47,7 @@
                     </div>
                 </fieldset>
 
-                <button class="button" type="submit" id="continue">Start</button>
-            }
+                <a class="button" href="#" id="start">Start</a>
 
         </div>
     </div>

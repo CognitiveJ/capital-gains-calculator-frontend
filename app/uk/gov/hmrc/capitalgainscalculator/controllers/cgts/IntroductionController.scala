@@ -27,8 +27,4 @@ trait Introduction extends FrontendController {
   val introduction = Action.async { implicit request =>
     Future.successful(Ok(uk.gov.hmrc.capitalgainscalculator.views.html.cgts.introduction()))
   }
-
-  val start = Action.async { implicit request =>
-    Future.successful(Redirect(routes.IntroductionController.introduction))
-  }
 }
