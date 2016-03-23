@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.capitalgainscalculator.controllers
+package controllers
 
+import play.api.mvc.Action
 import uk.gov.hmrc.play.frontend.controller.FrontendController
-import play.api.mvc._
+
 import scala.concurrent.Future
 
+object IntroductionController extends IntroductionController
 
-object HelloWorld extends HelloWorld
-
-trait HelloWorld extends FrontendController {
-  val helloWorld = Action.async { implicit request =>
-		Future.successful(Ok(uk.gov.hmrc.capitalgainscalculator.views.html.helloworld.hello_world()))
+trait IntroductionController extends FrontendController {
+  val introduction = Action.async { implicit request =>
+    Future.successful(Ok(views.html.cgts.introduction()))
   }
 }
