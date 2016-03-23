@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.capitalgainscalculator.controllers
+package controllers
 
-import uk.gov.hmrc.capitalgainscalculator.WSHttp
+import config.WSHttp
 import uk.gov.hmrc.http.cache.client.SessionCache
 import uk.gov.hmrc.play.config.{AppName, ServicesConfig}
 

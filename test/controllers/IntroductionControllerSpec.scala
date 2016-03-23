@@ -14,21 +14,16 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.capitalgainscalculator
+package controllers
 
 import play.api.http.Status
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.capitalgainscalculator.controllers.cgts.IntroductionController
-import uk.gov.hmrc.play.test.{WithFakeApplication, UnitSpec}
+import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
-/**
-  * Created by james on 18/03/16.
-  */
-class IntroductionControllerSpec extends UnitSpec with WithFakeApplication{
+class IntroductionControllerSpec extends UnitSpec with WithFakeApplication {
 
-  val fakeRequest = FakeRequest("GET", "/capital-gains-calculator-frontend/introduction")
-  val fakePostRequest = FakeRequest("POST", "/capital-gains-calculator-frontend/introduction")
+  val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/introduction")
 
   "GET /" should {
     "return 200" in {
@@ -41,7 +36,5 @@ class IntroductionControllerSpec extends UnitSpec with WithFakeApplication{
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
     }
-
   }
-
 }

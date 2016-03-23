@@ -1,4 +1,4 @@
 # microservice specific routes
 
-GET        /hello-world             uk.gov.hmrc.capitalgainscalculator.controllers.HelloWorld.helloWorld
-GET        /introduction            uk.gov.hmrc.capitalgainscalculator.controllers.cgts.IntroductionController.introduction
+GET        /hello-world             controllers.HelloWorldController.helloWorld
+GET        /introduction            controllers.IntroductionController.introduction
