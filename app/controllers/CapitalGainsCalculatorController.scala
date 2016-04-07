@@ -53,7 +53,9 @@ trait CapitalGainsCalculatorController extends FrontendController {
   }
 
   //################### Acquisition Value methods #######################
-  val acquisitionValue = TODO
+  val acquisitionValue = Action.async { implicit request =>
+    Future.successful(Ok(cgts.acquisitionValue()))
+  }
 
   //################### Improvements methods #######################
   val improvements = Action.async { implicit request =>
