@@ -33,7 +33,10 @@ trait CapitalGainsCalculatorController extends FrontendController {
   val disabledTrustee = TODO
   val currentIncome = TODO
   val personalAllowance = TODO
-  val otherProperties = TODO
+
+  val otherProperties = Action.async { implicit request =>
+    Future.successful(Ok(cgts.otherProperties()))
+  }
 
   val annualExemptAmount = Action.async { implicit request =>
     Future.successful(Ok(cgts.annualExemptAmount()))

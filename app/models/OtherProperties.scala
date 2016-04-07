@@ -16,10 +16,10 @@
 
 package models
 
-import play.api.libs.json._
+import play.api.libs.json.Json
 
-case class AnnualExemptAmount (customerType: String)
+case class OtherProperties (otherProperties: Boolean)
 
-object AnnualExemptAmount {
-  implicit val format = Json.format[AnnualExemptAmount]
+object OtherProperties {
+  implicit val format = Json.format[OtherProperties]
 }
