@@ -92,6 +92,20 @@ class CapitalGainsCalculatorControllerSpec extends UnitSpec with WithFakeApplica
       val result = CapitalGainsCalculatorController.disposalDate.toString()
       result shouldBe s
     }
+
+    //################### Disposal Value tests #######################
+    "return 200 from disposal-value" in new fakeRequestTo("disposal-value") {
+      val result = CapitalGainsCalculatorController.disposalValue(fakeRequest)
+      status(result) shouldBe 200
+    }
+
+    "return HTML from disposal-value" in new fakeRequestTo("disposal-value") {
+      val result = CapitalGainsCalculatorController.disposalValue(fakeRequest)
+      contentType(result) shouldBe Some("text/html")
+      charset(result) shouldBe Some("utf-8")
+    }
+
+    //################### Disposal Date tests #######################
     "return 200 from disposal-date" in new fakeRequestTo("disposal-date") {
       val result = CapitalGainsCalculatorController.disposalDate(fakeRequest)
       status(result) shouldBe 200
@@ -102,11 +116,8 @@ class CapitalGainsCalculatorControllerSpec extends UnitSpec with WithFakeApplica
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
     }
+    
 
-    "be Action(parser=BodyParser(anyContent)) for disposalValue" in {
-      val result = CapitalGainsCalculatorController.disposalValue.toString()
-      result shouldBe s
-    }
     "be Action(parser=BodyParser(anyContent)) for acquisitionCosts" in {
       val result = CapitalGainsCalculatorController.acquisitionCosts.toString()
       result shouldBe s
