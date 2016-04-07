@@ -16,13 +16,20 @@
 
 package controllers
 
+import play.api.mvc.Action
 import uk.gov.hmrc.play.frontend.controller.FrontendController
+
+import scala.concurrent.Future
+import views.html._
 
 object CapitalGainsCalculatorController extends CapitalGainsCalculatorController
 
 trait CapitalGainsCalculatorController extends FrontendController {
 
-  val customerType = TODO
+  val customerType = Action.async { implicit request =>
+    Future.successful(Ok(cgts.customerType()))
+  }
+
   val disabledTrustee = TODO
   val currentIncome = TODO
   val personalAllowance = TODO
