@@ -16,10 +16,10 @@
 
 package models
 
-import play.api.libs.json.Json
+import play.api.libs.json._
 
-case class OtherProperties (otherProperties: Boolean)
+case class CustomerTypeModel(customerType: String)
 
-object OtherProperties {
-  implicit val format = Json.format[OtherProperties]
+object CustomerTypeModel {
+  implicit val format = Json.format[CustomerTypeModel]
 }
