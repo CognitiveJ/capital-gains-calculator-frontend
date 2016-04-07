@@ -18,7 +18,7 @@ package models
 
 import play.api.libs.json.Json
 
-case class DisposalDateModel (day: Integer, month: Integer, year: Integer)
+case class DisposalDateModel (day: Int, month: Int, year: Int)
 
 object DisposalDateModel {
   implicit val format = Json.format[DisposalDateModel]
