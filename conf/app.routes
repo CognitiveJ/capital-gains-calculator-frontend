@@ -1,4 +1,8 @@
 # microservice specific routes
 
-GET        /hello-world             controllers.HelloWorldController.helloWorld
-GET        /introduction            controllers.IntroductionController.introduction
+GET         /hello-world             controllers.HelloWorldController.helloWorld
+
+GET         /introduction            controllers.IntroductionController.introduction
+
+GET         /customer-type           controllers.CaptialGainsCalculatorController.customerType
+

@@ -18,9 +18,10 @@ package controllers
 
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
-object IntroductionController extends IntroductionController
+object CaptialGainsCalculatorController extends CaptialGainsCalculatorController
 
-trait IntroductionController extends FrontendController {
+trait CaptialGainsCalculatorController extends FrontendController {
 
-  val introduction = TODO
+  val customerType = TODO
 }
+
