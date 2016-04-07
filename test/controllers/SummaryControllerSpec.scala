@@ -18,11 +18,11 @@ package controllers
 
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
-class IntroductionControllerSpec extends UnitSpec with WithFakeApplication {
+class SummaryControllerSpec extends UnitSpec with WithFakeApplication {
 
-  "IntroductionController.introduction" should {
+  "SummaryController.summary" should {
     "be Action(parser=BodyParser(anyContent))" in {
-      val result = IntroductionController.introduction.toString()
+      val result = SummaryController.summary.toString()
       result shouldBe "Action(parser=BodyParser(anyContent))"
     }
   }
