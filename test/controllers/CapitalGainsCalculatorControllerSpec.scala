@@ -16,17 +16,32 @@
 
 package controllers
 
+import play.api.http.Status
+import play.api.test.FakeRequest
+import play.api.test.Helpers._
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 class CapitalGainsCalculatorControllerSpec extends UnitSpec with WithFakeApplication {
 
   val s = "Action(parser=BodyParser(anyContent))"
 
-  "CaptialGainsCalculatorController vals" should {
-    "be Action(parser=BodyParser(anyContent)) for customerType" in {
-      val result = CapitalGainsCalculatorController.customerType.toString()
-      result shouldBe s
+  class fakeRequestTo(url : String) {
+    val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/" + url)
+  }
+
+  "CaptialGainsCalculatorController methods " should {
+
+    "return 200" in new fakeRequestTo("customer-type") {
+      val result = CapitalGainsCalculatorController.customerType(fakeRequest)
+      status(result) shouldBe 200
     }
+
+    "return HTML" in new fakeRequestTo("customer-type"){
+      val result = CapitalGainsCalculatorController.customerType(fakeRequest)
+      contentType(result) shouldBe Some("text/html")
+      charset(result) shouldBe Some("utf-8")
+    }
+
     "be Action(parser=BodyParser(anyContent)) for disabledTrustee" in {
       val result = CapitalGainsCalculatorController.disabledTrustee.toString()
       result shouldBe s
