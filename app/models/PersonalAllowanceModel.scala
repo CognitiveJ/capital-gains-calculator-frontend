@@ -18,7 +18,7 @@ package models
 
 import play.api.libs.json._
 
-case class PersonalAllowanceModel (personalAllowance: BigDecimal)
+case class PersonalAllowanceModel (personalAllowanceAmt : BigDecimal)
 
 object PersonalAllowanceModel {
   implicit val format = Json.format[PersonalAllowanceModel]
