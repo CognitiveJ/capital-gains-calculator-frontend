@@ -55,6 +55,7 @@ class CapitalGainsCalculatorControllerSpec extends UnitSpec with WithFakeApplica
       result shouldBe s
     }
 
+    //############## Other Properties tests ######################
     "return 200 from other-properties" in new fakeRequestTo("other-properties") {
       val result = CapitalGainsCalculatorController.otherProperties(fakeRequest)
       status(result) shouldBe 200
@@ -66,10 +67,19 @@ class CapitalGainsCalculatorControllerSpec extends UnitSpec with WithFakeApplica
       charset(result) shouldBe Some("utf-8")
     }
 
-    "be Action(parser=BodyParser(anyContent)) for annualExemptAmount" in {
-      val result = CapitalGainsCalculatorController.annualExemptAmount.toString()
-      result shouldBe s
+    //############## Annual Exempt Amount tests ######################
+    "return 200 for annual-exempt-amount" in new fakeRequestTo("annual-exempt-amount") {
+      val result = CapitalGainsCalculatorController.annualExemptAmount(fakeRequest)
+      status(result) shouldBe 200
     }
+
+    "return HTML for annual-exempt-amount" in new fakeRequestTo("annual-exempt-amount"){
+      val result = CapitalGainsCalculatorController.annualExemptAmount(fakeRequest)
+      contentType(result) shouldBe Some("text/html")
+      charset(result) shouldBe Some("utf-8")
+    }
+
+    //############## Acquisition Value tests ######################
     "be Action(parser=BodyParser(anyContent)) for acquisitionValue" in {
       val result = CapitalGainsCalculatorController.acquisitionValue.toString()
       result shouldBe s
