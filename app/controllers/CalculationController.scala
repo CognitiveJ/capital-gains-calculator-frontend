@@ -79,7 +79,9 @@ trait CalculationController extends FrontendController {
   val disposalCosts = TODO
 
   //################### Entrepreneurs Relief methods #######################
-  val entrepreneursRelief = TODO
+  val entrepreneursRelief = Action.async { implicit request =>
+    Future.successful(Ok(cgts.entrepreneursRelief()))
+  }
 
   //################### Allowable Losses methods #######################
   val allowableLosses = TODO
