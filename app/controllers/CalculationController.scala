@@ -73,7 +73,9 @@ trait CalculationController extends FrontendController {
   }
 
   //################### Acquisition Costs methods #######################
-  val acquisitionCosts = TODO
+  val acquisitionCosts = Action.async { implicit request =>
+    Future.successful(Ok(cgts.acquisitionCosts()))
+  }
 
   //################### Disposal Costs methods #######################
   val disposalCosts = TODO
