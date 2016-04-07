@@ -16,11 +16,17 @@
 
 package controllers
 
+import play.api.mvc.Action
 import uk.gov.hmrc.play.frontend.controller.FrontendController
+import views.html.cgts
+
+import scala.concurrent.Future
 
 object IntroductionController extends IntroductionController
 
 trait IntroductionController extends FrontendController {
 
-  val introduction = TODO
+  val introduction = Action.async { implicit request =>
+    Future.successful(Ok(cgts.introduction()))
+  }
 }
