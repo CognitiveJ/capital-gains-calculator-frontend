@@ -31,12 +31,12 @@ class CapitalGainsCalculatorControllerSpec extends UnitSpec with WithFakeApplica
 
   "CaptialGainsCalculatorController methods " should {
 
-    "return 200" in new fakeRequestTo("customer-type") {
+    "return 200 from customer-type" in new fakeRequestTo("customer-type") {
       val result = CapitalGainsCalculatorController.customerType(fakeRequest)
       status(result) shouldBe 200
     }
 
-    "return HTML" in new fakeRequestTo("customer-type"){
+    "return HTML from customer-type" in new fakeRequestTo("customer-type"){
       val result = CapitalGainsCalculatorController.customerType(fakeRequest)
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
@@ -54,10 +54,18 @@ class CapitalGainsCalculatorControllerSpec extends UnitSpec with WithFakeApplica
       val result = CapitalGainsCalculatorController.personalAllowance.toString()
       result shouldBe s
     }
-    "be Action(parser=BodyParser(anyContent)) for otherProperties" in {
-      val result = CapitalGainsCalculatorController.otherProperties.toString()
-      result shouldBe s
+
+    "return 200 from other-properties" in new fakeRequestTo("other-properties") {
+      val result = CapitalGainsCalculatorController.otherProperties(fakeRequest)
+      status(result) shouldBe 200
     }
+
+    "return HTML from other-properties" in new fakeRequestTo("other-properties"){
+      val result = CapitalGainsCalculatorController.otherProperties(fakeRequest)
+      contentType(result) shouldBe Some("text/html")
+      charset(result) shouldBe Some("utf-8")
+    }
+
     "be Action(parser=BodyParser(anyContent)) for annualExemptAmount" in {
       val result = CapitalGainsCalculatorController.annualExemptAmount.toString()
       result shouldBe s
