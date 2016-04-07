@@ -26,43 +26,63 @@ object CapitalGainsCalculatorController extends CapitalGainsCalculatorController
 
 trait CapitalGainsCalculatorController extends FrontendController {
 
+  //################### Customer Type methods #######################
   val customerType = Action.async { implicit request =>
     Future.successful(Ok(cgts.customerType()))
   }
 
+  //################### Disabled Trustee methods #######################
   val disabledTrustee = Action.async { implicit request =>
     Future.successful(Ok(cgts.disabledTrustee()))
   }
 
+  //################### Current Income methods #######################
   val currentIncome = TODO
+
+  //################### Personal Allowance methods #######################
   val personalAllowance = TODO
 
+  //################### Other Properties methods #######################
   val otherProperties = Action.async { implicit request =>
     Future.successful(Ok(cgts.otherProperties()))
   }
 
+  //################### Annual Exempt Amount methods #######################
   val annualExemptAmount = Action.async { implicit request =>
     Future.successful(Ok(cgts.annualExemptAmount()))
   }
 
+  //################### Acquisition Value methods #######################
   val acquisitionValue = TODO
 
+  //################### Improvements methods #######################
   val improvements = Action.async { implicit request =>
     Future.successful(Ok(cgts.improvements()))
   }
-  
+
+  //################### Disposal Date methods #######################
   val disposalDate = Action.async { implicit request =>
     Future.successful(Ok(cgts.disposalDate()))
   }
 
+  //################### Disposal Value methods #######################
   val disposalValue = Action.async { implicit request =>
     Future.successful(Ok(cgts.disposalValue()))
   }
 
+  //################### Acquisition Costs methods #######################
   val acquisitionCosts = TODO
+
+  //################### Disposal Costs methods #######################
   val disposalCosts = TODO
+
+  //################### Entrepreneurs Relief methods #######################
   val entrepreneursRelief = TODO
+
+  //################### Allowable Losses methods #######################
   val allowableLosses = TODO
+
+  //################### Other Reliefs methods #######################
   val otherReliefs = TODO
 
 }

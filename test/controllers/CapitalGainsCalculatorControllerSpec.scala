@@ -31,6 +31,7 @@ class CapitalGainsCalculatorControllerSpec extends UnitSpec with WithFakeApplica
 
   "CapitalGainsCalculatorController methods " should {
 
+    //################### Customer Type tests #######################
     "return 200 from customer-type" in new fakeRequestTo("customer-type") {
       val result = CapitalGainsCalculatorController.customerType(fakeRequest)
       status(result) shouldBe 200
@@ -42,10 +43,7 @@ class CapitalGainsCalculatorControllerSpec extends UnitSpec with WithFakeApplica
       charset(result) shouldBe Some("utf-8")
     }
 
-    "be Action(parser=BodyParser(anyContent)) for disabledTrustee" in {
-      val result = CapitalGainsCalculatorController.disabledTrustee.toString()
-      result shouldBe s
-    }
+    //################### Disabled Trustee tests #######################
     "return 200 from disabled-trustee" in new fakeRequestTo("disabled-trustee") {
       val result = CapitalGainsCalculatorController.disabledTrustee(fakeRequest)
       status(result) shouldBe 200
@@ -57,10 +55,13 @@ class CapitalGainsCalculatorControllerSpec extends UnitSpec with WithFakeApplica
       charset(result) shouldBe Some("utf-8")
     }
 
+    //################### Current Income tests #######################
     "be Action(parser=BodyParser(anyContent)) for currentIncome" in {
       val result = CapitalGainsCalculatorController.currentIncome.toString()
       result shouldBe s
     }
+
+    //################### Personal Allowance tests #######################
     "be Action(parser=BodyParser(anyContent)) for personalAllowance" in {
       val result = CapitalGainsCalculatorController.personalAllowance.toString()
       result shouldBe s
@@ -96,7 +97,7 @@ class CapitalGainsCalculatorControllerSpec extends UnitSpec with WithFakeApplica
       result shouldBe s
     }
 
-
+    //################### Improvements tests #######################
     "return 200 when sending a GET to `/calculate-your-capital-gains/improvements`" in new fakeRequestTo("improvements") {
       val result = CapitalGainsCalculatorController.improvements(fakeRequest)
       status(result) shouldBe 200
@@ -108,7 +109,7 @@ class CapitalGainsCalculatorControllerSpec extends UnitSpec with WithFakeApplica
       charset(result) shouldBe Some("utf-8")
     }
 
-
+    //################### Disposal Date tests #######################
     "be Action(parser=BodyParser(anyContent)) for disposalDate" in {
       val result = CapitalGainsCalculatorController.disposalDate.toString()
       result shouldBe s
@@ -137,24 +138,32 @@ class CapitalGainsCalculatorControllerSpec extends UnitSpec with WithFakeApplica
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
     }
-    
 
+    //################### Acquisition Costs tests #######################
     "be Action(parser=BodyParser(anyContent)) for acquisitionCosts" in {
       val result = CapitalGainsCalculatorController.acquisitionCosts.toString()
       result shouldBe s
     }
+
+    //################### Disposal Costs tests #######################
     "be Action(parser=BodyParser(anyContent)) for disposalCosts" in {
       val result = CapitalGainsCalculatorController.disposalCosts.toString()
       result shouldBe s
     }
+
+    //################### Entrepreneurs Relief tests #######################
     "be Action(parser=BodyParser(anyContent)) for entrepreneursRelief" in {
       val result = CapitalGainsCalculatorController.entrepreneursRelief.toString()
       result shouldBe s
     }
+
+    //################### Allowable Losses tests #######################
     "be Action(parser=BodyParser(anyContent)) for allowableLosses" in {
       val result = CapitalGainsCalculatorController.allowableLosses.toString()
       result shouldBe s
     }
+
+    //################### Other Reliefs tests #######################
     "be Action(parser=BodyParser(anyContent)) for otherReliefs" in {
       val result = CapitalGainsCalculatorController.otherReliefs.toString()
       result shouldBe s
