@@ -18,10 +18,24 @@ package controllers
 
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
-object CaptialGainsCalculatorController extends CaptialGainsCalculatorController
+object CapitalGainsCalculatorController extends CapitalGainsCalculatorController
 
-trait CaptialGainsCalculatorController extends FrontendController {
+trait CapitalGainsCalculatorController extends FrontendController {
 
   val customerType = TODO
-}
+  val disabledTrustee = TODO
+  val currentIncome = TODO
+  val personalAllowance = TODO
+  val otherProperties = TODO
+  val annualExemptAmount = TODO
+  val acquisitionValue = TODO
+  val improvements = TODO
+  val disposalDate = TODO
+  val disposalValue = TODO
+  val acquisitionCosts = TODO
+  val disposalCosts = TODO
+  val entrepreneursRelief = TODO
+  val allowableLosses = TODO
+  val otherReliefs = TODO
 
+}

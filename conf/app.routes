@@ -2,7 +2,61 @@
 
 GET         /hello-world             controllers.HelloWorldController.helloWorld
 
+#Introduction route
+########################################################
 GET         /introduction            controllers.IntroductionController.introduction
+########################################################
 
-GET         /customer-type           controllers.CaptialGainsCalculatorController.customerType
 
+#Calculation controller routes
+########################################################
+#Customer Type
+GET         /customer-type           controllers.CapitalGainsCalculatorController.customerType
+
+#Disabled Trustee
+GET         /disabled-trustee        controllers.CapitalGainsCalculatorController.disabledTrustee
+
+#Current Income
+GET         /current-income          controllers.CapitalGainsCalculatorController.currentIncome
+
+#Personal Allowance
+GET         /personalAllowance       controllers.CapitalGainsCalculatorController.personalAllowance
+
+#Other Properties
+GET         /other-properties        controllers.CapitalGainsCalculatorController.otherProperties
+
+#Allowance
+GET         /allowance               controllers.CapitalGainsCalculatorController.annualExemptAmount
+
+#Acquisition Value
+GET         /acquisition-value       controllers.CapitalGainsCalculatorController.acquisitionValue
+
+#Improvements
+GET         /improvements            controllers.CapitalGainsCalculatorController.improvements
+
+#Disposal Date
+GET         /disposal-date           controllers.CapitalGainsCalculatorController.disposalDate
+
+#Disposal Value
+GET         /disposal-value          controllers.CapitalGainsCalculatorController.disposalValue
+
+#Acquisition Costs
+GET         /acquisition-costs       controllers.CapitalGainsCalculatorController.acquisitionCosts
+
+#Disposal Costs
+GET         /disposal-costs          controllers.CapitalGainsCalculatorController.disposalCosts
+
+#Entrepreneurs Relief
+GET         /entrepreneurs-relief    controllers.CapitalGainsCalculatorController.entrepreneursRelief
+
+#Allowable Losses
+GET         /allowable-losses        controllers.CapitalGainsCalculatorController.allowableLosses
+
+#Other Reliefs
+GET         /other-reliefs           controllers.CapitalGainsCalculatorController.otherReliefs
+########################################################
+
+
+#Summary screen route
+########################################################
+GET         /summary                 controllers.SummaryController.summary
