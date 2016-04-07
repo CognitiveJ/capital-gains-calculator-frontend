@@ -11,49 +11,49 @@ GET         /introduction            controllers.IntroductionController.introduc
 #Calculation controller routes
 ########################################################
 #Customer Type
-GET         /customer-type           controllers.CapitalGainsCalculatorController.customerType
+GET         /customer-type           controllers.CalculatorController.customerType
 
 #Disabled Trustee
-GET         /disabled-trustee        controllers.CapitalGainsCalculatorController.disabledTrustee
+GET         /disabled-trustee        controllers.CalculatorController.disabledTrustee
 
 #Current Income
-GET         /current-income          controllers.CapitalGainsCalculatorController.currentIncome
+GET         /current-income          controllers.CalculatorController.currentIncome
 
 #Personal Allowance
-GET         /personalAllowance       controllers.CapitalGainsCalculatorController.personalAllowance
+GET         /personalAllowance       controllers.CalculatorController.personalAllowance
 
 #Other Properties
-GET         /other-properties        controllers.CapitalGainsCalculatorController.otherProperties
+GET         /other-properties        controllers.CalculatorController.otherProperties
 
 #Allowance
-GET         /allowance               controllers.CapitalGainsCalculatorController.annualExemptAmount
+GET         /allowance               controllers.CalculatorController.annualExemptAmount
 
 #Acquisition Value
-GET         /acquisition-value       controllers.CapitalGainsCalculatorController.acquisitionValue
+GET         /acquisition-value       controllers.CalculatorController.acquisitionValue
 
 #Improvements
-GET         /improvements            controllers.CapitalGainsCalculatorController.improvements
+GET         /improvements            controllers.CalculatorController.improvements
 
 #Disposal Date
-GET         /disposal-date           controllers.CapitalGainsCalculatorController.disposalDate
+GET         /disposal-date           controllers.CalculatorController.disposalDate
 
 #Disposal Value
-GET         /disposal-value          controllers.CapitalGainsCalculatorController.disposalValue
+GET         /disposal-value          controllers.CalculatorController.disposalValue
 
 #Acquisition Costs
-GET         /acquisition-costs       controllers.CapitalGainsCalculatorController.acquisitionCosts
+GET         /acquisition-costs       controllers.CalculatorController.acquisitionCosts
 
 #Disposal Costs
-GET         /disposal-costs          controllers.CapitalGainsCalculatorController.disposalCosts
+GET         /disposal-costs          controllers.CalculatorController.disposalCosts
 
 #Entrepreneurs Relief
-GET         /entrepreneurs-relief    controllers.CapitalGainsCalculatorController.entrepreneursRelief
+GET         /entrepreneurs-relief    controllers.CalculatorController.entrepreneursRelief
 
 #Allowable Losses
-GET         /allowable-losses        controllers.CapitalGainsCalculatorController.allowableLosses
+GET         /allowable-losses        controllers.CalculatorController.allowableLosses
 
 #Other Reliefs
-GET         /other-reliefs           controllers.CapitalGainsCalculatorController.otherReliefs
+GET         /other-reliefs           controllers.CalculatorController.otherReliefs
 ########################################################
 
 
