@@ -22,9 +22,9 @@ import uk.gov.hmrc.play.frontend.controller.FrontendController
 import scala.concurrent.Future
 import views.html._
 
-object CalculatorController extends CalculatorController
+object CalculationController extends CalculationController
 
-trait CalculatorController extends FrontendController {
+trait CalculationController extends FrontendController {
 
   //################### Customer Type methods #######################
   val customerType = Action.async { implicit request =>
