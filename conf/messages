@@ -1,0 +1,54 @@
+## Base ##
+
+## Introduction ##
+calc.introduction.title=Capital Gains Tax calculator for non-residents
+
+## Customer Type ##
+calc.customerType.title = Who owned the property?
+
+## Disabled Trustee ##
+calc.disabledTrustee.title = Are you a trustee for someone who’s vulnerable?
+
+## Current Income ##
+calc.currentIncome.title = In the tax year when you stopped owning the property, what was your total UK income?
+
+## Personal Allowance ##
+calc.personalAllowance.title = In the tax year when you stopped owning the property, what was your UK Personal Allowance?
+
+## Other Properties ##
+calc.otherProperties.title = Did you sell or give away any other properties in that tax year?
+
+## Annual Exempt Amount ##
+calc.annualExemptAmount.title = How much of your Capital Gains Tax allowance have you got left?
+
+## Acquisition Value ##
+calc.acquisitionValue.title = How much did you pay for the property?
+
+## Improvements ##
+calc.improvements.title = Did you make any improvements to the property?
+
+## Disposal Date ##
+calc.disposalDate.title = When did you sign the contract that made someone else the owner?
+
+## Disposal Value ##
+calc.disposalValue.title = How much did you sell or give away the property for?
+
+## Acquisition Costs ##
+calc.acquisitionCosts.title = How much did you pay in costs when you became the property owner?
+
+## Disposal Costs ##
+calc.disposalCosts.title = How much did you pay in costs when you stopped being the property owner?
+
+## Entrepreneurs Relief ##
+calc.entrepreneursRelief.title = Are you claiming Entrepreneurs' Relief?
+
+## Allowable Losses ##
+calc.allowableLosses.title = Are you claiming any allowable losses?
+
+## Other Reliefs ##
+calc.otherReliefs.title = How much extra tax relief are you claiming?
+
+## Summary ##
+calc.summary.title = Summary
+
+
