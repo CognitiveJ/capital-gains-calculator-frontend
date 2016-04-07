@@ -79,12 +79,16 @@ class CapitalGainsCalculatorControllerSpec extends UnitSpec with WithFakeApplica
       charset(result) shouldBe Some("utf-8")
     }
 
-    //############## Acquisition Value tests ######################
-    "be Action(parser=BodyParser(anyContent)) for acquisitionValue" in {
-      val result = CapitalGainsCalculatorController.acquisitionValue.toString()
-      result shouldBe s
+    "return 200 when sending a GET request `/calculate-your-capital-gains/acquisition-value`" in new fakeRequestTo("acquisition-value") {
+      val result = CapitalGainsCalculatorController.acquisitionValue(fakeRequest)
+      status(result) shouldBe 200
     }
 
+    "return HTML when sending a GET request `/calculate-your-capital-gains/acquisition-value`" in new fakeRequestTo("acquisition-value") {
+      val result = CapitalGainsCalculatorController.acquisitionValue(fakeRequest)
+      contentType(result) shouldBe Some("text/html")
+      charset(result) shouldBe Some("utf-8")
+    }
 
     "return 200 when sending a GET to `/calculate-your-capital-gains/improvements`" in new fakeRequestTo("improvements") {
       val result = CapitalGainsCalculatorController.improvements(fakeRequest)
@@ -96,7 +100,6 @@ class CapitalGainsCalculatorControllerSpec extends UnitSpec with WithFakeApplica
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
     }
-
 
     "be Action(parser=BodyParser(anyContent)) for disposalDate" in {
       val result = CapitalGainsCalculatorController.disposalDate.toString()
