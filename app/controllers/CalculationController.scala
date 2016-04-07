@@ -80,7 +80,9 @@ trait CalculationController extends FrontendController {
   }
 
   //################### Disposal Costs methods #######################
-  val disposalCosts = TODO
+  val disposalCosts = Action.async { implicit request =>
+    Future.successful(Ok(cgts.disposalCosts()))
+  }
 
   //################### Entrepreneurs Relief methods #######################
   val entrepreneursRelief = TODO

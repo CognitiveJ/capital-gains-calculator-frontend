@@ -164,9 +164,15 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
     }
 
     //################### Disposal Costs tests #######################
-    "be Action(parser=BodyParser(anyContent)) for disposalCosts" in {
-      val result = CalculationController.disposalCosts.toString()
-      result shouldBe s
+    "return 200 from disposal-costs" in new fakeRequestTo("disposal-costs") {
+      val result = CalculationController.disposalCosts(fakeRequest)
+      status(result) shouldBe 200
+    }
+
+    "return HTML from disposal-costs" in new fakeRequestTo("disposal-costs"){
+      val result = CalculationController.disposalCosts(fakeRequest)
+      contentType(result) shouldBe Some("text/html")
+      charset(result) shouldBe Some("utf-8")
     }
 
     //################### Entrepreneurs Relief tests #######################
