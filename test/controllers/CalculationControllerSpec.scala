@@ -21,7 +21,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
-class CapitalGainsCalculatorControllerSpec extends UnitSpec with WithFakeApplication {
+class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
 
   val s = "Action(parser=BodyParser(anyContent))"
 
@@ -31,124 +31,147 @@ class CapitalGainsCalculatorControllerSpec extends UnitSpec with WithFakeApplica
 
   "CapitalGainsCalculatorController methods " should {
 
+    //################### Customer Type tests #######################
     "return 200 from customer-type" in new fakeRequestTo("customer-type") {
-      val result = CapitalGainsCalculatorController.customerType(fakeRequest)
+      val result = CalculationController.customerType(fakeRequest)
       status(result) shouldBe 200
     }
 
     "return HTML from customer-type" in new fakeRequestTo("customer-type"){
-      val result = CapitalGainsCalculatorController.customerType(fakeRequest)
+      val result = CalculationController.customerType(fakeRequest)
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
     }
 
-    "be Action(parser=BodyParser(anyContent)) for disabledTrustee" in {
-      val result = CapitalGainsCalculatorController.disabledTrustee.toString()
-      result shouldBe s
+    //################### Disabled Trustee tests #######################
+    "return 200 from disabled-trustee" in new fakeRequestTo("disabled-trustee") {
+      val result = CalculationController.disabledTrustee(fakeRequest)
+      status(result) shouldBe 200
     }
+
+    "return HTML from disabled-trustee" in new fakeRequestTo("disabled-trustee"){
+      val result = CalculationController.disabledTrustee(fakeRequest)
+      contentType(result) shouldBe Some("text/html")
+      charset(result) shouldBe Some("utf-8")
+    }
+
+    //################### Current Income tests #######################
     "be Action(parser=BodyParser(anyContent)) for currentIncome" in {
-      val result = CapitalGainsCalculatorController.currentIncome.toString()
+      val result = CalculationController.currentIncome.toString()
       result shouldBe s
     }
+
+    //################### Personal Allowance tests #######################
     "be Action(parser=BodyParser(anyContent)) for personalAllowance" in {
-      val result = CapitalGainsCalculatorController.personalAllowance.toString()
+      val result = CalculationController.personalAllowance.toString()
       result shouldBe s
     }
 
     //############## Other Properties tests ######################
     "return 200 from other-properties" in new fakeRequestTo("other-properties") {
-      val result = CapitalGainsCalculatorController.otherProperties(fakeRequest)
+      val result = CalculationController.otherProperties(fakeRequest)
       status(result) shouldBe 200
     }
 
     "return HTML from other-properties" in new fakeRequestTo("other-properties"){
-      val result = CapitalGainsCalculatorController.otherProperties(fakeRequest)
+      val result = CalculationController.otherProperties(fakeRequest)
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
     }
 
     //############## Annual Exempt Amount tests ######################
     "return 200 for annual-exempt-amount" in new fakeRequestTo("annual-exempt-amount") {
-      val result = CapitalGainsCalculatorController.annualExemptAmount(fakeRequest)
+      val result = CalculationController.annualExemptAmount(fakeRequest)
       status(result) shouldBe 200
     }
 
     "return HTML for annual-exempt-amount" in new fakeRequestTo("annual-exempt-amount"){
-      val result = CapitalGainsCalculatorController.annualExemptAmount(fakeRequest)
+      val result = CalculationController.annualExemptAmount(fakeRequest)
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
     }
 
+    //############## Acquisition Value tests ######################
     "return 200 when sending a GET request `/calculate-your-capital-gains/acquisition-value`" in new fakeRequestTo("acquisition-value") {
-      val result = CapitalGainsCalculatorController.acquisitionValue(fakeRequest)
+      val result = CalculationController.acquisitionValue(fakeRequest)
       status(result) shouldBe 200
     }
 
     "return HTML when sending a GET request `/calculate-your-capital-gains/acquisition-value`" in new fakeRequestTo("acquisition-value") {
-      val result = CapitalGainsCalculatorController.acquisitionValue(fakeRequest)
+      val result = CalculationController.acquisitionValue(fakeRequest)
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
     }
 
+    //################### Improvements tests #######################
     "return 200 when sending a GET to `/calculate-your-capital-gains/improvements`" in new fakeRequestTo("improvements") {
-      val result = CapitalGainsCalculatorController.improvements(fakeRequest)
+      val result = CalculationController.improvements(fakeRequest)
       status(result) shouldBe 200
     }
 
     "return HTML when sending a GET to `/calculate-your-capital-gains/improvements`" in new fakeRequestTo("improvements"){
-      val result = CapitalGainsCalculatorController.improvements(fakeRequest)
+      val result = CalculationController.improvements(fakeRequest)
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
     }
 
+    //################### Disposal Date tests #######################
     "be Action(parser=BodyParser(anyContent)) for disposalDate" in {
-      val result = CapitalGainsCalculatorController.disposalDate.toString()
+      val result = CalculationController.disposalDate.toString()
       result shouldBe s
     }
 
     //################### Disposal Value tests #######################
     "return 200 from disposal-value" in new fakeRequestTo("disposal-value") {
-      val result = CapitalGainsCalculatorController.disposalValue(fakeRequest)
+      val result = CalculationController.disposalValue(fakeRequest)
       status(result) shouldBe 200
     }
 
     "return HTML from disposal-value" in new fakeRequestTo("disposal-value") {
-      val result = CapitalGainsCalculatorController.disposalValue(fakeRequest)
+      val result = CalculationController.disposalValue(fakeRequest)
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
     }
 
     //################### Disposal Date tests #######################
     "return 200 from disposal-date" in new fakeRequestTo("disposal-date") {
-      val result = CapitalGainsCalculatorController.disposalDate(fakeRequest)
+      val result = CalculationController.disposalDate(fakeRequest)
       status(result) shouldBe 200
     }
 
     "return HTML from disposal-date" in new fakeRequestTo("disposal-date"){
-      val result = CapitalGainsCalculatorController.disposalDate(fakeRequest)
+      val result = CalculationController.disposalDate(fakeRequest)
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
     }
-    
 
+    //################### Acquisition Costs tests #######################
     "be Action(parser=BodyParser(anyContent)) for acquisitionCosts" in {
-      val result = CapitalGainsCalculatorController.acquisitionCosts.toString()
+      val result = CalculationController.acquisitionCosts.toString()
       result shouldBe s
     }
+
+    //################### Disposal Costs tests #######################
     "be Action(parser=BodyParser(anyContent)) for disposalCosts" in {
-      val result = CapitalGainsCalculatorController.disposalCosts.toString()
+      val result = CalculationController.disposalCosts.toString()
       result shouldBe s
     }
+
+    //################### Entrepreneurs Relief tests #######################
     "be Action(parser=BodyParser(anyContent)) for entrepreneursRelief" in {
-      val result = CapitalGainsCalculatorController.entrepreneursRelief.toString()
+      val result = CalculationController.entrepreneursRelief.toString()
       result shouldBe s
     }
+
+    //################### Allowable Losses tests #######################
     "be Action(parser=BodyParser(anyContent)) for allowableLosses" in {
-      val result = CapitalGainsCalculatorController.allowableLosses.toString()
+      val result = CalculationController.allowableLosses.toString()
       result shouldBe s
     }
+
+    //################### Other Reliefs tests #######################
     "be Action(parser=BodyParser(anyContent)) for otherReliefs" in {
-      val result = CapitalGainsCalculatorController.otherReliefs.toString()
+      val result = CalculationController.otherReliefs.toString()
       result shouldBe s
     }
   }
