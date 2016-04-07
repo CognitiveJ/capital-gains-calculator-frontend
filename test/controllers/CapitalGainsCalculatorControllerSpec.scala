@@ -55,6 +55,7 @@ class CapitalGainsCalculatorControllerSpec extends UnitSpec with WithFakeApplica
       result shouldBe s
     }
 
+    //############## Other Properties tests ######################
     "return 200 from other-properties" in new fakeRequestTo("other-properties") {
       val result = CapitalGainsCalculatorController.otherProperties(fakeRequest)
       status(result) shouldBe 200
