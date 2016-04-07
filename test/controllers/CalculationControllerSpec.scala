@@ -61,10 +61,16 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
       result shouldBe s
     }
 
-    //################### Personal Allowance tests #######################
-    "be Action(parser=BodyParser(anyContent)) for personalAllowance" in {
-      val result = CalculationController.personalAllowance.toString()
-      result shouldBe s
+    //############## Personal Allowance tests ######################
+    "return 200 from personal-allowance" in new fakeRequestTo("personal-allowance") {
+      val result = CalculationController.personalAllowance(fakeRequest)
+      status(result) shouldBe 200
+    }
+
+    "return HTML from personal-allowance" in new fakeRequestTo("personal-allowance"){
+      val result = CalculationController.personalAllowance(fakeRequest)
+      contentType(result) shouldBe Some("text/html")
+      charset(result) shouldBe Some("utf-8")
     }
 
     //############## Other Properties tests ######################
@@ -146,9 +152,15 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
     }
 
     //################### Acquisition Costs tests #######################
-    "be Action(parser=BodyParser(anyContent)) for acquisitionCosts" in {
-      val result = CalculationController.acquisitionCosts.toString()
-      result shouldBe s
+    "return 200 from acquisition-costs" in new fakeRequestTo("acquisition-costs") {
+      val result = CalculationController.acquisitionCosts(fakeRequest)
+      status(result) shouldBe 200
+    }
+
+    "return HTML from acquisition-costs" in new fakeRequestTo("acquisition-costs") {
+      val result = CalculationController.acquisitionCosts(fakeRequest)
+      contentType(result) shouldBe Some("text/html")
+      charset(result) shouldBe Some("utf-8")
     }
 
     //################### Disposal Costs tests #######################
