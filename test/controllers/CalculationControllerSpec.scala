@@ -164,9 +164,15 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
     }
 
     //################### Disposal Costs tests #######################
-    "be Action(parser=BodyParser(anyContent)) for disposalCosts" in {
-      val result = CalculationController.disposalCosts.toString()
-      result shouldBe s
+    "return 200 from disposal-costs" in new fakeRequestTo("disposal-costs") {
+      val result = CalculationController.disposalCosts(fakeRequest)
+      status(result) shouldBe 200
+    }
+
+    "return HTML from disposal-costs" in new fakeRequestTo("disposal-costs"){
+      val result = CalculationController.disposalCosts(fakeRequest)
+      contentType(result) shouldBe Some("text/html")
+      charset(result) shouldBe Some("utf-8")
     }
 
     //################### Entrepreneurs Relief tests #######################
@@ -176,9 +182,15 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
     }
 
     //################### Allowable Losses tests #######################
-    "be Action(parser=BodyParser(anyContent)) for allowableLosses" in {
-      val result = CalculationController.allowableLosses.toString()
-      result shouldBe s
+    "return 200 when sending a GET request `/calculate-your-capital-gains/allowable-losses`" in new fakeRequestTo("allowable-losses") {
+      val result = CalculationController.allowableLosses(fakeRequest)
+      status(result) shouldBe 200
+    }
+
+    "return HTML when sending a GET to `/calculate-your-capital-gains/allowable-losses`" in new fakeRequestTo("allowable-losses"){
+      val result = CalculationController.allowableLosses(fakeRequest)
+      contentType(result) shouldBe Some("text/html")
+      charset(result) shouldBe Some("utf-8")
     }
 
     //################### Other Reliefs tests #######################
