@@ -18,8 +18,8 @@ package models
 
 import play.api.libs.json.Json
 
-case class OtherProperties (otherProperties: Boolean)
+case class DisposalDateModel (day: Int, month: Int, year: Int)
 
-object OtherProperties {
-  implicit val format = Json.format[OtherProperties]
+object DisposalDateModel {
+  implicit val format = Json.format[DisposalDateModel]
 }
