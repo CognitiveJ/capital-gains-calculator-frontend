@@ -29,7 +29,7 @@ class CapitalGainsCalculatorControllerSpec extends UnitSpec with WithFakeApplica
     val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/" + url)
   }
 
-  "CaptialGainsCalculatorController methods " should {
+  "CapitalGainsCalculatorController methods " should {
 
     "return 200" in new fakeRequestTo("customer-type") {
       val result = CapitalGainsCalculatorController.customerType(fakeRequest)
