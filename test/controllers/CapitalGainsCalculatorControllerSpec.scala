@@ -46,9 +46,9 @@ class CapitalGainsCalculatorControllerSpec extends UnitSpec with WithFakeApplica
       val result = CapitalGainsCalculatorController.disabledTrustee.toString()
       result shouldBe s
     }
-    "return 204 from disabled-trustee" in new fakeRequestTo("disabled-trustee") {
+    "return 200 from disabled-trustee" in new fakeRequestTo("disabled-trustee") {
       val result = CapitalGainsCalculatorController.disabledTrustee(fakeRequest)
-      status(result) shouldBe 204
+      status(result) shouldBe 200
     }
 
     "return HTML from disabled-trustee" in new fakeRequestTo("disabled-trustee"){
