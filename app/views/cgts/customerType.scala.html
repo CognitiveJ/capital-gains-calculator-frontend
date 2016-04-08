@@ -1,10 +1,31 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Empty</title>
-</head>
-<body>
+@import models.CustomerTypeModel
+@import uk.gov.hmrc.play.views.html._
+@import play.api.data._
 
-</body>
-</html>
+@(customerTypeForm: Form[CustomerTypeModel])(implicit request: Request[_])
+
+@main_template(title = Messages("calc.customerType.title")) {
+
+  <a class="link-back" href="@routes.IntroductionController.introduction">Back</a>
+
+  <h1>@Messages("calc.base.pageHeading")</h1>
+
+  @helpers.form(action = routes.CalculationController.customerType) {
+
+    <div class="form-group">
+    @helpers.inputRadioGroup(
+         field = customerTypeForm("customerType")
+        ,Seq(
+            "individual"->Messages("calc.customerType.individual"),
+            "trustee"->Messages("calc.customerType.trustee"),
+            "personalRep"->Messages("calc.customerType.personalRep")
+        ),
+        '_legend -> Messages("calc.customerType.question"),
+        '_labelAfter -> true,
+        '_labelClass -> "block-label"
+    )
+    </div>
+
+    <button class="button" type="submit" id="continue-button">@Messages("calc.base.continue")</button>
+  }
+}

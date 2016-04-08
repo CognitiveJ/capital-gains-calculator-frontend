@@ -1,10 +1,16 @@
 ## Base ##
+calc.base.pageHeading = Calculate your tax (non-residents)
+calc.base.continue = Continue
 
 ## Introduction ##
-calc.introduction.title=Capital Gains Tax calculator for non-residents
+calc.introduction.title = Capital Gains Tax calculator for non-residents
 
 ## Customer Type ##
 calc.customerType.title = Who owned the property?
+calc.customerType.question = Who owned the property?
+calc.customerType.individual = I owned it
+calc.customerType.trustee = I was a trustee
+calc.customerType.personalRep = I was the executor of an estate
 
 ## Disabled Trustee ##
 calc.disabledTrustee.title = Are you a trustee for someone who’s vulnerable?
