@@ -5,11 +5,12 @@ calc.base.calculate.tax.heading = Calculate your tax (non-residents)
 calc.base.percentage.comp = complete
 calc.base.button.continue = Continue
 
-## Common ##
-calc.date.fields.day = Day
-calc.date.fields.month = Month
-calc.date.fields.year = Year
-calc.date.hint = For example, 4 9 2016
+## Common date Messages ##
+## Use common messages if some but not all pages use these messages. ##
+calc.common.date.fields.day = Day
+calc.common.date.fields.month = Month
+calc.common.date.fields.year = Year
+calc.common.date.hint = For example, 4 9 2016
 
 ## Introduction ##
 calc.introduction.title = Introduction

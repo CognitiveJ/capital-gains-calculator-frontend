@@ -1,17 +1,11 @@
 @()(implicit request: Request[_])
 @import views.html.helpers._
 
-@views.html.main_template(title = Messages("calc.disposalDate.title"), bodyClasses = None) {
-    <div class="phase-banner-alpha">
-        <p>
-            <strong class="phase-tag">ALPHA</strong>
-            <span>This is a new service – your <a href="https://designpatterns.hackpad.com/GOV.UK-elements-feedback-sKrDyQxcfA2">feedback</a> will help us to improve it.</span>
-        </p>
-    </div>
-    <a class="link-back" href="javascript: history.go(-1)">@Messages("calc.base.back")</a>
-    <h1 class="heading-xlarge"><span class="heading-secondary">@Messages("calc.base.calculate.tax.heading")</span>25% @Messages("calc.base.percentage.comp")</h1>
+@main_template(title = Messages("calc.disposalDate.title"), bodyClasses = None) {
+    <a class="link-back" href=routes.CalculationController.improvements>@Messages("calc.base.back")</a>
+    <h1 class="heading-large">@Messages("calc.base.calculate.tax.heading")</h1>
 
-    @simpleInlineDate("dod", Messages("calc.disposalDate.title"))
+    @simpleInlineDate("disposalDate", Messages("calc.disposalDate.title"))
 
-    <button id="start" class="button button-start">@Messages("calc.base.button.continue")</button>
+    <button id="continue" class="button">@Messages("calc.base.button.continue")</button>
 }
