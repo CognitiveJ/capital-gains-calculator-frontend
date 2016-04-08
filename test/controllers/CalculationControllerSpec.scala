@@ -176,9 +176,15 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
     }
 
     //################### Entrepreneurs Relief tests #######################
-    "be Action(parser=BodyParser(anyContent)) for entrepreneursRelief" in {
-      val result = CalculationController.entrepreneursRelief.toString()
-      result shouldBe s
+    "return 200 from entrepreneurs-relief" in new fakeRequestTo("entrepreneurs-relief") {
+      val result = CalculationController.entrepreneursRelief(fakeRequest)
+      status(result) shouldBe 200
+    }
+
+    "return HTML from entrepreneurs-relief" in new fakeRequestTo("entrepreneurs-relief"){
+      val result = CalculationController.entrepreneursRelief(fakeRequest)
+      contentType(result) shouldBe Some("text/html")
+      charset(result) shouldBe Some("utf-8")
     }
 
     //################### Allowable Losses tests #######################
