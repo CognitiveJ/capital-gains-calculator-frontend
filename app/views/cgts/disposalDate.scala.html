@@ -1,17 +1,6 @@
+@()(implicit request: Request[_])
 @import views.html.helpers._
-@import models._
 
-@{val disposalDate = Form[DisposalDateModel]}
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-    @includes.dateFieldsInline(theForm, "", false, "", "writtenAgreement.startDate", "agent",  optional = false,  true, Messages("label.noJs.verbalAgreement.startDate"))
-
-</head>
-<body>
-
-</body>
-</html>
+@views.html.main_template(title = "Disposal Date", bodyClasses = None) {
+    @simpleInlineDate("dod")
+}

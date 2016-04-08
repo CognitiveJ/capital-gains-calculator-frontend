@@ -1,5 +1,10 @@
 ## Base ##
 
+## Common ##
+date.fields.day = Day
+date.fields.month = Month
+date.fields.year = Year
+
 ## Introduction ##
 calc.introduction.title=Capital Gains Tax calculator for non-residents
 
