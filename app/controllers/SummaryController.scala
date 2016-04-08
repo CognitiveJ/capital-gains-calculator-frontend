@@ -16,11 +16,17 @@
 
 package controllers
 
+import play.api.mvc.Action
 import uk.gov.hmrc.play.frontend.controller.FrontendController
+import views.html.cgts
+
+import scala.concurrent.Future
 
 object SummaryController extends SummaryController
 
 trait SummaryController extends FrontendController {
 
-  val summary = TODO
+  val summary = Action.async { implicit request =>
+    Future.successful(Ok(cgts.summary()))
+  }
 }

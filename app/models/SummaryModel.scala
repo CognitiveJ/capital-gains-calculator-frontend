@@ -31,7 +31,7 @@ case class SummaryModel (
                           disposalValueModel: DisposalValueModel,
                           acquisitionCostsModel: AcquisitionCostsModel,
                           disposalCostsModel : DisposalCostsModel,
-//                          entrepreneursReliefModel : entreprenuersReliefModel,
+                          entrepreneursReliefModel : EntrepreneursReliefModel,
                           allowableLossesModel : AllowableLossesModel
 //                          otherReliefsModel : otherReliefsModel
                         )
