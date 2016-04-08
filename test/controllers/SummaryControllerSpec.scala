@@ -16,14 +16,26 @@
 
 package controllers
 
+import play.api.test.FakeRequest
+import play.api.test.Helpers._
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 class SummaryControllerSpec extends UnitSpec with WithFakeApplication {
 
+  class fakeRequestTo(url : String) {
+    val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/" + url)
+  }
+
   "SummaryController.summary" should {
-    "be Action(parser=BodyParser(anyContent))" in {
-      val result = SummaryController.summary.toString()
-      result shouldBe "Action(parser=BodyParser(anyContent))"
+    "return 200 from summary" in new fakeRequestTo("summary") {
+      val result = SummaryController.summary(fakeRequest)
+      status(result) shouldBe 200
+    }
+
+    "return HTML from summary" in new fakeRequestTo("summary") {
+      val result = SummaryController.summary(fakeRequest)
+      contentType(result) shouldBe Some("text/html")
+      charset(result) shouldBe Some("utf-8")
     }
   }
 }
