@@ -1,10 +1,37 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Empty</title>
-</head>
-<body>
+@()(implicit request: Request[_])
 
-</body>
-</html>
+@views.html.main_template(title = Messages("calc.introduction.title"), bodyClasses = None) {
+
+    <h1 class="heading-large">@Messages("calc.introduction.header")</h1>
+
+    <p class="lede">@Messages("calc.introduction.lede") <span class="no-wrap">@Messages("calc.base.taxStart")</span>.</p>
+    <p>@Messages("calc.introduction.textOne")</p>
+    <p>@Messages("calc.introduction.textTwo")</p>
+
+    <button id="start" class="button button-start">@Messages("calc.introduction.start")</button>
+
+    <h2 class="heading-medium">@Messages("calc.introduction.listOneTitle")</h2>
+    <p>@Messages("calc.introduction.listOneText")</p>
+    <ul class="list list-bullet">
+        <li>@Messages("calc.introduction.listOneBulletOne")</li>
+        <li>@Messages("calc.introduction.listOneBulletTwo")</li>
+        <li>@Messages("calc.introduction.listOneBulletThree")</li>
+    </ul>
+
+    <h2 class="heading-medium">@Messages("calc.introduction.listTwoTitle")</h2>
+    <p>@Messages("calc.introduction.listTwoText")</p>
+    <ul class="list list-bullet">
+        <li>@Messages("calc.introduction.listTwoBulletOne")</li>
+        <li>@Messages("calc.introduction.listTwoBulletTwo")</li>
+        <li>@Messages("calc.introduction.listTwoBulletThree")</li>
+    </ul>
+
+    <h2 class="heading-medium">@Messages("calc.introduction.listThreeTitle")</h2>
+    <p>@Messages("calc.introduction.listThreeText")</p>
+    <ul class="list list-bullet">
+        <li>@Messages("calc.introduction.listThreeBulletOne")</li>
+        <li>@Messages("calc.introduction.listThreeBulletTwo")</li>
+        <li>@Messages("calc.introduction.listThreeBulletThree")</li>
+        <li>@Messages("calc.introduction.listThreeBulletFour")</li>
+    </ul>
+}

@@ -17,7 +17,7 @@
 package controllers
 
 import java.util.UUID
-
+import play.api.i18n.Messages
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.play.http.SessionKeys
@@ -35,26 +35,38 @@ class IntroductionControllerSpec extends UnitSpec with WithFakeApplication {
   }
 
   "IntroductionController.introduction" should {
-    "return 200 with no session" in new fakeRequestTo("customer-type") {
+    "return 200 with no session" in new fakeRequestTo("introduction") {
       val result = IntroductionController.introduction(fakeRequest)
       status(result) shouldBe 200
     }
 
-    "return HTML with no session" in new fakeRequestTo("customer-type"){
+    "return HTML with no session" in new fakeRequestTo("introduction"){
       val result = IntroductionController.introduction(fakeRequest)
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
     }
 
-    "return 200 with session" in new fakeRequestToWithSessionId("customer-type") {
+    "display the title from the messages file" in new fakeRequestTo("introduction") {
+      val result = IntroductionController.introduction(fakeRequest)
+      contentAsString(result) should include (Messages("calc.introduction.title"))
+    }
+
+    "contain a start button" in new fakeRequestTo("introduction") {
+      val result = IntroductionController.introduction(fakeRequest)
+      contentAsString(result) should include (Messages("calc.introduction.start") + "</button>")
+    }
+
+    "return 200 with session Id" in new fakeRequestToWithSessionId("introduction") {
       val result = IntroductionController.introduction(fakeRequest)
       status(result) shouldBe 200
     }
 
-    "return HTML with session" in new fakeRequestToWithSessionId("customer-type"){
+    "return HTML with session Id" in new fakeRequestToWithSessionId("introduction"){
       val result = IntroductionController.introduction(fakeRequest)
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
     }
+
+
   }
 }
