@@ -16,6 +16,7 @@
 
 package controllers
 
+import play.api.i18n.Messages
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
@@ -27,15 +28,25 @@ class IntroductionControllerSpec extends UnitSpec with WithFakeApplication {
   }
 
   "IntroductionController.introduction" should {
-    "return 200" in new fakeRequestTo("customer-type") {
+    "return 200" in new fakeRequestTo("introduction") {
       val result = IntroductionController.introduction(fakeRequest)
       status(result) shouldBe 200
     }
 
-    "return HTML" in new fakeRequestTo("customer-type"){
+    "return HTML" in new fakeRequestTo("introduction"){
       val result = IntroductionController.introduction(fakeRequest)
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
+    }
+
+    "display the title from the messages file" in new fakeRequestTo("introduction") {
+      val result = IntroductionController.introduction(fakeRequest)
+      contentAsString(result) should include (Messages("calc.introduction.title"))
+    }
+
+    "contain a start button" in new fakeRequestTo("introduction") {
+      val result = IntroductionController.introduction(fakeRequest)
+      contentAsString(result) should include (Messages("calc.introduction.start") + "</button>")
     }
   }
 }
