@@ -16,6 +16,7 @@
 
 package controllers
 
+import forms.CustomerTypeForm.customerTypeForm
 import play.api.mvc.Action
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
@@ -28,7 +29,7 @@ trait CalculationController extends FrontendController {
 
   //################### Customer Type methods #######################
   val customerType = Action.async { implicit request =>
-    Future.successful(Ok(cgts.customerType()))
+    Future.successful(Ok(cgts.customerType(customerTypeForm)))
   }
 
   //################### Disabled Trustee methods #######################

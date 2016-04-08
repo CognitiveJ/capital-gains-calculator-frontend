@@ -17,9 +17,11 @@
 package controllers
 
 import play.api.http.Status
+import play.api.i18n.Messages
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import org.jsoup._
 
 class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
 
@@ -41,6 +43,36 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
       val result = CalculationController.customerType(fakeRequest)
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
+    }
+
+    "display the correct title for the customer-type page" in new fakeRequestTo("customer-type"){
+      val result = CalculationController.customerType(fakeRequest)
+      val jsoupDoc = Jsoup.parse(bodyOf(result))
+      jsoupDoc.title shouldEqual Messages("calc.customerType.title")
+    }
+
+    "display the correct heading for the customer-type page" in new fakeRequestTo("customer-type") {
+      val result = CalculationController.customerType(fakeRequest)
+      val jsoupDoc = Jsoup.parse(bodyOf(result))
+      jsoupDoc.body.getElementsByTag("H1").text shouldEqual Messages("calc.base.pageHeading")
+    }
+
+    "display the correct wording for radio option `individual`" in new fakeRequestTo("customer-type"){
+      val result = CalculationController.customerType(fakeRequest)
+      val jsoupDoc = Jsoup.parse(bodyOf(result))
+      jsoupDoc.body.getElementById("customerType-individual").parent.text shouldEqual Messages("calc.customerType.individual")
+    }
+
+    "display the correct wording for radio option `trustee`" in new fakeRequestTo("customer-type"){
+      val result = CalculationController.customerType(fakeRequest)
+      val jsoupDoc = Jsoup.parse(bodyOf(result))
+      jsoupDoc.body.getElementById("customerType-trustee").parent.text shouldEqual Messages("calc.customerType.trustee")
+    }
+
+    "display the correct wording for radio option `Personal Representative`" in new fakeRequestTo("customer-type"){
+      val result = CalculationController.customerType(fakeRequest)
+      val jsoupDoc = Jsoup.parse(bodyOf(result))
+      jsoupDoc.body.getElementById("customerType-personalrep").parent.text shouldEqual Messages("calc.customerType.personalRep")
     }
 
     //################### Disabled Trustee tests #######################
