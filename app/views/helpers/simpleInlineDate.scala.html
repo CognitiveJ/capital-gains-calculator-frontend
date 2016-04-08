@@ -14,28 +14,28 @@
 * limitations under the License.
 *@
 
-@(fieldName: String)(implicit lang: play.api.i18n.Lang)
+@(fieldName: String, legendMessage: String)(implicit lang: play.api.i18n.Lang)
 
 @dayElemId = @{fieldName + ".day"}
 @monthElemId = @{fieldName + ".month"}
 @yearElemId = @{fieldName + ".year"}
 
-<fieldset class="form-group" id="dod">
-    <legend class="visuallyhidden">Date you signed the contract that made someone else the owner</legend>
-    <span class="form-hint">For example, 4 9 2016</span>
+<fieldset class="form-group" id="@fieldName">
+    <legend>@legendMessage</legend>
+    <span class="form-hint">@Messages("calc.date.hint")</span>
 
     <div class="form-date">
-        <div id="@dayElemId" class="form-group form-group-day">
-            <label for="dodDay">Day</label>
-            <input class="form-control" id="dodDay" name="dodDay" type="number" pattern="[0-9]*" min="0" max="31">
+        <div class="form-group form-group-day">
+            <label for="@dayElemId">@Messages("calc.date.fields.day")</label>
+            <input class="form-control" id="@dayElemId" name="@dayElemId" type="number" pattern="[0-9]*" min="0" max="31">
         </div>
-        <div id="@monthElemId" class="form-group form-group-month">
-            <label for="dodMonth">Month</label>
-            <input class="form-control" id="dodMonth" name="dodMonth" type="number" pattern="[0-9]*" min="0" max="12">
+        <div class="form-group form-group-month">
+            <label for="@monthElemId">@Messages("calc.date.fields.month")</label>
+            <input class="form-control" id="@monthElemId" name="@monthElemId" type="number" pattern="[0-9]*" min="0" max="12">
         </div>
-        <div id="@yearElemId" class="form-group form-group-year">
-            <label for="dodYear">Year</label>
-            <input class="form-control" id="dodYear" name="dodYear" type="number" pattern="[0-9]*" min="0">
+        <div class="form-group form-group-year">
+            <label for="@yearElemId">@Messages("calc.date.fields.year")</label>
+            <input class="form-control" id="@yearElemId" name="@yearElemId" type="number" pattern="[0-9]*" min="0">
         </div>
     </div>
 </fieldset>

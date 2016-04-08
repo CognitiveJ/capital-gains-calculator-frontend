@@ -1,10 +1,15 @@
 ## Base ##
 calc.base.taxStart = 6 April 2015
+calc.base.back = Back
+calc.base.calculate.tax.heading = Calculate your tax (non-residents)
+calc.base.percentage.comp = complete
+calc.base.button.continue = Continue
 
 ## Common ##
-date.fields.day = Day
-date.fields.month = Month
-date.fields.year = Year
+calc.date.fields.day = Day
+calc.date.fields.month = Month
+calc.date.fields.year = Year
+calc.date.hint = For example, 4 9 2016
 
 ## Introduction ##
 calc.introduction.title = Introduction
