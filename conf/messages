@@ -1,6 +1,11 @@
 ## Base ##
 calc.base.taxStart = 6 April 2015
 
+## Common ##
+date.fields.day = Day
+date.fields.month = Month
+date.fields.year = Year
+
 ## Introduction ##
 calc.introduction.title = Introduction
 calc.introduction.header = Capital Gains Tax calculator for non-residents
