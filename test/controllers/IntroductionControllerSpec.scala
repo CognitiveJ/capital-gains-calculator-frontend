@@ -16,8 +16,11 @@
 
 package controllers
 
+import java.util.UUID
+
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.play.http.SessionKeys
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 class IntroductionControllerSpec extends UnitSpec with WithFakeApplication {
@@ -26,8 +29,9 @@ class IntroductionControllerSpec extends UnitSpec with WithFakeApplication {
     val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/" + url)
   }
 
-  class fakeRequestToWithSession(url : String) {
-    val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/" + url).withSession()
+  class fakeRequestToWithSessionId(url : String) {
+    val sessionId = UUID.randomUUID.toString
+    val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/" + url).withSession(SessionKeys.sessionId -> s"session-$sessionId")
   }
 
   "IntroductionController.introduction" should {
@@ -42,12 +46,12 @@ class IntroductionControllerSpec extends UnitSpec with WithFakeApplication {
       charset(result) shouldBe Some("utf-8")
     }
 
-    "return 200 with session" in new fakeRequestToWithSession("customer-type") {
+    "return 200 with session" in new fakeRequestToWithSessionId("customer-type") {
       val result = IntroductionController.introduction(fakeRequest)
       status(result) shouldBe 200
     }
 
-    "return HTML with session" in new fakeRequestToWithSession("customer-type"){
+    "return HTML with session" in new fakeRequestToWithSessionId("customer-type"){
       val result = IntroductionController.introduction(fakeRequest)
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")

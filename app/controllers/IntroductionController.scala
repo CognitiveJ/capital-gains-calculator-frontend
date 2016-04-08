@@ -33,7 +33,7 @@ trait IntroductionController extends FrontendController {
   implicit val hc = new HeaderCarrier(sessionId = Some(SessionId(sessionId)))
 
   val introduction = Action.async { implicit request =>
-    if (request.session.isEmpty) {
+    if (request.session.get(SessionKeys.sessionId).isEmpty) {
       Future.successful(Ok(cgts.introduction()).withSession(request.session + (SessionKeys.sessionId -> s"session-$sessionId")))
     }
     else {
