@@ -1,5 +1,7 @@
 @()(implicit request: Request[_])
 
+@import uk.gov.hmrc.play.views.html._
+
 @views.html.main_template(title = Messages("calc.introduction.title"), bodyClasses = None) {
 
     <h1 class="heading-large">@Messages("calc.introduction.header")</h1>
