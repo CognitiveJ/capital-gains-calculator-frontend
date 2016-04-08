@@ -16,8 +16,11 @@
 
 package controllers
 
+import java.util.UUID
 import play.api.mvc.Action
 import uk.gov.hmrc.play.frontend.controller.FrontendController
+import uk.gov.hmrc.play.http.{SessionKeys, HeaderCarrier}
+import uk.gov.hmrc.play.http.logging.SessionId
 import views.html.cgts
 
 import scala.concurrent.Future
@@ -26,7 +29,15 @@ object IntroductionController extends IntroductionController
 
 trait IntroductionController extends FrontendController {
 
+  implicit val sessionId = UUID.randomUUID.toString
+  implicit val hc = new HeaderCarrier(sessionId = Some(SessionId(sessionId)))
+
   val introduction = Action.async { implicit request =>
-    Future.successful(Ok(cgts.introduction()))
+    if (request.session.get(SessionKeys.sessionId).isEmpty) {
+      Future.successful(Ok(cgts.introduction()).withSession(request.session + (SessionKeys.sessionId -> s"session-$sessionId")))
+    }
+    else {
+      Future.successful(Ok(cgts.introduction()))
+    }
   }
 }
