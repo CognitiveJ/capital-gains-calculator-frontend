@@ -1,5 +1,7 @@
 ## Base ##
 calc.base.taxStart = 6 April 2015
+calc.base.yes = Yes
+calc.base.no = No
 
 ## Common ##
 date.fields.day = Day
