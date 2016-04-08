@@ -26,13 +26,28 @@ class IntroductionControllerSpec extends UnitSpec with WithFakeApplication {
     val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/" + url)
   }
 
+  class fakeRequestToWithSession(url : String) {
+    val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/" + url).withSession()
+  }
+
   "IntroductionController.introduction" should {
-    "return 200" in new fakeRequestTo("customer-type") {
+    "return 200 with no session" in new fakeRequestTo("customer-type") {
       val result = IntroductionController.introduction(fakeRequest)
       status(result) shouldBe 200
     }
 
-    "return HTML" in new fakeRequestTo("customer-type"){
+    "return HTML with no session" in new fakeRequestTo("customer-type"){
+      val result = IntroductionController.introduction(fakeRequest)
+      contentType(result) shouldBe Some("text/html")
+      charset(result) shouldBe Some("utf-8")
+    }
+
+    "return 200 with session" in new fakeRequestToWithSession("customer-type") {
+      val result = IntroductionController.introduction(fakeRequest)
+      status(result) shouldBe 200
+    }
+
+    "return HTML with session" in new fakeRequestToWithSession("customer-type"){
       val result = IntroductionController.introduction(fakeRequest)
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
