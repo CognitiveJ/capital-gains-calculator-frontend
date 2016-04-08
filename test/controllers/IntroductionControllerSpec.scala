@@ -16,9 +16,11 @@
 
 package controllers
 
+import java.util.UUID
 import play.api.i18n.Messages
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.play.http.SessionKeys
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 class IntroductionControllerSpec extends UnitSpec with WithFakeApplication {
@@ -27,13 +29,18 @@ class IntroductionControllerSpec extends UnitSpec with WithFakeApplication {
     val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/" + url)
   }
 
+  class fakeRequestToWithSessionId(url : String) {
+    val sessionId = UUID.randomUUID.toString
+    val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/" + url).withSession(SessionKeys.sessionId -> s"session-$sessionId")
+  }
+
   "IntroductionController.introduction" should {
-    "return 200" in new fakeRequestTo("introduction") {
+    "return 200 with no session" in new fakeRequestTo("introduction") {
       val result = IntroductionController.introduction(fakeRequest)
       status(result) shouldBe 200
     }
 
-    "return HTML" in new fakeRequestTo("introduction"){
+    "return HTML with no session" in new fakeRequestTo("introduction"){
       val result = IntroductionController.introduction(fakeRequest)
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
@@ -48,5 +55,18 @@ class IntroductionControllerSpec extends UnitSpec with WithFakeApplication {
       val result = IntroductionController.introduction(fakeRequest)
       contentAsString(result) should include (Messages("calc.introduction.start") + "</button>")
     }
+
+    "return 200 with session Id" in new fakeRequestToWithSessionId("introduction") {
+      val result = IntroductionController.introduction(fakeRequest)
+      status(result) shouldBe 200
+    }
+
+    "return HTML with session Id" in new fakeRequestToWithSessionId("introduction"){
+      val result = IntroductionController.introduction(fakeRequest)
+      contentType(result) shouldBe Some("text/html")
+      charset(result) shouldBe Some("utf-8")
+    }
+
+
   }
 }
