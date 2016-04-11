@@ -106,6 +106,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
       jsoupDoc.body.getElementById("isVulnerableNo").parent.text shouldEqual Messages("calc.base.no")
     }
 
+    "display a Continue button on disabled-trustee page" in new fakeRequestTo("disabled-trustee"){
+      val result = CalculationController.disabledTrustee(fakeRequest)
+      val jsoupDoc = Jsoup.parse(bodyOf(result))
+      jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+    }
+
     //################### Current Income tests #######################
     "be Action(parser=BodyParser(anyContent)) for currentIncome" in {
       val result = CalculationController.currentIncome.toString()
