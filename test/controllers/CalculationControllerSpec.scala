@@ -132,10 +132,14 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
     "display the correct wording for radio option `Yes`" in new fakeRequestTo("other-properties"){
       val result = CalculationController.otherProperties(fakeRequest)
       val jsoupDoc = Jsoup.parse(bodyOf(result))
-      jsoupDoc.body.getElementById("otherPropertiesYes").parent.text shouldEqual Messages("calc.base.no")
+      jsoupDoc.body.getElementById("otherPropertiesYes").parent.text shouldEqual Messages("calc.base.yes")
     }
 
-
+    "display the correct wording for radio option `No`" in new fakeRequestTo("other-properties"){
+      val result = CalculationController.otherProperties(fakeRequest)
+      val jsoupDoc = Jsoup.parse(bodyOf(result))
+      jsoupDoc.body.getElementById("otherPropertiesNo").parent.text shouldEqual Messages("calc.base.no")
+    }
 
     //############## Annual Exempt Amount tests ######################
     "return 200 for annual-exempt-amount" in new fakeRequestTo("annual-exempt-amount") {
