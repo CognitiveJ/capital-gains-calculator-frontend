@@ -5,7 +5,7 @@
 
     <h1>@Messages("calc.base.pageHeading")</h1>
 
-    @YesNoRadio(Messages("calc.otherProperties.elementName"), Messages("calc.otherProperties.title"), Option(""))
+    @simpleYesNoRadio("otherProperties", Messages("calc.otherProperties.title"), Option(""))
 
     <a id="continue" href=@controllers.routes.CalculationController.annualExemptAmount class="button">@Messages("calc.base.continue")</a>
 }

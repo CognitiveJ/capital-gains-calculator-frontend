@@ -51,7 +51,6 @@ calc.currentIncome.title = In the tax year when you stopped owning the property,
 calc.personalAllowance.title = In the tax year when you stopped owning the property, what was your UK Personal Allowance?
 
 ## Other Properties ##
-calc.otherProperties.elementName = otherProperties
 calc.otherProperties.title = Did you sell or give away any other properties in that tax year?
 
 ## Annual Exempt Amount ##
