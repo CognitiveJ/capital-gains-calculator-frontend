@@ -1,6 +1,11 @@
 @()(implicit request: Request[_])
 @import views.html.helpers._
 
-@views.html.main_template(title = "Disposal Date", bodyClasses = None) {
-    @simpleInlineDate("dod")
+@main_template(title = Messages("calc.disposalDate.title"), bodyClasses = None) {
+    <a class="link-back" href="@routes.CalculationController.improvements">@Messages("calc.base.back")</a>
+    <h1 class="heading-large">@Messages("calc.base.calculate.tax.heading")</h1>
+
+    @simpleInlineDate("disposalDate", Messages("calc.disposalDate.title"))
+
+    <a id="continue" class="button">@Messages("calc.base.button.continue")</a>
 }

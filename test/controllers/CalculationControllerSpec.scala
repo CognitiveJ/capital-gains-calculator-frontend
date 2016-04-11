@@ -154,9 +154,39 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
     }
 
     //################### Disposal Date tests #######################
-    "be Action(parser=BodyParser(anyContent)) for disposalDate" in {
-      val result = CalculationController.disposalDate.toString()
-      result shouldBe s
+    "return 200 when sending a GET to `/calculate-your-capital-gains/disposal-date`" in new fakeRequestTo("disposal-date") {
+      val result = CalculationController.disposalDate(fakeRequest)
+      status(result) shouldBe 200
+    }
+
+    "return HTML when sending a GET to `/calculate-your-capital-gains/disposal-date`" in new fakeRequestTo("disposal-date"){
+      val result = CalculationController.disposalDate(fakeRequest)
+      contentType(result) shouldBe Some("text/html")
+      charset(result) shouldBe Some("utf-8")
+    }
+
+    "display the correct title for the disposal-date page" in new fakeRequestTo("disposal-date"){
+      val result = CalculationController.disposalDate(fakeRequest)
+      val jsoupDoc = Jsoup.parse(bodyOf(result))
+      jsoupDoc.title shouldEqual Messages("calc.disposalDate.title")
+    }
+
+    "display the correct heading for the disposal-date page" in new fakeRequestTo("disposal-date") {
+      val result = CalculationController.disposalDate(fakeRequest)
+      val jsoupDoc = Jsoup.parse(bodyOf(result))
+      jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+    }
+
+    "contain a simpleInlineDate with question When did you sign the contract that made someone else the owner?" in new fakeRequestTo("disposal-date") {
+      val result = CalculationController.disposalDate(fakeRequest)
+      val jsoupDoc = Jsoup.parse(bodyOf(result))
+      jsoupDoc.select("legend").text shouldEqual Messages("calc.disposalDate.title")
+    }
+
+    "contain a button with id equal to continue" in new fakeRequestTo("disposal-date") {
+      val result = CalculationController.disposalDate(fakeRequest)
+      val jsoupDoc = Jsoup.parse(bodyOf(result))
+      jsoupDoc.select("a#continue").text shouldEqual Messages("calc.base.continue")
     }
 
     //################### Disposal Value tests #######################
