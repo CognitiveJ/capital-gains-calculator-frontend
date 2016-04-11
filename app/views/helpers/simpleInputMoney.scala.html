@@ -1,0 +1,10 @@
+@(fieldName: String, questionText: String, helpText: Option[String])(implicit lang: play.api.i18n.Lang)
+
+<fieldset class="form-group">
+    <label>@questionText</label>
+    <span class="form-hint">@{
+        helpText.getOrElse("")
+    }
+    </span>
+    <input class="form-control" id="@fieldName" type="text" placeholder="£">
+</fieldset>
