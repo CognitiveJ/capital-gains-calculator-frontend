@@ -1,11 +1,11 @@
 @()(implicit request: Request[_])
 @import views.html.helpers._
 
-@views.html.main_template(title = Messages("calc.otherProperties.title"), bodyClasses = None) {
+@main_template(title = Messages("calc.otherProperties.title"), bodyClasses = None) {
 
     <h1>@Messages("calc.base.pageHeading")</h1>
 
-    @YesNoRadio("otherProperties", Messages("calc.otherProperties.title"), Option(""))
+    @YesNoRadio(Messages("calc.otherProperties.elementName"), Messages("calc.otherProperties.title"), Option(""))
 
     <a id="continue" href=@controllers.routes.CalculationController.annualExemptAmount class="button">@Messages("calc.base.continue")</a>
 }
