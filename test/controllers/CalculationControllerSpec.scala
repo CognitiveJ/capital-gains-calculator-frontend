@@ -165,19 +165,28 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
       charset(result) shouldBe Some("utf-8")
     }
 
-    "display the title from the messages file" in new fakeRequestTo("disposal-date") {
+    "display the correct title for the disposal-date page" in new fakeRequestTo("disposal-date"){
       val result = CalculationController.disposalDate(fakeRequest)
-      contentAsString(result) should include (Messages("calc.disposalDate.title"))
+      val jsoupDoc = Jsoup.parse(bodyOf(result))
+      jsoupDoc.title shouldEqual Messages("calc.disposalDate.title")
     }
 
-    "contain a simpleInlineDate with title When did you sign the contract that made someone else the owner?" in new fakeRequestTo("disposal-date") {
+    "display the correct heading for the disposal-date page" in new fakeRequestTo("disposal-date") {
       val result = CalculationController.disposalDate(fakeRequest)
-      contentAsString(result) should include ("<legend>" + Messages("calc.disposalDate.title") + "</legend>")
+      val jsoupDoc = Jsoup.parse(bodyOf(result))
+      jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
     }
 
-    "contain a button with Continue on it" in new fakeRequestTo("disposal-date") {
+    "contain a simpleInlineDate with question When did you sign the contract that made someone else the owner?" in new fakeRequestTo("disposal-date") {
       val result = CalculationController.disposalDate(fakeRequest)
-      contentAsString(result) should include (Messages("calc.base.button.continue") + "</button>")
+      val jsoupDoc = Jsoup.parse(bodyOf(result))
+      jsoupDoc.select("legend").text shouldEqual Messages("calc.disposalDate.title")
+    }
+
+    "contain a button with id equal to continue" in new fakeRequestTo("disposal-date") {
+      val result = CalculationController.disposalDate(fakeRequest)
+      val jsoupDoc = Jsoup.parse(bodyOf(result))
+      jsoupDoc.select("a#continue").text shouldEqual Messages("calc.base.continue")
     }
 
     //################### Disposal Value tests #######################
