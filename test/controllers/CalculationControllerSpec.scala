@@ -141,6 +141,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
       jsoupDoc.body.getElementById("otherPropertiesNo").parent.text shouldEqual Messages("calc.base.no")
     }
 
+    "contain a button with id equal to continue in other-properties" in new fakeRequestTo("other-properties") {
+      val result = CalculationController.otherProperties(fakeRequest)
+      val jsoupDoc = Jsoup.parse(bodyOf(result))
+      jsoupDoc.select("a#continue").text shouldEqual Messages("calc.base.continue")
+    }
+
     //############## Annual Exempt Amount tests ######################
     "return 200 for annual-exempt-amount" in new fakeRequestTo("annual-exempt-amount") {
       val result = CalculationController.annualExemptAmount(fakeRequest)
