@@ -22,6 +22,8 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import org.jsoup._
+import play.mvc.Action
+import play.mvc.BodyParser.AnyContent
 
 class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
 
@@ -232,9 +234,14 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
     }
 
     //################### Other Reliefs tests #######################
-    "be Action(parser=BodyParser(anyContent)) for otherReliefs" in {
-      val result = CalculationController.otherReliefs.toString()
-      result shouldBe s
+    "return 200 when sending a GET request `/calculate-your-capital-gains/other-reliefs`" in new fakeRequestTo("other-reliefs") {
+      val result = CalculationController.otherReliefs(fakeRequest)
+      status(result) shouldBe 200
+    }
+
+    "return HTML when sending a GET request `/calculate-your-capital-gains/other-reliefs`" in new fakeRequestTo("other-reliefs") {
+      val result = CalculationController.otherReliefs(fakeRequest)
+      contentType(result) shouldBe Some("text/html")
     }
   }
 }
