@@ -6,13 +6,13 @@
         helpText.getOrElse("")
     }
     </span>
-    <div class="inline">
-        <label class="block-label" for="{@fieldName + 'Yes'}">
-            <input id="{@fieldName + 'Yes'}" type="radio" name="radioGroup" value="Yes">
+    <div class="form-group inline">
+        <label class="block-label" for='@{fieldName + "Yes"}'>
+            <input id='@{fieldName + "Yes"}' type="radio" name="@fieldName" value="Yes">
             @Messages("calc.base.yes")
         </label>
-        <label class="block-label" for="{@fieldName + 'No'}">
-            <input id="{@fieldName + 'No'}" type="radio" name="radioGroup" value="No">
+        <label class="block-label" for='@{fieldName + "No"}'>
+            <input id='@{fieldName + "No"}' type="radio" name="@fieldName" value="No">
             @Messages("calc.base.no")
         </label>
     </div>
