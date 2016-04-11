@@ -1,10 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+@()(implicit request: Request[_])
+@import views.html.helpers._
 
-</body>
-</html>
+@views.html.main_template(title = Messages("calc.otherProperties.title"), bodyClasses = None) {
+
+    <h1>@Messages("calc.base.pageHeading")</h1>
+
+    @cgtYesNoRadio("otherProperties", Messages("calc.otherProperties.title"), Option(""))
+
+    <a id="continue" href=@controllers.routes.CalculationController.annualExemptAmount class="button">@Messages("calc.base.continue")</a>
+}
