@@ -13,7 +13,7 @@ $(function() {
             if ($this.val() === 'Yes' && $this.prop('checked')) {
                 $hidden.show();
             }
-            else {
+            else if($this.val() === 'No'){
                 $hidden.hide();
             }
         });
@@ -24,7 +24,7 @@ $(function() {
 
             if ($this.val() === 'Yes') {
                 $hidden.show();
-            } else {
+            } else if($this.val() === 'No') {
                 $hidden.hide();
             }
         });
