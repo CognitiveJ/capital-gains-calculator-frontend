@@ -1,4 +1,6 @@
 ## Base ##
+calc.base.pageHeading = Calculate your tax (non-residents)
+calc.base.continue = Continue
 calc.base.taxStart = 6 April 2015
 calc.base.back = Back
 calc.base.calculate.tax.heading = Calculate your tax (non-residents)
@@ -11,6 +13,8 @@ calc.common.date.fields.day = Day
 calc.common.date.fields.month = Month
 calc.common.date.fields.year = Year
 calc.common.date.hint = For example, 4 9 2016
+calc.base.yes = Yes
+calc.base.no = No
 
 ## Introduction ##
 calc.introduction.title = Introduction
@@ -38,6 +42,10 @@ calc.introduction.start = Start
 
 ## Customer Type ##
 calc.customerType.title = Who owned the property?
+calc.customerType.question = Who owned the property?
+calc.customerType.individual = I owned it
+calc.customerType.trustee = I was a trustee
+calc.customerType.personalRep = I was the executor of an estate
 
 ## Disabled Trustee ##
 calc.disabledTrustee.title = Are you a trustee for someone who’s vulnerable?
