@@ -53,7 +53,7 @@ class IntroductionControllerSpec extends UnitSpec with WithFakeApplication {
 
     "contain a start button" in new fakeRequestTo("introduction") {
       val result = IntroductionController.introduction(fakeRequest)
-      contentAsString(result) should include (Messages("calc.introduction.start") + "</button>")
+      contentAsString(result) should include (Messages("calc.introduction.start") + "</a>")
     }
 
     "return 200 with session Id" in new fakeRequestToWithSessionId("introduction") {
