@@ -1,5 +1,7 @@
 @()(implicit request: Request[_])
 
+@import uk.gov.hmrc.play.views.html._
+
 @views.html.main_template(title = Messages("calc.introduction.title"), bodyClasses = None) {
 
     <h1 class="heading-large">@Messages("calc.introduction.header")</h1>
@@ -8,7 +10,7 @@
     <p>@Messages("calc.introduction.textOne")</p>
     <p>@Messages("calc.introduction.textTwo")</p>
 
-    <button id="start" class="button button-start">@Messages("calc.introduction.start")</button>
+    <a id="start" href=@controllers.routes.CalculationController.customerType class="button button-start">@Messages("calc.introduction.start")</a>
 
     <h2 class="heading-medium">@Messages("calc.introduction.listOneTitle")</h2>
     <p>@Messages("calc.introduction.listOneText")</p>
