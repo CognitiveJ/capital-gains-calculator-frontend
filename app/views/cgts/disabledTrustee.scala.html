@@ -1,0 +1,14 @@
+@()(implicit request: Request[_])
+@import views.html.helpers._
+
+@main_template(title = Messages("calc.disabledTrustee.title")) {
+
+    <a class="link-back" href="@routes.CalculationController.customerType">Back</a>
+
+    <h1 class="heading-large">@Messages("calc.base.pageHeading")</h1>
+
+    @cgtYesNoRadio("isVulnerable",Messages("calc.disabledTrustee.question"),Some(Messages("calc.disabledTrustee.helptext")))
+
+    <button class="button" type="submit" id="continue-button">@Messages("calc.base.continue")</button>
+
+}

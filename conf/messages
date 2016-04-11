@@ -43,6 +43,8 @@ calc.customerType.personalRep = I was the executor of an estate
 
 ## Disabled Trustee ##
 calc.disabledTrustee.title = Are you a trustee for someone who’s vulnerable?
+calc.disabledTrustee.question = Are you a trustee for someone who’s vulnerable?
+calc.disabledTrustee.helptext = A person’s vulnerable if they’re disabled, or if they’re under 18 and their parents have died
 
 ## Current Income ##
 calc.currentIncome.title = In the tax year when you stopped owning the property, what was your total UK income?
