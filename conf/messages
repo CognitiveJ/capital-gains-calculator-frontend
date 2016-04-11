@@ -69,7 +69,6 @@ calc.acquisitionValue.title = How much did you pay for the property?
 calc.improvements.title = Did you make any improvements to the property?
 
 ## Disposal Date ##
-calc.disposalDate.element = disposalDate
 calc.disposalDate.title = When did you sign the contract that made someone else the owner?
 
 ## Disposal Value ##
