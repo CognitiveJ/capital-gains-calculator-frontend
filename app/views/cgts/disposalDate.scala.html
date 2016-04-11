@@ -5,7 +5,7 @@
     <a class="link-back" href=routes.CalculationController.improvements>@Messages("calc.base.back")</a>
     <h1 class="heading-large">@Messages("calc.base.calculate.tax.heading")</h1>
 
-    @simpleInlineDate("disposalDate", Messages("calc.disposalDate.title"))
+    @simpleInlineDate(Messages("calc.disposalDate.element"), Messages("calc.disposalDate.title"))
 
-    <button id="continue" class="button">@Messages("calc.base.button.continue")</button>
+    <a id="continue" href="controllers.routes.CalculationController.disposalDate" class="button">@Messages("calc.base.button.continue")</a>
 }
