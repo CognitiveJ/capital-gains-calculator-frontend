@@ -2,7 +2,7 @@
 @import views.html.helpers._
 
 @main_template(title = Messages("calc.disposalDate.title"), bodyClasses = None) {
-    <a class="link-back" href=routes.CalculationController.improvements>@Messages("calc.base.back")</a>
+    <a class="link-back" href="@routes.CalculationController.improvements">@Messages("calc.base.back")</a>
     <h1 class="heading-large">@Messages("calc.base.calculate.tax.heading")</h1>
 
     @simpleInlineDate("disposalDate", Messages("calc.disposalDate.title"))
