@@ -60,3 +60,6 @@ GET         /other-reliefs           controllers.CalculationController.otherReli
 #Summary screen route
 ########################################################
 GET         /summary                 controllers.SummaryController.summary
+
+# Map static resources from the /public folder to the /assets URL path
+GET    /assets/*file             controllers.Assets.at(path="/public", file)

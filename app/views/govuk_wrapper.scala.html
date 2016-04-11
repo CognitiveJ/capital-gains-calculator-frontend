@@ -14,6 +14,10 @@
 @import uk.gov.hmrc.play.views.html.{layouts => uiLayouts}
 @import uk.gov.hmrc.play.views.html.{helpers => uiHelpers}
 
+@scriptElement = {
+<script type="text/javascript" src='@controllers.routes.Assets.at("javascripts/cgt.js")'></script>
+}
+
 @head = {
     @uiLayouts.head(
       assetsPrefix = appConfig.assetsPrefix,
@@ -43,7 +47,7 @@
       analyticsHost = appConfig.analyticsHost,
       assetsPrefix = appConfig.assetsPrefix,
       ssoUrl = None,
-      scriptElem = scriptElem,
+      scriptElem = Some(scriptElement),
       gaCalls = None)
 }
 
