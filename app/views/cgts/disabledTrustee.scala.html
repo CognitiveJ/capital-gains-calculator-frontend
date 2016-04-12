@@ -1,7 +1,7 @@
 @()(implicit request: Request[_])
 @import views.html.helpers._
 
-@main_template(title = Messages("calc.disabledTrustee.title")) {
+@main_template(Messages("calc.disabledTrustee.question")) {
 
     <a class="link-back" href="@routes.CalculationController.customerType">Back</a>
 

@@ -92,7 +92,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
     "display the correct title for the disabled-trustee page" in new fakeRequestTo("disabled-trustee"){
       val result = CalculationController.disabledTrustee(fakeRequest)
       val jsoupDoc = Jsoup.parse(bodyOf(result))
-      jsoupDoc.title shouldEqual Messages("calc.disabledTrustee.title")
+      jsoupDoc.title shouldEqual Messages("calc.disabledTrustee.question")
     }
 
     "display the correct heading for the disabled-trustee page" in new fakeRequestTo("disabled-trustee") {
