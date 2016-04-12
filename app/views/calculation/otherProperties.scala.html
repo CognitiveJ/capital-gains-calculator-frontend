@@ -1,0 +1,12 @@
+@()(implicit request: Request[_])
+@import views.html.helpers._
+
+@main_template(Messages("calc.otherProperties.title")) {
+
+    <a class="link-back" href="">@Messages("calc.base.back")</a>
+    <h1>@Messages("calc.base.pageHeading")</h1>
+
+    @simpleYesNoRadio("otherProperties", Messages("calc.otherProperties.title"), None)
+
+    <button id="continue" class="button">@Messages("calc.base.continue")</button>
+}

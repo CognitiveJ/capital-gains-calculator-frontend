@@ -1,7 +1,7 @@
 @(fieldName: String, questionText: String, helpText: Option[String] = None)(implicit lang: play.api.i18n.Lang)
 
-@yesId = {fieldName + "Yes"}
-@noId = {fieldName + "No"}
+@yesId = @{fieldName + "Yes"}
+@noId = @{fieldName + "No"}
 
 <fieldset class="form-group" id="@fieldName">
     <legend>@questionText</legend>
