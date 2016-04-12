@@ -33,7 +33,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
     val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/" + url)
   }
 
-  "CapitalGainsCalculatorController methods " should {
+  "CalculationController methods " should {
 
     //################### Customer Type tests #######################
     "return 200 from customer-type" in new fakeRequestTo("customer-type") {
@@ -289,7 +289,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
     "contain a button with id equal to continue in disposal-date" in new fakeRequestTo("disposal-date") {
       val result = CalculationController.disposalDate(fakeRequest)
       val jsoupDoc = Jsoup.parse(bodyOf(result))
-      jsoupDoc.select("a#continue").text shouldEqual Messages("calc.base.continue")
+      jsoupDoc.select("button#continue").text shouldEqual Messages("calc.base.continue")
     }
 
     //################### Disposal Value tests #######################
@@ -314,18 +314,6 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
       val result = CalculationController.disposalValue(fakeRequest)
       val jsoupDoc = Jsoup.parse(bodyOf(result))
       jsoupDoc.select("button#continue").text shouldEqual Messages("calc.base.continue")
-    }
-
-    //################### Disposal Date tests #######################
-    "return 200 from disposal-date" in new fakeRequestTo("disposal-date") {
-      val result = CalculationController.disposalDate(fakeRequest)
-      status(result) shouldBe 200
-    }
-
-    "return HTML from disposal-date" in new fakeRequestTo("disposal-date"){
-      val result = CalculationController.disposalDate(fakeRequest)
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
     }
 
     //################### Acquisition Costs tests #######################
@@ -385,6 +373,20 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
     "return HTML when sending a GET request `/calculate-your-capital-gains/other-reliefs`" in new fakeRequestTo("other-reliefs") {
       val result = CalculationController.otherReliefs(fakeRequest)
       contentType(result) shouldBe Some("text/html")
+    }
+
+    //################### Summary tests #######################
+    "CalculationController.summary" should {
+      "return 200 from summary" in new fakeRequestTo("summary") {
+        val result = CalculationController.summary(fakeRequest)
+        status(result) shouldBe 200
+      }
+
+      "return HTML from summary" in new fakeRequestTo("summary") {
+        val result = CalculationController.summary(fakeRequest)
+        contentType(result) shouldBe Some("text/html")
+        charset(result) shouldBe Some("utf-8")
+      }
     }
   }
 }
