@@ -6,6 +6,9 @@ calc.base.back = Back
 calc.base.calculate.tax.heading = Calculate your tax (non-residents)
 calc.base.percentage.comp = complete
 calc.base.button.continue = Continue
+calc.base.yes = Yes
+calc.base.no = No
+calc.base.back = Back
 
 ## Common date Messages ##
 ## Use common messages if some but not all pages use these messages. ##
@@ -13,9 +16,7 @@ calc.common.date.fields.day = Day
 calc.common.date.fields.month = Month
 calc.common.date.fields.year = Year
 calc.common.date.hint = For example, 4 9 2016
-calc.base.yes = Yes
-calc.base.no = No
-calc.base.back = Back
+calc.common.readMore = Read more
 
 ## Introduction ##
 calc.introduction.title = Introduction
@@ -62,7 +63,8 @@ calc.personalAllowance.title = In the tax year when you stopped owning the prope
 calc.otherProperties.title = Did you sell or give away any other properties in that tax year?
 
 ## Annual Exempt Amount ##
-calc.annualExemptAmount.title = How much of your Capital Gains Tax allowance have you got left?
+calc.annualExemptAmount.question = How much of your Capital Gains Tax allowance have you got left?
+calc.annualExemptAmount.link.one = Capital Gains Tax allowances
 
 ## Acquisition Value ##
 calc.acquisitionValue.title = How much did you pay for the property?

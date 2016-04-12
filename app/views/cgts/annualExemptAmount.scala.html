@@ -1,10 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+@()(implicit request: Request[_])
 
-</body>
-</html>
+@import views.html.helpers._
+
+@sidebar = {
+    <a href="https://www.gov.uk/capital-gains-tax/allowances">@Messages("calc.annualExemptAmount.link.one")</a>
+}
+
+@main_template(Messages("calc.annualExemptAmount.question"), sidebarLinks = Some(sidebar)) {
+
+    <a id="link-back" class="link-back" href="@routes.CalculationController.otherProperties">Back</a>
+
+    <h1 class="heading-large">@Messages("calc.base.pageHeading")</h1>
+
+    @simpleInputMoney("annualExemptAmount",Messages("calc.annualExemptAmount.question"))
+
+    <button class="button" type="submit" id="continue-button">@Messages("calc.base.continue")</button>
+
+}
