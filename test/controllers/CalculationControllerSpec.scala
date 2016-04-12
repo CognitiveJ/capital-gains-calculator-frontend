@@ -209,9 +209,27 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
       "display the correct question heading" in new fakeRequestTo("allowance") {
         val result = CalculationController.annualExemptAmount(fakeRequest)
         val jsoupDoc = Jsoup.parse(bodyOf(result))
-        jsoupDoc.body.getElementById("question").text shouldEqual jsoupDoc.title shouldEqual Messages("calc.annualExemptAmount.question")
+        jsoupDoc.body.getElementsByTag("legend").text shouldEqual Messages("calc.annualExemptAmount.question")
       }
 
+      "Have an input box for the Annual Exempt Amount" in new fakeRequestTo("allowance") {
+        val result = CalculationController.annualExemptAmount(fakeRequest)
+        val jsoupDoc = Jsoup.parse(bodyOf(result))
+        jsoupDoc.body.getElementById("annualExemptAmount").tagName() shouldEqual "input"
+      }
+
+      "has a Continue button" in new fakeRequestTo("allowance") {
+        val result = CalculationController.annualExemptAmount(fakeRequest)
+        val jsoupDoc = Jsoup.parse(bodyOf(result))
+        jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+      }
+
+      "should contain a Read more sidebar with a link to CGT allowances" in new fakeRequestTo("allowance") {
+        val result = CalculationController.annualExemptAmount(fakeRequest)
+        val jsoupDoc = Jsoup.parse(bodyOf(result))
+        jsoupDoc.select("aside h2").text shouldBe Messages("calc.common.readMore")
+        jsoupDoc.select("aside a").text shouldBe Messages("calc.annualExemptAmount.link.one")
+      }
     }
 
     //############## Acquisition Value tests ######################
