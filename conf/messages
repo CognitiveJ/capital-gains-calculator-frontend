@@ -60,7 +60,7 @@ calc.personalAllowance.title = In the tax year when you stopped owning the prope
 calc.otherProperties.title = Did you sell or give away any other properties in that tax year?
 
 ## Annual Exempt Amount ##
-calc.annualExemptAmount.title = How much of your Capital Gains Tax allowance have you got left?
+calc.annualExemptAmount.question = How much of your Capital Gains Tax allowance have you got left?
 
 ## Acquisition Value ##
 calc.acquisitionValue.title = How much did you pay for the property?
