@@ -1,7 +1,7 @@
-@(fieldName: String, questionText: String, helpText: String = "")(implicit lang: play.api.i18n.Lang)
+@(fieldName: String, questionText: String, helpText: Option[String] = None)(implicit lang: play.api.i18n.Lang)
 
 <fieldset class="form-group">
     <legend>@questionText</legend>
-    <span class="form-hint">@helpText</span>
+    @if(helpText.isDefined) { <span class="form-hint">@helpText</span> }
     <input class="form-control" id="@fieldName" type="text" placeholder="£">
 </fieldset>
