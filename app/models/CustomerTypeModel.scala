@@ -21,5 +21,5 @@ import play.api.libs.json._
 case class CustomerTypeModel(customerType: String)
 
 object CustomerTypeModel {
-  implicit val format = Json.format[CustomerTypeModel]
+  implicit val formats = Json.format[CustomerTypeModel]
 }

@@ -20,9 +20,6 @@ import config.WSHttp
 import uk.gov.hmrc.http.cache.client.SessionCache
 import uk.gov.hmrc.play.config.{AppName, ServicesConfig}
 
-/**``
-  * Created by james on 16/03/16.
-  */
 object SessionCacheController extends SessionCache with ServicesConfig with AppName{
 
   override lazy val domain = getConfString("cachable.session-cache.domain", throw new Exception(s"Could not find config 'cachable.session-cache.domain'"))

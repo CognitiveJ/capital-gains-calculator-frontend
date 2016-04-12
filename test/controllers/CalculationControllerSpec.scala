@@ -16,14 +16,24 @@
 
 package controllers
 
-import play.api.http.Status
+import java.util.UUID
+
+import connectors.KeystoreConnector
+import models.CustomerTypeModel
+import org.mockito.Matchers
+import org.mockito.Mockito._
 import play.api.i18n.Messages
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.http.logging.SessionId
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import org.jsoup._
+import org.scalatest.mock.MockitoSugar
 
-class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
+import scala.concurrent.Future
+
+class CalculationControllerSpec extends UnitSpec with WithFakeApplication with MockitoSugar{
 
   val s = "Action(parser=BodyParser(anyContent))"
 
@@ -31,11 +41,21 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
     val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/" + url)
   }
 
+  val mockKeystoreConnector = mock[KeystoreConnector]
+  val TestCalculationController = new CalculationController {
+    override val keystoreConnector: KeystoreConnector = mockKeystoreConnector
+  }
+
+  implicit val hc = new HeaderCarrier(sessionId = Some(SessionId(UUID.randomUUID.toString)))
+
   "CapitalGainsCalculatorController methods " should {
 
     //################### Customer Type tests #######################
-    "return 200 from customer-type" in new fakeRequestTo("customer-type") {
-      val result = CalculationController.customerType(fakeRequest)
+    "return 200 from customer-type with a test model" in new fakeRequestTo("customer-type") {
+      val testCustomerTypeModel = new CustomerTypeModel("individual")
+      when(mockKeystoreConnector.fetchAndGetFormData[CustomerTypeModel](Matchers.anyString())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(Option(testCustomerTypeModel)))
+      val result = TestCalculationController.customerType(fakeRequest)
       status(result) shouldBe 200
     }
 

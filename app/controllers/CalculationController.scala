@@ -16,6 +16,7 @@
 
 package controllers
 
+import connectors.KeystoreConnector
 import forms.CustomerTypeForm.customerTypeForm
 import models.CustomerTypeModel
 import play.api.mvc.Action
@@ -24,14 +25,18 @@ import uk.gov.hmrc.play.frontend.controller.FrontendController
 import scala.concurrent.Future
 import views.html._
 
-object CalculationController extends CalculationController
+object CalculationController extends CalculationController {
+  val keystoreConnector = KeystoreConnector
+}
 
 trait CalculationController extends FrontendController {
 
+  val keystoreConnector: KeystoreConnector
+
   //################### Customer Type methods #######################
   val customerType = Action.async { implicit request =>
-    SessionCacheController.fetchAndGetEntry[CustomerTypeModel]("customerType").map {
-      case Some(data) => Ok(cgts.customerType(customerTypeForm))
+    keystoreConnector.fetchAndGetFormData[CustomerTypeModel]("customerType").map {
+      case Some(data) => Ok(cgts.customerType(customerTypeForm.fill(data)))
       case None => Ok(cgts.customerType(customerTypeForm))
     }
   }
