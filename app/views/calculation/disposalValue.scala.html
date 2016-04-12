@@ -1,10 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+@()(implicit request: Request[_])
+@import views.html.helpers._
 
-</body>
-</html>
+@main_template(Messages("calc.disposalValue.title")) {
+    <a class="link-back" href="@routes.CalculationController.improvements">@Messages("calc.base.back")</a>
+    <h1 class="heading-large">@Messages("calc.base.calculate.tax.heading")</h1>
+
+    @simpleInputMoney("disposalValue", Messages("calc.disposalValue.title"))
+
+    <button id="continue" class="button">@Messages("calc.base.button.continue")</button>
+}

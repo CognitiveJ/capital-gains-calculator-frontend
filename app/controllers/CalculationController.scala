@@ -96,7 +96,9 @@ trait CalculationController extends FrontendController {
   }
 
   //################### Other Reliefs methods #######################
-  val otherReliefs = TODO
+  val otherReliefs = Action.async { implicit request =>
+    Future.successful(Ok(cgts.otherReliefs()))
+  }
 
   //################### Summary Methods ##########################
   val summary = Action.async { implicit request =>
