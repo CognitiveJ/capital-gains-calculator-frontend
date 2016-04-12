@@ -50,7 +50,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
     "display the correct title for the customer-type page" in new fakeRequestTo("customer-type"){
       val result = CalculationController.customerType(fakeRequest)
       val jsoupDoc = Jsoup.parse(bodyOf(result))
-      jsoupDoc.title shouldEqual Messages("calc.customerType.title")
+      jsoupDoc.title shouldEqual Messages("calc.customerType.question")
     }
 
     "display the correct heading for the customer-type page" in new fakeRequestTo("customer-type") {
@@ -271,7 +271,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
     "display the correct title for the disposal-date page" in new fakeRequestTo("disposal-date"){
       val result = CalculationController.disposalDate(fakeRequest)
       val jsoupDoc = Jsoup.parse(bodyOf(result))
-      jsoupDoc.title shouldEqual Messages("calc.disposalDate.title")
+      jsoupDoc.title shouldEqual Messages("calc.disposalDate.question")
     }
 
     "display the correct heading for the disposal-date page" in new fakeRequestTo("disposal-date") {
@@ -283,7 +283,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
     "contain a simpleInlineDate with question When did you sign the contract that made someone else the owner?" in new fakeRequestTo("disposal-date") {
       val result = CalculationController.disposalDate(fakeRequest)
       val jsoupDoc = Jsoup.parse(bodyOf(result))
-      jsoupDoc.select("legend").text shouldEqual Messages("calc.disposalDate.title")
+      jsoupDoc.select("legend").text shouldEqual Messages("calc.disposalDate.question")
     }
 
     "contain a button with id equal to continue in disposal-date" in new fakeRequestTo("disposal-date") {
@@ -307,7 +307,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
     "contain the question How much did you sell or give away the property for?" in new fakeRequestTo("disposal-value") {
       val result = CalculationController.disposalValue(fakeRequest)
       val jsoupDoc = Jsoup.parse(bodyOf(result))
-      jsoupDoc.select("legend").text shouldEqual Messages("calc.disposalValue.title")
+      jsoupDoc.select("legend").text shouldEqual Messages("calc.disposalValue.question")
     }
 
     "contain a button with id equal to continue in disposal-value" in new fakeRequestTo("disposal-date") {
