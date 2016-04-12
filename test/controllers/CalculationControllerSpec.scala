@@ -89,6 +89,31 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
       charset(result) shouldBe Some("utf-8")
     }
 
+    "display the correct title for the disabled-trustee page" in new fakeRequestTo("disabled-trustee"){
+      val result = CalculationController.disabledTrustee(fakeRequest)
+      val jsoupDoc = Jsoup.parse(bodyOf(result))
+      jsoupDoc.title shouldEqual Messages("calc.disabledTrustee.question")
+    }
+
+    "display the correct heading for the disabled-trustee page" in new fakeRequestTo("disabled-trustee") {
+      val result = CalculationController.disabledTrustee(fakeRequest)
+      val jsoupDoc = Jsoup.parse(bodyOf(result))
+      jsoupDoc.body.getElementsByTag("H1").text shouldEqual Messages("calc.base.pageHeading")
+    }
+
+    "display Yes/No radio options on disabled-trustee page" in new fakeRequestTo("disabled-trustee"){
+      val result = CalculationController.disabledTrustee(fakeRequest)
+      val jsoupDoc = Jsoup.parse(bodyOf(result))
+      jsoupDoc.body.getElementById("isVulnerableYes").parent.text shouldEqual Messages("calc.base.yes")
+      jsoupDoc.body.getElementById("isVulnerableNo").parent.text shouldEqual Messages("calc.base.no")
+    }
+
+    "display a Continue button on disabled-trustee page" in new fakeRequestTo("disabled-trustee"){
+      val result = CalculationController.disabledTrustee(fakeRequest)
+      val jsoupDoc = Jsoup.parse(bodyOf(result))
+      jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+    }
+
     //################### Current Income tests #######################
     "be Action(parser=BodyParser(anyContent)) for currentIncome" in {
       val result = CalculationController.currentIncome.toString()
@@ -117,6 +142,36 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
       val result = CalculationController.otherProperties(fakeRequest)
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
+    }
+
+    "display the correct title for the other-properties page" in new fakeRequestTo("other-properties"){
+      val result = CalculationController.otherProperties(fakeRequest)
+      val jsoupDoc = Jsoup.parse(bodyOf(result))
+      jsoupDoc.title shouldEqual Messages("calc.otherProperties.title")
+    }
+
+    "display the correct heading for the other-properties page" in new fakeRequestTo("other-properties") {
+      val result = CalculationController.otherProperties(fakeRequest)
+      val jsoupDoc = Jsoup.parse(bodyOf(result))
+      jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+    }
+
+    "display the correct wording for radio option `Yes`" in new fakeRequestTo("other-properties"){
+      val result = CalculationController.otherProperties(fakeRequest)
+      val jsoupDoc = Jsoup.parse(bodyOf(result))
+      jsoupDoc.body.getElementById("otherPropertiesYes").parent.text shouldEqual Messages("calc.base.yes")
+    }
+
+    "display the correct wording for radio option `No`" in new fakeRequestTo("other-properties"){
+      val result = CalculationController.otherProperties(fakeRequest)
+      val jsoupDoc = Jsoup.parse(bodyOf(result))
+      jsoupDoc.body.getElementById("otherPropertiesNo").parent.text shouldEqual Messages("calc.base.no")
+    }
+
+    "contain a button with id equal to continue in other-properties" in new fakeRequestTo("other-properties") {
+      val result = CalculationController.otherProperties(fakeRequest)
+      val jsoupDoc = Jsoup.parse(bodyOf(result))
+      jsoupDoc.select("button#continue").text shouldEqual Messages("calc.base.continue")
     }
 
     //############## Annual Exempt Amount tests ######################

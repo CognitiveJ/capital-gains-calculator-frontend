@@ -15,6 +15,7 @@ calc.common.date.fields.year = Year
 calc.common.date.hint = For example, 4 9 2016
 calc.base.yes = Yes
 calc.base.no = No
+calc.base.back = Back
 
 ## Introduction ##
 calc.introduction.title = Introduction
@@ -48,7 +49,8 @@ calc.customerType.trustee = I was a trustee
 calc.customerType.personalRep = I was the executor of an estate
 
 ## Disabled Trustee ##
-calc.disabledTrustee.title = Are you a trustee for someone who’s vulnerable?
+calc.disabledTrustee.question = Are you a trustee for someone who’s vulnerable?
+calc.disabledTrustee.helptext = A person’s vulnerable if they’re disabled, or if they’re under 18 and their parents have died
 
 ## Current Income ##
 calc.currentIncome.title = In the tax year when you stopped owning the property, what was your total UK income?
