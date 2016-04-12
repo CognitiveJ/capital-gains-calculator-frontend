@@ -175,36 +175,6 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
     }
 
     //############## Annual Exempt Amount tests ######################
-    "return 200 for annual-exempt-amount" in new fakeRequestTo("annual-exempt-amount") {
-      val result = CalculationController.annualExemptAmount(fakeRequest)
-      status(result) shouldBe 200
-    }
-
-    "display the correct heading for the other-properties page" in new fakeRequestTo("other-properties") {
-      val result = CalculationController.otherProperties(fakeRequest)
-      val jsoupDoc = Jsoup.parse(bodyOf(result))
-      jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
-    }
-
-    "display the correct wording for radio option `Yes`" in new fakeRequestTo("other-properties"){
-      val result = CalculationController.otherProperties(fakeRequest)
-      val jsoupDoc = Jsoup.parse(bodyOf(result))
-      jsoupDoc.body.getElementById("otherPropertiesYes").parent.text shouldEqual Messages("calc.base.yes")
-    }
-
-    "display the correct wording for radio option `No`" in new fakeRequestTo("other-properties"){
-      val result = CalculationController.otherProperties(fakeRequest)
-      val jsoupDoc = Jsoup.parse(bodyOf(result))
-      jsoupDoc.body.getElementById("otherPropertiesNo").parent.text shouldEqual Messages("calc.base.no")
-    }
-
-    "contain a button with id equal to continue in other-properties" in new fakeRequestTo("other-properties") {
-      val result = CalculationController.otherProperties(fakeRequest)
-      val jsoupDoc = Jsoup.parse(bodyOf(result))
-      jsoupDoc.select("button#continue").text shouldEqual Messages("calc.base.continue")
-    }
-
-    //############## Annual Exempt Amount tests ######################
     "when calling the annualExemptAmount action" should {
 
       "return 200" in new fakeRequestTo("allowance") {
@@ -319,7 +289,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
     "contain a button with id equal to continue in disposal-date" in new fakeRequestTo("disposal-date") {
       val result = CalculationController.disposalDate(fakeRequest)
       val jsoupDoc = Jsoup.parse(bodyOf(result))
-      jsoupDoc.select("a#continue").text shouldEqual Messages("calc.base.continue")
+      jsoupDoc.select("button#continue").text shouldEqual Messages("calc.base.continue")
     }
 
     //################### Disposal Value tests #######################
@@ -344,18 +314,6 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
       val result = CalculationController.disposalValue(fakeRequest)
       val jsoupDoc = Jsoup.parse(bodyOf(result))
       jsoupDoc.select("button#continue").text shouldEqual Messages("calc.base.continue")
-    }
-
-    //################### Disposal Date tests #######################
-    "return 200 from disposal-date" in new fakeRequestTo("disposal-date") {
-      val result = CalculationController.disposalDate(fakeRequest)
-      status(result) shouldBe 200
-    }
-
-    "return HTML from disposal-date" in new fakeRequestTo("disposal-date"){
-      val result = CalculationController.disposalDate(fakeRequest)
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
     }
 
     //################### Acquisition Costs tests #######################
