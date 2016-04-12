@@ -14,12 +14,11 @@
 
     <div class="form-group">
         @govHelpers.inputRadioGroup(
-             field = customerTypeForm("customerType")
-            ,Seq(
+            field = customerTypeForm("customerType"),
+            Seq(
                 "individual"->Messages("calc.customerType.individual"),
                 "trustee"->Messages("calc.customerType.trustee"),
-                "personalRep"->Messages("calc.customerType.personalRep")
-            ),
+                "personalRep"->Messages("calc.customerType.personalRep")),
             '_legend -> Messages("calc.customerType.question"),
             '_labelAfter -> true,
             '_labelClass -> "block-label"
