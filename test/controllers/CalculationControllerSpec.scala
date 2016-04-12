@@ -144,7 +144,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
     "contain a button with id equal to continue in other-properties" in new fakeRequestTo("other-properties") {
       val result = CalculationController.otherProperties(fakeRequest)
       val jsoupDoc = Jsoup.parse(bodyOf(result))
-      jsoupDoc.select("a#continue").text shouldEqual Messages("calc.base.continue")
+      jsoupDoc.select("button#continue").text shouldEqual Messages("calc.base.continue")
     }
 
     //############## Annual Exempt Amount tests ######################
