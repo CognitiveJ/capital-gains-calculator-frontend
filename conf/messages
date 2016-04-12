@@ -4,6 +4,7 @@ calc.base.continue = Continue
 calc.base.taxStart = 6 April 2015
 calc.base.yes = Yes
 calc.base.no = No
+calc.base.back = Back
 
 ## Common ##
 date.fields.day = Day
