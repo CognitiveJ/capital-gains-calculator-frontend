@@ -15,6 +15,7 @@ calc.common.date.fields.year = Year
 calc.common.date.hint = For example, 4 9 2016
 calc.base.yes = Yes
 calc.base.no = No
+calc.base.back = Back
 
 ## Introduction ##
 calc.introduction.title = Introduction
