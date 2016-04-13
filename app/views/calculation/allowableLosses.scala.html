@@ -1,10 +1,30 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+@()(implicit request: Request[_])
 
-</body>
-</html>
+@import views.html.helpers._
+
+@hiddenYesNoContent = {
+    @simpleInputMoney("allowableLosses", Messages("calc.allowableLosses.question.two"))
+}
+
+@hiddenHelpTextContent = {
+    <p>@Messages("calc.allowableLosses.helpText.paragraph.one")</p>
+    <ul class="list list-bullet">
+        <li>@Messages("calc.allowableLosses.helpText.bullet.one")</li>
+        <li>@Messages("calc.allowableLosses.helpText.bullet.two")</li>
+        <li>@Messages("calc.allowableLosses.helpText.bullet.three")</li>
+    </ul>
+}
+
+@main_template(Messages("calc.allowableLosses.question.one")) {
+
+    <a id="link-back" class="link-back" href="@routes.CalculationController.entrepreneursRelief">Back</a>
+
+    <h1 class="heading-large">@Messages("calc.base.pageHeading")</h1>
+
+    @hiddenYesNoRadio("allowableLosses",Messages("calc.allowableLosses.question.one"),hiddenYesNoContent)
+
+    @hiddenHelpText("allowableLossesHiddenHelp",Messages("calc.allowableLosses.helpText.title"),hiddenHelpTextContent)
+
+    <button class="button" type="submit" id="continue-button">@Messages("calc.base.continue")</button>
+
+}

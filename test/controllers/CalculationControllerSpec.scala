@@ -209,7 +209,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
       "display the correct question heading" in new fakeRequestTo("allowance") {
         val result = CalculationController.annualExemptAmount(fakeRequest)
         val jsoupDoc = Jsoup.parse(bodyOf(result))
-        jsoupDoc.body.getElementsByTag("legend").text shouldEqual Messages("calc.annualExemptAmount.question")
+        jsoupDoc.body.getElementsByTag("label").text shouldEqual Messages("calc.annualExemptAmount.question")
       }
 
       "Have an input box for the Annual Exempt Amount" in new fakeRequestTo("allowance") {
@@ -307,7 +307,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
     "contain the question How much did you sell or give away the property for?" in new fakeRequestTo("disposal-value") {
       val result = CalculationController.disposalValue(fakeRequest)
       val jsoupDoc = Jsoup.parse(bodyOf(result))
-      jsoupDoc.select("legend").text shouldEqual Messages("calc.disposalValue.title")
+      jsoupDoc.select("label").text shouldEqual Messages("calc.disposalValue.title")
     }
 
     "contain a button with id equal to continue in disposal-value" in new fakeRequestTo("disposal-date") {
@@ -352,17 +352,73 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
       charset(result) shouldBe Some("utf-8")
     }
 
+
     //################### Allowable Losses tests #######################
-    "return 200 when sending a GET request `/calculate-your-capital-gains/allowable-losses`" in new fakeRequestTo("allowable-losses") {
-      val result = CalculationController.allowableLosses(fakeRequest)
-      status(result) shouldBe 200
+    "When calling the allowableLosses action" should {
+
+      "return 200" in new fakeRequestTo("allowable-losses") {
+        val result = CalculationController.allowableLosses(fakeRequest)
+        status(result) shouldBe 200
+      }
+
+      "return HTML" in new fakeRequestTo("allowable-losses") {
+        val result = CalculationController.allowableLosses(fakeRequest)
+        contentType(result) shouldBe Some("text/html")
+        charset(result) shouldBe Some("utf-8")
+      }
+
+      "have a back button" in new fakeRequestTo("allowable-losses") {
+        val result = CalculationController.allowableLosses(fakeRequest)
+        val jsoupDoc = Jsoup.parse(bodyOf(result))
+        jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+      }
+
+      "display the correct title" in new fakeRequestTo("allowable-losses") {
+        val result = CalculationController.allowableLosses(fakeRequest)
+        val jsoupDoc = Jsoup.parse(bodyOf(result))
+        jsoupDoc.title shouldEqual Messages("calc.allowableLosses.question.one")
+      }
+
+      "display the correct heading" in new fakeRequestTo("allowable-losses") {
+        val result = CalculationController.allowableLosses(fakeRequest)
+        val jsoupDoc = Jsoup.parse(bodyOf(result))
+        jsoupDoc.body.getElementsByTag("H1").text shouldEqual Messages("calc.base.pageHeading")
+      }
+
+      "display hidden Yes No Radio helper" in new fakeRequestTo("allowable-losses") {
+        val result = CalculationController.allowableLosses(fakeRequest)
+        val jsoupDoc = Jsoup.parse(bodyOf(result))
+        jsoupDoc.body.getElementById("allowableLossesYes").parent.text shouldBe Messages("calc.base.yes")
+        jsoupDoc.body.getElementById("allowableLossesNo").parent.text shouldBe Messages("calc.base.no")
+        jsoupDoc.body.getElementsByTag("legend").text shouldBe Messages("calc.allowableLosses.question.one")
+      }
+
+      "Display a monetary input box for the allowable losses with correct question" in new fakeRequestTo("allowable-losses") {
+        val result = CalculationController.allowableLosses(fakeRequest)
+        val jsoupDoc = Jsoup.parse(bodyOf(result))
+        jsoupDoc.body.getElementById("allowableLosses").tagName shouldEqual "input"
+        jsoupDoc.select("label[for=allowableLosses]").text shouldEqual Messages("calc.allowableLosses.question.two")
+      }
+
+      "have a hidden help text section with correct title and content" in new fakeRequestTo("allowable-losses") {
+        val result = CalculationController.allowableLosses(fakeRequest)
+        val jsoupDoc = Jsoup.parse(bodyOf(result))
+        jsoupDoc.select("div#allowableLossesHiddenHelp").text should
+          include (Messages("calc.allowableLosses.helpText.title"))
+          include (Messages("calc.allowableLosses.helpText.paragraph.one"))
+          include (Messages("calc.allowableLosses.helpText.bullet.one"))
+          include (Messages("calc.allowableLosses.helpText.bullet.two"))
+          include (Messages("calc.allowableLosses.helpText.bullet.three"))
+      }
+
+      "has a Continue button" in new fakeRequestTo("allowable-losses") {
+        val result = CalculationController.allowableLosses(fakeRequest)
+        val jsoupDoc = Jsoup.parse(bodyOf(result))
+        jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+      }
     }
 
-    "return HTML when sending a GET to `/calculate-your-capital-gains/allowable-losses`" in new fakeRequestTo("allowable-losses"){
-      val result = CalculationController.allowableLosses(fakeRequest)
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
-    }
+
 
     //################### Other Reliefs tests #######################
     "return 200 when sending a GET request `/calculate-your-capital-gains/other-reliefs`" in new fakeRequestTo("other-reliefs") {
