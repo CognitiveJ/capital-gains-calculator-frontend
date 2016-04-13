@@ -433,6 +433,22 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
         "have the heading 'Calculate your tax (non-residents)'" in {
           DisposalCostsTestDataItem.jsoupDoc.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
         }
+
+        "have a monetary field that" should {
+
+          "have the title 'How much did you pay in costs when you became the property owner?'" in {
+            DisposalCostsTestDataItem.jsoupDoc.select("label[for=disposalCosts]").text shouldEqual Messages("calc.disposalCosts.question")
+          }
+
+          "have the help text 'Costs include agent fees, legal fees and surveys'" in {
+            DisposalCostsTestDataItem.jsoupDoc.select("span.form-hint").text shouldEqual Messages("calc.disposalCosts.helpText")
+          }
+
+          "have an input box for the disposal costs" in {
+            DisposalCostsTestDataItem.jsoupDoc.getElementById("disposalCosts").tagName shouldBe "input"
+          }
+
+        }
       }
     }
 

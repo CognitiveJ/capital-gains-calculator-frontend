@@ -82,6 +82,7 @@ calc.acquisitionCosts.question = How much did you pay in costs when you became t
 
 ## Disposal Costs ##
 calc.disposalCosts.question = How much did you pay in costs when you stopped being the property owner?
+calc.disposalCosts.helpText = Costs include agent fees, legal fees and surveys
 
 ## Entrepreneurs Relief ##
 calc.entrepreneursRelief.question = Are you claiming Entrepreneurs' Relief?
