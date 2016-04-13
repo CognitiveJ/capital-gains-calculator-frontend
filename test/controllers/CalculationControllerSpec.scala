@@ -248,162 +248,229 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
         }
       }
     }
-//
-//    //############## Acquisition Value tests ######################
-//    "return 200 when sending a GET request `/calculate-your-capital-gains/acquisition-value`" in new fakeRequestTo("acquisition-value") {
-//      val result = CalculationController.acquisitionValue(fakeRequest)
-//      status(result) shouldBe 200
-//    }
-//
-//    "return HTML when sending a GET request `/calculate-your-capital-gains/acquisition-value`" in new fakeRequestTo("acquisition-value") {
-//      val result = CalculationController.acquisitionValue(fakeRequest)
-//      contentType(result) shouldBe Some("text/html")
-//      charset(result) shouldBe Some("utf-8")
-//    }
-//
-//    //################### Improvements tests #######################
-//    "return 200 when sending a GET to `/calculate-your-capital-gains/improvements`" in new fakeRequestTo("improvements") {
-//      val result = CalculationController.improvements(fakeRequest)
-//      status(result) shouldBe 200
-//    }
-//
-//    "return HTML when sending a GET to `/calculate-your-capital-gains/improvements`" in new fakeRequestTo("improvements"){
-//      val result = CalculationController.improvements(fakeRequest)
-//      contentType(result) shouldBe Some("text/html")
-//      charset(result) shouldBe Some("utf-8")
-//    }
-//
-//    //################### Disposal Date tests #######################
-//    "return 200 when sending a GET to `/calculate-your-capital-gains/disposal-date`" in new fakeRequestTo("disposal-date") {
-//      val result = CalculationController.disposalDate(fakeRequest)
-//      status(result) shouldBe 200
-//    }
-//
-//    "return HTML when sending a GET to `/calculate-your-capital-gains/disposal-date`" in new fakeRequestTo("disposal-date"){
-//      val result = CalculationController.disposalDate(fakeRequest)
-//      contentType(result) shouldBe Some("text/html")
-//      charset(result) shouldBe Some("utf-8")
-//    }
-//
-//    "display the correct title for the disposal-date page" in new fakeRequestTo("disposal-date"){
-//      val result = CalculationController.disposalDate(fakeRequest)
-//      val jsoupDoc = Jsoup.parse(bodyOf(result))
-//      jsoupDoc.title shouldEqual Messages("calc.disposalDate.question")
-//    }
-//
-//    "display the correct heading for the disposal-date page" in new fakeRequestTo("disposal-date") {
-//      val result = CalculationController.disposalDate(fakeRequest)
-//      val jsoupDoc = Jsoup.parse(bodyOf(result))
-//      jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
-//    }
-//
-//    "contain a simpleInlineDate with question When did you sign the contract that made someone else the owner?" in new fakeRequestTo("disposal-date") {
-//      val result = CalculationController.disposalDate(fakeRequest)
-//      val jsoupDoc = Jsoup.parse(bodyOf(result))
-//      jsoupDoc.select("legend").text shouldEqual Messages("calc.disposalDate.question")
-//    }
-//
-//    "contain a button with id equal to continue in disposal-date" in new fakeRequestTo("disposal-date") {
-//      val result = CalculationController.disposalDate(fakeRequest)
-//      val jsoupDoc = Jsoup.parse(bodyOf(result))
-//      jsoupDoc.select("button#continue").text shouldEqual Messages("calc.base.continue")
-//    }
-//
-//    //################### Disposal Value tests #######################
-//    "return 200 from disposal-value" in new fakeRequestTo("disposal-value") {
-//      val result = CalculationController.disposalValue(fakeRequest)
-//      status(result) shouldBe 200
-//    }
-//
-//    "return HTML from disposal-value" in new fakeRequestTo("disposal-value") {
-//      val result = CalculationController.disposalValue(fakeRequest)
-//      contentType(result) shouldBe Some("text/html")
-//      charset(result) shouldBe Some("utf-8")
-//    }
-//
-//    "contain the question How much did you sell or give away the property for?" in new fakeRequestTo("disposal-value") {
-//      val result = CalculationController.disposalValue(fakeRequest)
-//      val jsoupDoc = Jsoup.parse(bodyOf(result))
-//      jsoupDoc.select("legend").text shouldEqual Messages("calc.disposalValue.question")
-//    }
-//
-//    "contain a button with id equal to continue in disposal-value" in new fakeRequestTo("disposal-date") {
-//      val result = CalculationController.disposalValue(fakeRequest)
-//      val jsoupDoc = Jsoup.parse(bodyOf(result))
-//      jsoupDoc.select("button#continue").text shouldEqual Messages("calc.base.continue")
-//    }
-//
-//    //################### Acquisition Costs tests #######################
-//    "return 200 from acquisition-costs" in new fakeRequestTo("acquisition-costs") {
-//      val result = CalculationController.acquisitionCosts(fakeRequest)
-//      status(result) shouldBe 200
-//    }
-//
-//    "return HTML from acquisition-costs" in new fakeRequestTo("acquisition-costs") {
-//      val result = CalculationController.acquisitionCosts(fakeRequest)
-//      contentType(result) shouldBe Some("text/html")
-//      charset(result) shouldBe Some("utf-8")
-//    }
-//
-//    //################### Disposal Costs tests #######################
-//    "return 200 from disposal-costs" in new fakeRequestTo("disposal-costs") {
-//      val result = CalculationController.disposalCosts(fakeRequest)
-//      status(result) shouldBe 200
-//    }
-//
-//    "return HTML from disposal-costs" in new fakeRequestTo("disposal-costs"){
-//      val result = CalculationController.disposalCosts(fakeRequest)
-//      contentType(result) shouldBe Some("text/html")
-//      charset(result) shouldBe Some("utf-8")
-//    }
-//
-//    //################### Entrepreneurs Relief tests #######################
-//    "return 200 from entrepreneurs-relief" in new fakeRequestTo("entrepreneurs-relief") {
-//      val result = CalculationController.entrepreneursRelief(fakeRequest)
-//      status(result) shouldBe 200
-//    }
-//
-//    "return HTML from entrepreneurs-relief" in new fakeRequestTo("entrepreneurs-relief"){
-//      val result = CalculationController.entrepreneursRelief(fakeRequest)
-//      contentType(result) shouldBe Some("text/html")
-//      charset(result) shouldBe Some("utf-8")
-//    }
-//
-//    //################### Allowable Losses tests #######################
-//    "return 200 when sending a GET request `/calculate-your-capital-gains/allowable-losses`" in new fakeRequestTo("allowable-losses") {
-//      val result = CalculationController.allowableLosses(fakeRequest)
-//      status(result) shouldBe 200
-//    }
-//
-//    "return HTML when sending a GET to `/calculate-your-capital-gains/allowable-losses`" in new fakeRequestTo("allowable-losses"){
-//      val result = CalculationController.allowableLosses(fakeRequest)
-//      contentType(result) shouldBe Some("text/html")
-//      charset(result) shouldBe Some("utf-8")
-//    }
-//
-//    //################### Other Reliefs tests #######################
-//    "return 200 when sending a GET request `/calculate-your-capital-gains/other-reliefs`" in new fakeRequestTo("other-reliefs") {
-//      val result = CalculationController.otherReliefs(fakeRequest)
-//      status(result) shouldBe 200
-//    }
-//
-//    "return HTML when sending a GET request `/calculate-your-capital-gains/other-reliefs`" in new fakeRequestTo("other-reliefs") {
-//      val result = CalculationController.otherReliefs(fakeRequest)
-//      contentType(result) shouldBe Some("text/html")
-//    }
-//
-//    //################### Summary tests #######################
-//    "CalculationController.summary" should {
-//      "return 200 from summary" in new fakeRequestTo("summary") {
-//        val result = CalculationController.summary(fakeRequest)
-//        status(result) shouldBe 200
-//      }
-//
-//      "return HTML from summary" in new fakeRequestTo("summary") {
-//        val result = CalculationController.summary(fakeRequest)
-//        contentType(result) shouldBe Some("text/html")
-//        charset(result) shouldBe Some("utf-8")
-//      }
-//    }
+
+    //############## Acquisition Value tests ######################
+    "In CalculationController calling the .acquisitionValue action " should {
+
+      object AcquisitonValueTestDataItem extends fakeRequestTo("acquisition-value", CalculationController.acquisitionValue)
+
+      "return a 200" in {
+        status(AcquisitonValueTestDataItem.result) shouldBe 200
+      }
+
+      "return some HTML that" should {
+
+        "contain some text and use the character set utf-8" in {
+          contentType(AcquisitonValueTestDataItem.result) shouldBe Some("text/html")
+          charset(AcquisitonValueTestDataItem.result) shouldBe Some("utf-8")
+        }
+      }
+    }
+
+    //################### Improvements tests #######################
+    "In CalculationController calling the .improvements action " should {
+
+      object ImprovementsTestDataItem extends fakeRequestTo("improvements", CalculationController.improvements)
+
+      "return a 200" in {
+        status(ImprovementsTestDataItem.result) shouldBe 200
+      }
+
+      "return some HTML that" should {
+
+        "contain some text and use the character set utf-8" in {
+          contentType(ImprovementsTestDataItem.result) shouldBe Some("text/html")
+          charset(ImprovementsTestDataItem.result) shouldBe Some("utf-8")
+        }
+      }
+    }
+
+    //################### Disposal Date tests #######################
+    "In CalculationController calling the .disposalDate action " should {
+
+      object DisposalDateTestDataItem extends fakeRequestTo("disposal-date", CalculationController.disposalDate)
+
+      "return a 200" in {
+        status(DisposalDateTestDataItem.result) shouldBe 200
+      }
+
+      "return some HTML that" should {
+
+        "contain some text and use the character set utf-8" in {
+          contentType(DisposalDateTestDataItem.result) shouldBe Some("text/html")
+          charset(DisposalDateTestDataItem.result) shouldBe Some("utf-8")
+        }
+
+        "have the title 'When did you sign the contract that made someone else the owner?'" in {
+          DisposalDateTestDataItem.jsoupDoc.title shouldEqual Messages("calc.disposalDate.question")
+        }
+
+        "have the heading Calculate your tax (non-residents) " in {
+          DisposalDateTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+        }
+
+        "have a 'Back' link " in {
+          DisposalDateTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+        }
+
+        "have the question 'Who owned the property?' as the legend of the input" in {
+          DisposalDateTestDataItem.jsoupDoc.body.getElementsByTag("legend").text shouldEqual Messages("calc.disposalDate.question")
+        }
+
+        "display a 'Continue' button " in {
+          DisposalDateTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+        }
+      }
+    }
+
+    //################### Disposal Value tests #######################
+    "In CalculationController calling the .disposalValue action " should {
+
+      object DisposalValueTestDataItem extends fakeRequestTo("disposal-value", CalculationController.disposalValue)
+
+      "return a 200" in {
+        status(DisposalValueTestDataItem.result) shouldBe 200
+      }
+
+      "return some HTML that" should {
+
+        "contain some text and use the character set utf-8" in {
+          contentType(DisposalValueTestDataItem.result) shouldBe Some("text/html")
+          charset(DisposalValueTestDataItem.result) shouldBe Some("utf-8")
+        }
+
+        "have the title 'How much did you sell or give away the property for?'" in {
+          DisposalValueTestDataItem.jsoupDoc.title shouldEqual Messages("calc.disposalValue.question")
+        }
+
+        "have the heading Calculate your tax (non-residents) " in {
+          DisposalValueTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+        }
+
+        "have a 'Back' link " in {
+          DisposalValueTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+        }
+
+        "have the question 'How much did you sell or give away the property for?' as the legend of the input" in {
+          DisposalValueTestDataItem.jsoupDoc.body.getElementsByTag("legend").text shouldEqual Messages("calc.disposalValue.question")
+        }
+
+        "display an input box for the Annual Exempt Amount" in {
+          DisposalValueTestDataItem.jsoupDoc.body.getElementById("disposalValue").tagName() shouldEqual "input"
+        }
+
+        "display a 'Continue' button " in {
+          DisposalValueTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+        }
+      }
+    }
+
+    //################### Acquisition Costs tests #######################
+    "In CalculationController calling the .acquisitionCosts action " should {
+
+      object AcquisitionCostsTestDataItem extends fakeRequestTo("acquisition-costs", CalculationController.acquisitionCosts)
+
+      "return a 200" in {
+        status(AcquisitionCostsTestDataItem.result) shouldBe 200
+      }
+
+      "return some HTML that" should {
+
+        "contain some text and use the character set utf-8" in {
+          contentType(AcquisitionCostsTestDataItem.result) shouldBe Some("text/html")
+          charset(AcquisitionCostsTestDataItem.result) shouldBe Some("utf-8")
+        }
+      }
+    }
+
+    //################### Disposal Costs tests #######################
+    "In CalculationController calling the .disposalCosts action " should {
+
+      object DisposalCostsTestDataItem extends fakeRequestTo("disposal-costs", CalculationController.disposalCosts)
+
+      "return a 200" in {
+        status(DisposalCostsTestDataItem.result) shouldBe 200
+      }
+
+      "return some HTML that" should {
+
+        "contain some text and use the character set utf-8" in {
+          contentType(DisposalCostsTestDataItem.result) shouldBe Some("text/html")
+          charset(DisposalCostsTestDataItem.result) shouldBe Some("utf-8")
+        }
+      }
+    }
+
+    //################### Entrepreneurs Relief tests #######################
+    "In CalculationController calling the .entrepreneursRelief action " should {
+
+      object EntrepreneursReliefTestDataItem extends fakeRequestTo("entrepreneurs-relief", CalculationController.entrepreneursRelief)
+
+      "return a 200" in {
+        status(EntrepreneursReliefTestDataItem.result) shouldBe 200
+      }
+
+      "return some HTML that" should {
+
+        "contain some text and use the character set utf-8" in {
+          contentType(EntrepreneursReliefTestDataItem.result) shouldBe Some("text/html")
+          charset(EntrepreneursReliefTestDataItem.result) shouldBe Some("utf-8")
+        }
+      }
+    }
+
+    //################### Allowable Losses tests #######################
+    "In CalculationController calling the .allowableLosses action " should {
+
+      object AllowableLossesTestDataItem extends fakeRequestTo("allowable-losses", CalculationController.allowableLosses)
+
+      "return a 200" in {
+        status(AllowableLossesTestDataItem.result) shouldBe 200
+      }
+
+      "return some HTML that" should {
+
+        "contain some text and use the character set utf-8" in {
+          contentType(AllowableLossesTestDataItem.result) shouldBe Some("text/html")
+          charset(AllowableLossesTestDataItem.result) shouldBe Some("utf-8")
+        }
+      }
+    }
+
+    //################### Other Reliefs tests #######################
+    "In CalculationController calling the .otherReliefs action " should {
+
+      object OtherReliefsTestDataItem extends fakeRequestTo("other-reliefs", CalculationController.otherReliefs)
+
+      "return a 200" in {
+        status(OtherReliefsTestDataItem.result) shouldBe 200
+      }
+
+      "return some HTML that" should {
+
+        "contain some text and use the character set utf-8" in {
+          contentType(OtherReliefsTestDataItem.result) shouldBe Some("text/html")
+          charset(OtherReliefsTestDataItem.result) shouldBe Some("utf-8")
+        }
+      }
+    }
+
+    //################### Summary tests #######################
+    "In CalculationController calling the .summary action " should {
+
+      object SummaryTestDataItem extends fakeRequestTo("summary", CalculationController.summary)
+
+      "return a 200" in {
+        status(SummaryTestDataItem.result) shouldBe 200
+      }
+
+      "return some HTML that" should {
+
+        "contain some text and use the character set utf-8" in {
+          contentType(SummaryTestDataItem.result) shouldBe Some("text/html")
+          charset(SummaryTestDataItem.result) shouldBe Some("utf-8")
+        }
+      }
+    }
   }
 }
