@@ -282,17 +282,56 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
 
 
     //################### Improvements tests #######################
-    "return 200 when sending a GET to `/calculate-your-capital-gains/improvements`" in new fakeRequestTo("improvements") {
-      val result = CalculationController.improvements(fakeRequest)
-      status(result) shouldBe 200
-    }
+    "In CalculationController calling the .improvements action " should {
 
-    "return HTML when sending a GET to `/calculate-your-capital-gains/improvements`" in new fakeRequestTo("improvements"){
-      val result = CalculationController.improvements(fakeRequest)
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
-    }
+      object ImprovementsTestDataItem extends fakeRequestTo("disabled-trustee")
 
+      "return a 200" in new fakeRequestTo("improvements") {
+        val result = CalculationController.improvements(fakeRequest)
+        status(result) shouldBe 200
+      }
+
+      "return some HTML that" should {
+
+        "contain some text and use the character set utf-8" in new fakeRequestTo("improvements") {
+          val result = CalculationController.improvements(fakeRequest)
+          contentType(result) shouldBe Some("text/html")
+          charset(result) shouldBe Some("utf-8")
+        }
+
+        "have the title 'Who owned the property?'" in new fakeRequestTo("improvements"){
+          val result = CalculationController.improvements(fakeRequest)
+          val jsoupDoc = Jsoup.parse(bodyOf(result))
+          jsoupDoc.title shouldEqual Messages("calc.improvements.title")
+        }
+
+        "have the heading Calculate your tax (non-residents)" in new fakeRequestTo("improvements") {
+          val result = CalculationController.improvements(fakeRequest)
+          val jsoupDoc = Jsoup.parse(bodyOf(result))
+          jsoupDoc.body.getElementsByTag("H1").text shouldEqual Messages("calc.base.pageHeading")
+        }
+
+        "display the correct wording for radio option `yes`" in new fakeRequestTo("improvements"){
+          val result = CalculationController.improvements(fakeRequest)
+          val jsoupDoc = Jsoup.parse(bodyOf(result))
+          jsoupDoc.body.getElementById("improvementsCheckYes").parent.text shouldEqual Messages("calc.base.yes")
+        }
+
+        "display the correct wording for radio option `no`" in new fakeRequestTo("improvements"){
+          val result = CalculationController.improvements(fakeRequest)
+          val jsoupDoc = Jsoup.parse(bodyOf(result))
+          jsoupDoc.body.getElementById("improvementsCheckNo").parent.text shouldEqual Messages("calc.base.no")
+        }
+
+        "contain a hidden component with an input box" in new fakeRequestTo("improvements") {
+          val result = CalculationController.improvements(fakeRequest)
+          val jsoupDoc = Jsoup.parse(bodyOf(result))
+          print(jsoupDoc.body.getElementById("improvements").parent.parent.attr("style"))
+          jsoupDoc.body.getElementById("improvements").parent.parent.id shouldBe "hidden"
+        }
+
+      }
+    }
     //################### Disposal Date tests #######################
     "return 200 when sending a GET to `/calculate-your-capital-gains/disposal-date`" in new fakeRequestTo("disposal-date") {
       val result = CalculationController.disposalDate(fakeRequest)
