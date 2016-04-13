@@ -18,375 +18,380 @@ package controllers
 
 import play.api.http.Status
 import play.api.i18n.Messages
+import play.api.mvc.{AnyContent, Action}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import org.jsoup._
-import play.mvc.Action
-import play.mvc.BodyParser.AnyContent
 
 class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
 
   val s = "Action(parser=BodyParser(anyContent))"
 
-  class fakeRequestTo(url : String) {
+  class fakeRequestTo(url : String, controllerAction : Action[AnyContent]) {
     val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/" + url)
+    val result = controllerAction(fakeRequest)
+    val jsoupDoc = Jsoup.parse(bodyOf(result))
   }
 
-  "CalculationController methods " should {
+  //################### Customer Type tests #######################
+  "In CalculationController calling the .customerType action " should {
 
-    //################### Customer Type tests #######################
-    "return 200 from customer-type" in new fakeRequestTo("customer-type") {
-      val result = CalculationController.customerType(fakeRequest)
-      status(result) shouldBe 200
+    object CustomerTypeTestDataItem extends fakeRequestTo("customer-type", CalculationController.customerType)
+
+    "return a 200" in {
+      status(CustomerTypeTestDataItem.result) shouldBe 200
     }
 
-    "return HTML from customer-type" in new fakeRequestTo("customer-type"){
-      val result = CalculationController.customerType(fakeRequest)
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
+    "return some HTML that" should {
+
+      "contain some text and use the character set utf-8" in {
+        contentType(CustomerTypeTestDataItem.result) shouldBe Some("text/html")
+        charset(CustomerTypeTestDataItem.result) shouldBe Some("utf-8")
+      }
+
+      "have the title 'Who owned the property?'" in {
+        CustomerTypeTestDataItem.jsoupDoc.title shouldEqual Messages("calc.customerType.question")
+      }
+
+      "have the heading Calculate your tax (non-residents) " in {
+        CustomerTypeTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+      }
+
+      "display a radio button with the option `individual`" in {
+        CustomerTypeTestDataItem.jsoupDoc.body.getElementById("customerType-individual").parent.text shouldEqual Messages("calc.customerType.individual")
+      }
+
+      "display a radio button with the option `trustee`" in {
+        CustomerTypeTestDataItem.jsoupDoc.body.getElementById("customerType-trustee").parent.text shouldEqual Messages("calc.customerType.trustee")
+      }
+
+      "display a radio button with the option `personal representative`" in {
+        CustomerTypeTestDataItem.jsoupDoc.body.getElementById("customerType-personalrep").parent.text shouldEqual Messages("calc.customerType.personalRep")
+      }
+
+      "display a 'Continue' button " in {
+        CustomerTypeTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+      }
+    }
+  }
+
+  //################### Disabled Trustee tests #######################
+  "In CalculationController calling the .disabledTrustee action " should {
+
+    object DisabledTrusteeTestDataItem extends fakeRequestTo("disabled-trustee", CalculationController.disabledTrustee)
+
+    "return a 200" in {
+      status(DisabledTrusteeTestDataItem.result) shouldBe 200
     }
 
-    "display the correct title for the customer-type page" in new fakeRequestTo("customer-type"){
-      val result = CalculationController.customerType(fakeRequest)
-      val jsoupDoc = Jsoup.parse(bodyOf(result))
-      jsoupDoc.title shouldEqual Messages("calc.customerType.question")
-    }
+    "return some HTML that" should {
 
-    "display the correct heading for the customer-type page" in new fakeRequestTo("customer-type") {
-      val result = CalculationController.customerType(fakeRequest)
-      val jsoupDoc = Jsoup.parse(bodyOf(result))
-      jsoupDoc.body.getElementsByTag("H1").text shouldEqual Messages("calc.base.pageHeading")
-    }
+      "contain some text and use the character set utf-8" in {
+        contentType(DisabledTrusteeTestDataItem.result) shouldBe Some("text/html")
+        charset(DisabledTrusteeTestDataItem.result) shouldBe Some("utf-8")
+      }
 
-    "display the correct wording for radio option `individual`" in new fakeRequestTo("customer-type"){
-      val result = CalculationController.customerType(fakeRequest)
-      val jsoupDoc = Jsoup.parse(bodyOf(result))
-      jsoupDoc.body.getElementById("customerType-individual").parent.text shouldEqual Messages("calc.customerType.individual")
-    }
+      "have the title Are you a trustee for someone who’s vulnerable?" in {
+        DisabledTrusteeTestDataItem.jsoupDoc.title shouldEqual Messages("calc.disabledTrustee.question")
+      }
 
-    "display the correct wording for radio option `trustee`" in new fakeRequestTo("customer-type"){
-      val result = CalculationController.customerType(fakeRequest)
-      val jsoupDoc = Jsoup.parse(bodyOf(result))
-      jsoupDoc.body.getElementById("customerType-trustee").parent.text shouldEqual Messages("calc.customerType.trustee")
-    }
+      "have the heading Calculate your tax (non-residents) " in {
+        DisabledTrusteeTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+      }
 
-    "display the correct wording for radio option `Personal Representative`" in new fakeRequestTo("customer-type"){
-      val result = CalculationController.customerType(fakeRequest)
-      val jsoupDoc = Jsoup.parse(bodyOf(result))
-      jsoupDoc.body.getElementById("customerType-personalrep").parent.text shouldEqual Messages("calc.customerType.personalRep")
-    }
+      "display a radio button with the option 'Yes'" in {
+        DisabledTrusteeTestDataItem.jsoupDoc.body.getElementById("isVulnerableYes").parent.text shouldEqual Messages("calc.base.yes")
+      }
 
-    //################### Disabled Trustee tests #######################
-    "return 200 from disabled-trustee" in new fakeRequestTo("disabled-trustee") {
-      val result = CalculationController.disabledTrustee(fakeRequest)
-      status(result) shouldBe 200
-    }
+      "display a radio button with the option 'No'" in {
+        DisabledTrusteeTestDataItem.jsoupDoc.body.getElementById("isVulnerableNo").parent.text shouldEqual Messages("calc.base.no")
+      }
 
-    "return HTML from disabled-trustee" in new fakeRequestTo("disabled-trustee"){
-      val result = CalculationController.disabledTrustee(fakeRequest)
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
-    }
-
-    "display the correct title for the disabled-trustee page" in new fakeRequestTo("disabled-trustee"){
-      val result = CalculationController.disabledTrustee(fakeRequest)
-      val jsoupDoc = Jsoup.parse(bodyOf(result))
-      jsoupDoc.title shouldEqual Messages("calc.disabledTrustee.question")
-    }
-
-    "display the correct heading for the disabled-trustee page" in new fakeRequestTo("disabled-trustee") {
-      val result = CalculationController.disabledTrustee(fakeRequest)
-      val jsoupDoc = Jsoup.parse(bodyOf(result))
-      jsoupDoc.body.getElementsByTag("H1").text shouldEqual Messages("calc.base.pageHeading")
-    }
-
-    "display Yes/No radio options on disabled-trustee page" in new fakeRequestTo("disabled-trustee"){
-      val result = CalculationController.disabledTrustee(fakeRequest)
-      val jsoupDoc = Jsoup.parse(bodyOf(result))
-      jsoupDoc.body.getElementById("isVulnerableYes").parent.text shouldEqual Messages("calc.base.yes")
-      jsoupDoc.body.getElementById("isVulnerableNo").parent.text shouldEqual Messages("calc.base.no")
-    }
-
-    "display a Continue button on disabled-trustee page" in new fakeRequestTo("disabled-trustee"){
-      val result = CalculationController.disabledTrustee(fakeRequest)
-      val jsoupDoc = Jsoup.parse(bodyOf(result))
-      jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+      "display a 'Continue' button " in {
+        DisabledTrusteeTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+      }
     }
 
     //################### Current Income tests #######################
-    "be Action(parser=BodyParser(anyContent)) for currentIncome" in {
-      val result = CalculationController.currentIncome.toString()
-      result shouldBe s
+    "In CalculationController calling the .currentIncome action " should {
+
+      "be Action(parser=BodyParser(anyContent)) for currentIncome" in {
+        val result = CalculationController.currentIncome.toString()
+        result shouldBe s
+      }
     }
 
     //############## Personal Allowance tests ######################
-    "return 200 from personal-allowance" in new fakeRequestTo("personal-allowance") {
-      val result = CalculationController.personalAllowance(fakeRequest)
-      status(result) shouldBe 200
-    }
+    "In CalculationController calling the .personalAllowance action " should {
 
-    "return HTML from personal-allowance" in new fakeRequestTo("personal-allowance"){
-      val result = CalculationController.personalAllowance(fakeRequest)
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
+      object PersonalAllowanceTestDataItem extends fakeRequestTo("personal-allowance", CalculationController.personalAllowance)
+
+      "return a 200" in {
+        status(PersonalAllowanceTestDataItem.result) shouldBe 200
+      }
+
+      "return some HTML that" should {
+
+        "contain some text and use the character set utf-8" in {
+          contentType(PersonalAllowanceTestDataItem.result) shouldBe Some("text/html")
+          charset(PersonalAllowanceTestDataItem.result) shouldBe Some("utf-8")
+        }
+      }
     }
 
     //############## Other Properties tests ######################
-    "return 200 from other-properties" in new fakeRequestTo("other-properties") {
-      val result = CalculationController.otherProperties(fakeRequest)
-      status(result) shouldBe 200
-    }
+    "In CalculationController calling the .otherProperties action " should {
 
-    "return HTML from other-properties" in new fakeRequestTo("other-properties"){
-      val result = CalculationController.otherProperties(fakeRequest)
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
-    }
+      object OtherPropertiesTestDataItem extends fakeRequestTo("other-properties", CalculationController.otherProperties)
 
-    "display the correct title for the other-properties page" in new fakeRequestTo("other-properties"){
-      val result = CalculationController.otherProperties(fakeRequest)
-      val jsoupDoc = Jsoup.parse(bodyOf(result))
-      jsoupDoc.title shouldEqual Messages("calc.otherProperties.title")
-    }
-
-    "display the correct heading for the other-properties page" in new fakeRequestTo("other-properties") {
-      val result = CalculationController.otherProperties(fakeRequest)
-      val jsoupDoc = Jsoup.parse(bodyOf(result))
-      jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
-    }
-
-    "display the correct wording for radio option `Yes`" in new fakeRequestTo("other-properties"){
-      val result = CalculationController.otherProperties(fakeRequest)
-      val jsoupDoc = Jsoup.parse(bodyOf(result))
-      jsoupDoc.body.getElementById("otherPropertiesYes").parent.text shouldEqual Messages("calc.base.yes")
-    }
-
-    "display the correct wording for radio option `No`" in new fakeRequestTo("other-properties"){
-      val result = CalculationController.otherProperties(fakeRequest)
-      val jsoupDoc = Jsoup.parse(bodyOf(result))
-      jsoupDoc.body.getElementById("otherPropertiesNo").parent.text shouldEqual Messages("calc.base.no")
-    }
-
-    "contain a button with id equal to continue in other-properties" in new fakeRequestTo("other-properties") {
-      val result = CalculationController.otherProperties(fakeRequest)
-      val jsoupDoc = Jsoup.parse(bodyOf(result))
-      jsoupDoc.select("button#continue").text shouldEqual Messages("calc.base.continue")
-    }
-
-    //############## Annual Exempt Amount tests ######################
-    "when calling the annualExemptAmount action" should {
-
-      "return 200" in new fakeRequestTo("allowance") {
-        val result = CalculationController.annualExemptAmount(fakeRequest)
-        status(result) shouldBe 200
+      "return a 200" in {
+        status(OtherPropertiesTestDataItem.result) shouldBe 200
       }
 
-      "return HTML" in new fakeRequestTo("allowance") {
-        val result = CalculationController.annualExemptAmount(fakeRequest)
-        contentType(result) shouldBe Some("text/html")
-        charset(result) shouldBe Some("utf-8")
-      }
+      "return some HTML that" should {
 
-      "display the correct page title" in new fakeRequestTo("allowance") {
-        val result = CalculationController.annualExemptAmount(fakeRequest)
-        val jsoupDoc = Jsoup.parse(bodyOf(result))
-        jsoupDoc.title shouldEqual Messages("calc.annualExemptAmount.question")
-      }
+        "contain some text and use the character set utf-8" in {
+          contentType(OtherPropertiesTestDataItem.result) shouldBe Some("text/html")
+          charset(OtherPropertiesTestDataItem.result) shouldBe Some("utf-8")
+        }
 
-      "diplay the correct page heading" in new fakeRequestTo("allowance") {
-        val result = CalculationController.annualExemptAmount(fakeRequest)
-        val jsoupDoc = Jsoup.parse(bodyOf(result))
-        jsoupDoc.body.getElementsByTag("H1").text shouldEqual Messages("calc.base.pageHeading")
-      }
+        "have the title 'Did you sell or give away any other properties in that tax year?'" in {
+          OtherPropertiesTestDataItem.jsoupDoc.title shouldEqual Messages("calc.otherProperties.question")
+        }
 
-      "contain a back button to the previous page" in new fakeRequestTo("allowance") {
-        val result = CalculationController.annualExemptAmount(fakeRequest)
-        val jsoupDoc = Jsoup.parse(bodyOf(result))
-        jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
-      }
+        "have the heading Calculate your tax (non-residents) " in {
+          OtherPropertiesTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+        }
 
-      "display the correct question heading" in new fakeRequestTo("allowance") {
-        val result = CalculationController.annualExemptAmount(fakeRequest)
-        val jsoupDoc = Jsoup.parse(bodyOf(result))
-        jsoupDoc.body.getElementsByTag("legend").text shouldEqual Messages("calc.annualExemptAmount.question")
-      }
+        "display a radio button with the option `Yes`" in {
+          OtherPropertiesTestDataItem.jsoupDoc.body.getElementById("otherPropertiesYes").parent.text shouldEqual Messages("calc.base.yes")
+        }
 
-      "Have an input box for the Annual Exempt Amount" in new fakeRequestTo("allowance") {
-        val result = CalculationController.annualExemptAmount(fakeRequest)
-        val jsoupDoc = Jsoup.parse(bodyOf(result))
-        jsoupDoc.body.getElementById("annualExemptAmount").tagName() shouldEqual "input"
-      }
+        "display a radio button with the option `No`" in {
+          OtherPropertiesTestDataItem.jsoupDoc.body.getElementById("otherPropertiesNo").parent.text shouldEqual Messages("calc.base.no")
+        }
 
-      "has a Continue button" in new fakeRequestTo("allowance") {
-        val result = CalculationController.annualExemptAmount(fakeRequest)
-        val jsoupDoc = Jsoup.parse(bodyOf(result))
-        jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
-      }
-
-      "should contain a Read more sidebar with a link to CGT allowances" in new fakeRequestTo("allowance") {
-        val result = CalculationController.annualExemptAmount(fakeRequest)
-        val jsoupDoc = Jsoup.parse(bodyOf(result))
-        jsoupDoc.select("aside h2").text shouldBe Messages("calc.common.readMore")
-        jsoupDoc.select("aside a").text shouldBe Messages("calc.annualExemptAmount.link.one")
+        "display a 'Continue' button " in {
+          OtherPropertiesTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+        }
       }
     }
 
-    //############## Acquisition Value tests ######################
-    "return 200 when sending a GET request `/calculate-your-capital-gains/acquisition-value`" in new fakeRequestTo("acquisition-value") {
-      val result = CalculationController.acquisitionValue(fakeRequest)
-      status(result) shouldBe 200
-    }
-
-    "return HTML when sending a GET request `/calculate-your-capital-gains/acquisition-value`" in new fakeRequestTo("acquisition-value") {
-      val result = CalculationController.acquisitionValue(fakeRequest)
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
-    }
-
-    //################### Improvements tests #######################
-    "return 200 when sending a GET to `/calculate-your-capital-gains/improvements`" in new fakeRequestTo("improvements") {
-      val result = CalculationController.improvements(fakeRequest)
-      status(result) shouldBe 200
-    }
-
-    "return HTML when sending a GET to `/calculate-your-capital-gains/improvements`" in new fakeRequestTo("improvements"){
-      val result = CalculationController.improvements(fakeRequest)
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
-    }
-
-    //################### Disposal Date tests #######################
-    "return 200 when sending a GET to `/calculate-your-capital-gains/disposal-date`" in new fakeRequestTo("disposal-date") {
-      val result = CalculationController.disposalDate(fakeRequest)
-      status(result) shouldBe 200
-    }
-
-    "return HTML when sending a GET to `/calculate-your-capital-gains/disposal-date`" in new fakeRequestTo("disposal-date"){
-      val result = CalculationController.disposalDate(fakeRequest)
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
-    }
-
-    "display the correct title for the disposal-date page" in new fakeRequestTo("disposal-date"){
-      val result = CalculationController.disposalDate(fakeRequest)
-      val jsoupDoc = Jsoup.parse(bodyOf(result))
-      jsoupDoc.title shouldEqual Messages("calc.disposalDate.question")
-    }
-
-    "display the correct heading for the disposal-date page" in new fakeRequestTo("disposal-date") {
-      val result = CalculationController.disposalDate(fakeRequest)
-      val jsoupDoc = Jsoup.parse(bodyOf(result))
-      jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
-    }
-
-    "contain a simpleInlineDate with question When did you sign the contract that made someone else the owner?" in new fakeRequestTo("disposal-date") {
-      val result = CalculationController.disposalDate(fakeRequest)
-      val jsoupDoc = Jsoup.parse(bodyOf(result))
-      jsoupDoc.select("legend").text shouldEqual Messages("calc.disposalDate.question")
-    }
-
-    "contain a button with id equal to continue in disposal-date" in new fakeRequestTo("disposal-date") {
-      val result = CalculationController.disposalDate(fakeRequest)
-      val jsoupDoc = Jsoup.parse(bodyOf(result))
-      jsoupDoc.select("button#continue").text shouldEqual Messages("calc.base.continue")
-    }
-
-    //################### Disposal Value tests #######################
-    "return 200 from disposal-value" in new fakeRequestTo("disposal-value") {
-      val result = CalculationController.disposalValue(fakeRequest)
-      status(result) shouldBe 200
-    }
-
-    "return HTML from disposal-value" in new fakeRequestTo("disposal-value") {
-      val result = CalculationController.disposalValue(fakeRequest)
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
-    }
-
-    "contain the question How much did you sell or give away the property for?" in new fakeRequestTo("disposal-value") {
-      val result = CalculationController.disposalValue(fakeRequest)
-      val jsoupDoc = Jsoup.parse(bodyOf(result))
-      jsoupDoc.select("legend").text shouldEqual Messages("calc.disposalValue.question")
-    }
-
-    "contain a button with id equal to continue in disposal-value" in new fakeRequestTo("disposal-date") {
-      val result = CalculationController.disposalValue(fakeRequest)
-      val jsoupDoc = Jsoup.parse(bodyOf(result))
-      jsoupDoc.select("button#continue").text shouldEqual Messages("calc.base.continue")
-    }
-
-    //################### Acquisition Costs tests #######################
-    "return 200 from acquisition-costs" in new fakeRequestTo("acquisition-costs") {
-      val result = CalculationController.acquisitionCosts(fakeRequest)
-      status(result) shouldBe 200
-    }
-
-    "return HTML from acquisition-costs" in new fakeRequestTo("acquisition-costs") {
-      val result = CalculationController.acquisitionCosts(fakeRequest)
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
-    }
-
-    //################### Disposal Costs tests #######################
-    "return 200 from disposal-costs" in new fakeRequestTo("disposal-costs") {
-      val result = CalculationController.disposalCosts(fakeRequest)
-      status(result) shouldBe 200
-    }
-
-    "return HTML from disposal-costs" in new fakeRequestTo("disposal-costs"){
-      val result = CalculationController.disposalCosts(fakeRequest)
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
-    }
-
-    //################### Entrepreneurs Relief tests #######################
-    "return 200 from entrepreneurs-relief" in new fakeRequestTo("entrepreneurs-relief") {
-      val result = CalculationController.entrepreneursRelief(fakeRequest)
-      status(result) shouldBe 200
-    }
-
-    "return HTML from entrepreneurs-relief" in new fakeRequestTo("entrepreneurs-relief"){
-      val result = CalculationController.entrepreneursRelief(fakeRequest)
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
-    }
-
-    //################### Allowable Losses tests #######################
-    "return 200 when sending a GET request `/calculate-your-capital-gains/allowable-losses`" in new fakeRequestTo("allowable-losses") {
-      val result = CalculationController.allowableLosses(fakeRequest)
-      status(result) shouldBe 200
-    }
-
-    "return HTML when sending a GET to `/calculate-your-capital-gains/allowable-losses`" in new fakeRequestTo("allowable-losses"){
-      val result = CalculationController.allowableLosses(fakeRequest)
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
-    }
-
-    //################### Other Reliefs tests #######################
-    "return 200 when sending a GET request `/calculate-your-capital-gains/other-reliefs`" in new fakeRequestTo("other-reliefs") {
-      val result = CalculationController.otherReliefs(fakeRequest)
-      status(result) shouldBe 200
-    }
-
-    "return HTML when sending a GET request `/calculate-your-capital-gains/other-reliefs`" in new fakeRequestTo("other-reliefs") {
-      val result = CalculationController.otherReliefs(fakeRequest)
-      contentType(result) shouldBe Some("text/html")
-    }
-
-    //################### Summary tests #######################
-    "CalculationController.summary" should {
-      "return 200 from summary" in new fakeRequestTo("summary") {
-        val result = CalculationController.summary(fakeRequest)
-        status(result) shouldBe 200
-      }
-
-      "return HTML from summary" in new fakeRequestTo("summary") {
-        val result = CalculationController.summary(fakeRequest)
-        contentType(result) shouldBe Some("text/html")
-        charset(result) shouldBe Some("utf-8")
-      }
-    }
+//
+//    //############## Annual Exempt Amount tests ######################
+//    "when calling the annualExemptAmount action" should {
+//
+//      "return 200" in new fakeRequestTo("allowance") {
+//        val result = CalculationController.annualExemptAmount(fakeRequest)
+//        status(result) shouldBe 200
+//      }
+//
+//      "return HTML" in new fakeRequestTo("allowance") {
+//        val result = CalculationController.annualExemptAmount(fakeRequest)
+//        contentType(result) shouldBe Some("text/html")
+//        charset(result) shouldBe Some("utf-8")
+//      }
+//
+//      "display the correct page title" in new fakeRequestTo("allowance") {
+//        val result = CalculationController.annualExemptAmount(fakeRequest)
+//        val jsoupDoc = Jsoup.parse(bodyOf(result))
+//        jsoupDoc.title shouldEqual Messages("calc.annualExemptAmount.question")
+//      }
+//
+//      "diplay the correct page heading" in new fakeRequestTo("allowance") {
+//        val result = CalculationController.annualExemptAmount(fakeRequest)
+//        val jsoupDoc = Jsoup.parse(bodyOf(result))
+//        jsoupDoc.body.getElementsByTag("H1").text shouldEqual Messages("calc.base.pageHeading")
+//      }
+//
+//      "contain a back button to the previous page" in new fakeRequestTo("allowance") {
+//        val result = CalculationController.annualExemptAmount(fakeRequest)
+//        val jsoupDoc = Jsoup.parse(bodyOf(result))
+//        jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+//      }
+//
+//      "display the correct question heading" in new fakeRequestTo("allowance") {
+//        val result = CalculationController.annualExemptAmount(fakeRequest)
+//        val jsoupDoc = Jsoup.parse(bodyOf(result))
+//        jsoupDoc.body.getElementsByTag("legend").text shouldEqual Messages("calc.annualExemptAmount.question")
+//      }
+//
+//      "Have an input box for the Annual Exempt Amount" in new fakeRequestTo("allowance") {
+//        val result = CalculationController.annualExemptAmount(fakeRequest)
+//        val jsoupDoc = Jsoup.parse(bodyOf(result))
+//        jsoupDoc.body.getElementById("annualExemptAmount").tagName() shouldEqual "input"
+//      }
+//
+//      "has a Continue button" in new fakeRequestTo("allowance") {
+//        val result = CalculationController.annualExemptAmount(fakeRequest)
+//        val jsoupDoc = Jsoup.parse(bodyOf(result))
+//        jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+//      }
+//
+//      "should contain a Read more sidebar with a link to CGT allowances" in new fakeRequestTo("allowance") {
+//        val result = CalculationController.annualExemptAmount(fakeRequest)
+//        val jsoupDoc = Jsoup.parse(bodyOf(result))
+//        jsoupDoc.select("aside h2").text shouldBe Messages("calc.common.readMore")
+//        jsoupDoc.select("aside a").text shouldBe Messages("calc.annualExemptAmount.link.one")
+//      }
+//    }
+//
+//    //############## Acquisition Value tests ######################
+//    "return 200 when sending a GET request `/calculate-your-capital-gains/acquisition-value`" in new fakeRequestTo("acquisition-value") {
+//      val result = CalculationController.acquisitionValue(fakeRequest)
+//      status(result) shouldBe 200
+//    }
+//
+//    "return HTML when sending a GET request `/calculate-your-capital-gains/acquisition-value`" in new fakeRequestTo("acquisition-value") {
+//      val result = CalculationController.acquisitionValue(fakeRequest)
+//      contentType(result) shouldBe Some("text/html")
+//      charset(result) shouldBe Some("utf-8")
+//    }
+//
+//    //################### Improvements tests #######################
+//    "return 200 when sending a GET to `/calculate-your-capital-gains/improvements`" in new fakeRequestTo("improvements") {
+//      val result = CalculationController.improvements(fakeRequest)
+//      status(result) shouldBe 200
+//    }
+//
+//    "return HTML when sending a GET to `/calculate-your-capital-gains/improvements`" in new fakeRequestTo("improvements"){
+//      val result = CalculationController.improvements(fakeRequest)
+//      contentType(result) shouldBe Some("text/html")
+//      charset(result) shouldBe Some("utf-8")
+//    }
+//
+//    //################### Disposal Date tests #######################
+//    "return 200 when sending a GET to `/calculate-your-capital-gains/disposal-date`" in new fakeRequestTo("disposal-date") {
+//      val result = CalculationController.disposalDate(fakeRequest)
+//      status(result) shouldBe 200
+//    }
+//
+//    "return HTML when sending a GET to `/calculate-your-capital-gains/disposal-date`" in new fakeRequestTo("disposal-date"){
+//      val result = CalculationController.disposalDate(fakeRequest)
+//      contentType(result) shouldBe Some("text/html")
+//      charset(result) shouldBe Some("utf-8")
+//    }
+//
+//    "display the correct title for the disposal-date page" in new fakeRequestTo("disposal-date"){
+//      val result = CalculationController.disposalDate(fakeRequest)
+//      val jsoupDoc = Jsoup.parse(bodyOf(result))
+//      jsoupDoc.title shouldEqual Messages("calc.disposalDate.question")
+//    }
+//
+//    "display the correct heading for the disposal-date page" in new fakeRequestTo("disposal-date") {
+//      val result = CalculationController.disposalDate(fakeRequest)
+//      val jsoupDoc = Jsoup.parse(bodyOf(result))
+//      jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+//    }
+//
+//    "contain a simpleInlineDate with question When did you sign the contract that made someone else the owner?" in new fakeRequestTo("disposal-date") {
+//      val result = CalculationController.disposalDate(fakeRequest)
+//      val jsoupDoc = Jsoup.parse(bodyOf(result))
+//      jsoupDoc.select("legend").text shouldEqual Messages("calc.disposalDate.question")
+//    }
+//
+//    "contain a button with id equal to continue in disposal-date" in new fakeRequestTo("disposal-date") {
+//      val result = CalculationController.disposalDate(fakeRequest)
+//      val jsoupDoc = Jsoup.parse(bodyOf(result))
+//      jsoupDoc.select("button#continue").text shouldEqual Messages("calc.base.continue")
+//    }
+//
+//    //################### Disposal Value tests #######################
+//    "return 200 from disposal-value" in new fakeRequestTo("disposal-value") {
+//      val result = CalculationController.disposalValue(fakeRequest)
+//      status(result) shouldBe 200
+//    }
+//
+//    "return HTML from disposal-value" in new fakeRequestTo("disposal-value") {
+//      val result = CalculationController.disposalValue(fakeRequest)
+//      contentType(result) shouldBe Some("text/html")
+//      charset(result) shouldBe Some("utf-8")
+//    }
+//
+//    "contain the question How much did you sell or give away the property for?" in new fakeRequestTo("disposal-value") {
+//      val result = CalculationController.disposalValue(fakeRequest)
+//      val jsoupDoc = Jsoup.parse(bodyOf(result))
+//      jsoupDoc.select("legend").text shouldEqual Messages("calc.disposalValue.question")
+//    }
+//
+//    "contain a button with id equal to continue in disposal-value" in new fakeRequestTo("disposal-date") {
+//      val result = CalculationController.disposalValue(fakeRequest)
+//      val jsoupDoc = Jsoup.parse(bodyOf(result))
+//      jsoupDoc.select("button#continue").text shouldEqual Messages("calc.base.continue")
+//    }
+//
+//    //################### Acquisition Costs tests #######################
+//    "return 200 from acquisition-costs" in new fakeRequestTo("acquisition-costs") {
+//      val result = CalculationController.acquisitionCosts(fakeRequest)
+//      status(result) shouldBe 200
+//    }
+//
+//    "return HTML from acquisition-costs" in new fakeRequestTo("acquisition-costs") {
+//      val result = CalculationController.acquisitionCosts(fakeRequest)
+//      contentType(result) shouldBe Some("text/html")
+//      charset(result) shouldBe Some("utf-8")
+//    }
+//
+//    //################### Disposal Costs tests #######################
+//    "return 200 from disposal-costs" in new fakeRequestTo("disposal-costs") {
+//      val result = CalculationController.disposalCosts(fakeRequest)
+//      status(result) shouldBe 200
+//    }
+//
+//    "return HTML from disposal-costs" in new fakeRequestTo("disposal-costs"){
+//      val result = CalculationController.disposalCosts(fakeRequest)
+//      contentType(result) shouldBe Some("text/html")
+//      charset(result) shouldBe Some("utf-8")
+//    }
+//
+//    //################### Entrepreneurs Relief tests #######################
+//    "return 200 from entrepreneurs-relief" in new fakeRequestTo("entrepreneurs-relief") {
+//      val result = CalculationController.entrepreneursRelief(fakeRequest)
+//      status(result) shouldBe 200
+//    }
+//
+//    "return HTML from entrepreneurs-relief" in new fakeRequestTo("entrepreneurs-relief"){
+//      val result = CalculationController.entrepreneursRelief(fakeRequest)
+//      contentType(result) shouldBe Some("text/html")
+//      charset(result) shouldBe Some("utf-8")
+//    }
+//
+//    //################### Allowable Losses tests #######################
+//    "return 200 when sending a GET request `/calculate-your-capital-gains/allowable-losses`" in new fakeRequestTo("allowable-losses") {
+//      val result = CalculationController.allowableLosses(fakeRequest)
+//      status(result) shouldBe 200
+//    }
+//
+//    "return HTML when sending a GET to `/calculate-your-capital-gains/allowable-losses`" in new fakeRequestTo("allowable-losses"){
+//      val result = CalculationController.allowableLosses(fakeRequest)
+//      contentType(result) shouldBe Some("text/html")
+//      charset(result) shouldBe Some("utf-8")
+//    }
+//
+//    //################### Other Reliefs tests #######################
+//    "return 200 when sending a GET request `/calculate-your-capital-gains/other-reliefs`" in new fakeRequestTo("other-reliefs") {
+//      val result = CalculationController.otherReliefs(fakeRequest)
+//      status(result) shouldBe 200
+//    }
+//
+//    "return HTML when sending a GET request `/calculate-your-capital-gains/other-reliefs`" in new fakeRequestTo("other-reliefs") {
+//      val result = CalculationController.otherReliefs(fakeRequest)
+//      contentType(result) shouldBe Some("text/html")
+//    }
+//
+//    //################### Summary tests #######################
+//    "CalculationController.summary" should {
+//      "return 200 from summary" in new fakeRequestTo("summary") {
+//        val result = CalculationController.summary(fakeRequest)
+//        status(result) shouldBe 200
+//      }
+//
+//      "return HTML from summary" in new fakeRequestTo("summary") {
+//        val result = CalculationController.summary(fakeRequest)
+//        contentType(result) shouldBe Some("text/html")
+//        charset(result) shouldBe Some("utf-8")
+//      }
+//    }
   }
 }
