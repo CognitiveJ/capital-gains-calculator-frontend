@@ -421,6 +421,10 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
           contentType(DisposalCostsTestDataItem.result) shouldBe Some("text/html")
           charset(DisposalCostsTestDataItem.result) shouldBe Some("utf-8")
         }
+
+        "have the title 'How much did you pay in costs when you stopped being the property owner?'" in {
+          DisposalCostsTestDataItem.jsoupDoc.getElementsByTag("title").text shouldBe Messages("calc.disposalCosts.question")
+        }
       }
     }
 
