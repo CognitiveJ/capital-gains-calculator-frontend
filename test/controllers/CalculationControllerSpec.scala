@@ -40,14 +40,6 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
   val s = "Action(parser=BodyParser(anyContent))"
   val sessionId = UUID.randomUUID.toString
-
-//<<<<<<< HEAD
-
-  def keystoreFetchCondition[T](data: Option[T]): Unit = {
-    when(mockKeystoreConnector.fetchAndGetFormData[T](Matchers.anyString())(Matchers.any(), Matchers.any()))
-                .thenReturn(Future.successful(data))
-  }
-
   val mockKeystoreConnector = mock[KeystoreConnector]
   val TestCalculationController = new CalculationController {
     override val keystoreConnector: KeystoreConnector = mockKeystoreConnector
@@ -55,111 +47,15 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
   implicit val hc = new HeaderCarrier(sessionId = Some(SessionId(sessionId.toString)))
 
-//  "CalculationController methods " should {
-//
-//    //################### Customer Type tests #######################
-//    "when calling the customerType action" should {
-//      "when not supplied with a test model" should {
-//
-//        "return 200" in new fakeRequestTo("customer-type") {
-//          when(mockKeystoreConnector.fetchAndGetFormData[CustomerTypeModel](Matchers.anyString())(Matchers.any(), Matchers.any()))
-//            .thenReturn(Future.successful(None))
-//          val result = TestCalculationController.customerType(fakeRequest)
-//          status(result) shouldBe 200
-//        }
-//
-//        "return HTML" in new fakeRequestTo("customer-type") {
-//          when(mockKeystoreConnector.fetchAndGetFormData[CustomerTypeModel](Matchers.anyString())(Matchers.any(), Matchers.any()))
-//            .thenReturn(Future.successful(None))
-//          val result = TestCalculationController.customerType(fakeRequest)
-//          contentType(result) shouldBe Some("text/html")
-//          charset(result) shouldBe Some("utf-8")
-//        }
-//
-//        "display the correct title" in new fakeRequestTo("customer-type") {
-//          when(mockKeystoreConnector.fetchAndGetFormData[CustomerTypeModel](Matchers.anyString())(Matchers.any(), Matchers.any()))
-//            .thenReturn(Future.successful(None))
-//          val result = TestCalculationController.customerType(fakeRequest)
-//          val jsoupDoc = Jsoup.parse(bodyOf(result))
-//          jsoupDoc.title shouldEqual Messages("calc.customerType.title")
-//        }
-//
-//        "display the correct heading" in new fakeRequestTo("customer-type") {
-//          when(mockKeystoreConnector.fetchAndGetFormData[CustomerTypeModel](Matchers.anyString())(Matchers.any(), Matchers.any()))
-//            .thenReturn(Future.successful(None))
-//          val result = TestCalculationController.customerType(fakeRequest)
-//          val jsoupDoc = Jsoup.parse(bodyOf(result))
-//          jsoupDoc.body.getElementsByTag("H1").text shouldEqual Messages("calc.base.pageHeading")
-//        }
-//
-//        "display the correct wording for radio option `individual`" in new fakeRequestTo("customer-type") {
-//          when(mockKeystoreConnector.fetchAndGetFormData[CustomerTypeModel](Matchers.anyString())(Matchers.any(), Matchers.any()))
-//            .thenReturn(Future.successful(None))
-//          val result = TestCalculationController.customerType(fakeRequest)
-//          val jsoupDoc = Jsoup.parse(bodyOf(result))
-//          jsoupDoc.body.getElementById("customerType-individual").parent.text shouldEqual Messages("calc.customerType.individual")
-//        }
-//
-//        "display the correct wording for radio option `trustee`" in new fakeRequestTo("customer-type") {
-//          when(mockKeystoreConnector.fetchAndGetFormData[CustomerTypeModel](Matchers.anyString())(Matchers.any(), Matchers.any()))
-//            .thenReturn(Future.successful(None))
-//          val result = TestCalculationController.customerType(fakeRequest)
-//          val jsoupDoc = Jsoup.parse(bodyOf(result))
-//          jsoupDoc.body.getElementById("customerType-trustee").parent.text shouldEqual Messages("calc.customerType.trustee")
-//        }
-//
-//        "display the correct wording for radio option `Personal Representative`" in new fakeRequestTo("customer-type") {
-//          when(mockKeystoreConnector.fetchAndGetFormData[CustomerTypeModel](Matchers.anyString())(Matchers.any(), Matchers.any()))
-//            .thenReturn(Future.successful(None))
-//          val result = TestCalculationController.customerType(fakeRequest)
-//          val jsoupDoc = Jsoup.parse(bodyOf(result))
-//          jsoupDoc.body.getElementById("customerType-personalrep").parent.text shouldEqual Messages("calc.customerType.personalRep")
-//        }
-//
-//        "have the radio option `individual` not selected by default" in new fakeRequestTo("customer-type") {
-//          when(mockKeystoreConnector.fetchAndGetFormData[CustomerTypeModel](Matchers.anyString())(Matchers.any(), Matchers.any()))
-//            .thenReturn(Future.successful(None))
-//          val result = TestCalculationController.customerType(fakeRequest)
-//          val jsoupDoc = Jsoup.parse(bodyOf(result))
-//          jsoupDoc.body.getElementById("customerType-individual").parent.classNames().contains("selected") shouldBe false
-//        }
-//
-//      }
-//
-//      "when supplied with a test model containing the variable 'individual'" should {
-//
-//        val testCustomerTypeModel = new CustomerTypeModel("individual")
-//
-//        "return 200" in new fakeRequestTo("customer-type") {
-//          when(mockKeystoreConnector.fetchAndGetFormData[CustomerTypeModel](Matchers.anyString())(Matchers.any(), Matchers.any()))
-//            .thenReturn(Future.successful(Some(testCustomerTypeModel)))
-//          val result = TestCalculationController.customerType(fakeRequest)
-//          status(result) shouldBe 200
-//        }
-//
-//        "return HTML" in new fakeRequestTo("customer-type") {
-//          when(mockKeystoreConnector.fetchAndGetFormData[CustomerTypeModel](Matchers.anyString())(Matchers.any(), Matchers.any()))
-//            .thenReturn(Future.successful(Some(testCustomerTypeModel)))
-//          val result = TestCalculationController.customerType(fakeRequest)
-//          contentType(result) shouldBe Some("text/html")
-//          charset(result) shouldBe Some("utf-8")
-//        }
-//
-//        "have the radio option `individual` selected by default" in new fakeRequestTo("customer-type") {
-//          when(mockKeystoreConnector.fetchAndGetFormData[CustomerTypeModel](Matchers.anyString())(Matchers.any(), Matchers.any()))
-//            .thenReturn(Future.successful(Some(testCustomerTypeModel)))
-//          val result = TestCalculationController.customerType(fakeRequest)
-//          val jsoupDoc = Jsoup.parse(bodyOf(result))
-//          jsoupDoc.body.getElementById("customerType-individual").parent.classNames().contains("selected") shouldBe true
-//        }
-//
-//      }
-//    }
-//    =======
   class fakeRequestTo(url: String, controllerAction: Action[AnyContent]) {
     val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/" + url).withSession(SessionKeys.sessionId -> s"session-$sessionId")
     val result = controllerAction(fakeRequest)
     val jsoupDoc = Jsoup.parse(bodyOf(result))
+  }
+
+  def keystoreFetchCondition[T](data: Option[T]): Unit = {
+    when(mockKeystoreConnector.fetchAndGetFormData[T](Matchers.anyString())(Matchers.any(), Matchers.any()))
+      .thenReturn(Future.successful(data))
   }
 
   //################### Customer Type tests #######################
