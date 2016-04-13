@@ -17,7 +17,9 @@
 package controllers
 
 import java.util.UUID
+import org.jsoup.Jsoup
 import play.api.i18n.Messages
+import play.api.mvc.{AnyContent, Action}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.play.http.SessionKeys
@@ -25,48 +27,60 @@ import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 class IntroductionControllerSpec extends UnitSpec with WithFakeApplication {
 
-  class fakeRequestTo(url : String) {
+  class fakeRequestTo(url : String, controllerAction : Action[AnyContent]) {
     val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/" + url)
+    val result = controllerAction(fakeRequest)
+    val jsoupDoc = Jsoup.parse(bodyOf(result))
   }
 
-  class fakeRequestToWithSessionId(url : String) {
+  class fakeRequestToWithSessionId(url : String, controllerAction : Action[AnyContent]) {
     val sessionId = UUID.randomUUID.toString
     val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/" + url).withSession(SessionKeys.sessionId -> s"session-$sessionId")
+    val result = controllerAction(fakeRequest)
+    val jsoupDoc = Jsoup.parse(bodyOf(result))
   }
 
   "IntroductionController.introduction" should {
-    "return 200 with no session" in new fakeRequestTo("introduction") {
-      val result = IntroductionController.introduction(fakeRequest)
-      status(result) shouldBe 200
+
+    "when called with no session" should {
+
+      object IntroductionTestDataItem extends fakeRequestTo("introduction", IntroductionController.introduction)
+
+      "return a 200" in {
+        status(IntroductionTestDataItem.result) shouldBe 200
+      }
+
+      "return HTML that" should {
+
+        "contain some text and use the character set utf-8" in {
+          contentType(IntroductionTestDataItem.result) shouldBe Some("text/html")
+          charset(IntroductionTestDataItem.result) shouldBe Some("utf-8")
+        }
+
+        "have the title 'Introduction'" in {
+          IntroductionTestDataItem.jsoupDoc.title shouldEqual Messages("calc.introduction.title")
+        }
+        "contain a start button" in {
+          IntroductionTestDataItem.jsoupDoc.body.getElementById("start").text shouldEqual Messages("calc.introduction.start")
+        }
+      }
     }
 
-    "return HTML with no session" in new fakeRequestTo("introduction"){
-      val result = IntroductionController.introduction(fakeRequest)
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
+    "when called with a session" should {
+
+      object IntroductionWithSessionTestDataItem extends fakeRequestToWithSessionId("introduction", IntroductionController.introduction)
+
+      "return a 200" in {
+        status(IntroductionWithSessionTestDataItem.result) shouldBe 200
+      }
+
+      "return HTML that" should {
+
+        "contain some text and use character set utf-8" in {
+          contentType(IntroductionWithSessionTestDataItem.result) shouldBe Some("text/html")
+          charset(IntroductionWithSessionTestDataItem.result) shouldBe Some("utf-8")
+        }
+      }
     }
-
-    "display the title from the messages file" in new fakeRequestTo("introduction") {
-      val result = IntroductionController.introduction(fakeRequest)
-      contentAsString(result) should include (Messages("calc.introduction.title"))
-    }
-
-    "contain a start button" in new fakeRequestTo("introduction") {
-      val result = IntroductionController.introduction(fakeRequest)
-      contentAsString(result) should include (Messages("calc.introduction.start") + "</a>")
-    }
-
-    "return 200 with session Id" in new fakeRequestToWithSessionId("introduction") {
-      val result = IntroductionController.introduction(fakeRequest)
-      status(result) shouldBe 200
-    }
-
-    "return HTML with session Id" in new fakeRequestToWithSessionId("introduction"){
-      val result = IntroductionController.introduction(fakeRequest)
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
-    }
-
-
   }
 }

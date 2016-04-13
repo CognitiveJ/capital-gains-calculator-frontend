@@ -37,7 +37,7 @@ trait CalculationController extends FrontendController {
   val customerType = Action.async { implicit request =>
     keystoreConnector.fetchAndGetFormData[CustomerTypeModel]("customerType").map {
       case Some(data) => Ok(calculation.customerType(customerTypeForm.fill(data)))
-      case _ => Ok(calculation.customerType(customerTypeForm))
+      case None => Ok(calculation.customerType(customerTypeForm))
     }
   }
 
