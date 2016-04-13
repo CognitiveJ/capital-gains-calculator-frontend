@@ -429,6 +429,10 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
         "have a back link" in {
           DisposalCostsTestDataItem.jsoupDoc.getElementById("link-back").text shouldEqual Messages("calc.base.back")
         }
+
+        "have the heading 'Calculate your tax (non-residents)'" in {
+          DisposalCostsTestDataItem.jsoupDoc.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+        }
       }
     }
 
