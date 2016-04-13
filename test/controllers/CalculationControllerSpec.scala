@@ -264,6 +264,29 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
           contentType(AcquisitonValueTestDataItem.result) shouldBe Some("text/html")
           charset(AcquisitonValueTestDataItem.result) shouldBe Some("utf-8")
         }
+
+        "have the title 'How much did you pay for the property?'" in {
+          AcquisitonValueTestDataItem.jsoupDoc.title shouldEqual Messages("calc.acquisitionValue.question")
+        }
+
+        "have the heading Calculate your tax (non-residents) " in {
+          AcquisitonValueTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+        }
+
+        "have a 'Back' link " in {
+          AcquisitonValueTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+        }
+
+        "have the question 'How much did you pay for the property?'" in {
+          AcquisitonValueTestDataItem.jsoupDoc.body.getElementsByTag("legend").text shouldEqual Messages("calc.acquisitionValue.question")
+        }
+
+        "display an input box for the Acquisition Value" in {
+          AcquisitonValueTestDataItem.jsoupDoc.body.getElementById("acquisitionValue").tagName shouldEqual "input"
+        }
+        "display a 'Continue' button " in {
+          AcquisitonValueTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+        }
       }
     }
 
