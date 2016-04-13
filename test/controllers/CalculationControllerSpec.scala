@@ -425,6 +425,10 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
         "have the title 'How much did you pay in costs when you stopped being the property owner?'" in {
           DisposalCostsTestDataItem.jsoupDoc.getElementsByTag("title").text shouldBe Messages("calc.disposalCosts.question")
         }
+
+        "have a back link" in {
+          DisposalCostsTestDataItem.jsoupDoc.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+        }
       }
     }
 
