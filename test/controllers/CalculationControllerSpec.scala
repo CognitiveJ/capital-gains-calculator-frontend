@@ -447,7 +447,17 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
           "have an input box for the disposal costs" in {
             DisposalCostsTestDataItem.jsoupDoc.getElementById("disposalCosts").tagName shouldBe "input"
           }
+        }
 
+        "have a continue button that" should {
+
+          "be a button element" in {
+            DisposalCostsTestDataItem.jsoupDoc.getElementById("continue-button").tagName shouldBe "button"
+          }
+
+          "have the text 'Continue'" in {
+            DisposalCostsTestDataItem.jsoupDoc.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+          }
         }
       }
     }
