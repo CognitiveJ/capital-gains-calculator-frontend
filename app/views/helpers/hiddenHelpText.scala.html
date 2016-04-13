@@ -1,0 +1,10 @@
+@(helpTextId: String, helpTextTitle: String, content: Html)
+
+<div id="@helpTextId" class="form-group">
+    <details>
+        <summary><span class="summary">@helpTextTitle</span></summary>
+        <div class="panel panel-border-narrow">
+            @content
+        </div>
+    </details>
+</div>

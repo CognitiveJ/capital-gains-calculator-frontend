@@ -87,7 +87,13 @@ calc.disposalCosts.question = How much did you pay in costs when you stopped bei
 calc.entrepreneursRelief.question = Are you claiming Entrepreneurs' Relief?
 
 ## Allowable Losses ##
-calc.allowableLosses.question = Are you claiming any allowable losses?
+calc.allowableLosses.question.one = Are you claiming any allowable losses?
+calc.allowableLosses.question.two = What's the total value of your allowable losses?
+calc.allowableLosses.helpText.title = What are allowable losses?
+calc.allowableLosses.helpText.paragraph.one = They''re losses you''ve made on UK properties that:
+calc.allowableLosses.helpText.bullet.one = are covered by Capital Gains Tax
+calc.allowableLosses.helpText.bullet.two = you''ve declared to HMRC within four years of making the loss
+calc.allowableLosses.helpText.bullet.three = you haven't already used in an allowable losses claim
 
 ## Other Reliefs ##
 calc.otherReliefs.question = How much extra tax relief are you claiming?
