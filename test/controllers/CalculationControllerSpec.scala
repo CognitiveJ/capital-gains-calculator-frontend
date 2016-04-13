@@ -58,6 +58,14 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
         CustomerTypeTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
       }
 
+      "have a 'Back' link " in {
+        CustomerTypeTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+      }
+
+      "have the question 'Who owned the property?' as the legend of the input" in {
+        CustomerTypeTestDataItem.jsoupDoc.body.getElementsByTag("legend").text shouldEqual Messages("calc.customerType.question")
+      }
+
       "display a radio button with the option `individual`" in {
         CustomerTypeTestDataItem.jsoupDoc.body.getElementById("customerType-individual").parent.text shouldEqual Messages("calc.customerType.individual")
       }
@@ -98,6 +106,14 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
 
       "have the heading Calculate your tax (non-residents) " in {
         DisabledTrusteeTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+      }
+
+      "have a 'Back' link " in {
+        DisabledTrusteeTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+      }
+
+      "have the question 'When did you sign the contract that made someone else the owner?' as the legend of the input" in {
+        DisabledTrusteeTestDataItem.jsoupDoc.body.getElementsByTag("legend").text shouldEqual Messages("calc.disabledTrustee.question")
       }
 
       "display a radio button with the option 'Yes'" in {
@@ -164,6 +180,14 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
           OtherPropertiesTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
         }
 
+        "have a 'Back' link " in {
+          OtherPropertiesTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+        }
+
+        "have the question 'Did you sell or give away any other properties in that tax year?' as the legend of the input" in {
+          OtherPropertiesTestDataItem.jsoupDoc.body.getElementsByTag("legend").text shouldEqual Messages("calc.otherProperties.question")
+        }
+
         "display a radio button with the option `Yes`" in {
           OtherPropertiesTestDataItem.jsoupDoc.body.getElementById("otherPropertiesYes").parent.text shouldEqual Messages("calc.base.yes")
         }
@@ -178,64 +202,52 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
       }
     }
 
-//
-//    //############## Annual Exempt Amount tests ######################
-//    "when calling the annualExemptAmount action" should {
-//
-//      "return 200" in new fakeRequestTo("allowance") {
-//        val result = CalculationController.annualExemptAmount(fakeRequest)
-//        status(result) shouldBe 200
-//      }
-//
-//      "return HTML" in new fakeRequestTo("allowance") {
-//        val result = CalculationController.annualExemptAmount(fakeRequest)
-//        contentType(result) shouldBe Some("text/html")
-//        charset(result) shouldBe Some("utf-8")
-//      }
-//
-//      "display the correct page title" in new fakeRequestTo("allowance") {
-//        val result = CalculationController.annualExemptAmount(fakeRequest)
-//        val jsoupDoc = Jsoup.parse(bodyOf(result))
-//        jsoupDoc.title shouldEqual Messages("calc.annualExemptAmount.question")
-//      }
-//
-//      "diplay the correct page heading" in new fakeRequestTo("allowance") {
-//        val result = CalculationController.annualExemptAmount(fakeRequest)
-//        val jsoupDoc = Jsoup.parse(bodyOf(result))
-//        jsoupDoc.body.getElementsByTag("H1").text shouldEqual Messages("calc.base.pageHeading")
-//      }
-//
-//      "contain a back button to the previous page" in new fakeRequestTo("allowance") {
-//        val result = CalculationController.annualExemptAmount(fakeRequest)
-//        val jsoupDoc = Jsoup.parse(bodyOf(result))
-//        jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
-//      }
-//
-//      "display the correct question heading" in new fakeRequestTo("allowance") {
-//        val result = CalculationController.annualExemptAmount(fakeRequest)
-//        val jsoupDoc = Jsoup.parse(bodyOf(result))
-//        jsoupDoc.body.getElementsByTag("legend").text shouldEqual Messages("calc.annualExemptAmount.question")
-//      }
-//
-//      "Have an input box for the Annual Exempt Amount" in new fakeRequestTo("allowance") {
-//        val result = CalculationController.annualExemptAmount(fakeRequest)
-//        val jsoupDoc = Jsoup.parse(bodyOf(result))
-//        jsoupDoc.body.getElementById("annualExemptAmount").tagName() shouldEqual "input"
-//      }
-//
-//      "has a Continue button" in new fakeRequestTo("allowance") {
-//        val result = CalculationController.annualExemptAmount(fakeRequest)
-//        val jsoupDoc = Jsoup.parse(bodyOf(result))
-//        jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
-//      }
-//
-//      "should contain a Read more sidebar with a link to CGT allowances" in new fakeRequestTo("allowance") {
-//        val result = CalculationController.annualExemptAmount(fakeRequest)
-//        val jsoupDoc = Jsoup.parse(bodyOf(result))
-//        jsoupDoc.select("aside h2").text shouldBe Messages("calc.common.readMore")
-//        jsoupDoc.select("aside a").text shouldBe Messages("calc.annualExemptAmount.link.one")
-//      }
-//    }
+    //############## Annual Exempt Amount tests ######################
+    "In CalculationController calling the .annualExemptAmount action " should {
+
+      object AnnualExemptAmountTestDataItem extends fakeRequestTo("allowance", CalculationController.annualExemptAmount)
+
+      "return a 200" in {
+        status(AnnualExemptAmountTestDataItem.result) shouldBe 200
+      }
+
+      "return some HTML that" should {
+
+        "contain some text and use the character set utf-8" in {
+          contentType(AnnualExemptAmountTestDataItem.result) shouldBe Some("text/html")
+          charset(AnnualExemptAmountTestDataItem.result) shouldBe Some("utf-8")
+        }
+
+        "have the title 'How much of your Capital Gains Tax allowance have you got left?'" in {
+          AnnualExemptAmountTestDataItem.jsoupDoc.title shouldEqual Messages("calc.annualExemptAmount.question")
+        }
+
+        "have the heading Calculate your tax (non-residents) " in {
+          AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+        }
+
+        "have a 'Back' link " in {
+          AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+        }
+
+        "have the question 'How much of your Capital Gains Tax allowance have you got left?' as the legend of the input" in {
+          AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementsByTag("legend").text shouldEqual Messages("calc.annualExemptAmount.question")
+        }
+
+        "display an input box for the Annual Exempt Amount" in {
+          AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementById("annualExemptAmount").tagName() shouldEqual "input"
+        }
+
+        "display a 'Continue' button " in {
+          AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+        }
+
+        "should contain a Read more sidebar with a link to CGT allowances" in {
+          AnnualExemptAmountTestDataItem.jsoupDoc.select("aside h2").text shouldBe Messages("calc.common.readMore")
+          AnnualExemptAmountTestDataItem.jsoupDoc.select("aside a").text shouldBe Messages("calc.annualExemptAmount.link.one")
+        }
+      }
+    }
 //
 //    //############## Acquisition Value tests ######################
 //    "return 200 when sending a GET request `/calculate-your-capital-gains/acquisition-value`" in new fakeRequestTo("acquisition-value") {
