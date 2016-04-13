@@ -513,6 +513,29 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
           contentType(OtherReliefsTestDataItem.result) shouldBe Some("text/html")
           charset(OtherReliefsTestDataItem.result) shouldBe Some("utf-8")
         }
+        "have the title 'How much extra tax relief are you claiming?'" in {
+          OtherReliefsTestDataItem.jsoupDoc.title shouldEqual Messages("calc.otherReliefs.question")
+        }
+
+        "have the heading Calculate your tax (non-residents) " in {
+          OtherReliefsTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+        }
+
+        "have a 'Back' link " in {
+          OtherReliefsTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+        }
+
+        "have the question 'How much extra tax relief are you claiming?' as the legend of the input" in {
+          OtherReliefsTestDataItem.jsoupDoc.body.getElementsByTag("label").text shouldEqual Messages("calc.otherReliefs.question")
+        }
+
+        "display an input box for the Other Tax Reliefs" in {
+          OtherReliefsTestDataItem.jsoupDoc.body.getElementById("otherReliefs").tagName() shouldEqual "input"
+        }
+
+        "display a 'Continue' button " in {
+          OtherReliefsTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+        }
       }
     }
 
