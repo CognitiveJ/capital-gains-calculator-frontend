@@ -1,0 +1,20 @@
+@(fieldName: String, questionText:String, content:String, helpText:Option[String] = None)(implicit lang: play.api.i18n.Lang)
+
+<fieldset class="form-group" data-hidden='hidden'>
+    <label>@questionText</label>
+    @if(helpText.isDefined) { <span class="form-hint">@helpText.get</span> }
+
+    <div class="inline">
+        <label class="block-label" for='@{fieldName + "Yes"}'>
+            <input id='@{fieldName + "Yes"}' type="radio" name="radioGroup" value="Yes">
+            @Messages("calc.base.yes")
+        </label>
+        <label class="block-label" for='@{fieldName + "No"}'>
+            <input id='@{fieldName + "No"}' type="radio" name="radioGroup" value="No">
+            @Messages("calc.base.no")
+        </label>
+    </div>
+    <div class="panel-indent" id='hidden'>
+        @Html(content)
+    </div>
+</fieldset>

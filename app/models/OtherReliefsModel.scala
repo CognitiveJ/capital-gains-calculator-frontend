@@ -14,19 +14,13 @@
  * limitations under the License.
  */
 
-package controllers
+package models
 
-import play.api.mvc.Action
-import uk.gov.hmrc.play.frontend.controller.FrontendController
-import views.html.cgts
+import play.api.libs.json.Json
 
-import scala.concurrent.Future
+case class OtherReliefsModel (disposalValue: BigDecimal)
 
-object SummaryController extends SummaryController
-
-trait SummaryController extends FrontendController {
-
-  val summary = Action.async { implicit request =>
-    Future.successful(Ok(cgts.summary()))
-  }
+object OtherReliefsModel {
+  implicit val format = Json.format[OtherReliefsModel]
 }
+

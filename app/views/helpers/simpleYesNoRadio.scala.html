@@ -1,0 +1,18 @@
+@(fieldName: String, questionText: String, helpText: Option[String] = None)(implicit lang: play.api.i18n.Lang)
+
+@yesId = @{fieldName + "Yes"}
+@noId = @{fieldName + "No"}
+
+<fieldset class="form-group" id="@fieldName">
+    <legend>@questionText</legend>
+    @if(helpText.isDefined) { <span class="form-hint">@helpText.get</span> }
+
+    <div class="inline">
+        <label class="block-label" for="@yesId">
+            <input id="@yesId" type="radio" name="@fieldName" value="Yes"> @Messages("calc.base.yes")
+        </label>
+        <label class="block-label" for="@noId">
+            <input id="@noId" type="radio" name="@fieldName" value="No"> @Messages("calc.base.no")
+        </label>
+    </div>
+</fieldset>

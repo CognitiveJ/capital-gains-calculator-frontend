@@ -36,14 +36,14 @@ trait CalculationController extends FrontendController {
   //################### Customer Type methods #######################
   val customerType = Action.async { implicit request =>
     keystoreConnector.fetchAndGetFormData[CustomerTypeModel]("customerType").map {
-      case Some(data) => Ok(cgts.customerType(customerTypeForm.fill(data)))
-      case None => Ok(cgts.customerType(customerTypeForm))
+      case Some(data) => Ok(calculation.customerType(customerTypeForm.fill(data)))
+      case _ => Ok(calculation.customerType(customerTypeForm))
     }
   }
 
   //################### Disabled Trustee methods #######################
   val disabledTrustee = Action.async { implicit request =>
-    Future.successful(Ok(cgts.disabledTrustee()))
+    Future.successful(Ok(calculation.disabledTrustee()))
   }
 
   //################### Current Income methods #######################
@@ -51,60 +51,67 @@ trait CalculationController extends FrontendController {
 
   //################### Personal Allowance methods #######################
   val personalAllowance = Action.async { implicit request =>
-    Future.successful(Ok(cgts.personalAllowance()))
+    Future.successful(Ok(calculation.personalAllowance()))
   }
 
   //################### Other Properties methods #######################
   val otherProperties = Action.async { implicit request =>
-    Future.successful(Ok(cgts.otherProperties()))
+    Future.successful(Ok(calculation.otherProperties()))
   }
 
   //################### Annual Exempt Amount methods #######################
   val annualExemptAmount = Action.async { implicit request =>
-    Future.successful(Ok(cgts.annualExemptAmount()))
+    Future.successful(Ok(calculation.annualExemptAmount()))
   }
 
   //################### Acquisition Value methods #######################
   val acquisitionValue = Action.async { implicit request =>
-    Future.successful(Ok(cgts.acquisitionValue()))
+    Future.successful(Ok(calculation.acquisitionValue()))
   }
 
   //################### Improvements methods #######################
   val improvements = Action.async { implicit request =>
-    Future.successful(Ok(cgts.improvements()))
+    Future.successful(Ok(calculation.improvements()))
   }
 
   //################### Disposal Date methods #######################
   val disposalDate = Action.async { implicit request =>
-    Future.successful(Ok(cgts.disposalDate()))
+    Future.successful(Ok(calculation.disposalDate()))
   }
 
   //################### Disposal Value methods #######################
   val disposalValue = Action.async { implicit request =>
-    Future.successful(Ok(cgts.disposalValue()))
+    Future.successful(Ok(calculation.disposalValue()))
   }
 
   //################### Acquisition Costs methods #######################
   val acquisitionCosts = Action.async { implicit request =>
-    Future.successful(Ok(cgts.acquisitionCosts()))
+    Future.successful(Ok(calculation.acquisitionCosts()))
   }
 
   //################### Disposal Costs methods #######################
   val disposalCosts = Action.async { implicit request =>
-    Future.successful(Ok(cgts.disposalCosts()))
+    Future.successful(Ok(calculation.disposalCosts()))
   }
 
   //################### Entrepreneurs Relief methods #######################
   val entrepreneursRelief = Action.async { implicit request =>
-    Future.successful(Ok(cgts.entrepreneursRelief()))
+    Future.successful(Ok(calculation.entrepreneursRelief()))
   }
 
   //################### Allowable Losses methods #######################
   val allowableLosses = Action.async { implicit request =>
-    Future.successful(Ok(cgts.allowableLosses()))
+    Future.successful(Ok(calculation.allowableLosses()))
   }
 
   //################### Other Reliefs methods #######################
-  val otherReliefs = TODO
+  val otherReliefs = Action.async { implicit request =>
+    Future.successful(Ok(calculation.otherReliefs()))
+  }
+
+  //################### Summary Methods ##########################
+  val summary = Action.async { implicit request =>
+    Future.successful(Ok(calculation.summary()))
+  }
 
 }

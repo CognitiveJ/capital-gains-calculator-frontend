@@ -8,15 +8,18 @@
 
 @import uk.gov.hmrc.play.views.html.layouts
 
-
 @serviceInfoContent = {}
+
+@sidebarContent = {
+    <h2 class=heading-medium">@Messages("calc.common.readMore")</h2>
+    @sidebarLinks.get
+}
 
 @sidebar = {
     @if(sidebarLinks.isDefined) {
-        @layouts.sidebar(sidebarLinks.get, Some("sidebar"))
+        @layouts.sidebar(sidebarContent, Some("sidebar"))
     }
 }
-
 
 @govuk_wrapper(appConfig = ApplicationConfig,
                title = title,

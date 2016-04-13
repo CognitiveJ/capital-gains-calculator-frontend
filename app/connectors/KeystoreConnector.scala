@@ -31,10 +31,10 @@ trait KeystoreConnector {
   val sessionCache: SessionCache
 
   def saveFormData[T](key: String, data: T)(implicit hc: HeaderCarrier, formats: Format[T]): Future[CacheMap] = {
-    SessionCacheController.cache(key, data)
+    sessionCache.cache(key, data)
   }
 
   def fetchAndGetFormData[T](key: String)(implicit hc: HeaderCarrier, formats: Format[T]): Future[Option[T]] = {
-    SessionCacheController.fetchAndGetEntry(key)
+    sessionCache.fetchAndGetEntry(key)
   }
 }

@@ -21,7 +21,7 @@ import play.api.mvc.Action
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import uk.gov.hmrc.play.http.{SessionKeys, HeaderCarrier}
 import uk.gov.hmrc.play.http.logging.SessionId
-import views.html.cgts
+import views.html.introduction._
 
 import scala.concurrent.Future
 
@@ -34,10 +34,10 @@ trait IntroductionController extends FrontendController {
 
   val introduction = Action.async { implicit request =>
     if (request.session.get(SessionKeys.sessionId).isEmpty) {
-      Future.successful(Ok(cgts.introduction()).withSession(request.session + (SessionKeys.sessionId -> s"session-$sessionId")))
+      Future.successful(Ok(intro()).withSession(request.session + (SessionKeys.sessionId -> s"session-$sessionId")))
     }
     else {
-      Future.successful(Ok(cgts.introduction()))
+      Future.successful(Ok(intro()))
     }
   }
 }

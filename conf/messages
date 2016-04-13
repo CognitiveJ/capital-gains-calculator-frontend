@@ -2,13 +2,21 @@
 calc.base.pageHeading = Calculate your tax (non-residents)
 calc.base.continue = Continue
 calc.base.taxStart = 6 April 2015
+calc.base.back = Back
+calc.base.calculate.tax.heading = Calculate your tax (non-residents)
+calc.base.percentage.comp = complete
+calc.base.button.continue = Continue
 calc.base.yes = Yes
 calc.base.no = No
+calc.base.back = Back
 
-## Common ##
-date.fields.day = Day
-date.fields.month = Month
-date.fields.year = Year
+## Common date Messages ##
+## Use common messages if some but not all pages use these messages. ##
+calc.common.date.fields.day = Day
+calc.common.date.fields.month = Month
+calc.common.date.fields.year = Year
+calc.common.date.hint = For example, 4 9 2016
+calc.common.readMore = Read more
 
 ## Introduction ##
 calc.introduction.title = Introduction
@@ -42,7 +50,8 @@ calc.customerType.trustee = I was a trustee
 calc.customerType.personalRep = I was the executor of an estate
 
 ## Disabled Trustee ##
-calc.disabledTrustee.title = Are you a trustee for someone who’s vulnerable?
+calc.disabledTrustee.question = Are you a trustee for someone who’s vulnerable?
+calc.disabledTrustee.helptext = A person’s vulnerable if they’re disabled, or if they’re under 18 and their parents have died
 
 ## Current Income ##
 calc.currentIncome.title = In the tax year when you stopped owning the property, what was your total UK income?
@@ -54,7 +63,8 @@ calc.personalAllowance.title = In the tax year when you stopped owning the prope
 calc.otherProperties.title = Did you sell or give away any other properties in that tax year?
 
 ## Annual Exempt Amount ##
-calc.annualExemptAmount.title = How much of your Capital Gains Tax allowance have you got left?
+calc.annualExemptAmount.question = How much of your Capital Gains Tax allowance have you got left?
+calc.annualExemptAmount.link.one = Capital Gains Tax allowances
 
 ## Acquisition Value ##
 calc.acquisitionValue.title = How much did you pay for the property?
