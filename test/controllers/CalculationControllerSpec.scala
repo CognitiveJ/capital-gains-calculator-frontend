@@ -231,7 +231,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
         }
 
         "have the question 'How much of your Capital Gains Tax allowance have you got left?' as the legend of the input" in {
-          AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementsByTag("legend").text shouldEqual Messages("calc.annualExemptAmount.question")
+          AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementsByTag("label").text shouldEqual Messages("calc.annualExemptAmount.question")
         }
 
         "display an input box for the Annual Exempt Amount" in {
@@ -278,7 +278,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
         }
 
         "have the question 'How much did you pay for the property?'" in {
-          AcquisitonValueTestDataItem.jsoupDoc.body.getElementsByTag("legend").text shouldEqual Messages("calc.acquisitionValue.question")
+          AcquisitonValueTestDataItem.jsoupDoc.body.getElementsByTag("label").text shouldEqual Messages("calc.acquisitionValue.question")
         }
 
         "display an input box for the Acquisition Value" in {
@@ -396,7 +396,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
         }
 
         "have the question 'How much did you sell or give away the property for?' as the legend of the input" in {
-          DisposalValueTestDataItem.jsoupDoc.body.getElementsByTag("legend").text shouldEqual Messages("calc.disposalValue.question")
+          DisposalValueTestDataItem.jsoupDoc.body.getElementsByTag("label").text shouldEqual Messages("calc.disposalValue.question")
         }
 
         "display an input box for the Annual Exempt Amount" in {
@@ -463,6 +463,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
       }
     }
 
+
     //################### Allowable Losses tests #######################
     "In CalculationController calling the .allowableLosses action " should {
 
@@ -478,8 +479,45 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
           contentType(AllowableLossesTestDataItem.result) shouldBe Some("text/html")
           charset(AllowableLossesTestDataItem.result) shouldBe Some("utf-8")
         }
+
+        "have a back button" in {
+          AllowableLossesTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+        }
+
+        "have the title 'Are you claiming any allowable losses?'" in {
+          AllowableLossesTestDataItem.jsoupDoc.title shouldEqual Messages("calc.allowableLosses.question.one")
+        }
+
+        "have the heading 'Calculate your tax (non-residents)'" in {
+          AllowableLossesTestDataItem.jsoupDoc.body.getElementsByTag("H1").text shouldEqual Messages("calc.base.pageHeading")
+        }
+
+        "have a yes no helper with hidden content and question 'Are you claiming any allowable losses?'" in {
+          AllowableLossesTestDataItem.jsoupDoc.body.getElementById("allowableLossesYes").parent.text shouldBe Messages("calc.base.yes")
+          AllowableLossesTestDataItem.jsoupDoc.body.getElementById("allowableLossesNo").parent.text shouldBe Messages("calc.base.no")
+          AllowableLossesTestDataItem.jsoupDoc.body.getElementsByTag("legend").text shouldBe Messages("calc.allowableLosses.question.one")
+        }
+
+        "have a hidden monetary input with question 'Whats the total value of your allowable losses?'" in {
+          AllowableLossesTestDataItem.jsoupDoc.body.getElementById("allowableLosses").tagName shouldEqual "input"
+          AllowableLossesTestDataItem.jsoupDoc.select("label[for=allowableLosses]").text shouldEqual Messages("calc.allowableLosses.question.two")
+        }
+
+        "have a hidden help text section with summary 'What are allowable losses?' and correct content" in {
+          AllowableLossesTestDataItem.jsoupDoc.select("div#allowableLossesHiddenHelp").text should
+            include(Messages("calc.allowableLosses.helpText.title"))
+            include(Messages("calc.allowableLosses.helpText.paragraph.one"))
+            include(Messages("calc.allowableLosses.helpText.bullet.one"))
+            include(Messages("calc.allowableLosses.helpText.bullet.two"))
+            include(Messages("calc.allowableLosses.helpText.bullet.three"))
+        }
+
+        "has a Continue button" in {
+          AllowableLossesTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+        }
       }
     }
+
 
     //################### Other Reliefs tests #######################
     "In CalculationController calling the .otherReliefs action " should {
