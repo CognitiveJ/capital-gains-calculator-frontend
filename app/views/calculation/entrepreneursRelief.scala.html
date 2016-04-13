@@ -1,10 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+@()(implicit request: Request[_])
 
-</body>
-</html>
+@import views.html.helpers._
+
+@sidebar = {
+    <a href="https://www.gov.uk/entrepreneurs-relief" target="_blank">@Messages("calc.entrepreneursRelief.link")</a>
+}
+
+@main_template(Messages("calc.entrepreneursRelief.question"), sidebarLinks = Some(sidebar)) {
+
+    <a id="link-back" class="link-back" href="#">@Messages("calc.base.back")</a>
+
+    <h1 class="heading-large">@Messages("calc.base.pageHeading")</h1>
+
+    @simpleYesNoRadio("entrepreneursRelief", Messages("calc.entrepreneursRelief.question"))
+
+    <button class="button" type="submit" id="continue-button">@Messages("calc.base.continue")</button>
+
+}

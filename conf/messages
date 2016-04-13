@@ -84,7 +84,8 @@ calc.acquisitionCosts.question = How much did you pay in costs when you became t
 calc.disposalCosts.question = How much did you pay in costs when you stopped being the property owner?
 
 ## Entrepreneurs Relief ##
-calc.entrepreneursRelief.question = Are you claiming Entrepreneurs' Relief?
+calc.entrepreneursRelief.question = Are you claiming Entrepreneurs'' Relief?
+calc.entrepreneursRelief.link = Entrepreneurs'' Relief
 
 ## Allowable Losses ##
 calc.allowableLosses.question.one = Are you claiming any allowable losses?

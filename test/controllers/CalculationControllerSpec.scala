@@ -440,7 +440,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
           charset(EntrepreneursReliefTestDataItem.result) shouldBe Some("utf-8")
         }
 
-        "have the title 'How much did you sell or give away the property for?'" in {
+        "have the title 'Are you claiming Entrepreneurs Relief?'" in {
           EntrepreneursReliefTestDataItem.jsoupDoc.title shouldEqual Messages("calc.entrepreneursRelief.question")
         }
 
@@ -452,12 +452,16 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
           EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
         }
 
-        "have the question 'How much did you sell or give away the property for?' as the legend of the input" in {
+        "have the question 'Are you claiming Entrepreneurs Relief?' as the legend of the input" in {
           EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementsByTag("legend").text shouldEqual Messages("calc.entrepreneursRelief.question")
         }
 
         "display a 'Continue' button " in {
           EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+        }
+
+        "have a sidebar with additional links" in {
+          EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementsByClass("sidebar")
         }
 
       }
