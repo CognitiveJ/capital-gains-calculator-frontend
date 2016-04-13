@@ -439,6 +439,27 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
           contentType(EntrepreneursReliefTestDataItem.result) shouldBe Some("text/html")
           charset(EntrepreneursReliefTestDataItem.result) shouldBe Some("utf-8")
         }
+
+        "have the title 'How much did you sell or give away the property for?'" in {
+          EntrepreneursReliefTestDataItem.jsoupDoc.title shouldEqual Messages("calc.entrepreneursRelief.question")
+        }
+
+        "have the heading Calculate your tax (non-residents) " in {
+          EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+        }
+
+        "have a 'Back' link " in {
+          EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+        }
+
+        "have the question 'How much did you sell or give away the property for?' as the legend of the input" in {
+          EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementsByTag("legend").text shouldEqual Messages("calc.entrepreneursRelief.question")
+        }
+
+        "display a 'Continue' button " in {
+          EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+        }
+
       }
     }
 
