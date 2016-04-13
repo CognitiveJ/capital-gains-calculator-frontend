@@ -403,6 +403,10 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
           contentType(AcquisitionCostsTestDataItem.result) shouldBe Some("text/html")
           charset(AcquisitionCostsTestDataItem.result) shouldBe Some("utf-8")
         }
+
+        "have the title 'How much did you pay in costs when you became the property owner'" in {
+          AcquisitionCostsTestDataItem.jsoupDoc.getElementsByTag("title").text shouldEqual Messages("calc.acquisitionCosts.question")
+        }
       }
     }
 
