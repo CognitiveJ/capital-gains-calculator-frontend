@@ -43,7 +43,6 @@ calc.introduction.listThreeBulletFour = get compensation if it's destroyed
 calc.introduction.start = Start
 
 ## Customer Type ##
-calc.customerType.title = Who owned the property?
 calc.customerType.question = Who owned the property?
 calc.customerType.individual = I owned it
 calc.customerType.trustee = I was a trustee
@@ -54,13 +53,13 @@ calc.disabledTrustee.question = Are you a trustee for someone who’s vulnerable
 calc.disabledTrustee.helptext = A person’s vulnerable if they’re disabled, or if they’re under 18 and their parents have died
 
 ## Current Income ##
-calc.currentIncome.title = In the tax year when you stopped owning the property, what was your total UK income?
+calc.currentIncome.question = In the tax year when you stopped owning the property, what was your total UK income?
 
 ## Personal Allowance ##
-calc.personalAllowance.title = In the tax year when you stopped owning the property, what was your UK Personal Allowance?
+calc.personalAllowance.question = In the tax year when you stopped owning the property, what was your UK Personal Allowance?
 
 ## Other Properties ##
-calc.otherProperties.title = Did you sell or give away any other properties in that tax year?
+calc.otherProperties.question = Did you sell or give away any other properties in that tax year?
 
 ## Annual Exempt Amount ##
 calc.annualExemptAmount.question = How much of your Capital Gains Tax allowance have you got left?
@@ -70,28 +69,28 @@ calc.annualExemptAmount.link.one = Capital Gains Tax allowances
 calc.acquisitionValue.question = How much did you pay for the property?
 
 ## Improvements ##
-calc.improvements.title = Did you make any improvements to the property?
+calc.improvements.question = Did you make any improvements to the property?
 
 ## Disposal Date ##
-calc.disposalDate.title = When did you sign the contract that made someone else the owner?
+calc.disposalDate.question = When did you sign the contract that made someone else the owner?
 
 ## Disposal Value ##
-calc.disposalValue.title = How much did you sell or give away the property for?
+calc.disposalValue.question = How much did you sell or give away the property for?
 
 ## Acquisition Costs ##
-calc.acquisitionCosts.title = How much did you pay in costs when you became the property owner?
+calc.acquisitionCosts.question = How much did you pay in costs when you became the property owner?
 
 ## Disposal Costs ##
-calc.disposalCosts.title = How much did you pay in costs when you stopped being the property owner?
+calc.disposalCosts.question = How much did you pay in costs when you stopped being the property owner?
 
 ## Entrepreneurs Relief ##
-calc.entrepreneursRelief.title = Are you claiming Entrepreneurs' Relief?
+calc.entrepreneursRelief.question = Are you claiming Entrepreneurs' Relief?
 
 ## Allowable Losses ##
-calc.allowableLosses.title = Are you claiming any allowable losses?
+calc.allowableLosses.question = Are you claiming any allowable losses?
 
 ## Other Reliefs ##
-calc.otherReliefs.title = How much extra tax relief are you claiming?
+calc.otherReliefs.question = How much extra tax relief are you claiming?
 
 ## Summary ##
 calc.summary.title = Summary
