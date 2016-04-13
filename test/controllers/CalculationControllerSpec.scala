@@ -421,6 +421,44 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
           contentType(DisposalCostsTestDataItem.result) shouldBe Some("text/html")
           charset(DisposalCostsTestDataItem.result) shouldBe Some("utf-8")
         }
+
+        "have the title 'How much did you pay in costs when you stopped being the property owner?'" in {
+          DisposalCostsTestDataItem.jsoupDoc.getElementsByTag("title").text shouldBe Messages("calc.disposalCosts.question")
+        }
+
+        "have a back link" in {
+          DisposalCostsTestDataItem.jsoupDoc.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+        }
+
+        "have the heading 'Calculate your tax (non-residents)'" in {
+          DisposalCostsTestDataItem.jsoupDoc.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+        }
+
+        "have a monetary field that" should {
+
+          "have the title 'How much did you pay in costs when you became the property owner?'" in {
+            DisposalCostsTestDataItem.jsoupDoc.select("label[for=disposalCosts]").text shouldEqual Messages("calc.disposalCosts.question")
+          }
+
+          "have the help text 'Costs include agent fees, legal fees and surveys'" in {
+            DisposalCostsTestDataItem.jsoupDoc.select("span.form-hint").text shouldEqual Messages("calc.disposalCosts.helpText")
+          }
+
+          "have an input box for the disposal costs" in {
+            DisposalCostsTestDataItem.jsoupDoc.getElementById("disposalCosts").tagName shouldBe "input"
+          }
+        }
+
+        "have a continue button that" should {
+
+          "be a button element" in {
+            DisposalCostsTestDataItem.jsoupDoc.getElementById("continue-button").tagName shouldBe "button"
+          }
+
+          "have the text 'Continue'" in {
+            DisposalCostsTestDataItem.jsoupDoc.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+          }
+        }
       }
     }
 
