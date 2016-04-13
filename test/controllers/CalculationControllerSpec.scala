@@ -233,16 +233,53 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
     }
 
     //############## Acquisition Value tests ######################
-    "return 200 when sending a GET request `/calculate-your-capital-gains/acquisition-value`" in new fakeRequestTo("acquisition-value") {
-      val result = CalculationController.acquisitionValue(fakeRequest)
-      status(result) shouldBe 200
+    "when calling the acquisitionValue action" should {
+
+      "return 200" in new fakeRequestTo("acquisition-value") {
+        val result = CalculationController.acquisitionValue(fakeRequest)
+        status(result) shouldBe 200
+      }
+
+      "return HTML" in new fakeRequestTo("acquisition-value") {
+        val result = CalculationController.acquisitionValue(fakeRequest)
+        contentType(result) shouldBe Some("text/html")
+        charset(result) shouldBe Some("utf-8")
+      }
+
+      "have the correct page title" in new fakeRequestTo("acquisition-value") {
+        val result = CalculationController.acquisitionValue(fakeRequest)
+        val jsoupDoc = Jsoup.parse(bodyOf(result))
+        jsoupDoc.title shouldEqual Messages("calc.acquisitionValue.question")
+      }
+
+      "should include a back button to the previous page" in new fakeRequestTo("acquisition-value") {
+        val result = CalculationController.acquisitionValue(fakeRequest)
+        val jsoupDoc = Jsoup.parse(bodyOf(result))
+        jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+      }
+
+      "should include the correct page heading" in new fakeRequestTo("acquisition-value") {
+        val result = CalculationController.acquisitionValue(fakeRequest)
+        val jsoupDoc = Jsoup.parse(bodyOf(result))
+        jsoupDoc.body.getElementsByTag("H1").text shouldEqual Messages("calc.base.pageHeading")
+      }
+
+      "should include a monetary input for acquisition value with correct wording for question" in new fakeRequestTo("acquisition-value") {
+        val result = CalculationController.acquisitionValue(fakeRequest)
+        val jsoupDoc = Jsoup.parse(bodyOf(result))
+        jsoupDoc.body.getElementById("acquisitionValue").tagName shouldEqual "input"
+        jsoupDoc.body.getElementsByTag("legend").text shouldEqual Messages("calc.acquisitionValue.question")
+      }
+
+      "should include a continue button" in new fakeRequestTo("acquisition-value") {
+        val result = CalculationController.acquisitionValue(fakeRequest)
+        val jsoupDoc = Jsoup.parse(bodyOf(result))
+        jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+      }
+
     }
 
-    "return HTML when sending a GET request `/calculate-your-capital-gains/acquisition-value`" in new fakeRequestTo("acquisition-value") {
-      val result = CalculationController.acquisitionValue(fakeRequest)
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
-    }
+
 
     //################### Improvements tests #######################
     "return 200 when sending a GET to `/calculate-your-capital-gains/improvements`" in new fakeRequestTo("improvements") {

@@ -67,7 +67,7 @@ calc.annualExemptAmount.question = How much of your Capital Gains Tax allowance 
 calc.annualExemptAmount.link.one = Capital Gains Tax allowances
 
 ## Acquisition Value ##
-calc.acquisitionValue.title = How much did you pay for the property?
+calc.acquisitionValue.question = How much did you pay for the property?
 
 ## Improvements ##
 calc.improvements.title = Did you make any improvements to the property?
