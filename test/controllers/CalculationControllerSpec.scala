@@ -672,6 +672,137 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
           contentType(SummaryTestDataItem.result) shouldBe Some("text/html")
           charset(SummaryTestDataItem.result) shouldBe Some("utf-8")
         }
+
+        "should have the title 'Summary'" in {
+          SummaryTestDataItem.jsoupDoc.getElementsByTag("title").text shouldEqual Messages("calc.summary.title")
+        }
+
+        "have a back button" in {
+          SummaryTestDataItem.jsoupDoc.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+        }
+
+        "have the correct sub-heading 'You owe'" in {
+          SummaryTestDataItem.jsoupDoc.select("h1 span").text shouldEqual Messages("calc.summary.secondaryHeading")
+        }
+
+        "have a result amount currently set to £NNNN.pp" in {
+          SummaryTestDataItem.jsoupDoc.select("h1 b").text shouldEqual "£NNNN.pp"
+        }
+
+        "have a 'Calculation details' section that" should {
+
+          "include the section heading 'Calculation details" in {
+            SummaryTestDataItem.jsoupDoc.select("#calcDetails").text should include (Messages("calc.summary.calculation.details.title"))
+          }
+
+          "include 'Your total gain'" in {
+            SummaryTestDataItem.jsoupDoc.select("#calcDetails").text should include (Messages("calc.summary.calculation.details.totalGain"))
+          }
+
+          "include 'Your taxable gain'" in {
+            SummaryTestDataItem.jsoupDoc.select("#calcDetails").text should include (Messages("calc.summary.calculation.details.taxableGain"))
+          }
+
+          "include 'Your tax rate'" in {
+            SummaryTestDataItem.jsoupDoc.select("#calcDetails").text should include (Messages("calc.summary.calculation.details.taxRate"))
+          }
+        }
+
+        "have a 'Personal details' section that" should {
+
+          "include the section heading 'Personal details" in {
+            SummaryTestDataItem.jsoupDoc.select("#personalDetails").text should include (Messages("calc.summary.personal.details.title"))
+          }
+
+          "include the question 'Who owned the property?'" in {
+            SummaryTestDataItem.jsoupDoc.select("#personalDetails").text should include (Messages("calc.customerType.question"))
+          }
+
+          "include the question 'Are you a trustee for someone who's vulnerable'" in {
+            SummaryTestDataItem.jsoupDoc.select("#personalDetails").text should include (Messages("calc.disabledTrustee.question"))
+          }
+
+          "include the question 'How much of your Capital Gains Tax allowance have you got left'" in {
+            SummaryTestDataItem.jsoupDoc.select("#personalDetails").text should include (Messages("calc.annualExemptAmount.question"))
+          }
+        }
+
+        "have a 'Purchase details' section that" should {
+
+          "include the section heading 'Purchase details" in {
+            SummaryTestDataItem.jsoupDoc.select("#purchaseDetails").text should include (Messages("calc.summary.purchase.details.title"))
+          }
+
+          "include the question 'How much did you pay for the property?'" in {
+            SummaryTestDataItem.jsoupDoc.select("#purchaseDetails").text should include (Messages("calc.acquisitionValue.question"))
+          }
+
+          "include the question 'How much did you pay in costs when you became the property owner?'" in {
+            SummaryTestDataItem.jsoupDoc.select("#purchaseDetails").text should include (Messages("calc.acquisitionCosts.question"))
+          }
+        }
+
+        "have a 'Property details' section that" should {
+
+          "include the section heading 'Property details" in {
+            SummaryTestDataItem.jsoupDoc.select("#propertyDetails").text should include (Messages("calc.summary.property.details.title"))
+          }
+
+          "include the question 'How much did you pay for the property?'" in {
+            SummaryTestDataItem.jsoupDoc.select("#propertyDetails").text should include (Messages("calc.improvements.question"))
+          }
+        }
+
+        "have a 'Sale details' section that" should {
+
+          "include the section heading 'Sale details" in {
+            SummaryTestDataItem.jsoupDoc.select("#saleDetails").text should include (Messages("calc.summary.sale.details.title"))
+          }
+
+          "include the question 'When did you sign the contract that made someone else the owner?'" in {
+            SummaryTestDataItem.jsoupDoc.select("#saleDetails").text should include (Messages("calc.disposalDate.question"))
+          }
+
+          "include the question 'How much did you sell or give away the property for?'" in {
+            SummaryTestDataItem.jsoupDoc.select("#saleDetails").text should include (Messages("calc.disposalValue.question"))
+          }
+
+          "include the question 'How much did you pay in costs when you stopped being the property owner?'" in {
+            SummaryTestDataItem.jsoupDoc.select("#saleDetails").text should include (Messages("calc.disposalCosts.question"))
+          }
+        }
+
+        "have a 'Deductions details' section that" should {
+
+          "include the section heading 'Deductions" in {
+            SummaryTestDataItem.jsoupDoc.select("#deductions").text should include (Messages("calc.summary.deductions.title"))
+          }
+
+          "include the question 'Are you claiming Entrepreneurs' Relief?'" in {
+            SummaryTestDataItem.jsoupDoc.select("#deductions").text should include (Messages("calc.entrepreneursRelief.question"))
+          }
+
+          "include the question 'Whats the total value of your allowable losses?'" in {
+            SummaryTestDataItem.jsoupDoc.select("#deductions").text should include (Messages("calc.allowableLosses.question.two"))
+          }
+        }
+
+        "have a 'What to do next' section that" should {
+
+          "have the heading 'What to do next'" in {
+            SummaryTestDataItem.jsoupDoc.select("#whatToDoNext H2").text shouldEqual (Messages("calc.common.next.actions.heading"))
+          }
+
+          "include the text 'You need to tell HMRC about the property'" in {
+            SummaryTestDataItem.jsoupDoc.select("#whatToDoNext").text should
+              include (Messages("calc.summary.next.actions.text"))
+              include (Messages("calc.summary.next.actions.link"))
+          }
+        }
+
+        "have a link to 'Start again'" in {
+          SummaryTestDataItem.jsoupDoc.select("#startAgain").text shouldEqual Messages("calc.summary.startAgain")
+        }
       }
     }
   }

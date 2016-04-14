@@ -1,10 +1,134 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+@()(implicit request: Request[_])
 
-</body>
-</html>
+@import views.html.helpers._
+
+@main_template(Messages("calc.summary.title"), articleLayout = false) {
+
+    <a id="back-link" class="back-link" href="#">@Messages("calc.base.back")</a>
+
+    @*
+    *  Calculated Tax Owed
+    *@
+    <div>
+        <h1 class="heading-xlarge heading-xxlarge">
+            <span class="heading-secondary">@Messages("calc.summary.secondaryHeading")</span>
+            <b>&pound;NNNN.pp</b>
+        </h1>
+    </div>
+
+     @*
+     *  Calculation Details Section
+     *@
+     @summaryPageSection("calcDetails",Messages("calc.summary.calculation.details.title"),
+        Array(
+            Map(
+                "question" -> Messages("calc.summary.calculation.details.totalGain"),
+                "answer" -> ""),
+            Map(
+                "question" -> Messages("calc.summary.calculation.details.taxableGain"),
+                "answer" -> ""),
+            Map(
+                "question" -> Messages("calc.summary.calculation.details.taxRate"),
+                "answer" -> "")
+        )
+    )
+
+
+    @*
+    *  Personal Details Section
+    *@
+    @summaryPageSection("personalDetails",Messages("calc.summary.personal.details.title"),
+        Array(
+            Map(
+                "question" -> Messages("calc.customerType.question"),
+                "answer" -> ""),
+            Map(
+                "question" -> Messages("calc.disabledTrustee.question"),
+                "answer" -> ""),
+            Map(
+                "question" -> Messages("calc.annualExemptAmount.question"),
+                "answer" -> "")
+        )
+    )
+
+
+    @*
+    *  Purchase Details Section
+    *@
+    @summaryPageSection("purchaseDetails",Messages("calc.summary.purchase.details.title"),
+        Array(
+            Map(
+                "question" -> Messages("calc.acquisitionValue.question"),
+                "answer" -> ""),
+            Map(
+                "question" -> Messages("calc.acquisitionCosts.question"),
+                "answer" -> "")
+        )
+    )
+
+
+    @*
+    *  Property Details Section
+    *@
+    @summaryPageSection("propertyDetails",Messages("calc.summary.property.details.title"),
+        Array(
+            Map(
+                "question" -> Messages("calc.improvements.question"),
+                "answer" -> "")
+        )
+    )
+
+
+    @*
+    *  Sale Details Section
+    *@
+    @summaryPageSection("saleDetails",Messages("calc.summary.sale.details.title"),
+        Array(
+            Map(
+                "question" -> Messages("calc.disposalDate.question"),
+                "answer" -> ""),
+            Map(
+                "question" -> Messages("calc.disposalValue.question"),
+                "answer" -> ""),
+            Map(
+                "question" -> Messages("calc.disposalCosts.question"),
+                "answer" -> "")
+        )
+    )
+
+
+    @*
+    *  Deductions Section
+    *@
+    @summaryPageSection("deductions",Messages("calc.summary.deductions.title"),
+        Array(
+            Map(
+                "question" -> Messages("calc.entrepreneursRelief.question"),
+                "answer" -> ""),
+            Map(
+                "question" -> Messages("calc.allowableLosses.question.two"),
+                "answer" -> "")
+        )
+    )
+
+
+    <div class="grid-layout__column grid-layout__column--2-3">
+
+        @*
+        *  What to do next
+        *@
+        <div id="whatToDoNext" class="form-group">
+            <h2 class="heading-medium">@Messages("calc.common.next.actions.heading")</h2>
+            <p>
+                @Messages("calc.summary.next.actions.text")
+                <a class="external-link" rel="external" href="#">@Messages("calc.summary.next.actions.link")</a>
+            </p>
+        </div>
+
+        @*
+        *  Start Again
+        *@
+        <a id="startAgain" class="bold-medium" href="@routes.IntroductionController.introduction">@Messages("calc.summary.startAgain")</a>
+
+    </div>
+}
