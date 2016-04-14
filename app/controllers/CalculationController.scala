@@ -16,20 +16,29 @@
 
 package controllers
 
+import connectors.CalculatorConnector
 import forms.CustomerTypeForm.customerTypeForm
+import models.CustomerTypeModel
 import play.api.mvc.Action
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 import scala.concurrent.Future
 import views.html._
 
-object CalculationController extends CalculationController
+object CalculationController extends CalculationController {
+  val calcConnector = CalculatorConnector
+}
 
 trait CalculationController extends FrontendController {
 
+  val calcConnector: CalculatorConnector
+
   //################### Customer Type methods #######################
   val customerType = Action.async { implicit request =>
-    Future.successful(Ok(calculation.customerType(customerTypeForm)))
+    calcConnector.fetchAndGetFormData[CustomerTypeModel]("customerType").map {
+      case Some(data) => Ok(calculation.customerType(customerTypeForm.fill(data)))
+      case None => Ok(calculation.customerType(customerTypeForm))
+    }
   }
 
   //################### Disabled Trustee methods #######################

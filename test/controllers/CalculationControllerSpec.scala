@@ -16,70 +16,132 @@
 
 package controllers
 
-import play.api.http.Status
+import java.util.UUID
+import scala.collection.JavaConversions._
+
+import connectors.CalculatorConnector
+import models.CustomerTypeModel
+import org.scalatest.BeforeAndAfterEach
+import org.mockito.Matchers
+import org.mockito.Mockito._
 import play.api.i18n.Messages
 import play.api.mvc.{AnyContent, Action}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.play.http.{SessionKeys, HeaderCarrier}
+import uk.gov.hmrc.play.http.logging.SessionId
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import org.jsoup._
+import org.scalatest.mock.MockitoSugar
+import scala.concurrent.Future
 
-class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
+
+class CalculationControllerSpec extends UnitSpec with WithFakeApplication with MockitoSugar with BeforeAndAfterEach{
 
   val s = "Action(parser=BodyParser(anyContent))"
+  val sessionId = UUID.randomUUID.toString
+  val mockCalcConnector = mock[CalculatorConnector]
+  val TestCalculationController = new CalculationController {
+    override val calcConnector: CalculatorConnector = mockCalcConnector
+  }
 
-  class fakeRequestTo(url : String, controllerAction : Action[AnyContent]) {
-    val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/" + url)
+  implicit val hc = new HeaderCarrier(sessionId = Some(SessionId(sessionId.toString)))
+
+  class fakeRequestTo(url: String, controllerAction: Action[AnyContent]) {
+    val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/" + url).withSession(SessionKeys.sessionId -> s"session-$sessionId")
     val result = controllerAction(fakeRequest)
     val jsoupDoc = Jsoup.parse(bodyOf(result))
   }
 
+  def keystoreFetchCondition[T](data: Option[T]): Unit = {
+    when(mockCalcConnector.fetchAndGetFormData[T](Matchers.anyString())(Matchers.any(), Matchers.any()))
+      .thenReturn(Future.successful(data))
+  }
+
   //################### Customer Type tests #######################
-  "In CalculationController calling the .customerType action " should {
+  "In CalculationController calling the .customerType action " when {
+    "not supplied with a pre-existing stored model" should {
+      object CustomerTypeTestDataItem extends fakeRequestTo("customer-type", TestCalculationController.customerType)
 
-    object CustomerTypeTestDataItem extends fakeRequestTo("customer-type", CalculationController.customerType)
+      "return a 200" in {
+        keystoreFetchCondition[CustomerTypeModel](None)
+        status(CustomerTypeTestDataItem.result) shouldBe 200
+      }
 
-    "return a 200" in {
-      status(CustomerTypeTestDataItem.result) shouldBe 200
+      "return some HTML that" should {
+
+        "contain some text and use the character set utf-8" in {
+          keystoreFetchCondition[CustomerTypeModel](None)
+          contentType(CustomerTypeTestDataItem.result) shouldBe Some("text/html")
+          charset(CustomerTypeTestDataItem.result) shouldBe Some("utf-8")
+        }
+
+        "have the title 'Who owned the property?'" in {
+          keystoreFetchCondition[CustomerTypeModel](None)
+          CustomerTypeTestDataItem.jsoupDoc.title shouldEqual Messages("calc.customerType.question")
+        }
+
+        "have the heading Calculate your tax (non-residents) " in {
+          keystoreFetchCondition[CustomerTypeModel](None)
+          CustomerTypeTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+        }
+
+        "have a 'Back' link " in {
+          keystoreFetchCondition[CustomerTypeModel](None)
+          CustomerTypeTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+        }
+
+        "have the question 'Who owned the property?' as the legend of the input" in {
+          keystoreFetchCondition[CustomerTypeModel](None)
+          CustomerTypeTestDataItem.jsoupDoc.body.getElementsByTag("legend").text shouldEqual Messages("calc.customerType.question")
+        }
+
+        "display a radio button with the option `individual`" in {
+          keystoreFetchCondition[CustomerTypeModel](None)
+          CustomerTypeTestDataItem.jsoupDoc.body.getElementById("customerType-individual").parent.text shouldEqual Messages("calc.customerType.individual")
+        }
+
+        "have the radio option `individual` not selected by default" in {
+          keystoreFetchCondition[CustomerTypeModel](None)
+          CustomerTypeTestDataItem.jsoupDoc.body.getElementById("customerType-individual").parent.classNames().contains("selected") shouldBe false
+        }
+
+        "display a radio button with the option `trustee`" in {
+          keystoreFetchCondition[CustomerTypeModel](None)
+          CustomerTypeTestDataItem.jsoupDoc.body.getElementById("customerType-trustee").parent.text shouldEqual Messages("calc.customerType.trustee")
+        }
+
+        "display a radio button with the option `personal representative`" in {
+          keystoreFetchCondition[CustomerTypeModel](None)
+          CustomerTypeTestDataItem.jsoupDoc.body.getElementById("customerType-personalrep").parent.text shouldEqual Messages("calc.customerType.personalRep")
+        }
+
+        "display a 'Continue' button " in {
+          keystoreFetchCondition[CustomerTypeModel](None)
+          CustomerTypeTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+        }
+      }
     }
-
-    "return some HTML that" should {
-
-      "contain some text and use the character set utf-8" in {
-        contentType(CustomerTypeTestDataItem.result) shouldBe Some("text/html")
-        charset(CustomerTypeTestDataItem.result) shouldBe Some("utf-8")
+    "supplied with a pre-existing stored model" should {
+      object CustomerTypeTestDataItem extends fakeRequestTo("customer-type", TestCalculationController.customerType)
+      val testModel = new CustomerTypeModel("individual")
+      "return a 200" in {
+        keystoreFetchCondition[CustomerTypeModel](Some(testModel))
+        status(CustomerTypeTestDataItem.result) shouldBe 200
       }
 
-      "have the title 'Who owned the property?'" in {
-        CustomerTypeTestDataItem.jsoupDoc.title shouldEqual Messages("calc.customerType.question")
-      }
+      "return some HTML that" should {
 
-      "have the heading Calculate your tax (non-residents) " in {
-        CustomerTypeTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
-      }
+        "contain some text and use the character set utf-8" in {
+          keystoreFetchCondition[CustomerTypeModel](Some(testModel))
+          contentType(CustomerTypeTestDataItem.result) shouldBe Some("text/html")
+          charset(CustomerTypeTestDataItem.result) shouldBe Some("utf-8")
+        }
 
-      "have a 'Back' link " in {
-        CustomerTypeTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
-      }
-
-      "have the question 'Who owned the property?' as the legend of the input" in {
-        CustomerTypeTestDataItem.jsoupDoc.body.getElementsByTag("legend").text shouldEqual Messages("calc.customerType.question")
-      }
-
-      "display a radio button with the option `individual`" in {
-        CustomerTypeTestDataItem.jsoupDoc.body.getElementById("customerType-individual").parent.text shouldEqual Messages("calc.customerType.individual")
-      }
-
-      "display a radio button with the option `trustee`" in {
-        CustomerTypeTestDataItem.jsoupDoc.body.getElementById("customerType-trustee").parent.text shouldEqual Messages("calc.customerType.trustee")
-      }
-
-      "display a radio button with the option `personal representative`" in {
-        CustomerTypeTestDataItem.jsoupDoc.body.getElementById("customerType-personalrep").parent.text shouldEqual Messages("calc.customerType.personalRep")
-      }
-
-      "display a 'Continue' button " in {
-        CustomerTypeTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+        "have the radio option `individual` selected by default" in {
+          keystoreFetchCondition[CustomerTypeModel](Some(testModel))
+          CustomerTypeTestDataItem.jsoupDoc.body.getElementById("customerType-individual").parent.classNames().contains("selected") shouldBe true
+        }
       }
     }
   }
