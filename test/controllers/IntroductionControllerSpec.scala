@@ -57,6 +57,9 @@ class IntroductionControllerSpec extends UnitSpec with WithFakeApplication {
           charset(IntroductionTestDataItem.result) shouldBe Some("utf-8")
         }
 
+        "display the beta banner" in {
+          IntroductionTestDataItem.jsoupDoc.body.getElementById("phase").text shouldEqual ("BETA")
+        }
         "have the title 'Introduction'" in {
           IntroductionTestDataItem.jsoupDoc.title shouldEqual Messages("calc.introduction.title")
         }

@@ -13,6 +13,7 @@
 @import layouts.{govuk_template => hmrcGovUkTemplate}
 @import uk.gov.hmrc.play.views.html.{layouts => uiLayouts}
 @import uk.gov.hmrc.play.views.html.{helpers => uiHelpers}
+@import views.html.helpers._
 
 @scriptElement = {
 <script type="text/javascript" src='@controllers.routes.Assets.at("javascripts/cgt.js")'></script>
@@ -56,7 +57,7 @@
 
 @serviceInfo = {
     @uiLayouts.serviceInfo(
-      betaBanner = HtmlFormat.empty,
+      betaBanner = betaBanner("BETA"),
       includeGridWrapper = false,
       serviceInfoContent = Some(serviceInfoContent))
 }
