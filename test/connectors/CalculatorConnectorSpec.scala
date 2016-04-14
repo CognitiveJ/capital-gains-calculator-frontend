@@ -33,12 +33,12 @@ import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
 
-class KeystoreConnectorSpec extends UnitSpec with MockitoSugar {
+class CalculatorConnectorSpec extends UnitSpec with MockitoSugar {
 
   lazy val mockSessionCache  = mock[SessionCache]
   lazy val sessionId = UUID.randomUUID.toString
 
-  object TestKeystoreConnector extends CalculatorConnector{
+  object TestCalculatorConnector extends CalculatorConnector{
     lazy val sessionCache = mockSessionCache
   }
 
@@ -50,7 +50,7 @@ class KeystoreConnectorSpec extends UnitSpec with MockitoSugar {
       val testModel = CustomerTypeModel("trustee")
       when(mockSessionCache.fetchAndGetEntry[CustomerTypeModel](Matchers.anyString())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(Option(testModel)))
-      lazy val result = TestKeystoreConnector.fetchAndGetFormData[CustomerTypeModel]("customerType")
+      lazy val result = TestCalculatorConnector.fetchAndGetFormData[CustomerTypeModel]("customerType")
       await(result) shouldBe Some(testModel)
     }
 
@@ -59,7 +59,7 @@ class KeystoreConnectorSpec extends UnitSpec with MockitoSugar {
       val returnedCacheMap = CacheMap("customerType", Map("data" -> Json.toJson(testModel)))
       when(mockSessionCache.cache[CustomerTypeModel](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(returnedCacheMap))
-      lazy val result = TestKeystoreConnector.saveFormData("customerType", testModel)
+      lazy val result = TestCalculatorConnector.saveFormData("customerType", testModel)
       await(result) shouldBe returnedCacheMap
     }
   }

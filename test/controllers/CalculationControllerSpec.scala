@@ -40,9 +40,9 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
   val s = "Action(parser=BodyParser(anyContent))"
   val sessionId = UUID.randomUUID.toString
-  val mockKeystoreConnector = mock[CalculatorConnector]
+  val mockCalcConnector = mock[CalculatorConnector]
   val TestCalculationController = new CalculationController {
-    override val keystoreConnector: CalculatorConnector = mockKeystoreConnector
+    override val calcConnector: CalculatorConnector = mockCalcConnector
   }
 
   implicit val hc = new HeaderCarrier(sessionId = Some(SessionId(sessionId.toString)))
@@ -54,7 +54,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
   }
 
   def keystoreFetchCondition[T](data: Option[T]): Unit = {
-    when(mockKeystoreConnector.fetchAndGetFormData[T](Matchers.anyString())(Matchers.any(), Matchers.any()))
+    when(mockCalcConnector.fetchAndGetFormData[T](Matchers.anyString())(Matchers.any(), Matchers.any()))
       .thenReturn(Future.successful(data))
   }
 

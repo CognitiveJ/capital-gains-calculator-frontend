@@ -26,16 +26,16 @@ import scala.concurrent.Future
 import views.html._
 
 object CalculationController extends CalculationController {
-  val keystoreConnector = CalculatorConnector
+  val calcConnector = CalculatorConnector
 }
 
 trait CalculationController extends FrontendController {
 
-  val keystoreConnector: CalculatorConnector
+  val calcConnector: CalculatorConnector
 
   //################### Customer Type methods #######################
   val customerType = Action.async { implicit request =>
-    keystoreConnector.fetchAndGetFormData[CustomerTypeModel]("customerType").map {
+    calcConnector.fetchAndGetFormData[CustomerTypeModel]("customerType").map {
       case Some(data) => Ok(calculation.customerType(customerTypeForm.fill(data)))
       case None => Ok(calculation.customerType(customerTypeForm))
     }
