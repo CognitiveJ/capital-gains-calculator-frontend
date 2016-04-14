@@ -22,9 +22,19 @@ import models._
 
 
 object CustomerTypeForm {
+
+  def validate(customerType:String): Option[CustomerTypeModel] = {
+    customerType match {
+      case "individual" => Some(CustomerTypeModel(customerType))
+      case "trustee" => Some(CustomerTypeModel(customerType))
+      case "personalRep" => Some(CustomerTypeModel(customerType))
+      case _ => None
+    }
+  }
+
   val customerTypeForm = Form(
     mapping(
-      "customerType" -> text
+      "customerType" -> nonEmptyText.verifying("Invalid customer type!", customerType => validate(customerType).isDefined)
     )(CustomerTypeModel.apply)(CustomerTypeModel.unapply)
   )
 }
