@@ -407,6 +407,10 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
         "have the title 'How much did you pay in costs when you became the property owner'" in {
           AcquisitionCostsTestDataItem.jsoupDoc.getElementsByTag("title").text shouldEqual Messages("calc.acquisitionCosts.question")
         }
+
+        "have a back link" in {
+          AcquisitionCostsTestDataItem.jsoupDoc.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+        }
       }
     }
 
