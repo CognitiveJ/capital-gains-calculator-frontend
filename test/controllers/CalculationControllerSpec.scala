@@ -424,6 +424,44 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
           contentType(AcquisitionCostsTestDataItem.result) shouldBe Some("text/html")
           charset(AcquisitionCostsTestDataItem.result) shouldBe Some("utf-8")
         }
+
+        "have the title 'How much did you pay in costs when you became the property owner'" in {
+          AcquisitionCostsTestDataItem.jsoupDoc.getElementsByTag("title").text shouldEqual Messages("calc.acquisitionCosts.question")
+        }
+
+        "have a back link" in {
+          AcquisitionCostsTestDataItem.jsoupDoc.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+        }
+
+        "have the page heading 'Calculate your tax (non-residents)'" in {
+          AcquisitionCostsTestDataItem.jsoupDoc.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+        }
+
+        "have a monetary field that" should {
+
+          "have the title 'How much did you pay in costs when you became the property owner?'" in {
+            AcquisitionCostsTestDataItem.jsoupDoc.select("label[for=acquisitionCosts]").text shouldEqual Messages("calc.acquisitionCosts.question")
+          }
+
+          "have the help text 'Costs include agent fees, legal fees and surveys'" in {
+            AcquisitionCostsTestDataItem.jsoupDoc.select("span.form-hint").text shouldEqual Messages("calc.acquisitionCosts.helpText")
+          }
+
+          "have an input box for the acquisition costs" in {
+            AcquisitionCostsTestDataItem.jsoupDoc.getElementById("acquisitionCosts").tagName shouldBe "input"
+          }
+        }
+
+        "have a continue button that" should {
+
+          "be a button element" in {
+            AcquisitionCostsTestDataItem.jsoupDoc.getElementById("continue-button").tagName shouldBe "button"
+          }
+
+          "have the text 'Continue'" in {
+            AcquisitionCostsTestDataItem.jsoupDoc.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+          }
+        }
       }
     }
 
@@ -459,10 +497,6 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
 
           "have the title 'How much did you pay in costs when you became the property owner?'" in {
             DisposalCostsTestDataItem.jsoupDoc.select("label[for=disposalCosts]").text shouldEqual Messages("calc.disposalCosts.question")
-          }
-
-          "have the help text 'Costs include agent fees, legal fees and surveys'" in {
-            DisposalCostsTestDataItem.jsoupDoc.select("span.form-hint").text shouldEqual Messages("calc.disposalCosts.helpText")
           }
 
           "have an input box for the disposal costs" in {
