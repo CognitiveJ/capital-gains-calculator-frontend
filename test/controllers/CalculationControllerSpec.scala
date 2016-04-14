@@ -430,6 +430,17 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
             AcquisitionCostsTestDataItem.jsoupDoc.getElementById("acquisitionCosts").tagName shouldBe "input"
           }
         }
+
+        "have a continue button that" should {
+
+          "be a button element" in {
+            AcquisitionCostsTestDataItem.jsoupDoc.getElementById("continue-button").tagName shouldBe "button"
+          }
+
+          "have the text 'Continue'" in {
+            AcquisitionCostsTestDataItem.jsoupDoc.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+          }
+        }
       }
     }
 
