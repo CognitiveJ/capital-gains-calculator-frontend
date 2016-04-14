@@ -18,8 +18,8 @@ package connectors
 
 import java.util.UUID
 
-import config.WSHttp
-import controllers.SessionCacheController._
+import config.{CalculatorSessionCache, WSHttp}
+import CalculatorSessionCache._
 import models.CustomerTypeModel
 import org.mockito.Matchers
 import org.mockito.Mockito._

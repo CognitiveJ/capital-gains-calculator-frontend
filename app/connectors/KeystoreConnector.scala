@@ -16,14 +16,14 @@
 
 package connectors
 
-import controllers.SessionCacheController
+import config.CalculatorSessionCache
 import play.api.libs.json.Format
 import uk.gov.hmrc.http.cache.client.{SessionCache, CacheMap}
 import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.concurrent.Future
 
 object KeystoreConnector extends KeystoreConnector {
-  val sessionCache = SessionCacheController
+  val sessionCache = CalculatorSessionCache
 }
 
 trait KeystoreConnector {
