@@ -416,7 +416,20 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
           AcquisitionCostsTestDataItem.jsoupDoc.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
         }
 
+        "have a monetary field that" should {
 
+          "have the title 'How much did you pay in costs when you became the property owner?'" in {
+            AcquisitionCostsTestDataItem.jsoupDoc.select("label[for=acquisitionCosts]").text shouldEqual Messages("calc.acquisitionCosts.question")
+          }
+
+          "have the help text 'Costs include agent fees, legal fees and surveys'" in {
+            AcquisitionCostsTestDataItem.jsoupDoc.select("span.form-hint").text shouldEqual Messages("calc.acquisitionCosts.helpText")
+          }
+
+          "have an input box for the acquisition costs" in {
+            AcquisitionCostsTestDataItem.jsoupDoc.getElementById("acquisitionCosts").tagName shouldBe "input"
+          }
+        }
       }
     }
 
@@ -452,10 +465,6 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
 
           "have the title 'How much did you pay in costs when you became the property owner?'" in {
             DisposalCostsTestDataItem.jsoupDoc.select("label[for=disposalCosts]").text shouldEqual Messages("calc.disposalCosts.question")
-          }
-
-          "have the help text 'Costs include agent fees, legal fees and surveys'" in {
-            DisposalCostsTestDataItem.jsoupDoc.select("span.form-hint").text shouldEqual Messages("calc.disposalCosts.helpText")
           }
 
           "have an input box for the disposal costs" in {
