@@ -44,9 +44,9 @@ class CalculatorConnectorSpec extends UnitSpec with MockitoSugar {
 
   implicit val hc: HeaderCarrier = HeaderCarrier(sessionId = Some(SessionId(sessionId.toString)))
 
-  "Keystore Connector" should {
+  "Calculator Connector" should {
 
-    "fetch and get" in {
+    "fetch and get from keystore" in {
       val testModel = CustomerTypeModel("trustee")
       when(mockSessionCache.fetchAndGetEntry[CustomerTypeModel](Matchers.anyString())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(Option(testModel)))
