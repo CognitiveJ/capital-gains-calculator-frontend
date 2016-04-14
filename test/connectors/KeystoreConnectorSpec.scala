@@ -38,7 +38,7 @@ class KeystoreConnectorSpec extends UnitSpec with MockitoSugar {
   lazy val mockSessionCache  = mock[SessionCache]
   lazy val sessionId = UUID.randomUUID.toString
 
-  object TestKeystoreConnector extends KeystoreConnector{
+  object TestKeystoreConnector extends CalculatorConnector{
     lazy val sessionCache = mockSessionCache
   }
 

@@ -22,11 +22,11 @@ import uk.gov.hmrc.http.cache.client.{SessionCache, CacheMap}
 import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.concurrent.Future
 
-object KeystoreConnector extends KeystoreConnector {
+object CalculatorConnector extends CalculatorConnector {
   val sessionCache = CalculatorSessionCache
 }
 
-trait KeystoreConnector {
+trait CalculatorConnector {
 
   val sessionCache: SessionCache
 

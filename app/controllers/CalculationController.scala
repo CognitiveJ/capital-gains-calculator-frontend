@@ -16,7 +16,7 @@
 
 package controllers
 
-import connectors.KeystoreConnector
+import connectors.CalculatorConnector
 import forms.CustomerTypeForm.customerTypeForm
 import models.CustomerTypeModel
 import play.api.mvc.Action
@@ -26,12 +26,12 @@ import scala.concurrent.Future
 import views.html._
 
 object CalculationController extends CalculationController {
-  val keystoreConnector = KeystoreConnector
+  val keystoreConnector = CalculatorConnector
 }
 
 trait CalculationController extends FrontendController {
 
-  val keystoreConnector: KeystoreConnector
+  val keystoreConnector: CalculatorConnector
 
   //################### Customer Type methods #######################
   val customerType = Action.async { implicit request =>

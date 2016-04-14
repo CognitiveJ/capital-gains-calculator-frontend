@@ -19,7 +19,7 @@ package controllers
 import java.util.UUID
 import scala.collection.JavaConversions._
 
-import connectors.KeystoreConnector
+import connectors.CalculatorConnector
 import models.CustomerTypeModel
 import org.scalatest.BeforeAndAfterEach
 import org.mockito.Matchers
@@ -40,9 +40,9 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
   val s = "Action(parser=BodyParser(anyContent))"
   val sessionId = UUID.randomUUID.toString
-  val mockKeystoreConnector = mock[KeystoreConnector]
+  val mockKeystoreConnector = mock[CalculatorConnector]
   val TestCalculationController = new CalculationController {
-    override val keystoreConnector: KeystoreConnector = mockKeystoreConnector
+    override val keystoreConnector: CalculatorConnector = mockKeystoreConnector
   }
 
   implicit val hc = new HeaderCarrier(sessionId = Some(SessionId(sessionId.toString)))
