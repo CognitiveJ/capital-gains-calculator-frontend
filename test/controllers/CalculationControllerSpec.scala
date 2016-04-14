@@ -101,6 +101,11 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           CustomerTypeTestDataItem.jsoupDoc.body.getElementById("customerType-individual").parent.text shouldEqual Messages("calc.customerType.individual")
         }
 
+        "have the radio option `individual` not selected by default" in {
+          keystoreFetchCondition[CustomerTypeModel](None)
+          CustomerTypeTestDataItem.jsoupDoc.body.getElementById("customerType-individual").parent.classNames().contains("selected") shouldBe false
+        }
+
         "display a radio button with the option `trustee`" in {
           keystoreFetchCondition[CustomerTypeModel](None)
           CustomerTypeTestDataItem.jsoupDoc.body.getElementById("customerType-trustee").parent.text shouldEqual Messages("calc.customerType.trustee")
