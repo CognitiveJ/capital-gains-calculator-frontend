@@ -305,8 +305,29 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
           contentType(ImprovementsTestDataItem.result) shouldBe Some("text/html")
           charset(ImprovementsTestDataItem.result) shouldBe Some("utf-8")
         }
+
+        "have the title 'Who owned the property?'" in {
+          ImprovementsTestDataItem.jsoupDoc.title shouldEqual Messages("calc.improvements.question")
+        }
+
+        "have the heading Calculate your tax (non-residents)" in {
+          ImprovementsTestDataItem.jsoupDoc.body.getElementsByTag("H1").text shouldEqual Messages("calc.base.pageHeading")
+        }
+
+        "display the correct wording for radio option `yes`" in {
+          ImprovementsTestDataItem.jsoupDoc.body.getElementById("improvementsCheckYes").parent.text shouldEqual Messages("calc.base.yes")
+        }
+
+        "display the correct wording for radio option `no`" in{
+          ImprovementsTestDataItem.jsoupDoc.body.getElementById("improvementsCheckNo").parent.text shouldEqual Messages("calc.base.no")
+        }
+
+        "contain a hidden component with an input box" in {
+          ImprovementsTestDataItem.jsoupDoc.body.getElementById("improvements").parent.parent.id shouldBe "hidden"
+        }
       }
     }
+
 
     //################### Disposal Date tests #######################
     "In CalculationController calling the .disposalDate action " should {
@@ -511,6 +532,31 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
           contentType(EntrepreneursReliefTestDataItem.result) shouldBe Some("text/html")
           charset(EntrepreneursReliefTestDataItem.result) shouldBe Some("utf-8")
         }
+
+        "have the title 'Are you claiming Entrepreneurs Relief?'" in {
+          EntrepreneursReliefTestDataItem.jsoupDoc.title shouldEqual Messages("calc.entrepreneursRelief.question")
+        }
+
+        "have the heading Calculate your tax (non-residents) " in {
+          EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+        }
+
+        "have a 'Back' link " in {
+          EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+        }
+
+        "have the question 'Are you claiming Entrepreneurs Relief?' as the legend of the input" in {
+          EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementsByTag("legend").text shouldEqual Messages("calc.entrepreneursRelief.question")
+        }
+
+        "display a 'Continue' button " in {
+          EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+        }
+
+        "have a sidebar with additional links" in {
+          EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementsByClass("sidebar")
+        }
+
       }
     }
 
@@ -584,6 +630,29 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication {
         "contain some text and use the character set utf-8" in {
           contentType(OtherReliefsTestDataItem.result) shouldBe Some("text/html")
           charset(OtherReliefsTestDataItem.result) shouldBe Some("utf-8")
+        }
+        "have the title 'How much extra tax relief are you claiming?'" in {
+          OtherReliefsTestDataItem.jsoupDoc.title shouldEqual Messages("calc.otherReliefs.question")
+        }
+
+        "have the heading Calculate your tax (non-residents) " in {
+          OtherReliefsTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+        }
+
+        "have a 'Back' link " in {
+          OtherReliefsTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+        }
+
+        "have the question 'How much extra tax relief are you claiming?' as the legend of the input" in {
+          OtherReliefsTestDataItem.jsoupDoc.body.getElementsByTag("label").text shouldEqual Messages("calc.otherReliefs.question")
+        }
+
+        "display an input box for the Other Tax Reliefs" in {
+          OtherReliefsTestDataItem.jsoupDoc.body.getElementById("otherReliefs").tagName() shouldEqual "input"
+        }
+
+        "display a 'Continue' button " in {
+          OtherReliefsTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
         }
       }
     }
