@@ -4,7 +4,8 @@
   contentHeader: Option[Html] = None,
   bodyClasses: Option[String] = None,
   mainClass: Option[String] = None,
-  scriptElem: Option[Html] = None)(mainContent: Html)(implicit request : Request[_])
+  scriptElem: Option[Html] = None,
+  articleLayout: Boolean = true)(mainContent: Html)(implicit request : Request[_])
 
 @import uk.gov.hmrc.play.views.html.layouts
 
@@ -21,13 +22,21 @@
     }
 }
 
+@contentLayout = {
+    @if(articleLayout) {
+        @layouts.article(mainContent)
+    } else {
+        @mainContent
+    }
+}
+
 @govuk_wrapper(appConfig = ApplicationConfig,
                title = title,
                mainClass = mainClass,
                bodyClasses = bodyClasses,
                sidebar = sidebar,
                contentHeader = contentHeader,
-               mainContent = layouts.article(mainContent),
+               mainContent = contentLayout,
                serviceInfoContent = serviceInfoContent,
                scriptElem = scriptElem
 )
