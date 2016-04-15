@@ -1,5 +1,9 @@
-@()(implicit request: Request[_])
 @import views.html.helpers._
+@import models.DisabledTrusteeModel
+@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+@import play.api.data._
+
+@(disabledTrusteeForm: Form[DisabledTrusteeModel])(implicit request: Request[_])
 
 @main_template(Messages("calc.disabledTrustee.question")) {
 
@@ -7,8 +11,22 @@
 
     <h1 class="heading-large">@Messages("calc.base.pageHeading")</h1>
 
-    @simpleYesNoRadio("isVulnerable",Messages("calc.disabledTrustee.question"),Some(Messages("calc.disabledTrustee.helptext")))
+        @govHelpers.form(action = routes.CalculationController.disabledTrustee) {
 
-    <button class="button" type="submit" id="continue-button">@Messages("calc.base.continue")</button>
+        <div class="form-group">
+            @formInputRadioGroup(
+                field = disabledTrusteeForm("isVulnerable"),
+                Seq(
+                    "Yes"->Messages("calc.base.yes"),
+                    "No"->Messages("calc.base.no")),
+                '_legend -> Messages("calc.disabledTrustee.question"),
+                '_helpText -> Messages("calc.disabledTrustee.helptext"),
+                '_labelAfter -> true,
+                '_labelClass -> "block-label",
+                '_groupClass -> "inline"
+            )
+        </div>
 
+        <button class="button" type="submit" id="continue-button">@Messages("calc.base.continue")</button>
+    }
 }

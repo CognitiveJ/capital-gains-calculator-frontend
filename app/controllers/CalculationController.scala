@@ -17,9 +17,11 @@
 package controllers
 
 import connectors.CalculatorConnector
+import forms.AcquisitionValueForm._
 import forms.CustomerTypeForm._
+import forms.DisabledTrusteeForm._
 import forms.AnnualExemptAmountForm._
-import models.{AnnualExemptAmountModel, CustomerTypeModel}
+import models._
 import play.api.mvc.Action
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
@@ -44,7 +46,10 @@ trait CalculationController extends FrontendController {
 
   //################### Disabled Trustee methods #######################
   val disabledTrustee = Action.async { implicit request =>
-    Future.successful(Ok(calculation.disabledTrustee()))
+    calcConnector.fetchAndGetFormData[DisabledTrusteeModel]("isVulnerable").map {
+      case Some(data) => Ok(calculation.disabledTrustee(disabledTrusteeForm.fill(data)))
+      case None => Ok(calculation.disabledTrustee(disabledTrusteeForm))
+    }
   }
 
   //################### Current Income methods #######################
@@ -80,7 +85,10 @@ trait CalculationController extends FrontendController {
 
   //################### Acquisition Value methods #######################
   val acquisitionValue = Action.async { implicit request =>
-    Future.successful(Ok(calculation.acquisitionValue()))
+    calcConnector.fetchAndGetFormData[AcquisitionValueModel]("acquisitionValue").map {
+      case Some(data) => Ok(calculation.acquisitionValue(acquisitionValueForm.fill(data)))
+      case None => Ok(calculation.acquisitionValue(acquisitionValueForm))
+    }
   }
 
   //################### Improvements methods #######################
