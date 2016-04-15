@@ -87,9 +87,9 @@ trait CalculationController extends FrontendController {
   //################### Disposal Value methods #######################
   val disposalValue = Action.async { implicit request =>
     calcConnector.fetchAndGetFormData[DisposalValueModel]("disposalValue").map {
-      case some(data) => Ok(calculation.disposalValue(disposalValueForm.fill(data)))
+      case Some(data) => Ok(calculation.disposalValue(disposalValueForm.fill(data)))
+      case None => Ok(calculation.disposalValue(disposalValueForm))
     }
-    Future.successful(Ok(calculation.disposalValue()))
   }
 
   //################### Acquisition Costs methods #######################

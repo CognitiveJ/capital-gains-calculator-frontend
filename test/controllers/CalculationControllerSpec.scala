@@ -518,6 +518,28 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           }
         }
       }
+      "supplied with a pre-existing stored model" should {
+        object DisposalValueTestDataItem extends fakeRequestTo("disposal-value", TestCalculationController.disposalValue)
+        val testModel = new DisposalValueModel(1000)
+        "return a 200" in {
+          keystoreFetchCondition[DisposalValueModel](Some(testModel))
+          status(DisposalValueTestDataItem.result) shouldBe 200
+        }
+
+        "return some HTML that" should {
+
+          "contain some text and use the character set utf-8" in {
+            keystoreFetchCondition[DisposalValueModel](Some(testModel))
+            contentType(DisposalValueTestDataItem.result) shouldBe Some("text/html")
+            charset(DisposalValueTestDataItem.result) shouldBe Some("utf-8")
+          }
+
+          "have the value 1000 auto-filled into the input box" in {
+            keystoreFetchCondition[DisposalValueModel](Some(testModel))
+            DisposalValueTestDataItem.jsoupDoc.getElementById("disposalValue").attr("value") shouldEqual("1000")
+          }
+        }
+      }
     }
 
     //################### Acquisition Costs tests #######################
