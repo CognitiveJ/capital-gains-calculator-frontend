@@ -20,7 +20,7 @@ import java.util.UUID
 import scala.collection.JavaConversions._
 
 import connectors.CalculatorConnector
-import models.{CustomerTypeModel,DisabledTrusteeModel,AnnualExemptAmountModel}
+import models.{DisabledTrusteeModel, AnnualExemptAmountModel, CustomerTypeModel}
 import org.scalatest.BeforeAndAfterEach
 import org.mockito.Matchers
 import org.mockito.Mockito._
@@ -36,7 +36,7 @@ import org.scalatest.mock.MockitoSugar
 import scala.concurrent.Future
 
 
-class CalculationControllerSpec extends UnitSpec with WithFakeApplication with MockitoSugar with BeforeAndAfterEach{
+class CalculationControllerSpec extends UnitSpec with WithFakeApplication with MockitoSugar with BeforeAndAfterEach {
 
   val s = "Action(parser=BodyParser(anyContent))"
   val sessionId = UUID.randomUUID.toString
@@ -50,7 +50,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
   class fakeRequestTo(url: String, controllerAction: Action[AnyContent]) {
     val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/" + url).withSession(SessionKeys.sessionId -> s"session-$sessionId")
     val result = controllerAction(fakeRequest)
-    val jsoupDoc = Jsoup.parse(bodyOf(controllerAction(fakeRequest)))
+    val jsoupDoc = Jsoup.parse(bodyOf(result))
   }
 
   def keystoreFetchCondition[T](data: Option[T]): Unit = {
@@ -61,8 +61,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
   //################### Customer Type tests #######################
   "In CalculationController calling the .customerType action " when {
     "not supplied with a pre-existing stored model" should {
-
-      object CustomerTypeTestDataItem extends fakeRequestTo("customer-type354", TestCalculationController.customerType)
+      object CustomerTypeTestDataItem extends fakeRequestTo("customer-type", TestCalculationController.customerType)
 
       "return a 200" in {
         keystoreFetchCondition[CustomerTypeModel](None)
@@ -373,11 +372,14 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
         "have the value 1000 auto-filled into the input box" in {
           keystoreFetchCondition[AnnualExemptAmountModel](Some(testModel))
-          AnnualExemptAmountTestDataItem.jsoupDoc.getElementById("annualExemptAmount").attr("value") shouldEqual("1000")
+          AnnualExemptAmountTestDataItem.jsoupDoc.getElementById("annualExemptAmount").attr("value") shouldEqual ("1000")
         }
       }
     }
   }
+
+  object AnnualExemptAmountTestDataItem extends fakeRequestTo("allowance", CalculationController.annualExemptAmount)
+
 
   //############## Acquisition Value tests ######################
   "In CalculationController calling the .acquisitionValue action " should {
@@ -448,7 +450,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         ImprovementsTestDataItem.jsoupDoc.body.getElementById("improvementsCheckYes").parent.text shouldEqual Messages("calc.base.yes")
       }
 
-      "display the correct wording for radio option `no`" in{
+      "display the correct wording for radio option `no`" in {
         ImprovementsTestDataItem.jsoupDoc.body.getElementById("improvementsCheckNo").parent.text shouldEqual Messages("calc.base.no")
       }
 
@@ -733,10 +735,10 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       "have a hidden help text section with summary 'What are allowable losses?' and correct content" in {
         AllowableLossesTestDataItem.jsoupDoc.select("div#allowableLossesHiddenHelp").text should
           include(Messages("calc.allowableLosses.helpText.title"))
-          include(Messages("calc.allowableLosses.helpText.paragraph.one"))
-          include(Messages("calc.allowableLosses.helpText.bullet.one"))
-          include(Messages("calc.allowableLosses.helpText.bullet.two"))
-          include(Messages("calc.allowableLosses.helpText.bullet.three"))
+        include(Messages("calc.allowableLosses.helpText.paragraph.one"))
+        include(Messages("calc.allowableLosses.helpText.bullet.one"))
+        include(Messages("calc.allowableLosses.helpText.bullet.two"))
+        include(Messages("calc.allowableLosses.helpText.bullet.three"))
       }
 
       "has a Continue button" in {
@@ -822,98 +824,98 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       "have a 'Calculation details' section that" should {
 
         "include the section heading 'Calculation details" in {
-          SummaryTestDataItem.jsoupDoc.select("#calcDetails").text should include (Messages("calc.summary.calculation.details.title"))
+          SummaryTestDataItem.jsoupDoc.select("#calcDetails").text should include(Messages("calc.summary.calculation.details.title"))
         }
 
         "include 'Your total gain'" in {
-          SummaryTestDataItem.jsoupDoc.select("#calcDetails").text should include (Messages("calc.summary.calculation.details.totalGain"))
+          SummaryTestDataItem.jsoupDoc.select("#calcDetails").text should include(Messages("calc.summary.calculation.details.totalGain"))
         }
 
         "include 'Your taxable gain'" in {
-          SummaryTestDataItem.jsoupDoc.select("#calcDetails").text should include (Messages("calc.summary.calculation.details.taxableGain"))
+          SummaryTestDataItem.jsoupDoc.select("#calcDetails").text should include(Messages("calc.summary.calculation.details.taxableGain"))
         }
 
         "include 'Your tax rate'" in {
-          SummaryTestDataItem.jsoupDoc.select("#calcDetails").text should include (Messages("calc.summary.calculation.details.taxRate"))
+          SummaryTestDataItem.jsoupDoc.select("#calcDetails").text should include(Messages("calc.summary.calculation.details.taxRate"))
         }
       }
 
       "have a 'Personal details' section that" should {
 
         "include the section heading 'Personal details" in {
-          SummaryTestDataItem.jsoupDoc.select("#personalDetails").text should include (Messages("calc.summary.personal.details.title"))
+          SummaryTestDataItem.jsoupDoc.select("#personalDetails").text should include(Messages("calc.summary.personal.details.title"))
         }
 
         "include the question 'Who owned the property?'" in {
-          SummaryTestDataItem.jsoupDoc.select("#personalDetails").text should include (Messages("calc.customerType.question"))
+          SummaryTestDataItem.jsoupDoc.select("#personalDetails").text should include(Messages("calc.customerType.question"))
         }
 
         "include the question 'Are you a trustee for someone who's vulnerable'" in {
-          SummaryTestDataItem.jsoupDoc.select("#personalDetails").text should include (Messages("calc.disabledTrustee.question"))
+          SummaryTestDataItem.jsoupDoc.select("#personalDetails").text should include(Messages("calc.disabledTrustee.question"))
         }
 
         "include the question 'How much of your Capital Gains Tax allowance have you got left'" in {
-          SummaryTestDataItem.jsoupDoc.select("#personalDetails").text should include (Messages("calc.annualExemptAmount.question"))
+          SummaryTestDataItem.jsoupDoc.select("#personalDetails").text should include(Messages("calc.annualExemptAmount.question"))
         }
       }
 
       "have a 'Purchase details' section that" should {
 
         "include the section heading 'Purchase details" in {
-          SummaryTestDataItem.jsoupDoc.select("#purchaseDetails").text should include (Messages("calc.summary.purchase.details.title"))
+          SummaryTestDataItem.jsoupDoc.select("#purchaseDetails").text should include(Messages("calc.summary.purchase.details.title"))
         }
 
         "include the question 'How much did you pay for the property?'" in {
-          SummaryTestDataItem.jsoupDoc.select("#purchaseDetails").text should include (Messages("calc.acquisitionValue.question"))
+          SummaryTestDataItem.jsoupDoc.select("#purchaseDetails").text should include(Messages("calc.acquisitionValue.question"))
         }
 
         "include the question 'How much did you pay in costs when you became the property owner?'" in {
-          SummaryTestDataItem.jsoupDoc.select("#purchaseDetails").text should include (Messages("calc.acquisitionCosts.question"))
+          SummaryTestDataItem.jsoupDoc.select("#purchaseDetails").text should include(Messages("calc.acquisitionCosts.question"))
         }
       }
 
       "have a 'Property details' section that" should {
 
         "include the section heading 'Property details" in {
-          SummaryTestDataItem.jsoupDoc.select("#propertyDetails").text should include (Messages("calc.summary.property.details.title"))
+          SummaryTestDataItem.jsoupDoc.select("#propertyDetails").text should include(Messages("calc.summary.property.details.title"))
         }
 
         "include the question 'How much did you pay for the property?'" in {
-          SummaryTestDataItem.jsoupDoc.select("#propertyDetails").text should include (Messages("calc.improvements.question"))
+          SummaryTestDataItem.jsoupDoc.select("#propertyDetails").text should include(Messages("calc.improvements.question"))
         }
       }
 
       "have a 'Sale details' section that" should {
 
         "include the section heading 'Sale details" in {
-          SummaryTestDataItem.jsoupDoc.select("#saleDetails").text should include (Messages("calc.summary.sale.details.title"))
+          SummaryTestDataItem.jsoupDoc.select("#saleDetails").text should include(Messages("calc.summary.sale.details.title"))
         }
 
         "include the question 'When did you sign the contract that made someone else the owner?'" in {
-          SummaryTestDataItem.jsoupDoc.select("#saleDetails").text should include (Messages("calc.disposalDate.question"))
+          SummaryTestDataItem.jsoupDoc.select("#saleDetails").text should include(Messages("calc.disposalDate.question"))
         }
 
         "include the question 'How much did you sell or give away the property for?'" in {
-          SummaryTestDataItem.jsoupDoc.select("#saleDetails").text should include (Messages("calc.disposalValue.question"))
+          SummaryTestDataItem.jsoupDoc.select("#saleDetails").text should include(Messages("calc.disposalValue.question"))
         }
 
         "include the question 'How much did you pay in costs when you stopped being the property owner?'" in {
-          SummaryTestDataItem.jsoupDoc.select("#saleDetails").text should include (Messages("calc.disposalCosts.question"))
+          SummaryTestDataItem.jsoupDoc.select("#saleDetails").text should include(Messages("calc.disposalCosts.question"))
         }
       }
 
       "have a 'Deductions details' section that" should {
 
         "include the section heading 'Deductions" in {
-          SummaryTestDataItem.jsoupDoc.select("#deductions").text should include (Messages("calc.summary.deductions.title"))
+          SummaryTestDataItem.jsoupDoc.select("#deductions").text should include(Messages("calc.summary.deductions.title"))
         }
 
         "include the question 'Are you claiming Entrepreneurs' Relief?'" in {
-          SummaryTestDataItem.jsoupDoc.select("#deductions").text should include (Messages("calc.entrepreneursRelief.question"))
+          SummaryTestDataItem.jsoupDoc.select("#deductions").text should include(Messages("calc.entrepreneursRelief.question"))
         }
 
         "include the question 'Whats the total value of your allowable losses?'" in {
-          SummaryTestDataItem.jsoupDoc.select("#deductions").text should include (Messages("calc.allowableLosses.question.two"))
+          SummaryTestDataItem.jsoupDoc.select("#deductions").text should include(Messages("calc.allowableLosses.question.two"))
         }
       }
 
@@ -925,8 +927,8 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
         "include the text 'You need to tell HMRC about the property'" in {
           SummaryTestDataItem.jsoupDoc.select("#whatToDoNext").text should
-            include (Messages("calc.summary.next.actions.text"))
-            include (Messages("calc.summary.next.actions.link"))
+            include(Messages("calc.summary.next.actions.text"))
+          include(Messages("calc.summary.next.actions.link"))
         }
       }
 
