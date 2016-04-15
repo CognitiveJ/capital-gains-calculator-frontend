@@ -1,4 +1,7 @@
-@()(implicit request: Request[_])
+@import models.AcquisitionValueModel
+@import play.api.data._
+
+@(acquisitionValueForm: Form[AcquisitionValueModel])(implicit request: Request[_])
 
 @import views.html.helpers._
 
@@ -8,7 +11,7 @@
 
     <h1 class="heading-large">@Messages("calc.base.pageHeading")</h1>
 
-    @simpleInputMoney("acquisitionValue",Messages("calc.acquisitionValue.question"))
+    @formInputMoney(acquisitionValueForm, "acquisitionValue", Messages("calc.acquisitionValue.question"))
 
     <button class="button" type="submit" id="continue-button">@Messages("calc.base.continue")</button>
 
