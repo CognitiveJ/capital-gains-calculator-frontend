@@ -20,7 +20,7 @@ import java.util.UUID
 import scala.collection.JavaConversions._
 
 import connectors.CalculatorConnector
-import models.{AnnualExemptAmountModel, CustomerTypeModel}
+import models.{DisposalDateModel, AnnualExemptAmountModel, CustomerTypeModel}
 import org.scalatest.BeforeAndAfterEach
 import org.mockito.Matchers
 import org.mockito.Mockito._
@@ -434,39 +434,72 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
 
     //################### Disposal Date tests #######################
-    "In CalculationController calling the .disposalDate action " should {
+    "In CalculationController calling the .disposalDate action " when {
+      "not supplied with a pre-existing stored model" should {
 
-      object DisposalDateTestDataItem extends fakeRequestTo("disposal-date", CalculationController.disposalDate)
+        object DisposalDateTestDataItem extends fakeRequestTo("disposal-date", TestCalculationController.disposalDate)
 
-      "return a 200" in {
-        status(DisposalDateTestDataItem.result) shouldBe 200
+        "return a 200" in {
+          keystoreFetchCondition[DisposalDateModel](None)
+          status(DisposalDateTestDataItem.result) shouldBe 200
+        }
+
+        "return some HTML that" should {
+
+          "contain some text and use the character set utf-8" in {
+            contentType(DisposalDateTestDataItem.result) shouldBe Some("text/html")
+            charset(DisposalDateTestDataItem.result) shouldBe Some("utf-8")
+          }
+
+          "have the title 'When did you sign the contract that made someone else the owner?'" in {
+            DisposalDateTestDataItem.jsoupDoc.title shouldEqual Messages("calc.disposalDate.question")
+          }
+
+          "have the heading Calculate your tax (non-residents) " in {
+            DisposalDateTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+          }
+
+          "have a 'Back' link " in {
+            DisposalDateTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+          }
+
+          "have the question 'Who owned the property?' as the legend of the input" in {
+            DisposalDateTestDataItem.jsoupDoc.body.getElementsByTag("legend").text shouldEqual Messages("calc.disposalDate.question")
+          }
+
+          "display three input boxes with labels Day, Month and Year respectively" in {
+            DisposalDateTestDataItem.jsoupDoc.select("label[for=disposalDate.day]").text shouldEqual Messages("calc.common.date.fields.day")
+            DisposalDateTestDataItem.jsoupDoc.select("label[for=disposalDate.month]").text shouldEqual Messages("calc.common.date.fields.month")
+            DisposalDateTestDataItem.jsoupDoc.select("label[for=disposalDate.year]").text shouldEqual Messages("calc.common.date.fields.year")
+          }
+
+          "display a 'Continue' button " in {
+            DisposalDateTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+          }
+        }
       }
 
-      "return some HTML that" should {
+      "supplied with a model already filled with data" should {
+        object DisposalDateTestDataItem extends fakeRequestTo("disposal-date", TestCalculationController.disposalDate)
+        val testDisposalDateModel = new DisposalDateModel(10, 12, 2016)
 
-        "contain some text and use the character set utf-8" in {
-          contentType(DisposalDateTestDataItem.result) shouldBe Some("text/html")
-          charset(DisposalDateTestDataItem.result) shouldBe Some("utf-8")
+        "return a 200" in {
+          keystoreFetchCondition[DisposalDateModel](Some(testDisposalDateModel))
+          status(DisposalDateTestDataItem.result) shouldBe 200
         }
 
-        "have the title 'When did you sign the contract that made someone else the owner?'" in {
-          DisposalDateTestDataItem.jsoupDoc.title shouldEqual Messages("calc.disposalDate.question")
-        }
+        "return some HTML that" should {
+          "contain some text and use the character set utf-8" in {
+            contentType(DisposalDateTestDataItem.result) shouldBe Some("text/html")
+            charset(DisposalDateTestDataItem.result) shouldBe Some("utf-8")
+          }
 
-        "have the heading Calculate your tax (non-residents) " in {
-          DisposalDateTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
-        }
-
-        "have a 'Back' link " in {
-          DisposalDateTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
-        }
-
-        "have the question 'Who owned the property?' as the legend of the input" in {
-          DisposalDateTestDataItem.jsoupDoc.body.getElementsByTag("legend").text shouldEqual Messages("calc.disposalDate.question")
-        }
-
-        "display a 'Continue' button " in {
-          DisposalDateTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+          "have be pre-populated with the date 10, 12, 2016" in {
+            keystoreFetchCondition[DisposalDateModel](Some(testDisposalDateModel))
+            DisposalDateTestDataItem.jsoupDoc.body.getElementById("disposalDate.day").attr("value") shouldEqual testDisposalDateModel.day.toString
+            DisposalDateTestDataItem.jsoupDoc.body.getElementById("disposalDate.month").attr("value") shouldEqual testDisposalDateModel.month.toString
+            DisposalDateTestDataItem.jsoupDoc.body.getElementById("disposalDate.year").attr("value") shouldEqual testDisposalDateModel.year.toString
+          }
         }
       }
     }
