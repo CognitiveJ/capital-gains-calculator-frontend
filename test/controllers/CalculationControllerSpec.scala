@@ -361,7 +361,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
 
     "In CalculationController calling the .submitAnnualExemptAmount action" when {
-      def keystoreCacheCondition[T.](data: AnnualExemptAmountModel): Unit = {
+      def keystoreCacheCondition[T](data: AnnualExemptAmountModel): Unit = {
         lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
         when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
           .thenReturn(Future.successful(returnedCacheMap))
@@ -393,9 +393,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           status(AnnualExemptAmountTestDataItem.result) shouldBe 400
         }
       }
-
     }
-
 
     //############## Acquisition Value tests ######################
     "In CalculationController calling the .acquisitionValue action " should {
