@@ -20,7 +20,7 @@ import java.util.UUID
 import scala.collection.JavaConversions._
 
 import connectors.CalculatorConnector
-import models.CustomerTypeModel
+import models.{AnnualExemptAmountModel, CustomerTypeModel}
 import org.scalatest.BeforeAndAfterEach
 import org.mockito.Matchers
 import org.mockito.Mockito._
@@ -265,51 +265,93 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
 
     //############## Annual Exempt Amount tests ######################
-    "In CalculationController calling the .annualExemptAmount action " should {
+    "In CalculationController calling the .annualExemptAmount action " when {
+      "not supplied with a pre-existing stored model" should {
+        object AnnualExemptAmountTestDataItem extends fakeRequestTo("allowance", TestCalculationController.annualExemptAmount)
 
-      object AnnualExemptAmountTestDataItem extends fakeRequestTo("allowance", CalculationController.annualExemptAmount)
+        "return a 200" in {
+          keystoreFetchCondition[AnnualExemptAmountModel](None)
+          status(AnnualExemptAmountTestDataItem.result) shouldBe 200
+        }
 
-      "return a 200" in {
-        status(AnnualExemptAmountTestDataItem.result) shouldBe 200
+        "return some HTML that" should {
+
+          "contain some text and use the character set utf-8" in {
+            keystoreFetchCondition[AnnualExemptAmountModel](None)
+            contentType(AnnualExemptAmountTestDataItem.result) shouldBe Some("text/html")
+            charset(AnnualExemptAmountTestDataItem.result) shouldBe Some("utf-8")
+          }
+
+          "have the title 'How much of your Capital Gains Tax allowance have you got left?'" in {
+            keystoreFetchCondition[AnnualExemptAmountModel](None)
+            AnnualExemptAmountTestDataItem.jsoupDoc.title shouldEqual Messages("calc.annualExemptAmount.question")
+          }
+
+          "have the heading Calculate your tax (non-residents) " in {
+            keystoreFetchCondition[AnnualExemptAmountModel](None)
+            AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+          }
+
+          "have a 'Back' link " in {
+            keystoreFetchCondition[AnnualExemptAmountModel](None)
+            AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+          }
+
+          "have the question 'How much of your Capital Gains Tax allowance have you got left?' as the legend of the input" in {
+            keystoreFetchCondition[AnnualExemptAmountModel](None)
+            AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementsByTag("label").text shouldEqual Messages("calc.annualExemptAmount.question")
+          }
+
+          "display an input box for the Annual Exempt Amount" in {
+            keystoreFetchCondition[AnnualExemptAmountModel](None)
+            AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementById("annualExemptAmount").tagName() shouldEqual "input"
+          }
+
+          "have no value auto-filled into the input box" in {
+            keystoreFetchCondition[AnnualExemptAmountModel](None)
+            AnnualExemptAmountTestDataItem.jsoupDoc.getElementById("annualExemptAmount").attr("value") shouldBe empty
+          }
+
+          "display a 'Continue' button " in {
+            keystoreFetchCondition[AnnualExemptAmountModel](None)
+            AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+          }
+
+          "should contain a Read more sidebar with a link to CGT allowances" in {
+            keystoreFetchCondition[AnnualExemptAmountModel](None)
+            AnnualExemptAmountTestDataItem.jsoupDoc.select("aside h2").text shouldBe Messages("calc.common.readMore")
+            AnnualExemptAmountTestDataItem.jsoupDoc.select("aside a").text shouldBe Messages("calc.annualExemptAmount.link.one")
+          }
+        }
       }
+      "supplied with a pre-existing stored model" should {
+        object AnnualExemptAmountTestDataItem extends fakeRequestTo("allowance", TestCalculationController.annualExemptAmount)
+        val testModel = new AnnualExemptAmountModel(1000)
 
-      "return some HTML that" should {
-
-        "contain some text and use the character set utf-8" in {
-          contentType(AnnualExemptAmountTestDataItem.result) shouldBe Some("text/html")
-          charset(AnnualExemptAmountTestDataItem.result) shouldBe Some("utf-8")
+        "return a 200" in {
+          keystoreFetchCondition[AnnualExemptAmountModel](Some(testModel))
+          status(AnnualExemptAmountTestDataItem.result) shouldBe 200
         }
 
-        "have the title 'How much of your Capital Gains Tax allowance have you got left?'" in {
-          AnnualExemptAmountTestDataItem.jsoupDoc.title shouldEqual Messages("calc.annualExemptAmount.question")
-        }
+        "return some HTML that" should {
 
-        "have the heading Calculate your tax (non-residents) " in {
-          AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
-        }
+          "contain some text and use the character set utf-8" in {
+            keystoreFetchCondition[AnnualExemptAmountModel](Some(testModel))
+            contentType(AnnualExemptAmountTestDataItem.result) shouldBe Some("text/html")
+            charset(AnnualExemptAmountTestDataItem.result) shouldBe Some("utf-8")
+          }
 
-        "have a 'Back' link " in {
-          AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
-        }
-
-        "have the question 'How much of your Capital Gains Tax allowance have you got left?' as the legend of the input" in {
-          AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementsByTag("label").text shouldEqual Messages("calc.annualExemptAmount.question")
-        }
-
-        "display an input box for the Annual Exempt Amount" in {
-          AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementById("annualExemptAmount").tagName() shouldEqual "input"
-        }
-
-        "display a 'Continue' button " in {
-          AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
-        }
-
-        "should contain a Read more sidebar with a link to CGT allowances" in {
-          AnnualExemptAmountTestDataItem.jsoupDoc.select("aside h2").text shouldBe Messages("calc.common.readMore")
-          AnnualExemptAmountTestDataItem.jsoupDoc.select("aside a").text shouldBe Messages("calc.annualExemptAmount.link.one")
+          "have the value 1000 auto-filled into the input box" in {
+            keystoreFetchCondition[AnnualExemptAmountModel](Some(testModel))
+            AnnualExemptAmountTestDataItem.jsoupDoc.getElementById("annualExemptAmount").attr("value") shouldEqual("1000")
+          }
         }
       }
     }
+
+      object AnnualExemptAmountTestDataItem extends fakeRequestTo("allowance", CalculationController.annualExemptAmount)
+
+
 
     //############## Acquisition Value tests ######################
     "In CalculationController calling the .acquisitionValue action " should {
