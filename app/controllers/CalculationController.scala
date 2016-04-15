@@ -17,10 +17,11 @@
 package controllers
 
 import connectors.CalculatorConnector
+import forms.AcquisitionValueForm._
 import forms.CustomerTypeForm._
 import forms.DisabledTrusteeForm._
 import forms.AnnualExemptAmountForm._
-import models.{CustomerTypeModel,DisabledTrusteeModel,AnnualExemptAmountModel}
+import models._
 import play.api.mvc.Action
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
@@ -74,7 +75,10 @@ trait CalculationController extends FrontendController {
 
   //################### Acquisition Value methods #######################
   val acquisitionValue = Action.async { implicit request =>
-    Future.successful(Ok(calculation.acquisitionValue()))
+    calcConnector.fetchAndGetFormData[AcquisitionValueModel]("acquisitionValue").map {
+      case Some(data) => Ok(calculation.acquisitionValue(acquisitionValueForm.fill(data)))
+      case None => Ok(calculation.acquisitionValue(acquisitionValueForm))
+    }
   }
 
   //################### Improvements methods #######################
