@@ -17,6 +17,9 @@
 package controllers
 
 import java.util.UUID
+import play.api.libs.json.Json
+import uk.gov.hmrc.http.cache.client.CacheMap
+
 import scala.collection.JavaConversions._
 
 import connectors.CalculatorConnector
@@ -49,6 +52,14 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
   class fakeRequestTo(url: String, controllerAction: Action[AnyContent]) {
     val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/" + url).withSession(SessionKeys.sessionId -> s"session-$sessionId")
+    val result = controllerAction(fakeRequest)
+    val jsoupDoc = Jsoup.parse(bodyOf(result))
+  }
+
+  class fakeRequestToPost(url: String, controllerAction: Action[AnyContent], data: (String, String)) {
+    val fakeRequest = FakeRequest("POST", "/calculate-your-capital-gains/" + url)
+      .withSession(SessionKeys.sessionId -> s"session-$sessionId")
+      .withFormUrlEncodedBody(data)
     val result = controllerAction(fakeRequest)
     val jsoupDoc = Jsoup.parse(bodyOf(result))
   }
@@ -343,14 +354,47 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
           "have the value 1000 auto-filled into the input box" in {
             keystoreFetchCondition[AnnualExemptAmountModel](Some(testModel))
-            AnnualExemptAmountTestDataItem.jsoupDoc.getElementById("annualExemptAmount").attr("value") shouldEqual("1000")
+            AnnualExemptAmountTestDataItem.jsoupDoc.getElementById("annualExemptAmount").attr("value") shouldEqual "1000"
           }
         }
       }
     }
 
-      object AnnualExemptAmountTestDataItem extends fakeRequestTo("allowance", CalculationController.annualExemptAmount)
+    "In CalculationController calling the .submitAnnualExemptAmount action" when {
+      def keystoreCacheCondition[T.](data: AnnualExemptAmountModel): Unit = {
+        lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+        when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+          .thenReturn(Future.successful(returnedCacheMap))
+      }
+      "submitting a valid form" should {
+        object AnnualExemptAmountTestDataItem extends fakeRequestToPost(
+          "allowance",
+          TestCalculationController.submitAnnualExemptAmount,
+          ("annualExemptAmount", "1000")
+        )
+        val testModel = new AnnualExemptAmountModel(1000)
 
+        "return a 303" in {
+          keystoreCacheCondition[AnnualExemptAmountModel](testModel)
+          status(AnnualExemptAmountTestDataItem.result) shouldBe 303
+        }
+      }
+
+      "submitting an invalid form" should {
+        object AnnualExemptAmountTestDataItem extends fakeRequestToPost(
+          "allowance",
+          TestCalculationController.submitAnnualExemptAmount,
+          ("annualExemptAmount", "")
+        )
+        val testModel = new AnnualExemptAmountModel(0)
+
+        "return a 400" in {
+          keystoreCacheCondition[AnnualExemptAmountModel](testModel)
+          status(AnnualExemptAmountTestDataItem.result) shouldBe 400
+        }
+      }
+
+    }
 
 
     //############## Acquisition Value tests ######################
