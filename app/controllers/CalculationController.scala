@@ -21,7 +21,7 @@ import forms.AcquisitionValueForm._
 import forms.CustomerTypeForm._
 import forms.DisabledTrusteeForm._
 import forms.AnnualExemptAmountForm._
-import models.{CustomerTypeModel,DisabledTrusteeModel,AnnualExemptAmountModel, AcquisitionValueModel}
+import models._
 import play.api.mvc.Action
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 

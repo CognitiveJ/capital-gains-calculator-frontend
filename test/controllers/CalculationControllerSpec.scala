@@ -18,7 +18,7 @@ package controllers
 
 import java.util.UUID
 import connectors.CalculatorConnector
-import models.{DisabledTrusteeModel, AnnualExemptAmountModel, AcquisitionValueModel, CustomerTypeModel}
+import models._
 import org.scalatest.BeforeAndAfterEach
 import org.mockito.Matchers
 import org.mockito.Mockito._
