@@ -64,8 +64,7 @@ trait CalculationController extends FrontendController {
   val annualExemptAmount = Action.async { implicit request =>
     calcConnector.fetchAndGetFormData[AnnualExemptAmountModel]("annualExemptAmount").map {
       case Some(data) => Ok(calculation.annualExemptAmount(annualExemptAmountForm.fill(data)))
-      case None => //noinspection ScalaStyle
-        Ok(calculation.annualExemptAmount(annualExemptAmountForm))
+      case None => Ok(calculation.annualExemptAmount(annualExemptAmountForm))
     }
   }
 
