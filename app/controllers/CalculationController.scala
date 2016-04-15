@@ -18,7 +18,8 @@ package controllers
 
 import connectors.CalculatorConnector
 import forms.CustomerTypeForm.customerTypeForm
-import models.CustomerTypeModel
+import forms.OtherPropertiesForm.otherPropertiesForm
+import models.{OtherPropertiesModel, CustomerTypeModel}
 import play.api.mvc.Action
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
@@ -56,7 +57,11 @@ trait CalculationController extends FrontendController {
 
   //################### Other Properties methods #######################
   val otherProperties = Action.async { implicit request =>
-    Future.successful(Ok(calculation.otherProperties()))
+
+    calcConnector.fetchAndGetFormData[OtherPropertiesModel]("otherProperties").map {
+      case Some(data) => Ok(calculation.otherProperties(otherPropertiesForm.fill(data)))
+      case None => Ok(calculation.otherProperties(otherPropertiesForm))
+    }
   }
 
   //################### Annual Exempt Amount methods #######################
