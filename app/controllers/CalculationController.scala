@@ -74,6 +74,16 @@ trait CalculationController extends FrontendController {
     }
   }
 
+  val submitAnnualExemptAmount =  Action { implicit request =>
+    annualExemptAmountForm.bindFromRequest.fold(
+      errors => BadRequest(calculation.annualExemptAmount(errors)),
+      success => {
+        calcConnector.saveFormData("annualExemptAmount", success)
+        Redirect(routes.CalculationController.acquisitionValue())
+      }
+    )
+  }
+
   //################### Acquisition Value methods #######################
   val acquisitionValue = Action.async { implicit request =>
     calcConnector.fetchAndGetFormData[AcquisitionValueModel]("acquisitionValue").map {

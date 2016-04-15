@@ -16,7 +16,7 @@
 
     <h1 class="heading-large">@Messages("calc.base.pageHeading")</h1>
 
-    @govHelpers.form(action = routes.CalculationController.annualExemptAmount) {
+    @govHelpers.form(action = routes.CalculationController.submitAnnualExemptAmount) {
 
         @formInputMoney(annualExemptAmountForm, "annualExemptAmount", Messages("calc.annualExemptAmount.question"))
 
