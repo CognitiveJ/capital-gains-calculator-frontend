@@ -1,0 +1,17 @@
+@(sectionId: String, sectionTitle: String, sectionContent: Array[Map[String,String]])
+
+<section id="@sectionId">
+    @for(i <- 0 until sectionContent.length) {
+        <div class="grid-layout grid-layout--stacked form-group">
+            <div class="grid-layout__column grid-layout__column--1-3">
+                @if(i==0){<span class="heading-large">@sectionTitle</span>}
+            </div>
+            <div class="grid-layout__column grid-layout__column--1-3">
+                <span class="lede">@sectionContent(i)("question")</span>
+            </div>
+            <div class="grid-layout__column grid-layout__column--1-3">
+                <span class="lede">@Html(sectionContent(i)("answer"))</span>
+            </div>
+        </div>
+    }
+</section>

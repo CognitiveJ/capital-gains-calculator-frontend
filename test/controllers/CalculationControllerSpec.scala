@@ -291,51 +291,93 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
 
     //############## Annual Exempt Amount tests ######################
-    "In CalculationController calling the .annualExemptAmount action " should {
+    "In CalculationController calling the .annualExemptAmount action " when {
+      "not supplied with a pre-existing stored model" should {
+        object AnnualExemptAmountTestDataItem extends fakeRequestTo("allowance", TestCalculationController.annualExemptAmount)
 
-      object AnnualExemptAmountTestDataItem extends fakeRequestTo("allowance", CalculationController.annualExemptAmount)
+        "return a 200" in {
+          keystoreFetchCondition[AnnualExemptAmountModel](None)
+          status(AnnualExemptAmountTestDataItem.result) shouldBe 200
+        }
 
-      "return a 200" in {
-        status(AnnualExemptAmountTestDataItem.result) shouldBe 200
+        "return some HTML that" should {
+
+          "contain some text and use the character set utf-8" in {
+            keystoreFetchCondition[AnnualExemptAmountModel](None)
+            contentType(AnnualExemptAmountTestDataItem.result) shouldBe Some("text/html")
+            charset(AnnualExemptAmountTestDataItem.result) shouldBe Some("utf-8")
+          }
+
+          "have the title 'How much of your Capital Gains Tax allowance have you got left?'" in {
+            keystoreFetchCondition[AnnualExemptAmountModel](None)
+            AnnualExemptAmountTestDataItem.jsoupDoc.title shouldEqual Messages("calc.annualExemptAmount.question")
+          }
+
+          "have the heading Calculate your tax (non-residents) " in {
+            keystoreFetchCondition[AnnualExemptAmountModel](None)
+            AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+          }
+
+          "have a 'Back' link " in {
+            keystoreFetchCondition[AnnualExemptAmountModel](None)
+            AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+          }
+
+          "have the question 'How much of your Capital Gains Tax allowance have you got left?' as the legend of the input" in {
+            keystoreFetchCondition[AnnualExemptAmountModel](None)
+            AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementsByTag("label").text shouldEqual Messages("calc.annualExemptAmount.question")
+          }
+
+          "display an input box for the Annual Exempt Amount" in {
+            keystoreFetchCondition[AnnualExemptAmountModel](None)
+            AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementById("annualExemptAmount").tagName() shouldEqual "input"
+          }
+
+          "have no value auto-filled into the input box" in {
+            keystoreFetchCondition[AnnualExemptAmountModel](None)
+            AnnualExemptAmountTestDataItem.jsoupDoc.getElementById("annualExemptAmount").attr("value") shouldBe empty
+          }
+
+          "display a 'Continue' button " in {
+            keystoreFetchCondition[AnnualExemptAmountModel](None)
+            AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+          }
+
+          "should contain a Read more sidebar with a link to CGT allowances" in {
+            keystoreFetchCondition[AnnualExemptAmountModel](None)
+            AnnualExemptAmountTestDataItem.jsoupDoc.select("aside h2").text shouldBe Messages("calc.common.readMore")
+            AnnualExemptAmountTestDataItem.jsoupDoc.select("aside a").text shouldBe Messages("calc.annualExemptAmount.link.one")
+          }
+        }
       }
+      "supplied with a pre-existing stored model" should {
+        object AnnualExemptAmountTestDataItem extends fakeRequestTo("allowance", TestCalculationController.annualExemptAmount)
+        val testModel = new AnnualExemptAmountModel(1000)
 
-      "return some HTML that" should {
-
-        "contain some text and use the character set utf-8" in {
-          contentType(AnnualExemptAmountTestDataItem.result) shouldBe Some("text/html")
-          charset(AnnualExemptAmountTestDataItem.result) shouldBe Some("utf-8")
+        "return a 200" in {
+          keystoreFetchCondition[AnnualExemptAmountModel](Some(testModel))
+          status(AnnualExemptAmountTestDataItem.result) shouldBe 200
         }
 
-        "have the title 'How much of your Capital Gains Tax allowance have you got left?'" in {
-          AnnualExemptAmountTestDataItem.jsoupDoc.title shouldEqual Messages("calc.annualExemptAmount.question")
-        }
+        "return some HTML that" should {
 
-        "have the heading Calculate your tax (non-residents) " in {
-          AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
-        }
+          "contain some text and use the character set utf-8" in {
+            keystoreFetchCondition[AnnualExemptAmountModel](Some(testModel))
+            contentType(AnnualExemptAmountTestDataItem.result) shouldBe Some("text/html")
+            charset(AnnualExemptAmountTestDataItem.result) shouldBe Some("utf-8")
+          }
 
-        "have a 'Back' link " in {
-          AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
-        }
-
-        "have the question 'How much of your Capital Gains Tax allowance have you got left?' as the legend of the input" in {
-          AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementsByTag("label").text shouldEqual Messages("calc.annualExemptAmount.question")
-        }
-
-        "display an input box for the Annual Exempt Amount" in {
-          AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementById("annualExemptAmount").tagName() shouldEqual "input"
-        }
-
-        "display a 'Continue' button " in {
-          AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
-        }
-
-        "should contain a Read more sidebar with a link to CGT allowances" in {
-          AnnualExemptAmountTestDataItem.jsoupDoc.select("aside h2").text shouldBe Messages("calc.common.readMore")
-          AnnualExemptAmountTestDataItem.jsoupDoc.select("aside a").text shouldBe Messages("calc.annualExemptAmount.link.one")
+          "have the value 1000 auto-filled into the input box" in {
+            keystoreFetchCondition[AnnualExemptAmountModel](Some(testModel))
+            AnnualExemptAmountTestDataItem.jsoupDoc.getElementById("annualExemptAmount").attr("value") shouldEqual("1000")
+          }
         }
       }
     }
+
+      object AnnualExemptAmountTestDataItem extends fakeRequestTo("allowance", CalculationController.annualExemptAmount)
+
+
 
     //############## Acquisition Value tests ######################
     "In CalculationController calling the .acquisitionValue action " should {
@@ -759,6 +801,137 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         "contain some text and use the character set utf-8" in {
           contentType(SummaryTestDataItem.result) shouldBe Some("text/html")
           charset(SummaryTestDataItem.result) shouldBe Some("utf-8")
+        }
+
+        "should have the title 'Summary'" in {
+          SummaryTestDataItem.jsoupDoc.getElementsByTag("title").text shouldEqual Messages("calc.summary.title")
+        }
+
+        "have a back button" in {
+          SummaryTestDataItem.jsoupDoc.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+        }
+
+        "have the correct sub-heading 'You owe'" in {
+          SummaryTestDataItem.jsoupDoc.select("h1 span").text shouldEqual Messages("calc.summary.secondaryHeading")
+        }
+
+        "have a result amount currently set to £NNNN.pp" in {
+          SummaryTestDataItem.jsoupDoc.select("h1 b").text shouldEqual "£NNNN.pp"
+        }
+
+        "have a 'Calculation details' section that" should {
+
+          "include the section heading 'Calculation details" in {
+            SummaryTestDataItem.jsoupDoc.select("#calcDetails").text should include (Messages("calc.summary.calculation.details.title"))
+          }
+
+          "include 'Your total gain'" in {
+            SummaryTestDataItem.jsoupDoc.select("#calcDetails").text should include (Messages("calc.summary.calculation.details.totalGain"))
+          }
+
+          "include 'Your taxable gain'" in {
+            SummaryTestDataItem.jsoupDoc.select("#calcDetails").text should include (Messages("calc.summary.calculation.details.taxableGain"))
+          }
+
+          "include 'Your tax rate'" in {
+            SummaryTestDataItem.jsoupDoc.select("#calcDetails").text should include (Messages("calc.summary.calculation.details.taxRate"))
+          }
+        }
+
+        "have a 'Personal details' section that" should {
+
+          "include the section heading 'Personal details" in {
+            SummaryTestDataItem.jsoupDoc.select("#personalDetails").text should include (Messages("calc.summary.personal.details.title"))
+          }
+
+          "include the question 'Who owned the property?'" in {
+            SummaryTestDataItem.jsoupDoc.select("#personalDetails").text should include (Messages("calc.customerType.question"))
+          }
+
+          "include the question 'Are you a trustee for someone who's vulnerable'" in {
+            SummaryTestDataItem.jsoupDoc.select("#personalDetails").text should include (Messages("calc.disabledTrustee.question"))
+          }
+
+          "include the question 'How much of your Capital Gains Tax allowance have you got left'" in {
+            SummaryTestDataItem.jsoupDoc.select("#personalDetails").text should include (Messages("calc.annualExemptAmount.question"))
+          }
+        }
+
+        "have a 'Purchase details' section that" should {
+
+          "include the section heading 'Purchase details" in {
+            SummaryTestDataItem.jsoupDoc.select("#purchaseDetails").text should include (Messages("calc.summary.purchase.details.title"))
+          }
+
+          "include the question 'How much did you pay for the property?'" in {
+            SummaryTestDataItem.jsoupDoc.select("#purchaseDetails").text should include (Messages("calc.acquisitionValue.question"))
+          }
+
+          "include the question 'How much did you pay in costs when you became the property owner?'" in {
+            SummaryTestDataItem.jsoupDoc.select("#purchaseDetails").text should include (Messages("calc.acquisitionCosts.question"))
+          }
+        }
+
+        "have a 'Property details' section that" should {
+
+          "include the section heading 'Property details" in {
+            SummaryTestDataItem.jsoupDoc.select("#propertyDetails").text should include (Messages("calc.summary.property.details.title"))
+          }
+
+          "include the question 'How much did you pay for the property?'" in {
+            SummaryTestDataItem.jsoupDoc.select("#propertyDetails").text should include (Messages("calc.improvements.question"))
+          }
+        }
+
+        "have a 'Sale details' section that" should {
+
+          "include the section heading 'Sale details" in {
+            SummaryTestDataItem.jsoupDoc.select("#saleDetails").text should include (Messages("calc.summary.sale.details.title"))
+          }
+
+          "include the question 'When did you sign the contract that made someone else the owner?'" in {
+            SummaryTestDataItem.jsoupDoc.select("#saleDetails").text should include (Messages("calc.disposalDate.question"))
+          }
+
+          "include the question 'How much did you sell or give away the property for?'" in {
+            SummaryTestDataItem.jsoupDoc.select("#saleDetails").text should include (Messages("calc.disposalValue.question"))
+          }
+
+          "include the question 'How much did you pay in costs when you stopped being the property owner?'" in {
+            SummaryTestDataItem.jsoupDoc.select("#saleDetails").text should include (Messages("calc.disposalCosts.question"))
+          }
+        }
+
+        "have a 'Deductions details' section that" should {
+
+          "include the section heading 'Deductions" in {
+            SummaryTestDataItem.jsoupDoc.select("#deductions").text should include (Messages("calc.summary.deductions.title"))
+          }
+
+          "include the question 'Are you claiming Entrepreneurs' Relief?'" in {
+            SummaryTestDataItem.jsoupDoc.select("#deductions").text should include (Messages("calc.entrepreneursRelief.question"))
+          }
+
+          "include the question 'Whats the total value of your allowable losses?'" in {
+            SummaryTestDataItem.jsoupDoc.select("#deductions").text should include (Messages("calc.allowableLosses.question.two"))
+          }
+        }
+
+        "have a 'What to do next' section that" should {
+
+          "have the heading 'What to do next'" in {
+            SummaryTestDataItem.jsoupDoc.select("#whatToDoNext H2").text shouldEqual (Messages("calc.common.next.actions.heading"))
+          }
+
+          "include the text 'You need to tell HMRC about the property'" in {
+            SummaryTestDataItem.jsoupDoc.select("#whatToDoNext").text should
+              include (Messages("calc.summary.next.actions.text"))
+              include (Messages("calc.summary.next.actions.link"))
+          }
+        }
+
+        "have a link to 'Start again'" in {
+          SummaryTestDataItem.jsoupDoc.select("#startAgain").text shouldEqual Messages("calc.summary.startAgain")
         }
       }
     }
