@@ -19,7 +19,8 @@ package controllers
 import connectors.CalculatorConnector
 import forms.CustomerTypeForm._
 import forms.AnnualExemptAmountForm._
-import models.{AnnualExemptAmountModel, CustomerTypeModel}
+import forms.DisposalValueForm._
+import models.{DisposalValueModel, AnnualExemptAmountModel, CustomerTypeModel}
 import play.api.mvc.Action
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
@@ -85,6 +86,9 @@ trait CalculationController extends FrontendController {
 
   //################### Disposal Value methods #######################
   val disposalValue = Action.async { implicit request =>
+    calcConnector.fetchAndGetFormData[DisposalValueModel]("disposalValue").map {
+      case some(data) => Ok(calculation.disposalValue(disposalValueForm.fill(data)))
+    }
     Future.successful(Ok(calculation.disposalValue()))
   }
 

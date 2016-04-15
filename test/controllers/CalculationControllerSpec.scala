@@ -17,10 +17,8 @@
 package controllers
 
 import java.util.UUID
-import scala.collection.JavaConversions._
-
 import connectors.CalculatorConnector
-import models.{AnnualExemptAmountModel, CustomerTypeModel}
+import models.{AnnualExemptAmountModel, CustomerTypeModel, DisposalValueModel}
 import org.scalatest.BeforeAndAfterEach
 import org.mockito.Matchers
 import org.mockito.Mockito._
@@ -472,43 +470,52 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
 
     //################### Disposal Value tests #######################
-    "In CalculationController calling the .disposalValue action " should {
+    "In CalculationController calling the .disposalValue action " when {
+      "not supplied with a pre-existing stored model" should {
+        object DisposalValueTestDataItem extends fakeRequestTo("disposal-value", TestCalculationController.disposalValue)
 
-      object DisposalValueTestDataItem extends fakeRequestTo("disposal-value", CalculationController.disposalValue)
-
-      "return a 200" in {
-        status(DisposalValueTestDataItem.result) shouldBe 200
-      }
-
-      "return some HTML that" should {
-
-        "contain some text and use the character set utf-8" in {
-          contentType(DisposalValueTestDataItem.result) shouldBe Some("text/html")
-          charset(DisposalValueTestDataItem.result) shouldBe Some("utf-8")
+        "return a 200" in {
+          keystoreFetchCondition[DisposalValueModel](None)
+          status(DisposalValueTestDataItem.result) shouldBe 200
         }
 
-        "have the title 'How much did you sell or give away the property for?'" in {
-          DisposalValueTestDataItem.jsoupDoc.title shouldEqual Messages("calc.disposalValue.question")
-        }
+        "return some HTML that" should {
 
-        "have the heading Calculate your tax (non-residents) " in {
-          DisposalValueTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
-        }
+          "contain some text and use the character set utf-8" in {
+            keystoreFetchCondition[DisposalValueModel](None)
+            contentType(DisposalValueTestDataItem.result) shouldBe Some("text/html")
+            charset(DisposalValueTestDataItem.result) shouldBe Some("utf-8")
+          }
 
-        "have a 'Back' link " in {
-          DisposalValueTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
-        }
+          "have the title 'How much did you sell or give away the property for?'" in {
+            keystoreFetchCondition[DisposalValueModel](None)
+            DisposalValueTestDataItem.jsoupDoc.title shouldEqual Messages("calc.disposalValue.question")
+          }
 
-        "have the question 'How much did you sell or give away the property for?' as the legend of the input" in {
-          DisposalValueTestDataItem.jsoupDoc.body.getElementsByTag("label").text shouldEqual Messages("calc.disposalValue.question")
-        }
+          "have the heading Calculate your tax (non-residents) " in {
+            keystoreFetchCondition[DisposalValueModel](None)
+            DisposalValueTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+          }
 
-        "display an input box for the Annual Exempt Amount" in {
-          DisposalValueTestDataItem.jsoupDoc.body.getElementById("disposalValue").tagName() shouldEqual "input"
-        }
+          "have a 'Back' link " in {
+            keystoreFetchCondition[DisposalValueModel](None)
+            DisposalValueTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+          }
 
-        "display a 'Continue' button " in {
-          DisposalValueTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+          "have the question 'How much did you sell or give away the property for?' as the legend of the input" in {
+            keystoreFetchCondition[DisposalValueModel](None)
+            DisposalValueTestDataItem.jsoupDoc.body.getElementsByTag("label").text shouldEqual Messages("calc.disposalValue.question")
+          }
+
+          "display an input box for the Annual Exempt Amount" in {
+            keystoreFetchCondition[DisposalValueModel](None)
+            DisposalValueTestDataItem.jsoupDoc.body.getElementById("disposalValue").tagName() shouldEqual "input"
+          }
+
+          "display a 'Continue' button " in {
+            keystoreFetchCondition[DisposalValueModel](None)
+            DisposalValueTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+          }
         }
       }
     }
