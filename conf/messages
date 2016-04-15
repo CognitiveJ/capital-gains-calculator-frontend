@@ -17,6 +17,7 @@ calc.common.date.fields.month = Month
 calc.common.date.fields.year = Year
 calc.common.date.hint = For example, 4 9 2016
 calc.common.readMore = Read more
+calc.common.next.actions.heading = What to do next
 
 ## Introduction ##
 calc.introduction.title = Introduction
@@ -104,5 +105,24 @@ calc.otherReliefs.question = How much extra tax relief are you claiming?
 
 ## Summary ##
 calc.summary.title = Summary
+calc.summary.secondaryHeading = You owe
+calc.summary.calculation.details.title = Calculation details
+calc.summary.calculation.details.totalGain = Your total gain
+calc.summary.calculation.details.taxableGain = Your taxable gain
+calc.summary.calculation.details.taxRate = Your tax rate
+calc.summary.personal.details.title = Personal details
+calc.summary.purchase.details.title = Purchase details
+calc.summary.property.details.title = Property details
+calc.summary.sale.details.title = Sale details
+calc.summary.deductions.title = Deductions
+calc.summary.next.actions.text = You need to
+calc.summary.next.actions.link = tell HMRC about the property
+calc.summary.startAgain = Start again
+
+
+
+
+
+
 
 
