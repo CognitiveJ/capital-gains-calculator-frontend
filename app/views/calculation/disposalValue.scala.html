@@ -1,11 +1,13 @@
-@()(implicit request: Request[_])
+@import models.DisposalValueModel
+
+@(disposalValueForm: Form[DisposalValueModel])(implicit request: Request[_])
 @import views.html.helpers._
 
 @main_template(Messages("calc.disposalValue.question")) {
     <a id="link-back" class="link-back" href="@routes.CalculationController.improvements">@Messages("calc.base.back")</a>
     <h1 class="heading-large">@Messages("calc.base.calculate.tax.heading")</h1>
 
-    @simpleInputMoney("disposalValue", Messages("calc.disposalValue.question"))
+    @formInputMoney(disposalValueForm, "disposalValue", Messages("calc.disposalValue.question"))
 
     <button id="continue-button" class="button">@Messages("calc.base.button.continue")</button>
 }

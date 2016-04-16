@@ -22,6 +22,7 @@ import forms.AcquisitionValueForm._
 import forms.CustomerTypeForm._
 import forms.DisabledTrusteeForm._
 import forms.AnnualExemptAmountForm._
+import forms.DisposalValueForm._
 import models._
 import play.api.mvc.Action
 import uk.gov.hmrc.play.frontend.controller.FrontendController
@@ -78,6 +79,16 @@ trait CalculationController extends FrontendController {
     }
   }
 
+  val submitAnnualExemptAmount =  Action { implicit request =>
+    annualExemptAmountForm.bindFromRequest.fold(
+      errors => BadRequest(calculation.annualExemptAmount(errors)),
+      success => {
+        calcConnector.saveFormData("annualExemptAmount", success)
+        Redirect(routes.CalculationController.acquisitionValue())
+      }
+    )
+  }
+
   //################### Acquisition Value methods #######################
   val acquisitionValue = Action.async { implicit request =>
     calcConnector.fetchAndGetFormData[AcquisitionValueModel]("acquisitionValue").map {
@@ -98,7 +109,10 @@ trait CalculationController extends FrontendController {
 
   //################### Disposal Value methods #######################
   val disposalValue = Action.async { implicit request =>
-    Future.successful(Ok(calculation.disposalValue()))
+    calcConnector.fetchAndGetFormData[DisposalValueModel]("disposalValue").map {
+      case Some(data) => Ok(calculation.disposalValue(disposalValueForm.fill(data)))
+      case None => Ok(calculation.disposalValue(disposalValueForm))
+    }
   }
 
   //################### Acquisition Costs methods #######################

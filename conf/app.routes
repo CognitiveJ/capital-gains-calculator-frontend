@@ -29,6 +29,7 @@ GET         /other-properties        controllers.CalculationController.otherProp
 
 #Allowance
 GET         /allowance               controllers.CalculationController.annualExemptAmount
+POST        /allowance               controllers.CalculationController.submitAnnualExemptAmount
 
 #Acquisition Value
 GET         /acquisition-value       controllers.CalculationController.acquisitionValue
