@@ -3,5 +3,6 @@
 
 @(inputForm: Form[_], fieldName: String, questionText: String, helpText: Option[String] = None)(implicit lang: play.api.i18n.Lang)
 
-    @govHelpers.input(inputForm(fieldName), '_label -> questionText, '_inputHint -> helpText.getOrElse(""), '_inputClass -> "form-group", '_dataAttributes -> "placeholder = £")
-
+    <div class="form-group">
+    @govHelpers.input(inputForm(fieldName), '_label -> questionText, '_inputHint -> helpText.getOrElse(""), '_dataAttributes -> "placeholder = £")
+    </div>

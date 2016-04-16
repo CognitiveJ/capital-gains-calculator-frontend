@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
-package models
+package forms
 
-import play.api.libs.json.Json
+import play.api.data._
+import play.api.data.Forms._
+import models._
 
-case class DisabledTrusteeModel (isVulnerable: String)
-
-object DisabledTrusteeModel {
-  implicit val format = Json.format[DisabledTrusteeModel]
+object DisposalValueForm {
+  val disposalValueForm = Form(
+    mapping(
+      "disposalValue" -> bigDecimal
+    )(DisposalValueModel.apply)(DisposalValueModel.unapply)
+  )
 }
