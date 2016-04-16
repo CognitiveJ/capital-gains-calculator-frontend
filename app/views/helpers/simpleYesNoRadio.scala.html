@@ -1,12 +1,9 @@
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 
-@(fieldName: String, questionText: String, helpText: Option[String] = None, formToBind: Option[Form[_]] = None)(implicit lang: play.api.i18n.Lang)
+@(fieldName: String, questionText: String, helpText: Option[String] = None)(implicit lang: play.api.i18n.Lang)
 
 @yesId = @{fieldName + "Yes"}
 @noId = @{fieldName + "No"}
-@if(formToBind.isDefined) {
-    print(formToBind)
-}
 
 <fieldset class="form-group" id="@fieldName">
     <legend>@questionText</legend>
