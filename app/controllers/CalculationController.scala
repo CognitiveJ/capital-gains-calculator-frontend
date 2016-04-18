@@ -24,6 +24,7 @@ import forms.DisabledTrusteeForm._
 import forms.AnnualExemptAmountForm._
 import forms.DisposalDateForm._
 import forms.DisposalValueForm._
+import forms.EntrepreneursReliefForm._
 import forms.DisposalCostsForm._
 import models._
 import play.api.mvc.Action
@@ -148,7 +149,10 @@ trait CalculationController extends FrontendController {
 
   //################### Entrepreneurs Relief methods #######################
   val entrepreneursRelief = Action.async { implicit request =>
-    Future.successful(Ok(calculation.entrepreneursRelief()))
+    calcConnector.fetchAndGetFormData[EntrepreneursReliefModel]("entrepreneursRelief").map {
+      case Some(data) => Ok(calculation.entrepreneursRelief(entrepreneursReliefForm.fill(data)))
+      case None => Ok(calculation.entrepreneursRelief(entrepreneursReliefForm))
+    }
   }
 
   //################### Allowable Losses methods #######################
