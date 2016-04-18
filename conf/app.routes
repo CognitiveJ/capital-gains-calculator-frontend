@@ -14,6 +14,7 @@ GET         /introduction            controllers.IntroductionController.introduc
 ########################################################
 #Customer Type
 GET         /customer-type           controllers.CalculationController.customerType
+POST        /customer-type           controllers.CalculationController.submitCustomerType
 
 #Disabled Trustee
 GET         /disabled-trustee        controllers.CalculationController.disabledTrustee
@@ -22,10 +23,11 @@ GET         /disabled-trustee        controllers.CalculationController.disabledT
 GET         /current-income          controllers.CalculationController.currentIncome
 
 #Personal Allowance
-GET         /personalAllowance       controllers.CalculationController.personalAllowance
+GET         /personal-allowance       controllers.CalculationController.personalAllowance
 
 #Other Properties
 GET         /other-properties        controllers.CalculationController.otherProperties
+POST        /other-properties        controllers.CalculationController.submitOtherProperties
 
 #Allowance
 GET         /allowance               controllers.CalculationController.annualExemptAmount

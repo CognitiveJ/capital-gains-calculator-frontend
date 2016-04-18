@@ -18,7 +18,9 @@ package models
 
 import play.api.libs.json._
 
-case class AllowableLossesModel (allowableLossesAmt: BigDecimal)
+case class AllowableLossesModel (
+                                  isClaimingAllowableLosses: String,
+                                  allowableLossesAmt: BigDecimal)
 
 object AllowableLossesModel {
   implicit val format = Json.format[AllowableLossesModel]

@@ -155,6 +155,69 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
   }
 
+  "In CalculationController calling the .submitCustomerType action" when {
+    def keystoreCacheCondition[T](data: CustomerTypeModel): Unit = {
+      lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+      when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(returnedCacheMap))
+    }
+    "submitting a valid form with 'individual'" should {
+      object CustomerTypeTestDataItem extends fakeRequestToPost(
+        "customer-type",
+        TestCalculationController.submitCustomerType,
+        ("customerType", "individual")
+      )
+      val testModel = new CustomerTypeModel("individual")
+
+      "return a 303" in {
+        keystoreCacheCondition[CustomerTypeModel](testModel)
+        status(CustomerTypeTestDataItem.result) shouldBe 303
+      }
+    }
+
+    "submitting a valid form with 'trustee'" should {
+      object CustomerTypeTestDataItem extends fakeRequestToPost(
+        "customer-type",
+        TestCalculationController.submitCustomerType,
+        ("customerType", "trustee")
+      )
+      val testModel = new CustomerTypeModel("trustee")
+
+      "return a 303" in {
+        keystoreCacheCondition[CustomerTypeModel](testModel)
+        status(CustomerTypeTestDataItem.result) shouldBe 303
+      }
+    }
+
+    "submitting a valid form with 'personalRep'" should {
+      object CustomerTypeTestDataItem extends fakeRequestToPost(
+        "customer-type",
+        TestCalculationController.submitCustomerType,
+        ("customerType", "personalRep")
+      )
+      val testModel = new CustomerTypeModel("personalRep")
+
+      "return a 303" in {
+        keystoreCacheCondition[CustomerTypeModel](testModel)
+        status(CustomerTypeTestDataItem.result) shouldBe 303
+      }
+    }
+
+    "submitting an invalid form" should {
+      object OtherPropertiesTestDataItem extends fakeRequestToPost(
+        "customer-type",
+        TestCalculationController.submitCustomerType,
+        ("annualExemptAmount", "")
+      )
+      val testModel = new CustomerTypeModel("")
+
+      "return a 400" in {
+        keystoreCacheCondition[CustomerTypeModel](testModel)
+        status(OtherPropertiesTestDataItem.result) shouldBe 400
+      }
+    }
+  }
+
   //################### Disabled Trustee tests #######################
   "In CalculationController calling the .disabledTrustee action " when {
 
@@ -253,6 +316,36 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         contentType(PersonalAllowanceTestDataItem.result) shouldBe Some("text/html")
         charset(PersonalAllowanceTestDataItem.result) shouldBe Some("utf-8")
       }
+
+      "have the title In the tax year when you stopped owning the property, what was your UK Personal Allowance?" in {
+        PersonalAllowanceTestDataItem.jsoupDoc.title shouldEqual Messages("calc.personalAllowance.question")
+      }
+
+      "have the heading Calculate your tax (non-residents) " in {
+        PersonalAllowanceTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+      }
+
+      "have a 'Back' link " in {
+        PersonalAllowanceTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+      }
+
+      "have the question 'In the tax year when you stopped owning the property, what was your UK Personal Allowance?' as the label of the input" in {
+        PersonalAllowanceTestDataItem.jsoupDoc.body.getElementsByTag("label").text shouldEqual Messages("calc.personalAllowance.question")
+      }
+
+      "display an input box for the Personal Allowance" in {
+        PersonalAllowanceTestDataItem.jsoupDoc.body.getElementById("personalAllowance").tagName() shouldEqual "input"
+      }
+
+      "display a 'Continue' button " in {
+        PersonalAllowanceTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+      }
+
+      "should contain a Read more sidebar with a link to personal allowances and taxation abroad" in {
+        PersonalAllowanceTestDataItem.jsoupDoc.select("aside h2").text shouldBe Messages("calc.common.readMore")
+        PersonalAllowanceTestDataItem.jsoupDoc.select("aside a").first().attr("href") shouldBe "https://www.gov.uk/income-tax-rates/current-rates-and-allowances"
+        PersonalAllowanceTestDataItem.jsoupDoc.select("aside a").last().attr("href") shouldBe "https://www.gov.uk/tax-uk-income-live-abroad/personal-allowance"
+      }
     }
   }
 
@@ -325,6 +418,55 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           OtherPropertiesTestDataItem.jsoupDoc.body.getElementById("otherProperties-yes").parent.classNames().contains("selected") shouldBe true
 
         }
+      }
+    }
+  }
+
+  "In CalculationController calling the .submitOtherProperties action" when {
+    def keystoreCacheCondition[T](data: OtherPropertiesModel): Unit = {
+      lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+      when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(returnedCacheMap))
+    }
+    "submitting a valid form with 'Yes'" should {
+      object OtherPropertiesTestDataItem extends fakeRequestToPost(
+        "allowance",
+        TestCalculationController.submitOtherProperties,
+        ("otherProperties", "Yes")
+      )
+      val testModel = new OtherPropertiesModel("Yes")
+
+      "return a 303" in {
+        keystoreCacheCondition[OtherPropertiesModel](testModel)
+        status(OtherPropertiesTestDataItem.result) shouldBe 303
+      }
+    }
+
+    "submitting a valid form with 'No'" should {
+      object OtherPropertiesTestDataItem extends fakeRequestToPost(
+        "allowance",
+        TestCalculationController.submitOtherProperties,
+        ("otherProperties", "No")
+      )
+      val testModel = new OtherPropertiesModel("No")
+
+      "return a 303" in {
+        keystoreCacheCondition[OtherPropertiesModel](testModel)
+        status(OtherPropertiesTestDataItem.result) shouldBe 303
+      }
+    }
+
+    "submitting an invalid form" should {
+      object OtherPropertiesTestDataItem extends fakeRequestToPost(
+        "allowance",
+        TestCalculationController.submitOtherProperties,
+        ("annualExemptAmount", "")
+      )
+      val testModel = new OtherPropertiesModel("")
+
+      "return a 400" in {
+        keystoreCacheCondition[AnnualExemptAmountModel](testModel)
+        status(OtherPropertiesTestDataItem.result) shouldBe 400
       }
     }
   }
@@ -768,150 +910,255 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
   //################### Disposal Costs tests #######################
   "In CalculationController calling the .disposalCosts action " should {
+    "not supplied with a pre-existing stored model" should {
+      object DisposalCostsTestDataItem extends fakeRequestTo("disposal-costs", TestCalculationController.disposalCosts)
 
-    object DisposalCostsTestDataItem extends fakeRequestTo("disposal-costs", CalculationController.disposalCosts)
+      "return a 200" in {
+        keystoreFetchCondition[DisposalCostsModel](None)
+        status(DisposalCostsTestDataItem.result) shouldBe 200
+      }
 
-    "return a 200" in {
-      status(DisposalCostsTestDataItem.result) shouldBe 200
+      "return some HTML that" should {
+
+        "contain some text and use the character set utf-8" in {
+          contentType(DisposalCostsTestDataItem.result) shouldBe Some("text/html")
+          charset(DisposalCostsTestDataItem.result) shouldBe Some("utf-8")
+        }
+
+        "have the title 'How much did you pay in costs when you stopped being the property owner?'" in {
+          DisposalCostsTestDataItem.jsoupDoc.getElementsByTag("title").text shouldBe Messages("calc.disposalCosts.question")
+        }
+
+        "have a back link" in {
+          DisposalCostsTestDataItem.jsoupDoc.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+        }
+
+        "have the heading 'Calculate your tax (non-residents)'" in {
+          DisposalCostsTestDataItem.jsoupDoc.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+        }
+
+        "have a monetary field that" should {
+
+          "have the title 'How much did you pay in costs when you became the property owner?'" in {
+            DisposalCostsTestDataItem.jsoupDoc.select("label[for=disposalCosts]").text shouldEqual Messages("calc.disposalCosts.question")
+          }
+
+          "have an input box for the disposal costs" in {
+            DisposalCostsTestDataItem.jsoupDoc.getElementById("disposalCosts").tagName shouldBe "input"
+          }
+        }
+
+        "have a continue button that" should {
+
+          "be a button element" in {
+            DisposalCostsTestDataItem.jsoupDoc.getElementById("continue-button").tagName shouldBe "button"
+          }
+
+          "have the text 'Continue'" in {
+            DisposalCostsTestDataItem.jsoupDoc.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+          }
+        }
+      }
     }
+    "supplied with a pre-existing stored model" should {
+      object DisposalCostsTestDataItem extends fakeRequestTo("disposal-costs", TestCalculationController.disposalCosts)
+      val disposalCostsTestModel = new DisposalCostsModel(1000)
 
-    "return some HTML that" should {
-
-      "contain some text and use the character set utf-8" in {
-        contentType(DisposalCostsTestDataItem.result) shouldBe Some("text/html")
-        charset(DisposalCostsTestDataItem.result) shouldBe Some("utf-8")
+      "return a 200" in {
+        keystoreFetchCondition[DisposalCostsModel](Some(disposalCostsTestModel))
+        status(DisposalCostsTestDataItem.result) shouldBe 200
       }
 
-      "have the title 'How much did you pay in costs when you stopped being the property owner?'" in {
-        DisposalCostsTestDataItem.jsoupDoc.getElementsByTag("title").text shouldBe Messages("calc.disposalCosts.question")
-      }
+      "return some HTML that" should {
 
-      "have a back link" in {
-        DisposalCostsTestDataItem.jsoupDoc.getElementById("link-back").text shouldEqual Messages("calc.base.back")
-      }
-
-      "have the heading 'Calculate your tax (non-residents)'" in {
-        DisposalCostsTestDataItem.jsoupDoc.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
-      }
-
-      "have a monetary field that" should {
-
-        "have the title 'How much did you pay in costs when you became the property owner?'" in {
-          DisposalCostsTestDataItem.jsoupDoc.select("label[for=disposalCosts]").text shouldEqual Messages("calc.disposalCosts.question")
+        "contain some text and use the character set utf-8" in {
+          keystoreFetchCondition[DisposalCostsModel](Some(disposalCostsTestModel))
+          contentType(DisposalCostsTestDataItem.result) shouldBe Some("text/html")
+          charset(DisposalCostsTestDataItem.result) shouldBe Some("utf-8")
         }
 
-        "have an input box for the disposal costs" in {
-          DisposalCostsTestDataItem.jsoupDoc.getElementById("disposalCosts").tagName shouldBe "input"
+        "have the value 1000 auto-filled into the input box" in {
+          keystoreFetchCondition[DisposalCostsModel](Some(disposalCostsTestModel))
+          DisposalCostsTestDataItem.jsoupDoc.getElementById("disposalCosts").attr("value") shouldEqual ("1000")
         }
       }
 
-      "have a continue button that" should {
-
-        "be a button element" in {
-          DisposalCostsTestDataItem.jsoupDoc.getElementById("continue-button").tagName shouldBe "button"
-        }
-
-        "have the text 'Continue'" in {
-          DisposalCostsTestDataItem.jsoupDoc.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
-        }
-      }
     }
   }
 
   //################### Entrepreneurs Relief tests #######################
   "In CalculationController calling the .entrepreneursRelief action " should {
 
-    object EntrepreneursReliefTestDataItem extends fakeRequestTo("entrepreneurs-relief", CalculationController.entrepreneursRelief)
+    "not supplied with a pre-existing stored model" should {
+      object EntrepreneursReliefTestDataItem extends fakeRequestTo("entrepreneurs-relief", TestCalculationController.entrepreneursRelief)
 
-    "return a 200" in {
-      status(EntrepreneursReliefTestDataItem.result) shouldBe 200
+      "return a 200" in {
+        keystoreFetchCondition[EntrepreneursReliefModel](None)
+        status(EntrepreneursReliefTestDataItem.result) shouldBe 200
+      }
+
+      "return some HTML that" should {
+
+        "contain some text and use the character set utf-8" in {
+          keystoreFetchCondition[EntrepreneursReliefModel](None)
+          contentType(EntrepreneursReliefTestDataItem.result) shouldBe Some("text/html")
+          charset(EntrepreneursReliefTestDataItem.result) shouldBe Some("utf-8")
+        }
+
+        "have the title 'Are you claiming Entrepreneurs Relief?'" in {
+          keystoreFetchCondition[EntrepreneursReliefModel](None)
+          EntrepreneursReliefTestDataItem.jsoupDoc.title shouldEqual Messages("calc.entrepreneursRelief.question")
+        }
+
+        "have the heading Calculate your tax (non-residents) " in {
+          keystoreFetchCondition[EntrepreneursReliefModel](None)
+          EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+        }
+
+        "have a 'Back' link " in {
+          keystoreFetchCondition[EntrepreneursReliefModel](None)
+          EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+        }
+
+        "have the question 'Are you claiming Entrepreneurs Relief?' as the legend of the input" in {
+          keystoreFetchCondition[EntrepreneursReliefModel](None)
+          EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementsByTag("legend").text shouldEqual Messages("calc.entrepreneursRelief.question")
+        }
+
+        "display a 'Continue' button " in {
+          keystoreFetchCondition[EntrepreneursReliefModel](None)
+          EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+        }
+
+        "have a sidebar with additional links" in {
+          keystoreFetchCondition[EntrepreneursReliefModel](None)
+          EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementsByClass("sidebar")
+        }
+      }
     }
 
-    "return some HTML that" should {
+    "supplied with a pre-existing stored model" should {
 
-      "contain some text and use the character set utf-8" in {
-        contentType(EntrepreneursReliefTestDataItem.result) shouldBe Some("text/html")
-        charset(EntrepreneursReliefTestDataItem.result) shouldBe Some("utf-8")
+      "return a 200" in {
+        object EntrepreneursReliefTestDataItem extends fakeRequestTo("entrepreneurs-relief", TestCalculationController.entrepreneursRelief)
+        keystoreFetchCondition[EntrepreneursReliefModel](Some(EntrepreneursReliefModel("Yes")))
+        status(EntrepreneursReliefTestDataItem.result) shouldBe 200
       }
 
-      "have the title 'Are you claiming Entrepreneurs Relief?'" in {
-        EntrepreneursReliefTestDataItem.jsoupDoc.title shouldEqual Messages("calc.entrepreneursRelief.question")
-      }
+      "return some HTML that" should {
 
-      "have the heading Calculate your tax (non-residents) " in {
-        EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
-      }
+        "have the radio option `Yes` selected if `Yes` is supplied in the model" in {
+          object EntrepreneursReliefTestDataItem extends fakeRequestTo("entrepreneurs-relief", TestCalculationController.entrepreneursRelief)
+          keystoreFetchCondition[EntrepreneursReliefModel](Some(EntrepreneursReliefModel("Yes")))
+          EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementById("entrepreneursRelief-yes").parent.classNames().contains("selected") shouldBe true
+        }
 
-      "have a 'Back' link " in {
-        EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+        "have the radio option `No` selected if `No` is supplied in the model" in {
+          object EntrepreneursReliefTestDataItem extends fakeRequestTo("entrepreneurs-relief", TestCalculationController.entrepreneursRelief)
+          keystoreFetchCondition[EntrepreneursReliefModel](Some(EntrepreneursReliefModel("No")))
+          EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementById("entrepreneursRelief-no").parent.classNames().contains("selected") shouldBe true
+        }
       }
-
-      "have the question 'Are you claiming Entrepreneurs Relief?' as the legend of the input" in {
-        EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementsByTag("legend").text shouldEqual Messages("calc.entrepreneursRelief.question")
-      }
-
-      "display a 'Continue' button " in {
-        EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
-      }
-
-      "have a sidebar with additional links" in {
-        EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementsByClass("sidebar")
-      }
-
     }
   }
 
 
   //################### Allowable Losses tests #######################
-  "In CalculationController calling the .allowableLosses action " should {
+  "In CalculationController calling the .allowableLosses action " when {
 
-    object AllowableLossesTestDataItem extends fakeRequestTo("allowable-losses", CalculationController.allowableLosses)
+    "not supplied with a pre-existing stored value" should {
 
-    "return a 200" in {
-      status(AllowableLossesTestDataItem.result) shouldBe 200
+      object AllowableLossesTestDataItem extends fakeRequestTo("allowable-losses", TestCalculationController.allowableLosses)
+
+      "return a 200" in {
+        keystoreFetchCondition[AllowableLossesModel](None)
+        status(AllowableLossesTestDataItem.result) shouldBe 200
+      }
+
+      "return some HTML that" should {
+
+        "contain some text and use the character set utf-8" in {
+          keystoreFetchCondition[AllowableLossesModel](None)
+          contentType(AllowableLossesTestDataItem.result) shouldBe Some("text/html")
+          charset(AllowableLossesTestDataItem.result) shouldBe Some("utf-8")
+        }
+
+        "have a back button" in {
+          keystoreFetchCondition[AllowableLossesModel](None)
+          AllowableLossesTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+        }
+
+        "have the title 'Are you claiming any allowable losses?'" in {
+          keystoreFetchCondition[AllowableLossesModel](None)
+          AllowableLossesTestDataItem.jsoupDoc.title shouldEqual Messages("calc.allowableLosses.question.one")
+        }
+
+        "have the heading 'Calculate your tax (non-residents)'" in {
+          keystoreFetchCondition[AllowableLossesModel](None)
+          AllowableLossesTestDataItem.jsoupDoc.body.getElementsByTag("H1").text shouldEqual Messages("calc.base.pageHeading")
+        }
+
+        "have a yes no helper with hidden content and question 'Are you claiming any allowable losses?'" in {
+          keystoreFetchCondition[AllowableLossesModel](None)
+          AllowableLossesTestDataItem.jsoupDoc.body.getElementById("isClaimingAllowableLosses-yes").parent.text shouldBe Messages("calc.base.yes")
+          AllowableLossesTestDataItem.jsoupDoc.body.getElementById("isClaimingAllowableLosses-no").parent.text shouldBe Messages("calc.base.no")
+          AllowableLossesTestDataItem.jsoupDoc.body.getElementsByTag("legend").text shouldBe Messages("calc.allowableLosses.question.one")
+        }
+
+        "have a hidden monetary input with question 'Whats the total value of your allowable losses?'" in {
+          keystoreFetchCondition[AllowableLossesModel](None)
+          AllowableLossesTestDataItem.jsoupDoc.body.getElementById("allowableLossesAmt").tagName shouldEqual "input"
+          AllowableLossesTestDataItem.jsoupDoc.select("label[for=allowableLossesAmt]").text shouldEqual Messages("calc.allowableLosses.question.two")
+        }
+
+        "have no value auto-filled into the input box" in {
+          keystoreFetchCondition[AcquisitionValueModel](None)
+          AllowableLossesTestDataItem.jsoupDoc.getElementById("allowableLossesAmt").attr("value") shouldBe empty
+        }
+
+        "have a hidden help text section with summary 'What are allowable losses?' and correct content" in {
+          keystoreFetchCondition[AllowableLossesModel](None)
+          AllowableLossesTestDataItem.jsoupDoc.select("div#allowableLossesHiddenHelp").text should
+            include(Messages("calc.allowableLosses.helpText.title"))
+            include(Messages("calc.allowableLosses.helpText.paragraph.one"))
+            include(Messages("calc.allowableLosses.helpText.bullet.one"))
+            include(Messages("calc.allowableLosses.helpText.bullet.two"))
+            include(Messages("calc.allowableLosses.helpText.bullet.three"))
+        }
+
+        "has a Continue button" in {
+          keystoreFetchCondition[AllowableLossesModel](None)
+          AllowableLossesTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+        }
+      }
     }
+    "supplied with a pre-existing stored model" should {
 
-    "return some HTML that" should {
+      object AllowableLossesTestDataItem extends fakeRequestTo("allowable-losses", TestCalculationController.allowableLosses)
+      val testModel = new AllowableLossesModel("Yes",9999.54)
 
-      "contain some text and use the character set utf-8" in {
-        contentType(AllowableLossesTestDataItem.result) shouldBe Some("text/html")
-        charset(AllowableLossesTestDataItem.result) shouldBe Some("utf-8")
+      "return a 200" in {
+        keystoreFetchCondition[AllowableLossesModel](Some(testModel))
+        status(AllowableLossesTestDataItem.result) shouldBe 200
       }
 
-      "have a back button" in {
-        AllowableLossesTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
-      }
+      "return some HTML that" should {
 
-      "have the title 'Are you claiming any allowable losses?'" in {
-        AllowableLossesTestDataItem.jsoupDoc.title shouldEqual Messages("calc.allowableLosses.question.one")
-      }
+        "contain some text and use the character set utf-8" in {
+          keystoreFetchCondition[AllowableLossesModel](Some(testModel))
+          contentType(AllowableLossesTestDataItem.result) shouldBe Some("text/html")
+          charset(AllowableLossesTestDataItem.result) shouldBe Some("utf-8")
+        }
 
-      "have the heading 'Calculate your tax (non-residents)'" in {
-        AllowableLossesTestDataItem.jsoupDoc.body.getElementsByTag("H1").text shouldEqual Messages("calc.base.pageHeading")
-      }
+        "have the 'Yes' Radio option selected" in {
+          keystoreFetchCondition[AllowableLossesModel](Some(testModel))
+          AllowableLossesTestDataItem.jsoupDoc.getElementById("isClaimingAllowableLosses-yes").parent.classNames().contains("selected") shouldBe true
+        }
 
-      "have a yes no helper with hidden content and question 'Are you claiming any allowable losses?'" in {
-        AllowableLossesTestDataItem.jsoupDoc.body.getElementById("allowableLossesYes").parent.text shouldBe Messages("calc.base.yes")
-        AllowableLossesTestDataItem.jsoupDoc.body.getElementById("allowableLossesNo").parent.text shouldBe Messages("calc.base.no")
-        AllowableLossesTestDataItem.jsoupDoc.body.getElementsByTag("legend").text shouldBe Messages("calc.allowableLosses.question.one")
-      }
-
-      "have a hidden monetary input with question 'Whats the total value of your allowable losses?'" in {
-        AllowableLossesTestDataItem.jsoupDoc.body.getElementById("allowableLosses").tagName shouldEqual "input"
-        AllowableLossesTestDataItem.jsoupDoc.select("label[for=allowableLosses]").text shouldEqual Messages("calc.allowableLosses.question.two")
-      }
-
-      "have a hidden help text section with summary 'What are allowable losses?' and correct content" in {
-        AllowableLossesTestDataItem.jsoupDoc.select("div#allowableLossesHiddenHelp").text should
-          include(Messages("calc.allowableLosses.helpText.title"))
-        include(Messages("calc.allowableLosses.helpText.paragraph.one"))
-        include(Messages("calc.allowableLosses.helpText.bullet.one"))
-        include(Messages("calc.allowableLosses.helpText.bullet.two"))
-        include(Messages("calc.allowableLosses.helpText.bullet.three"))
-      }
-
-      "has a Continue button" in {
-        AllowableLossesTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+        "have the value 9999.54 auto-filled into the input box" in {
+          keystoreFetchCondition[AllowableLossesModel](Some(testModel))
+          AllowableLossesTestDataItem.jsoupDoc.getElementById("allowableLossesAmt").attr("value") shouldEqual ("9999.54")
+        }
       }
     }
   }

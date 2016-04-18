@@ -23,7 +23,7 @@ import models._
 object CustomerTypeForm {
   val customerTypeForm = Form(
     mapping(
-      "customerType" -> text
+      "customerType" -> nonEmptyText
     )(CustomerTypeModel.apply)(CustomerTypeModel.unapply)
   )
 }
