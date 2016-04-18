@@ -342,15 +342,6 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
   }
 
-  //################### Current Income tests #######################
-  "In CalculationController calling the .currentIncome action " should {
-
-    "be Action(parser=BodyParser(anyContent)) for currentIncome" in {
-      val result = CalculationController.currentIncome.toString()
-      result shouldBe s
-    }
-  }
-
   //############## Personal Allowance tests ######################
   "In CalculationController calling the .personalAllowance action " should {
     "not supplied with a model that already contains data" should {
