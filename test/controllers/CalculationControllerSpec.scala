@@ -603,13 +603,41 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       }
     }
 
-    "submitting an invalid form" should {
+    "submitting an invalid form with no value" should {
       object AnnualExemptAmountTestDataItem extends fakeRequestToPost(
         "allowance",
         TestCalculationController.submitAnnualExemptAmount,
         ("annualExemptAmount", "")
       )
       val testModel = new AnnualExemptAmountModel(0)
+
+      "return a 400" in {
+        keystoreCacheCondition[AnnualExemptAmountModel](testModel)
+        status(AnnualExemptAmountTestDataItem.result) shouldBe 400
+      }
+    }
+
+    "submitting an invalid form above the maximum value" should {
+      object AnnualExemptAmountTestDataItem extends fakeRequestToPost(
+        "allowance",
+        TestCalculationController.submitAnnualExemptAmount,
+        ("annualExemptAmount", "15000")
+      )
+      val testModel = new AnnualExemptAmountModel(15000)
+
+      "return a 400" in {
+        keystoreCacheCondition[AnnualExemptAmountModel](testModel)
+        status(AnnualExemptAmountTestDataItem.result) shouldBe 400
+      }
+    }
+
+    "submitting an invalid form below the minimum" should {
+      object AnnualExemptAmountTestDataItem extends fakeRequestToPost(
+        "allowance",
+        TestCalculationController.submitAnnualExemptAmount,
+        ("annualExemptAmount", "-1000")
+      )
+      val testModel = new AnnualExemptAmountModel(-1000)
 
       "return a 400" in {
         keystoreCacheCondition[AnnualExemptAmountModel](testModel)
