@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
-package models
+package forms
 
-import play.api.libs.json.Json
+import play.api.data._
+import play.api.data.Forms._
+import models._
 
-case class EntrepreneursReliefModel(entReliefClaimed : String)
-
-object EntrepreneursReliefModel {
-  implicit val format = Json.format[EntrepreneursReliefModel]
+object AllowableLossesForm {
+  val allowableLossesForm = Form(
+    mapping(
+      "isClaimingAllowableLosses" -> text,
+      "allowableLossesAmt" -> bigDecimal
+    )(AllowableLossesModel.apply)(AllowableLossesModel.unapply)
+  )
 }

@@ -17,6 +17,7 @@ calc.common.date.fields.month = Month
 calc.common.date.fields.year = Year
 calc.common.date.hint = For example, 4 9 2016
 calc.common.readMore = Read more
+calc.common.next.actions.heading = What to do next
 
 ## Introduction ##
 calc.introduction.title = Introduction
@@ -43,7 +44,6 @@ calc.introduction.listThreeBulletFour = get compensation if it's destroyed
 calc.introduction.start = Start
 
 ## Customer Type ##
-calc.customerType.title = Who owned the property?
 calc.customerType.question = Who owned the property?
 calc.customerType.individual = I owned it
 calc.customerType.trustee = I was a trustee
@@ -54,13 +54,18 @@ calc.disabledTrustee.question = Are you a trustee for someone who’s vulnerable
 calc.disabledTrustee.helptext = A person’s vulnerable if they’re disabled, or if they’re under 18 and their parents have died
 
 ## Current Income ##
-calc.currentIncome.title = In the tax year when you stopped owning the property, what was your total UK income?
+calc.currentIncome.question = In the tax year when you stopped owning the property, what was your total UK income?
+calc.currentIncome.link.one = Income Tax
+calc.currentIncome.link.two = Previous tax years
+calc.currentIncome.helpText = Tax years start on 6 April
 
 ## Personal Allowance ##
-calc.personalAllowance.title = In the tax year when you stopped owning the property, what was your UK Personal Allowance?
+calc.personalAllowance.question = In the tax year when you stopped owning the property, what was your UK Personal Allowance?
+calc.personalAllowance.linkOne = Income Tax rates and Personal Allowances
+calc.personalAllowance.linkTwo = Tax on your UK income if you live abroad
 
 ## Other Properties ##
-calc.otherProperties.title = Did you sell or give away any other properties in that tax year?
+calc.otherProperties.question = Did you sell or give away any other properties in that tax year?
 
 ## Annual Exempt Amount ##
 calc.annualExemptAmount.question = How much of your Capital Gains Tax allowance have you got left?
@@ -70,30 +75,51 @@ calc.annualExemptAmount.link.one = Capital Gains Tax allowances
 calc.acquisitionValue.question = How much did you pay for the property?
 
 ## Improvements ##
-calc.improvements.title = Did you make any improvements to the property?
+calc.improvements.question = Did you make any improvements to the property?
+calc.improvements.help = Improvements are permanent changes that raise the value of a property, like adding extensions or garages.
+calc.improvements.questionTwo = How much did the improvements cost?
 
 ## Disposal Date ##
-calc.disposalDate.title = When did you sign the contract that made someone else the owner?
+calc.disposalDate.question = When did you sign the contract that made someone else the owner?
 
 ## Disposal Value ##
-calc.disposalValue.title = How much did you sell or give away the property for?
+calc.disposalValue.question = How much did you sell or give away the property for?
 
 ## Acquisition Costs ##
-calc.acquisitionCosts.title = How much did you pay in costs when you became the property owner?
+calc.acquisitionCosts.question = How much did you pay in costs when you became the property owner?
+calc.acquisitionCosts.helpText = Costs include agent fees, legal fees and surveys
 
 ## Disposal Costs ##
-calc.disposalCosts.title = How much did you pay in costs when you stopped being the property owner?
+calc.disposalCosts.question = How much did you pay in costs when you stopped being the property owner?
 
 ## Entrepreneurs Relief ##
-calc.entrepreneursRelief.title = Are you claiming Entrepreneurs' Relief?
+calc.entrepreneursRelief.question = Are you claiming Entrepreneurs'' Relief?
+calc.entrepreneursRelief.link = Entrepreneurs'' Relief
 
 ## Allowable Losses ##
-calc.allowableLosses.title = Are you claiming any allowable losses?
+calc.allowableLosses.question.one = Are you claiming any allowable losses from the 2016/2017 tax year?
+calc.allowableLosses.question.two = What''s the total value of your allowable losses?
+calc.allowableLosses.helpText.title = What are allowable losses?
+calc.allowableLosses.helpText.paragraph.one = They''re losses you''ve made on UK properties that:
+calc.allowableLosses.helpText.bullet.one = are covered by Capital Gains Tax
+calc.allowableLosses.helpText.bullet.two = you''ve declared to HMRC within four years of making the loss
+calc.allowableLosses.helpText.bullet.three = you haven''t already used in an allowable losses claim
 
 ## Other Reliefs ##
-calc.otherReliefs.title = How much extra tax relief are you claiming?
+calc.otherReliefs.question = How much extra tax relief are you claiming?
 
 ## Summary ##
 calc.summary.title = Summary
-
-
+calc.summary.secondaryHeading = You owe
+calc.summary.calculation.details.title = Calculation details
+calc.summary.calculation.details.totalGain = Your total gain
+calc.summary.calculation.details.taxableGain = Your taxable gain
+calc.summary.calculation.details.taxRate = Your tax rate
+calc.summary.personal.details.title = Personal details
+calc.summary.purchase.details.title = Purchase details
+calc.summary.property.details.title = Property details
+calc.summary.sale.details.title = Sale details
+calc.summary.deductions.title = Deductions
+calc.summary.next.actions.text = You need to
+calc.summary.next.actions.link = tell HMRC about the property
+calc.summary.startAgain = Start again

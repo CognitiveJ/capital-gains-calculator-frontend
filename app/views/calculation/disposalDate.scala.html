@@ -1,11 +1,13 @@
-@()(implicit request: Request[_])
+@import play.api.data._
 @import views.html.helpers._
 
-@main_template(Messages("calc.disposalDate.title")) {
-    <a class="link-back" href="@routes.CalculationController.improvements">@Messages("calc.base.back")</a>
+@(disposalDateForm: Form[DisposalDateModel])(implicit request: Request[_])
+
+@main_template(Messages("calc.disposalDate.question")) {
+    <a id="link-back" class="link-back" href="@routes.CalculationController.improvements">@Messages("calc.base.back")</a>
     <h1 class="heading-large">@Messages("calc.base.calculate.tax.heading")</h1>
 
-    @simpleInlineDate("disposalDate", Messages("calc.disposalDate.title"))
+    @formInlineDateInput(disposalDateForm, "disposalDate", Messages("calc.disposalDate.question"))
 
-    <button id="continue" class="button">@Messages("calc.base.button.continue")</button>
+    <button id="continue-button" class="button">@Messages("calc.base.button.continue")</button>
 }

@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
-package models
+package forms
 
-import play.api.libs.json.Json
+import play.api.data._
+import play.api.data.Forms._
+import models._
 
-case class EntrepreneursReliefModel(entReliefClaimed : String)
-
-object EntrepreneursReliefModel {
-  implicit val format = Json.format[EntrepreneursReliefModel]
+object DisposalDateForm {
+  val disposalDateForm = Form(
+    mapping(
+        "disposalDate.day" -> number,
+        "disposalDate.month" -> number,
+        "disposalDate.year" -> number
+    )(DisposalDateModel.apply)(DisposalDateModel.unapply)
+  )
 }

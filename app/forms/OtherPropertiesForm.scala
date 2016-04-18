@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
-package models
+package forms
 
-import play.api.libs.json.Json
+import models.OtherPropertiesModel
+import play.api.data.Forms._
+import play.api.data._
 
-case class EntrepreneursReliefModel(entReliefClaimed : String)
-
-object EntrepreneursReliefModel {
-  implicit val format = Json.format[EntrepreneursReliefModel]
+object OtherPropertiesForm {
+  val otherPropertiesForm = Form (
+    mapping(
+      "otherProperties" -> text
+    )(OtherPropertiesModel.apply)(OtherPropertiesModel.unapply)
+  )
 }

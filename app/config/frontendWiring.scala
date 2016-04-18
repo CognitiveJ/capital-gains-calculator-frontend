@@ -16,6 +16,7 @@
 
 package config
 
+import uk.gov.hmrc.http.cache.client.SessionCache
 import uk.gov.hmrc.play.audit.http.config.LoadAuditingConfig
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector => Auditing}
 import uk.gov.hmrc.play.config.{AppName, RunMode, ServicesConfig}
@@ -33,4 +34,13 @@ object WSHttp extends WSGet with WSPut with WSPost with WSDelete with AppName wi
 object FrontendAuthConnector extends AuthConnector with ServicesConfig {
   val serviceUrl = baseUrl("auth")
   lazy val http = WSHttp
+}
+
+object CalculatorSessionCache extends SessionCache with ServicesConfig with AppName{
+
+  override lazy val domain = getConfString("cachable.session-cache.domain", throw new Exception(s"Could not find config 'cachable.session-cache.domain'"))
+  override lazy val baseUri = baseUrl("cachable.session-cache")
+  override lazy val defaultSource = appName
+  override lazy val http = WSHttp
+
 }

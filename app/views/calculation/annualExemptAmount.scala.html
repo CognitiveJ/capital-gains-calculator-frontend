@@ -1,4 +1,8 @@
-@()(implicit request: Request[_])
+@import models.AnnualExemptAmountModel
+@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+@import play.api.data._
+
+@(annualExemptAmountForm: Form[AnnualExemptAmountModel])(implicit request: Request[_])
 
 @import views.html.helpers._
 
@@ -12,8 +16,12 @@
 
     <h1 class="heading-large">@Messages("calc.base.pageHeading")</h1>
 
-    @simpleInputMoney("annualExemptAmount",Messages("calc.annualExemptAmount.question"))
+    @govHelpers.form(action = routes.CalculationController.submitAnnualExemptAmount) {
 
-    <button class="button" type="submit" id="continue-button">@Messages("calc.base.continue")</button>
+        @formInputMoney(annualExemptAmountForm, "annualExemptAmount", Messages("calc.annualExemptAmount.question"))
+
+        <button class="button" type="submit" id="continue-button">@Messages("calc.base.continue")</button>
+
+    }
 
 }

@@ -1,10 +1,33 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+@(entrepreneursReliefForm: Form[EntrepreneursReliefModel])(implicit request: Request[_])
 
-</body>
-</html>
+@import models.OtherPropertiesModel
+@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+@import views.html.helpers._
+
+@sidebar = {
+    <a href="https://www.gov.uk/entrepreneurs-relief" target="_blank">@Messages("calc.entrepreneursRelief.link")</a>
+}
+
+@main_template(Messages("calc.entrepreneursRelief.question"), sidebarLinks = Some(sidebar)) {
+
+    <a id="link-back" class="link-back" href="#">@Messages("calc.base.back")</a>
+
+    <h1 class="heading-large">@Messages("calc.base.pageHeading")</h1>
+
+    @govHelpers.form(action = routes.CalculationController.entrepreneursRelief) {
+    <div class="inline form-group">
+        @govHelpers.inputRadioGroup(
+        field = entrepreneursReliefForm("entrepreneursRelief"),
+        Seq(
+        "Yes"->Messages("calc.base.yes"),
+        "No"->Messages("calc.base.no")),
+        '_legend -> Messages("calc.entrepreneursRelief.question"),
+        '_labelAfter -> true,
+        '_labelClass -> "block-label"
+        )
+
+    </div>
+    <button class="button" type="submit" id="continue-button" >@Messages("calc.base.continue")</button>
+    }
+
+}

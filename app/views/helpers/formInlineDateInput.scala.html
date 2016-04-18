@@ -1,0 +1,42 @@
+@(formItem:Form[_], fieldName: String, questionText: String, args: (Symbol,Any)*)(implicit lang: play.api.i18n.Lang)
+
+@import uk.gov.hmrc.play.mappers.DateFields._
+@import play.api.i18n._
+@import uk.gov.hmrc.play.mappers.DateFormatSymbols._
+@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+
+
+
+@fieldsetClasses = @{if(formItem(fieldName).hasErrors) "form-field--error" else "" }
+
+<fieldset class="form-group form-date @fieldsetClasses" id="@fieldName-fieldset">
+
+    <legend>@questionText</legend>
+
+    @formItem(fieldName).errors.map { error => <span class="error-notification">@Messages(error.message)</span>}
+
+    <span class="form-hint">@Messages("calc.common.date.hint")</span>
+
+    @govHelpers.input(
+        formItem(s"${fieldName}.day"),
+        '_label -> Messages("calc.common.date.fields.day"),
+        '_labelClass -> "form-group form-group-day",
+        '_inputClass -> "form-control input--xsmall",
+        '_emptyValueText -> " "
+    )
+    @govHelpers.input(
+        formItem(s"${fieldName}.month"),
+        '_label -> Messages("calc.common.date.fields.month"),
+        '_labelClass -> "form-group form-group-month",
+        '_inputClass -> "form-control input--xsmall",
+        '_emptyValueText -> " "
+    )
+    @govHelpers.input(
+        formItem(s"${fieldName}.year"),
+        '_label -> Messages("calc.common.date.fields.year"),
+        '_labelClass -> "form-group form-group-year",
+        '_inputClass -> "form-control input--xsmall",
+        '_emptyValueText -> " "
+    )
+
+</fieldset>

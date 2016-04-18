@@ -14,20 +14,12 @@
  * limitations under the License.
  */
 
-package controllers
+package models
 
-import config.WSHttp
-import uk.gov.hmrc.http.cache.client.SessionCache
-import uk.gov.hmrc.play.config.{AppName, ServicesConfig}
+import play.api.libs.json._
 
-/**``
-  * Created by james on 16/03/16.
-  */
-object SessionCacheController extends SessionCache with ServicesConfig with AppName{
+case class CurrentIncomeModel (currentIncome: BigDecimal)
 
-  override lazy val domain = getConfString("cachable.session-cache.domain", throw new Exception(s"Could not find config 'cachable.session-cache.domain'"))
-  override lazy val baseUri = baseUrl("cachable.session-cache")
-  override lazy val defaultSource = appName
-  override lazy val http = WSHttp
-
+object CurrentIncomeModel {
+  implicit val format = Json.format[CurrentIncomeModel]
 }

@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
-package models
+package forms
 
-import play.api.libs.json.Json
+import play.api.data._
+import play.api.data.Forms._
+import models._
+import play.api.data.format.Formats._
 
-case class EntrepreneursReliefModel(entReliefClaimed : String)
-
-object EntrepreneursReliefModel {
-  implicit val format = Json.format[EntrepreneursReliefModel]
+object DisabledTrusteeForm {
+  val disabledTrusteeForm = Form(
+    mapping(
+      "isVulnerable" -> text
+    )(DisabledTrusteeModel.apply)(DisabledTrusteeModel.unapply)
+  )
 }

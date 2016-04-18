@@ -18,7 +18,7 @@ package models
 
 import play.api.libs.json.Json
 
-case class DisabledTrusteeModel (isVulnerable: Boolean)
+case class DisabledTrusteeModel (isVulnerable: String)
 
 object DisabledTrusteeModel {
   implicit val format = Json.format[DisabledTrusteeModel]

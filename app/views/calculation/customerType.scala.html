@@ -4,13 +4,13 @@
 
 @(customerTypeForm: Form[CustomerTypeModel])(implicit request: Request[_])
 
-@main_template(title = Messages("calc.customerType.title")) {
+@main_template(title = Messages("calc.customerType.question")) {
 
-  <a class="link-back" href="@routes.IntroductionController.introduction">Back</a>
+  <a id="link-back" class="link-back" href="@routes.IntroductionController.introduction">@Messages("calc.base.back")</a>
 
   <h1>@Messages("calc.base.pageHeading")</h1>
 
-  @govHelpers.form(action = routes.CalculationController.customerType) {
+  @govHelpers.form(action = routes.CalculationController.submitCustomerType) {
 
     <div class="form-group">
         @govHelpers.inputRadioGroup(
