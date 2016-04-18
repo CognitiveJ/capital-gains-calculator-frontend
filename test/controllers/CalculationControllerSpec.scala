@@ -155,6 +155,69 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
   }
 
+  "In CalculationController calling the .submitCustomerType action" when {
+    def keystoreCacheCondition[T](data: CustomerTypeModel): Unit = {
+      lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+      when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(returnedCacheMap))
+    }
+    "submitting a valid form with 'individual'" should {
+      object CustomerTypeTestDataItem extends fakeRequestToPost(
+        "customer-type",
+        TestCalculationController.submitCustomerType,
+        ("customerType", "individual")
+      )
+      val testModel = new CustomerTypeModel("individual")
+
+      "return a 303" in {
+        keystoreCacheCondition[OtherPropertiesModel](testModel)
+        status(CustomerTypeTestDataItem.result) shouldBe 303
+      }
+    }
+
+    "submitting a valid form with 'trustee'" should {
+      object CustomerTypeTestDataItem extends fakeRequestToPost(
+        "customer-type",
+        TestCalculationController.submitCustomerType,
+        ("customerType", "trustee")
+      )
+      val testModel = new CustomerTypeModel("trustee")
+
+      "return a 303" in {
+        keystoreCacheCondition[OtherPropertiesModel](testModel)
+        status(CustomerTypeTestDataItem.result) shouldBe 303
+      }
+    }
+
+    "submitting a valid form with 'personalRep'" should {
+      object CustomerTypeTestDataItem extends fakeRequestToPost(
+        "customer-type",
+        TestCalculationController.submitCustomerType,
+        ("customerType", "personalRep")
+      )
+      val testModel = new CustomerTypeModel("personalRep")
+
+      "return a 303" in {
+        keystoreCacheCondition[OtherPropertiesModel](testModel)
+        status(CustomerTypeTestDataItem.result) shouldBe 303
+      }
+    }
+
+    "submitting an invalid form" should {
+      object OtherPropertiesTestDataItem extends fakeRequestToPost(
+        "customer-type",
+        TestCalculationController.submitCustomerType,
+        ("annualExemptAmount", "")
+      )
+      val testModel = new CustomerTypeModel("")
+
+      "return a 400" in {
+        keystoreCacheCondition[CustomerTypeModel](testModel)
+        status(OtherPropertiesTestDataItem.result) shouldBe 400
+      }
+    }
+  }
+
   //################### Disabled Trustee tests #######################
   "In CalculationController calling the .disabledTrustee action " when {
 
@@ -339,7 +402,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       object OtherPropertiesTestDataItem extends fakeRequestToPost(
         "allowance",
         TestCalculationController.submitOtherProperties,
-        ("otherProperties", "No")
+        ("otherProperties", "Yes")
       )
       val testModel = new OtherPropertiesModel("Yes")
 
