@@ -25,6 +25,8 @@ import forms.AnnualExemptAmountForm._
 import forms.DisposalDateForm._
 import forms.DisposalValueForm._
 import forms.AllowableLossesForm._
+import forms.EntrepreneursReliefForm._
+import forms.DisposalCostsForm._
 import models._
 import play.api.mvc.Action
 import uk.gov.hmrc.play.frontend.controller.FrontendController
@@ -71,6 +73,19 @@ trait CalculationController extends FrontendController {
       case Some(data) => Ok(calculation.otherProperties(otherPropertiesForm.fill(data)))
       case None => Ok(calculation.otherProperties(otherPropertiesForm))
     }
+  }
+
+  val submitOtherProperties = Action { implicit request =>
+    otherPropertiesForm.bindFromRequest.fold(
+      errors => BadRequest(calculation.otherProperties(errors)),
+      success => {
+        calcConnector.saveFormData("otherProperties", success)
+        success.otherProperties match {
+          case "Yes" => Redirect(routes.CalculationController.annualExemptAmount())
+          case "No" => Redirect(routes.CalculationController.acquisitionValue())
+       }
+      }
+    )
   }
 
   //################### Annual Exempt Amount methods #######################
@@ -127,12 +142,18 @@ trait CalculationController extends FrontendController {
 
   //################### Disposal Costs methods #######################
   val disposalCosts = Action.async { implicit request =>
-    Future.successful(Ok(calculation.disposalCosts()))
+    calcConnector.fetchAndGetFormData[DisposalCostsModel]("disposalCosts").map {
+      case Some(data) => Ok(calculation.disposalCosts(disposalCostsForm.fill(data)))
+      case None => Ok(calculation.disposalCosts(disposalCostsForm))
+    }
   }
 
   //################### Entrepreneurs Relief methods #######################
   val entrepreneursRelief = Action.async { implicit request =>
-    Future.successful(Ok(calculation.entrepreneursRelief()))
+    calcConnector.fetchAndGetFormData[EntrepreneursReliefModel]("entrepreneursRelief").map {
+      case Some(data) => Ok(calculation.entrepreneursRelief(entrepreneursReliefForm.fill(data)))
+      case None => Ok(calculation.entrepreneursRelief(entrepreneursReliefForm))
+    }
   }
 
   //################### Allowable Losses methods #######################
