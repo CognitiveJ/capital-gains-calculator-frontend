@@ -26,7 +26,7 @@ import forms.DisposalDateForm._
 import forms.DisposalValueForm._
 import forms.EntrepreneursReliefForm._
 import forms.DisposalCostsForm._
-import forms.ImprovementsFrom._
+import forms.ImprovementsForm._
 import models._
 import play.api.mvc.Action
 import uk.gov.hmrc.play.frontend.controller.FrontendController

@@ -18,7 +18,7 @@ package models
 
 import play.api.libs.json._
 
-case class ImprovementsModel (improvementsAmt: BigDecimal)
+case class ImprovementsModel (isClaimingImprovements: String, improvementsAmt: BigDecimal)
 
 object ImprovementsModel {
   implicit val format = Json.format[ImprovementsModel]

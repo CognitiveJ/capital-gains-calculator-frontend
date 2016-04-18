@@ -604,23 +604,58 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         }
 
         "display the correct wording for radio option `yes`" in {
-          ImprovementsTestDataItem.jsoupDoc.body.getElementById("improvementsCheckYes").parent.text shouldEqual Messages("calc.base.yes")
+          ImprovementsTestDataItem.jsoupDoc.body.getElementById("isClaimingImprovements-yes").parent.text shouldEqual Messages("calc.base.yes")
         }
 
         "display the correct wording for radio option `no`" in {
-          ImprovementsTestDataItem.jsoupDoc.body.getElementById("improvementsCheckNo").parent.text shouldEqual Messages("calc.base.no")
+          ImprovementsTestDataItem.jsoupDoc.body.getElementById("isClaimingImprovements-no").parent.text shouldEqual Messages("calc.base.no")
         }
 
         "contain a hidden component with an input box" in {
-          ImprovementsTestDataItem.jsoupDoc.body.getElementById("improvements").parent.parent.id shouldBe "hidden"
+          ImprovementsTestDataItem.jsoupDoc.body.getElementById("improvementsAmt").parent.parent.parent.id shouldBe "hidden"
         }
       }
     }
-//    "supplied with a pre-existing stored model" should {
-//      val improvementsTestModel = new ImprovementsModel(1000)
-//      object ImprovementsTestDataItem extends fakeRequestTo("improvements", TestCalculationController.improvements)
-//
-//    }
+    "supplied with a pre-existing model with 'Yes' checked and value already entered" should {
+      val testImprovementsModelYes = new ImprovementsModel("Yes", 10000)
+
+      "return a 200" in {
+        object ImprovementsTestDataItem extends fakeRequestTo("improvements", TestCalculationController.improvements)
+        keystoreFetchCondition[ImprovementsModel](Some(testImprovementsModelYes))
+        status(ImprovementsTestDataItem.result) shouldBe 200
+      }
+
+      "return some HTML that" should {
+
+        "be pre-poulated with Yes box selected and a value of 10000 entered" in {
+          object ImprovementsTestDataItem extends fakeRequestTo("improvements", TestCalculationController.improvements)
+          keystoreFetchCondition[ImprovementsModel](Some(testImprovementsModelYes))
+
+          ImprovementsTestDataItem.jsoupDoc.getElementById("isClaimingImprovements-yes").attr("checked") shouldEqual ("checked")
+          ImprovementsTestDataItem.jsoupDoc.getElementById("improvementsAmt").attr("value") shouldEqual "10000"
+        }
+      }
+    }
+    "supplied with a pre-existing model with 'No' checked and value already entered" should {
+      val testImprovementsModelNo = new ImprovementsModel("No", 0)
+
+      "return a 200" in {
+        object ImprovementsTestDataItem extends fakeRequestTo("improvements", TestCalculationController.improvements)
+        keystoreFetchCondition[ImprovementsModel](Some(testImprovementsModelNo))
+        status(ImprovementsTestDataItem.result) shouldBe 200
+      }
+
+      "return some HTML that" should {
+
+        "be pre-poulated with No box selected and a value of 0" in {
+          object ImprovementsTestDataItem extends fakeRequestTo("improvements", TestCalculationController.improvements)
+          keystoreFetchCondition[ImprovementsModel](Some(testImprovementsModelNo))
+
+          ImprovementsTestDataItem.jsoupDoc.getElementById("isClaimingImprovements-no").attr("checked") shouldEqual ("checked")
+          ImprovementsTestDataItem.jsoupDoc.getElementById("improvementsAmt").attr("value") shouldEqual "0"
+        }
+      }
+    }
   }
 
   //################### Disposal Date tests #######################
@@ -684,7 +719,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           charset(DisposalDateTestDataItem.result) shouldBe Some("utf-8")
         }
 
-        "have be pre-populated with the date 10, 12, 2016" in {
+        "be pre-populated with the date 10, 12, 2016" in {
           keystoreFetchCondition[DisposalDateModel](Some(testDisposalDateModel))
           DisposalDateTestDataItem.jsoupDoc.body.getElementById("disposalDate.day").attr("value") shouldEqual testDisposalDateModel.day.toString
           DisposalDateTestDataItem.jsoupDoc.body.getElementById("disposalDate.month").attr("value") shouldEqual testDisposalDateModel.month.toString

@@ -1,0 +1,20 @@
+@(form: Form[_], fieldName: String, questionText:String, content:Html, helpText:Option[String] = None)(implicit lang: play.api.i18n.Lang)
+
+<div class="form-group" data-hidden='hidden'>
+
+    @formInputRadioGroup(
+        field = form(fieldName),
+        Seq(
+        "Yes"->Messages("calc.base.yes"),
+        "No"->Messages("calc.base.no")),
+        '_legend -> questionText,
+        '_helpText -> helpText,
+        '_labelAfter -> true,
+        '_labelClass -> "block-label",
+        '_groupClass -> "inline"
+        )
+
+    <div class="panel-indent" id='hidden' style="display: none">
+        @content
+    </div>
+</div>

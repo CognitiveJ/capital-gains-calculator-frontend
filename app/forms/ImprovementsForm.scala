@@ -23,7 +23,8 @@ import models._
 object ImprovementsForm {
   val improvementsForm = Form(
     mapping(
-      "improvements" -> bigDecimal
+      "isClaimingImprovements" -> text,
+      "improvementsAmt" -> bigDecimal
     )(ImprovementsModel.apply)(ImprovementsModel.unapply)
   )
 }
