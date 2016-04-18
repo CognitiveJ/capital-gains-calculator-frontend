@@ -1005,7 +1005,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
     "not supplied with a pre-existing stored value" should {
 
-      object AllowableLossesTestDataItem extends fakeRequestTo("allowable-losses", CalculationController.allowableLosses)
+      object AllowableLossesTestDataItem extends fakeRequestTo("allowable-losses", TestCalculationController.allowableLosses)
 
       "return a 200" in {
         keystoreFetchCondition[AllowableLossesModel](None)
