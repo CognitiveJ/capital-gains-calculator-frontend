@@ -17,6 +17,7 @@
 package controllers
 
 import connectors.CalculatorConnector
+import forms.OtherPropertiesForm._
 import forms.AcquisitionValueForm._
 import forms.CustomerTypeForm._
 import forms.DisabledTrusteeForm._
@@ -63,7 +64,11 @@ trait CalculationController extends FrontendController {
 
   //################### Other Properties methods #######################
   val otherProperties = Action.async { implicit request =>
-    Future.successful(Ok(calculation.otherProperties()))
+
+    calcConnector.fetchAndGetFormData[OtherPropertiesModel]("otherProperties").map {
+      case Some(data) => Ok(calculation.otherProperties(otherPropertiesForm.fill(data)))
+      case None => Ok(calculation.otherProperties(otherPropertiesForm))
+    }
   }
 
   //################### Annual Exempt Amount methods #######################

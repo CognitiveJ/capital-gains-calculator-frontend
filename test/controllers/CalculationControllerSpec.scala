@@ -198,7 +198,6 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           keystoreFetchCondition[DisabledTrusteeModel](None)
           DisabledTrusteeTestDataItem.jsoupDoc.body.getElementById("isVulnerable-yes").parent.text shouldEqual Messages("calc.base.yes")
         }
-
         "display a radio button with the option 'No'" in {
           keystoreFetchCondition[DisabledTrusteeModel](None)
           DisabledTrusteeTestDataItem.jsoupDoc.body.getElementById("isVulnerable-no").parent.text shouldEqual Messages("calc.base.no")
@@ -210,6 +209,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         }
       }
     }
+
     "supplied with a pre-existing stored model" should {
 
       "return some HTML that" should {
@@ -257,47 +257,74 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
   }
 
   //############## Other Properties tests ######################
-  "In CalculationController calling the .otherProperties action " should {
+  "In CalculationController calling the .otherProperties action " when {
+    "not supplied with a model that already contains data" should {
 
-    object OtherPropertiesTestDataItem extends fakeRequestTo("other-properties", CalculationController.otherProperties)
+      object OtherPropertiesTestDataItem extends fakeRequestTo("other-properties", TestCalculationController.otherProperties)
 
-    "return a 200" in {
-      status(OtherPropertiesTestDataItem.result) shouldBe 200
+      "return a 200" in {
+        keystoreFetchCondition[OtherPropertiesModel](None)
+        status(OtherPropertiesTestDataItem.result) shouldBe 200
+      }
+
+      "return some HTML that" should {
+
+        "contain some text and use the character set utf-8" in {
+          contentType(OtherPropertiesTestDataItem.result) shouldBe Some("text/html")
+          charset(OtherPropertiesTestDataItem.result) shouldBe Some("utf-8")
+        }
+
+        "have the title 'Did you sell or give away any other properties in that tax year?'" in {
+          OtherPropertiesTestDataItem.jsoupDoc.title shouldEqual Messages("calc.otherProperties.question")
+        }
+
+        "have the heading Calculate your tax (non-residents) " in {
+          OtherPropertiesTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+        }
+
+        "have a 'Back' link " in {
+          OtherPropertiesTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+        }
+
+        "have the question 'Did you sell or give away any other properties in that tax year?' as the legend of the input" in {
+          OtherPropertiesTestDataItem.jsoupDoc.body.getElementsByTag("legend").text shouldEqual Messages("calc.otherProperties.question")
+        }
+
+        "display a radio button with the option `Yes`" in {
+          OtherPropertiesTestDataItem.jsoupDoc.body.getElementById("otherProperties-yes").parent.text shouldEqual Messages("calc.base.yes")
+        }
+
+        "display a radio button with the option `No`" in {
+          OtherPropertiesTestDataItem.jsoupDoc.body.getElementById("otherProperties-no").parent.text shouldEqual Messages("calc.base.no")
+        }
+
+        "display a 'Continue' button " in {
+          OtherPropertiesTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+        }
+      }
     }
 
-    "return some HTML that" should {
+    "supplied with a model that already contains data" should {
 
-      "contain some text and use the character set utf-8" in {
-        contentType(OtherPropertiesTestDataItem.result) shouldBe Some("text/html")
-        charset(OtherPropertiesTestDataItem.result) shouldBe Some("utf-8")
+      object OtherPropertiesTestDataItem extends fakeRequestTo("other-properties", TestCalculationController.otherProperties)
+      val otherPropertiesTestModel = new OtherPropertiesModel("Yes")
+
+      "return a 200" in {
+        keystoreFetchCondition[OtherPropertiesModel](Some(otherPropertiesTestModel))
+        status(OtherPropertiesTestDataItem.result) shouldBe 200
       }
 
-      "have the title 'Did you sell or give away any other properties in that tax year?'" in {
-        OtherPropertiesTestDataItem.jsoupDoc.title shouldEqual Messages("calc.otherProperties.question")
-      }
+      "return some HTML that" should {
+        "contain some text and use the character set utf-8" in {
+          contentType(OtherPropertiesTestDataItem.result) shouldBe Some("text/html")
+          charset(OtherPropertiesTestDataItem.result) shouldBe Some("utf-8")
+        }
 
-      "have the heading Calculate your tax (non-residents) " in {
-        OtherPropertiesTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
-      }
+        "have the radio option `Yes` selected by default" in {
+          keystoreFetchCondition[OtherPropertiesModel](Some(otherPropertiesTestModel))
+          OtherPropertiesTestDataItem.jsoupDoc.body.getElementById("otherProperties-yes").parent.classNames().contains("selected") shouldBe true
 
-      "have a 'Back' link " in {
-        OtherPropertiesTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
-      }
-
-      "have the question 'Did you sell or give away any other properties in that tax year?' as the legend of the input" in {
-        OtherPropertiesTestDataItem.jsoupDoc.body.getElementsByTag("legend").text shouldEqual Messages("calc.otherProperties.question")
-      }
-
-      "display a radio button with the option `Yes`" in {
-        OtherPropertiesTestDataItem.jsoupDoc.body.getElementById("otherPropertiesYes").parent.text shouldEqual Messages("calc.base.yes")
-      }
-
-      "display a radio button with the option `No`" in {
-        OtherPropertiesTestDataItem.jsoupDoc.body.getElementById("otherPropertiesNo").parent.text shouldEqual Messages("calc.base.no")
-      }
-
-      "display a 'Continue' button " in {
-        OtherPropertiesTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+        }
       }
     }
   }
