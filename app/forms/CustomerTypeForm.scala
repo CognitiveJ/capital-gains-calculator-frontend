@@ -19,6 +19,7 @@ package forms
 import play.api.data._
 import play.api.data.Forms._
 import models._
+import play.api.i18n.Messages
 
 object CustomerTypeForm {
 
@@ -33,7 +34,7 @@ object CustomerTypeForm {
 
   val customerTypeForm = Form(
     mapping(
-      "customerType" -> nonEmptyText.verifying("Invalid customer type!", customerType => validate(customerType).isDefined)
+      "customerType" -> text.verifying(Messages("calc.common.invalidError"), customerType => validate(customerType).isDefined)
     )(CustomerTypeModel.apply)(CustomerTypeModel.unapply)
   )
 }

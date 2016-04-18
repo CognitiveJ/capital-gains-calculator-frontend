@@ -18,6 +18,7 @@ calc.common.date.fields.year = Year
 calc.common.date.hint = For example, 4 9 2016
 calc.common.readMore = Read more
 calc.common.next.actions.heading = What to do next
+calc.common.invalidError = Invalid selection!
 
 ## Introduction ##
 calc.introduction.title = Introduction
