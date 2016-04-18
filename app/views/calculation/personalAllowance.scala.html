@@ -1,10 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+@()(implicit request: Request[_])
 
-</body>
-</html>
+@import helpers._
+
+@sidebar = {
+    <a href="https://www.gov.uk/income-tax-rates/current-rates-and-allowances" target="_blank">@Messages("calc.personalAllowance.linkOne")</a>
+    <a href="https://www.gov.uk/tax-uk-income-live-abroad/personal-allowance" target="_blank">@Messages("calc.personalAllowance.linkTwo")</a>
+}
+
+@main_template(Messages("calc.personalAllowance.question"), sidebarLinks = Some(sidebar)) {
+
+    <a id="link-back" class="link-back" href="#">@Messages("calc.base.back")</a>
+
+    <h1 class="heading-large">@Messages("calc.base.pageHeading")</h1>
+
+    @simpleInputMoney("personalAllowance", Messages("calc.personalAllowance.question"))
+
+    <button class="button" type="submit" id="continue-button">@Messages("calc.base.continue")</button>
+
+}
