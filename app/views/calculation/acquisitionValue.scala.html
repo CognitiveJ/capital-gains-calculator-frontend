@@ -1,9 +1,10 @@
 @import models.AcquisitionValueModel
 @import play.api.data._
+@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+@import views.html.helpers._
+@import views.html.helpers._
 
 @(acquisitionValueForm: Form[AcquisitionValueModel])(implicit request: Request[_])
-
-@import views.html.helpers._
 
 @main_template(Messages("calc.acquisitionValue.question")) {
 
@@ -11,8 +12,12 @@
 
     <h1 class="heading-large">@Messages("calc.base.pageHeading")</h1>
 
-    @formInputMoney(acquisitionValueForm, "acquisitionValue", Messages("calc.acquisitionValue.question"))
+    @govHelpers.form(action = routes.CalculationController.submitAcquisitionValue) {
 
-    <button class="button" type="submit" id="continue-button">@Messages("calc.base.continue")</button>
+        @formInputMoney(acquisitionValueForm, "acquisitionValue", Messages("calc.acquisitionValue.question"))
+
+        <button class="button" type="submit" id="continue-button">@Messages("calc.base.continue")</button>
+
+    }
 
 }

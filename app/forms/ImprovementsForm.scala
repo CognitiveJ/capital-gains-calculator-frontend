@@ -20,10 +20,11 @@ import play.api.data._
 import play.api.data.Forms._
 import models._
 
-object CustomerTypeForm {
-  val customerTypeForm = Form(
+object ImprovementsForm {
+  val improvementsForm = Form(
     mapping(
-      "customerType" -> nonEmptyText
-    )(CustomerTypeModel.apply)(CustomerTypeModel.unapply)
+      "isClaimingImprovements" -> text,
+      "improvementsAmt" -> bigDecimal
+    )(ImprovementsModel.apply)(ImprovementsModel.unapply)
   )
 }

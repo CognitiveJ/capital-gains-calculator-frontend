@@ -14,6 +14,7 @@ GET         /introduction            controllers.IntroductionController.introduc
 ########################################################
 #Customer Type
 GET         /customer-type           controllers.CalculationController.customerType
+POST        /customer-type           controllers.CalculationController.submitCustomerType
 
 #Disabled Trustee
 GET         /disabled-trustee        controllers.CalculationController.disabledTrustee
@@ -35,6 +36,7 @@ POST        /allowance               controllers.CalculationController.submitAnn
 
 #Acquisition Value
 GET         /acquisition-value       controllers.CalculationController.acquisitionValue
+POST        /acquisition-value       controllers.CalculationController.submitAcquisitionValue
 
 #Improvements
 GET         /improvements            controllers.CalculationController.improvements

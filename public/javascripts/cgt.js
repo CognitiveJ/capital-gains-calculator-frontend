@@ -13,7 +13,7 @@ $(function() {
             if ($this.val() === 'Yes' && $this.prop('checked')) {
                 $hidden.show();
             }
-            else if($this.val() === 'No'){
+            else if($this.val() === 'No' && $this.prop('checked')){
                 $hidden.hide();
             }
         });

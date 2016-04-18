@@ -37,6 +37,7 @@ import org.scalatest.mock.MockitoSugar
 import scala.concurrent.Future
 
 
+//noinspection ScalaStyle
 class CalculationControllerSpec extends UnitSpec with WithFakeApplication with MockitoSugar with BeforeAndAfterEach {
 
   val s = "Action(parser=BodyParser(anyContent))"
@@ -151,6 +152,69 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           keystoreFetchCondition[CustomerTypeModel](Some(testModel))
           CustomerTypeTestDataItem.jsoupDoc.body.getElementById("customerType-individual").parent.classNames().contains("selected") shouldBe true
         }
+      }
+    }
+  }
+
+  "In CalculationController calling the .submitCustomerType action" when {
+    def keystoreCacheCondition[T](data: CustomerTypeModel): Unit = {
+      lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+      when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(returnedCacheMap))
+    }
+    "submitting a valid form with 'individual'" should {
+      object CustomerTypeTestDataItem extends fakeRequestToPost(
+        "customer-type",
+        TestCalculationController.submitCustomerType,
+        ("customerType", "individual")
+      )
+      val testModel = new CustomerTypeModel("individual")
+
+      "return a 303" in {
+        keystoreCacheCondition[CustomerTypeModel](testModel)
+        status(CustomerTypeTestDataItem.result) shouldBe 303
+      }
+    }
+
+    "submitting a valid form with 'trustee'" should {
+      object CustomerTypeTestDataItem extends fakeRequestToPost(
+        "customer-type",
+        TestCalculationController.submitCustomerType,
+        ("customerType", "trustee")
+      )
+      val testModel = new CustomerTypeModel("trustee")
+
+      "return a 303" in {
+        keystoreCacheCondition[CustomerTypeModel](testModel)
+        status(CustomerTypeTestDataItem.result) shouldBe 303
+      }
+    }
+
+    "submitting a valid form with 'personalRep'" should {
+      object CustomerTypeTestDataItem extends fakeRequestToPost(
+        "customer-type",
+        TestCalculationController.submitCustomerType,
+        ("customerType", "personalRep")
+      )
+      val testModel = new CustomerTypeModel("personalRep")
+
+      "return a 303" in {
+        keystoreCacheCondition[CustomerTypeModel](testModel)
+        status(CustomerTypeTestDataItem.result) shouldBe 303
+      }
+    }
+
+    "submitting an invalid form" should {
+      object OtherPropertiesTestDataItem extends fakeRequestToPost(
+        "customer-type",
+        TestCalculationController.submitCustomerType,
+        ("annualExemptAmount", "")
+      )
+      val testModel = new CustomerTypeModel("")
+
+      "return a 400" in {
+        keystoreCacheCondition[CustomerTypeModel](testModel)
+        status(OtherPropertiesTestDataItem.result) shouldBe 400
       }
     }
   }
@@ -289,48 +353,81 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
   //############## Personal Allowance tests ######################
   "In CalculationController calling the .personalAllowance action " should {
+    "not supplied with a model that already contains data" should {
+      object PersonalAllowanceTestDataItem extends fakeRequestTo("personal-allowance", TestCalculationController.personalAllowance)
 
-    object PersonalAllowanceTestDataItem extends fakeRequestTo("personal-allowance", CalculationController.personalAllowance)
+      "return a 200" in {
+        keystoreFetchCondition[PersonalAllowanceModel](None)
+        status(PersonalAllowanceTestDataItem.result) shouldBe 200
+      }
 
-    "return a 200" in {
-      status(PersonalAllowanceTestDataItem.result) shouldBe 200
+      "return some HTML that" should {
+
+        "contain some text and use the character set utf-8" in {
+          keystoreFetchCondition[PersonalAllowanceModel](None)
+          contentType(PersonalAllowanceTestDataItem.result) shouldBe Some("text/html")
+          charset(PersonalAllowanceTestDataItem.result) shouldBe Some("utf-8")
+        }
+
+        "have the title In the tax year when you stopped owning the property, what was your UK Personal Allowance?" in {
+          keystoreFetchCondition[PersonalAllowanceModel](None)
+          PersonalAllowanceTestDataItem.jsoupDoc.title shouldEqual Messages("calc.personalAllowance.question")
+        }
+
+        "have the heading Calculate your tax (non-residents) " in {
+          keystoreFetchCondition[PersonalAllowanceModel](None)
+          PersonalAllowanceTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+        }
+
+        "have a 'Back' link " in {
+          keystoreFetchCondition[PersonalAllowanceModel](None)
+          PersonalAllowanceTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+        }
+
+        "have the question 'In the tax year when you stopped owning the property, what was your UK Personal Allowance?' as the label of the input" in {
+          keystoreFetchCondition[PersonalAllowanceModel](None)
+          PersonalAllowanceTestDataItem.jsoupDoc.body.getElementsByTag("label").text shouldEqual Messages("calc.personalAllowance.question")
+        }
+
+        "display an input box for the Personal Allowance" in {
+          keystoreFetchCondition[PersonalAllowanceModel](None)
+          PersonalAllowanceTestDataItem.jsoupDoc.body.getElementById("personalAllowance").tagName() shouldEqual "input"
+        }
+
+        "have no value auto-filled into the input box" in {
+          keystoreFetchCondition[PersonalAllowanceModel](None)
+          PersonalAllowanceTestDataItem.jsoupDoc.getElementById("personalAllowance").attr("value") shouldBe empty
+        }
+
+        "display a 'Continue' button " in {
+          keystoreFetchCondition[PersonalAllowanceModel](None)
+          PersonalAllowanceTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+        }
+
+        "should contain a Read more sidebar with a link to personal allowances and taxation abroad" in {
+          keystoreFetchCondition[PersonalAllowanceModel](None)
+          PersonalAllowanceTestDataItem.jsoupDoc.select("aside h2").text shouldBe Messages("calc.common.readMore")
+          PersonalAllowanceTestDataItem.jsoupDoc.select("aside a").first().attr("href") shouldBe "https://www.gov.uk/income-tax-rates/current-rates-and-allowances"
+          PersonalAllowanceTestDataItem.jsoupDoc.select("aside a").last().attr("href") shouldBe "https://www.gov.uk/tax-uk-income-live-abroad/personal-allowance"
+        }
+      }
     }
 
-    "return some HTML that" should {
+    "supplied with a model that already contains data" should {
+      object PersonalAllowanceTestDataItem extends fakeRequestTo("personal-allowance", TestCalculationController.personalAllowance)
+      val testModel = new PersonalAllowanceModel(1000)
 
-      "contain some text and use the character set utf-8" in {
-        contentType(PersonalAllowanceTestDataItem.result) shouldBe Some("text/html")
-        charset(PersonalAllowanceTestDataItem.result) shouldBe Some("utf-8")
+      "return a 200" in {
+        keystoreFetchCondition[PersonalAllowanceModel](Some(testModel))
+        status(PersonalAllowanceTestDataItem.result) shouldBe 200
       }
 
-      "have the title In the tax year when you stopped owning the property, what was your UK Personal Allowance?" in {
-        PersonalAllowanceTestDataItem.jsoupDoc.title shouldEqual Messages("calc.personalAllowance.question")
-      }
+      "return some HTML that" should {
 
-      "have the heading Calculate your tax (non-residents) " in {
-        PersonalAllowanceTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
-      }
-
-      "have a 'Back' link " in {
-        PersonalAllowanceTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
-      }
-
-      "have the question 'In the tax year when you stopped owning the property, what was your UK Personal Allowance?' as the label of the input" in {
-        PersonalAllowanceTestDataItem.jsoupDoc.body.getElementsByTag("label").text shouldEqual Messages("calc.personalAllowance.question")
-      }
-
-      "display an input box for the Personal Allowance" in {
-        PersonalAllowanceTestDataItem.jsoupDoc.body.getElementById("personalAllowance").tagName() shouldEqual "input"
-      }
-
-      "display a 'Continue' button " in {
-        PersonalAllowanceTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
-      }
-
-      "should contain a Read more sidebar with a link to personal allowances and taxation abroad" in {
-        PersonalAllowanceTestDataItem.jsoupDoc.select("aside h2").text shouldBe Messages("calc.common.readMore")
-        PersonalAllowanceTestDataItem.jsoupDoc.select("aside a").first().attr("href") shouldBe "https://www.gov.uk/income-tax-rates/current-rates-and-allowances"
-        PersonalAllowanceTestDataItem.jsoupDoc.select("aside a").last().attr("href") shouldBe "https://www.gov.uk/tax-uk-income-live-abroad/personal-allowance"
+        "have the value 1000 auto-filled into the input box" in {
+          keystoreFetchCondition[PersonalAllowanceModel](Some(testModel))
+          PersonalAllowanceTestDataItem.jsoupDoc.getElementById("personalAllowance").attr("value") shouldEqual ("1000")
+        }
       }
     }
   }
@@ -419,7 +516,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       object OtherPropertiesTestDataItem extends fakeRequestToPost(
         "allowance",
         TestCalculationController.submitOtherProperties,
-        ("otherProperties", "No")
+        ("otherProperties", "Yes")
       )
       val testModel = new OtherPropertiesModel("Yes")
 
@@ -581,116 +678,194 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
   //############## Acquisition Value tests ######################
   "In CalculationController calling the .acquisitionValue action " when {
-  "not supplied with a pre-existing stored model" should {
-    object AcquisitionValueTestDataItem extends fakeRequestTo("acquisition-value", TestCalculationController.acquisitionValue)
+    "not supplied with a pre-existing stored model" should {
+      object AcquisitionValueTestDataItem extends fakeRequestTo("acquisition-value", TestCalculationController.acquisitionValue)
 
-    "return a 200" in {
-      keystoreFetchCondition[AcquisitionValueModel](None)
-      status(AcquisitionValueTestDataItem.result) shouldBe 200
+      "return a 200" in {
+        keystoreFetchCondition[AcquisitionValueModel](None)
+        status(AcquisitionValueTestDataItem.result) shouldBe 200
+      }
+
+      "return some HTML that" should {
+
+        "contain some text and use the character set utf-8" in {
+          keystoreFetchCondition[AcquisitionValueModel](None)
+          contentType(AcquisitionValueTestDataItem.result) shouldBe Some("text/html")
+          charset(AcquisitionValueTestDataItem.result) shouldBe Some("utf-8")
+        }
+
+        "have the title 'How much did you pay for the property?'" in {
+          keystoreFetchCondition[AcquisitionValueModel](None)
+          AcquisitionValueTestDataItem.jsoupDoc.title shouldEqual Messages("calc.acquisitionValue.question")
+        }
+
+        "have the heading Calculate your tax (non-residents) " in {
+          keystoreFetchCondition[AcquisitionValueModel](None)
+          AcquisitionValueTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+        }
+
+        "have a 'Back' link " in {
+          keystoreFetchCondition[AcquisitionValueModel](None)
+          AcquisitionValueTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+        }
+
+        "have the question 'How much did you pay for the property?'" in {
+          keystoreFetchCondition[AcquisitionValueModel](None)
+          AcquisitionValueTestDataItem.jsoupDoc.body.getElementsByTag("label").text shouldEqual Messages("calc.acquisitionValue.question")
+        }
+
+        "display an input box for the Acquisition Value" in {
+          keystoreFetchCondition[AcquisitionValueModel](None)
+          AcquisitionValueTestDataItem.jsoupDoc.body.getElementById("acquisitionValue").tagName shouldEqual "input"
+        }
+        "have no value auto-filled into the input box" in {
+          keystoreFetchCondition[AcquisitionValueModel](None)
+          AcquisitionValueTestDataItem.jsoupDoc.getElementById("acquisitionValue").attr("value") shouldEqual ""
+        }
+        "display a 'Continue' button " in {
+          keystoreFetchCondition[AcquisitionValueModel](None)
+          AcquisitionValueTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+        }
+      }
     }
 
-    "return some HTML that" should {
+    "supplied with a pre-existing stored model" should {
+      val testModel = new AcquisitionValueModel(1000)
+      object AcquisitionValueTestDataItem extends fakeRequestTo("acquisition-value", TestCalculationController.acquisitionValue)
 
-      "contain some text and use the character set utf-8" in {
-        keystoreFetchCondition[AcquisitionValueModel](None)
-        contentType(AcquisitionValueTestDataItem.result) shouldBe Some("text/html")
-        charset(AcquisitionValueTestDataItem.result) shouldBe Some("utf-8")
-      }
-
-      "have the title 'How much did you pay for the property?'" in {
-        keystoreFetchCondition[AcquisitionValueModel](None)
-        AcquisitionValueTestDataItem.jsoupDoc.title shouldEqual Messages("calc.acquisitionValue.question")
+      "return a 200" in {
+        keystoreFetchCondition[AcquisitionValueModel](Some(testModel))
+        status(AcquisitionValueTestDataItem.result) shouldBe 200
       }
 
-      "have the heading Calculate your tax (non-residents) " in {
-        keystoreFetchCondition[AcquisitionValueModel](None)
-        AcquisitionValueTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
-      }
+      "return some HTML that" should {
 
-      "have a 'Back' link " in {
-        keystoreFetchCondition[AcquisitionValueModel](None)
-        AcquisitionValueTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
-      }
+        "contain some text and use the character set utf-8" in {
+          keystoreFetchCondition[AcquisitionValueModel](Some(testModel))
+          contentType(AcquisitionValueTestDataItem.result) shouldBe Some("text/html")
+          charset(AcquisitionValueTestDataItem.result) shouldBe Some("utf-8")
+        }
 
-      "have the question 'How much did you pay for the property?'" in {
-        keystoreFetchCondition[AcquisitionValueModel](None)
-        AcquisitionValueTestDataItem.jsoupDoc.body.getElementsByTag("label").text shouldEqual Messages("calc.acquisitionValue.question")
-      }
-
-      "display an input box for the Acquisition Value" in {
-        keystoreFetchCondition[AcquisitionValueModel](None)
-        AcquisitionValueTestDataItem.jsoupDoc.body.getElementById("acquisitionValue").tagName shouldEqual "input"
-      }
-      "have no value auto-filled into the input box" in {
-        keystoreFetchCondition[AcquisitionValueModel](None)
-        AcquisitionValueTestDataItem.jsoupDoc.getElementById("acquisitionValue").attr("value") shouldEqual ""
-      }
-      "display a 'Continue' button " in {
-        keystoreFetchCondition[AcquisitionValueModel](None)
-        AcquisitionValueTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+        "have the value 1000 auto-filled into the input box" in {
+          keystoreFetchCondition[AcquisitionValueModel](Some(testModel))
+          AcquisitionValueTestDataItem.jsoupDoc.getElementById("acquisitionValue").attr("value") shouldEqual "1000"
+        }
       }
     }
   }
 
-  "supplied with a pre-existing stored model" should {
-    val testModel = new AcquisitionValueModel(1000)
-    object AcquisitionValueTestDataItem extends fakeRequestTo("acquisition-value", TestCalculationController.acquisitionValue)
-
-    "return a 200" in {
-      keystoreFetchCondition[AcquisitionValueModel](Some(testModel))
-      status(AcquisitionValueTestDataItem.result) shouldBe 200
+  "In CalculationController calling the .submitAcquisitionValue action" when {
+    def keystoreCacheCondition[T](data: AcquisitionValueModel): Unit = {
+      lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+      when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(returnedCacheMap))
     }
 
-    "return some HTML that" should {
+    "submitting a valid form" should {
+      val testModel = new AcquisitionValueModel(1000)
+      object AcquisitionValueTestDataItem extends fakeRequestToPost (
+        "acquisition-value",
+        TestCalculationController.submitAcquisitionValue,
+        ("acquisitionValue", "1000")
+      )
 
-      "contain some text and use the character set utf-8" in {
-        keystoreFetchCondition[AcquisitionValueModel](Some(testModel))
-        contentType(AcquisitionValueTestDataItem.result) shouldBe Some("text/html")
-        charset(AcquisitionValueTestDataItem.result) shouldBe Some("utf-8")
+      "return a 303" in {
+        keystoreCacheCondition(testModel)
+        status(AcquisitionValueTestDataItem.result) shouldBe 303
       }
+    }
 
-      "have the value 1000 auto-filled into the input box" in {
-        keystoreFetchCondition[AcquisitionValueModel](Some(testModel))
-        AcquisitionValueTestDataItem.jsoupDoc.getElementById("acquisitionValue").attr("value") shouldEqual "1000"
+    "submitting an invalid form" should {
+      val testModel = new AcquisitionValueModel(1000)
+      object AcquisitionValueTestDataItem extends fakeRequestToPost (
+        "acquisition-value",
+        TestCalculationController.submitAcquisitionValue,
+        ("acquisitionValue", "")
+      )
+
+      "return a 400" in {
+        keystoreCacheCondition(testModel)
+        status(AcquisitionValueTestDataItem.result) shouldBe 400
       }
     }
   }
-}
 
   //################### Improvements tests #######################
-  "In CalculationController calling the .improvements action " should {
+  "In CalculationController calling the .improvements action " when {
+    "not supplied with a pre-existing stored model" should {
+      object ImprovementsTestDataItem extends fakeRequestTo("improvements", TestCalculationController.improvements)
 
-    object ImprovementsTestDataItem extends fakeRequestTo("improvements", CalculationController.improvements)
+      "return a 200" in {
+        keystoreFetchCondition[ImprovementsModel](None)
+        status(ImprovementsTestDataItem.result) shouldBe 200
+      }
 
-    "return a 200" in {
-      status(ImprovementsTestDataItem.result) shouldBe 200
+      "return some HTML that" should {
+
+        "contain some text and use the character set utf-8" in {
+          contentType(ImprovementsTestDataItem.result) shouldBe Some("text/html")
+          charset(ImprovementsTestDataItem.result) shouldBe Some("utf-8")
+        }
+
+        "have the title 'Who owned the property?'" in {
+          ImprovementsTestDataItem.jsoupDoc.title shouldEqual Messages("calc.improvements.question")
+        }
+
+        "have the heading Calculate your tax (non-residents)" in {
+          ImprovementsTestDataItem.jsoupDoc.body.getElementsByTag("H1").text shouldEqual Messages("calc.base.pageHeading")
+        }
+
+        "display the correct wording for radio option `yes`" in {
+          ImprovementsTestDataItem.jsoupDoc.body.getElementById("isClaimingImprovements-yes").parent.text shouldEqual Messages("calc.base.yes")
+        }
+
+        "display the correct wording for radio option `no`" in {
+          ImprovementsTestDataItem.jsoupDoc.body.getElementById("isClaimingImprovements-no").parent.text shouldEqual Messages("calc.base.no")
+        }
+
+        "contain a hidden component with an input box" in {
+          ImprovementsTestDataItem.jsoupDoc.body.getElementById("improvementsAmt").parent.parent.parent.id shouldBe "hidden"
+        }
+      }
     }
+    "supplied with a pre-existing model with 'Yes' checked and value already entered" should {
+      val testImprovementsModelYes = new ImprovementsModel("Yes", 10000)
 
-    "return some HTML that" should {
-
-      "contain some text and use the character set utf-8" in {
-        contentType(ImprovementsTestDataItem.result) shouldBe Some("text/html")
-        charset(ImprovementsTestDataItem.result) shouldBe Some("utf-8")
+      "return a 200" in {
+        object ImprovementsTestDataItem extends fakeRequestTo("improvements", TestCalculationController.improvements)
+        keystoreFetchCondition[ImprovementsModel](Some(testImprovementsModelYes))
+        status(ImprovementsTestDataItem.result) shouldBe 200
       }
 
-      "have the title 'Who owned the property?'" in {
-        ImprovementsTestDataItem.jsoupDoc.title shouldEqual Messages("calc.improvements.question")
+      "return some HTML that" should {
+
+        "be pre populated with Yes box selected and a value of 10000 entered" in {
+          object ImprovementsTestDataItem extends fakeRequestTo("improvements", TestCalculationController.improvements)
+          keystoreFetchCondition[ImprovementsModel](Some(testImprovementsModelYes))
+
+          ImprovementsTestDataItem.jsoupDoc.getElementById("isClaimingImprovements-yes").attr("checked") shouldEqual "checked"
+          ImprovementsTestDataItem.jsoupDoc.getElementById("improvementsAmt").attr("value") shouldEqual "10000"
+        }
+      }
+    }
+    "supplied with a pre-existing model with 'No' checked and value already entered" should {
+      val testImprovementsModelNo = new ImprovementsModel("No", 0)
+
+      "return a 200" in {
+        object ImprovementsTestDataItem extends fakeRequestTo("improvements", TestCalculationController.improvements)
+        keystoreFetchCondition[ImprovementsModel](Some(testImprovementsModelNo))
+        status(ImprovementsTestDataItem.result) shouldBe 200
       }
 
-      "have the heading Calculate your tax (non-residents)" in {
-        ImprovementsTestDataItem.jsoupDoc.body.getElementsByTag("H1").text shouldEqual Messages("calc.base.pageHeading")
-      }
+      "return some HTML that" should {
 
-      "display the correct wording for radio option `yes`" in {
-        ImprovementsTestDataItem.jsoupDoc.body.getElementById("improvementsCheckYes").parent.text shouldEqual Messages("calc.base.yes")
-      }
+        "be pre populated with No box selected and a value of 0" in {
+          object ImprovementsTestDataItem extends fakeRequestTo("improvements", TestCalculationController.improvements)
+          keystoreFetchCondition[ImprovementsModel](Some(testImprovementsModelNo))
 
-      "display the correct wording for radio option `no`" in {
-        ImprovementsTestDataItem.jsoupDoc.body.getElementById("improvementsCheckNo").parent.text shouldEqual Messages("calc.base.no")
-      }
-
-      "contain a hidden component with an input box" in {
-        ImprovementsTestDataItem.jsoupDoc.body.getElementById("improvements").parent.parent.id shouldBe "hidden"
+          ImprovementsTestDataItem.jsoupDoc.getElementById("isClaimingImprovements-no").attr("checked") shouldEqual "checked"
+          ImprovementsTestDataItem.jsoupDoc.getElementById("improvementsAmt").attr("value") shouldEqual "0"
+        }
       }
     }
   }
@@ -756,7 +931,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           charset(DisposalDateTestDataItem.result) shouldBe Some("utf-8")
         }
 
-        "have be pre-populated with the date 10, 12, 2016" in {
+        "be pre-populated with the date 10, 12, 2016" in {
           keystoreFetchCondition[DisposalDateModel](Some(testDisposalDateModel))
           DisposalDateTestDataItem.jsoupDoc.body.getElementById("disposalDate.day").attr("value") shouldEqual testDisposalDateModel.day.toString
           DisposalDateTestDataItem.jsoupDoc.body.getElementById("disposalDate.month").attr("value") shouldEqual testDisposalDateModel.month.toString
@@ -1340,4 +1515,74 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       }
     }
   }
+
+
+
+  //############## Current Income tests ######################
+  "In CalculationController calling the .currentIncome action " when {
+    "not supplied with a pre-existing stored model" should {
+      object CurrentIncomeTestDataItem extends fakeRequestTo("currentIncome", TestCalculationController.currentIncome)
+
+      "return a 200" in {
+        keystoreFetchCondition[CurrentIncomeModel](None)
+        status(CurrentIncomeTestDataItem.result) shouldBe 200
+      }
+
+      "return some HTML that" should {
+
+        "contain some text and use the character set utf-8" in {
+          keystoreFetchCondition[CurrentIncomeModel](None)
+          contentType(CurrentIncomeTestDataItem.result) shouldBe Some("text/html")
+          charset(CurrentIncomeTestDataItem.result) shouldBe Some("utf-8")
+        }
+
+        "have the title 'In the tax year when you stopped owning the property, what was your total UK income?'" in {
+          keystoreFetchCondition[CurrentIncomeModel](None)
+          CurrentIncomeTestDataItem.jsoupDoc.title shouldEqual Messages("calc.currentIncome.question")
+        }
+
+        "have the heading Calculate your tax (non-residents) " in {
+          keystoreFetchCondition[CurrentIncomeModel](None)
+          CurrentIncomeTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+        }
+
+        "have a 'Back' link " in {
+          keystoreFetchCondition[CurrentIncomeModel](None)
+          CurrentIncomeTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+        }
+
+        "have the question 'In the tax year when you stopped owning the property, what was your total UK income?' as the legend of the input" in {
+          keystoreFetchCondition[CurrentIncomeModel](None)
+          CurrentIncomeTestDataItem.jsoupDoc.body.getElementsByTag("label").text shouldEqual Messages("calc.currentIncome.question")
+        }
+
+        "display an input box for the Current Income Amount" in {
+          keystoreFetchCondition[CurrentIncomeModel](None)
+          CurrentIncomeTestDataItem.jsoupDoc.body.getElementById("currentIncome").tagName() shouldEqual "input"
+        }
+
+        "have no value auto-filled into the input box" in {
+          keystoreFetchCondition[CurrentIncomeModel](None)
+          CurrentIncomeTestDataItem.jsoupDoc.getElementById("currentIncome").attr("value") shouldBe empty
+        }
+
+        "display a 'Continue' button " in {
+          keystoreFetchCondition[CurrentIncomeModel](None)
+          CurrentIncomeTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+        }
+
+        "should contain a Read more sidebar with a link to CGT allowances" in {
+          keystoreFetchCondition[CurrentIncomeModel](None)
+          CurrentIncomeTestDataItem.jsoupDoc.select("aside h2").text shouldBe Messages("calc.common.readMore")
+          CurrentIncomeTestDataItem.jsoupDoc.select("aside a").first.text shouldBe Messages("calc.currentIncome.link.one")
+          CurrentIncomeTestDataItem.jsoupDoc.select("aside a").last.text shouldBe Messages("calc.currentIncome.link.two")
+        }
+      }
+    }
+  }
+
+
+
+
+
 }

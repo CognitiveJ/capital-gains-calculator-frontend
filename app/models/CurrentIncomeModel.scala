@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
-package forms
+package models
 
-import play.api.data._
-import play.api.data.Forms._
-import models._
+import play.api.libs.json._
 
-object CustomerTypeForm {
-  val customerTypeForm = Form(
-    mapping(
-      "customerType" -> nonEmptyText
-    )(CustomerTypeModel.apply)(CustomerTypeModel.unapply)
-  )
+case class CurrentIncomeModel (currentIncome: BigDecimal)
+
+object CurrentIncomeModel {
+  implicit val format = Json.format[CurrentIncomeModel]
 }

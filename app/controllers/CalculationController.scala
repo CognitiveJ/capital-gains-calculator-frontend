@@ -17,6 +17,7 @@
 package controllers
 
 import connectors.CalculatorConnector
+
 import forms.OtherPropertiesForm._
 import forms.AcquisitionValueForm._
 import forms.CustomerTypeForm._
@@ -27,6 +28,9 @@ import forms.DisposalValueForm._
 import forms.AllowableLossesForm._
 import forms.EntrepreneursReliefForm._
 import forms.DisposalCostsForm._
+import forms.ImprovementsForm._
+import forms.PersonalAllowanceForm._
+
 import models._
 import play.api.mvc.Action
 import uk.gov.hmrc.play.frontend.controller.FrontendController
@@ -50,6 +54,20 @@ trait CalculationController extends FrontendController {
     }
   }
 
+  val submitCustomerType = Action { implicit request =>
+    customerTypeForm.bindFromRequest.fold(
+      errors => BadRequest(calculation.customerType(errors)),
+      success => {
+        calcConnector.saveFormData("customerType", success)
+        success.customerType match {
+          case "individual" => Redirect(routes.CalculationController.currentIncome())
+          case "trustee" => Redirect(routes.CalculationController.disabledTrustee())
+          case "personalRep" => Redirect(routes.CalculationController.otherProperties())
+        }
+      }
+    )
+  }
+
   //################### Disabled Trustee methods #######################
   val disabledTrustee = Action.async { implicit request =>
     calcConnector.fetchAndGetFormData[DisabledTrusteeModel]("isVulnerable").map {
@@ -69,11 +87,18 @@ trait CalculationController extends FrontendController {
   }
 
   //################### Current Income methods #######################
-  val currentIncome = TODO
+  val currentIncome = Action.async { implicit request =>
+    Future.successful(Ok(calculation.currentIncome()))
+  }
+
+
 
   //################### Personal Allowance methods #######################
   val personalAllowance = Action.async { implicit request =>
-    Future.successful(Ok(calculation.personalAllowance()))
+    calcConnector.fetchAndGetFormData[PersonalAllowanceModel]("personalAllowance").map {
+      case Some(data) => Ok(calculation.personalAllowance(personalAllowanceForm.fill(data)))
+      case None => Ok(calculation.personalAllowance(personalAllowanceForm))
+    }
   }
 
   //################### Other Properties methods #######################
@@ -124,9 +149,22 @@ trait CalculationController extends FrontendController {
     }
   }
 
+  val submitAcquisitionValue = Action { implicit request =>
+    acquisitionValueForm.bindFromRequest.fold(
+      errors => BadRequest(calculation.acquisitionValue(errors)),
+      success => {
+        calcConnector.saveFormData("acquisitionValue", success)
+        Redirect(routes.CalculationController.improvements())
+      }
+    )
+  }
+
   //################### Improvements methods #######################
   val improvements = Action.async { implicit request =>
-    Future.successful(Ok(calculation.improvements()))
+    calcConnector.fetchAndGetFormData[ImprovementsModel]("improvements").map {
+      case Some(data) => Ok(calculation.improvements(improvementsForm.fill(data)))
+      case None => Ok(calculation.improvements(improvementsForm))
+    }
   }
 
   //################### Disposal Date methods #######################
