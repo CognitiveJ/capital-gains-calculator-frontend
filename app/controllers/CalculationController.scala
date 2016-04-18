@@ -128,6 +128,16 @@ trait CalculationController extends FrontendController {
     }
   }
 
+  val submitAcquisitionValue = Action { implicit request =>
+    acquisitionValueForm.bindFromRequest.fold(
+      errors => BadRequest(calculation.acquisitionValue(errors)),
+      success => {
+        calcConnector.saveFormData("acquisitionValue", success)
+        Redirect(routes.CalculationController.improvements())
+      }
+    )
+  }
+
   //################### Improvements methods #######################
   val improvements = Action.async { implicit request =>
     Future.successful(Ok(calculation.improvements()))

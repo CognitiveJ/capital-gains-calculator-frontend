@@ -35,6 +35,7 @@ POST        /allowance               controllers.CalculationController.submitAnn
 
 #Acquisition Value
 GET         /acquisition-value       controllers.CalculationController.acquisitionValue
+POST        /acquisition-value       controllers.CalculationController.submitAcquisitionValue
 
 #Improvements
 GET         /improvements            controllers.CalculationController.improvements
