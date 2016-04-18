@@ -329,6 +329,55 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
   }
 
+  "In CalculationController calling the .submitOtherProperties action" when {
+    def keystoreCacheCondition[T](data: OtherPropertiesModel): Unit = {
+      lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+      when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(returnedCacheMap))
+    }
+    "submitting a valid form with 'Yes'" should {
+      object OtherPropertiesTestDataItem extends fakeRequestToPost(
+        "allowance",
+        TestCalculationController.submitOtherProperties,
+        ("otherProperties", "No")
+      )
+      val testModel = new OtherPropertiesModel("Yes")
+
+      "return a 303" in {
+        keystoreCacheCondition[OtherPropertiesModel](testModel)
+        status(OtherPropertiesTestDataItem.result) shouldBe 303
+      }
+    }
+
+    "submitting a valid form with 'No'" should {
+      object OtherPropertiesTestDataItem extends fakeRequestToPost(
+        "allowance",
+        TestCalculationController.submitOtherProperties,
+        ("otherProperties", "No")
+      )
+      val testModel = new OtherPropertiesModel("No")
+
+      "return a 303" in {
+        keystoreCacheCondition[OtherPropertiesModel](testModel)
+        status(OtherPropertiesTestDataItem.result) shouldBe 303
+      }
+    }
+
+    "submitting an invalid form" should {
+      object OtherPropertiesTestDataItem extends fakeRequestToPost(
+        "allowance",
+        TestCalculationController.submitOtherProperties,
+        ("annualExemptAmount", "")
+      )
+      val testModel = new OtherPropertiesModel("")
+
+      "return a 400" in {
+        keystoreCacheCondition[AnnualExemptAmountModel](testModel)
+        status(OtherPropertiesTestDataItem.result) shouldBe 400
+      }
+    }
+  }
+
   //############## Annual Exempt Amount tests ######################
   "In CalculationController calling the .annualExemptAmount action " when {
     "not supplied with a pre-existing stored model" should {

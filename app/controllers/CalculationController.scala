@@ -72,6 +72,19 @@ trait CalculationController extends FrontendController {
     }
   }
 
+  val submitOtherProperties = Action { implicit request =>
+    otherPropertiesForm.bindFromRequest.fold(
+      errors => BadRequest(calculation.otherProperties(errors)),
+      success => {
+        calcConnector.saveFormData("otherProperties", success)
+        success.otherProperties match {
+          case "Yes" => Redirect(routes.CalculationController.annualExemptAmount())
+          case "No" => Redirect(routes.CalculationController.acquisitionValue())
+       }
+      }
+    )
+  }
+
   //################### Annual Exempt Amount methods #######################
   val annualExemptAmount = Action.async { implicit request =>
     calcConnector.fetchAndGetFormData[AnnualExemptAmountModel]("annualExemptAmount").map {
