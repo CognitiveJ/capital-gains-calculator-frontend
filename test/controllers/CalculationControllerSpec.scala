@@ -912,7 +912,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
         "have no value auto-filled into the input box" in {
           keystoreFetchCondition[AcquisitionValueModel](None)
-          AllowableLossesTestDataItem.jsoupDoc.getElementById("allowableLossesAmt").attr("value") shouldEqual ""
+          AllowableLossesTestDataItem.jsoupDoc.getElementById("allowableLossesAmt").attr("value") shouldBe empty
         }
 
         "have a hidden help text section with summary 'What are allowable losses?' and correct content" in {
