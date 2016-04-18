@@ -70,6 +70,8 @@ calc.otherProperties.question = Did you sell or give away any other properties i
 ## Annual Exempt Amount ##
 calc.annualExemptAmount.question = How much of your Capital Gains Tax allowance have you got left?
 calc.annualExemptAmount.link.one = Capital Gains Tax allowances
+calc.annualExemptAmount.errorMax = Maximum allowance is £11000
+calc.annualExemptAmount.errorMin = Allowance cannot be negative
 
 ## Acquisition Value ##
 calc.acquisitionValue.question = How much did you pay for the property?
