@@ -23,7 +23,7 @@ GET         /disabled-trustee        controllers.CalculationController.disabledT
 GET         /current-income          controllers.CalculationController.currentIncome
 
 #Personal Allowance
-GET         /personalAllowance       controllers.CalculationController.personalAllowance
+GET         /personal-allowance       controllers.CalculationController.personalAllowance
 
 #Other Properties
 GET         /other-properties        controllers.CalculationController.otherProperties

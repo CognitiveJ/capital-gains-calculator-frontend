@@ -24,6 +24,7 @@ import forms.DisabledTrusteeForm._
 import forms.AnnualExemptAmountForm._
 import forms.DisposalDateForm._
 import forms.DisposalValueForm._
+import forms.AllowableLossesForm._
 import forms.EntrepreneursReliefForm._
 import forms.DisposalCostsForm._
 import models._
@@ -171,7 +172,10 @@ trait CalculationController extends FrontendController {
 
   //################### Allowable Losses methods #######################
   val allowableLosses = Action.async { implicit request =>
-    Future.successful(Ok(calculation.allowableLosses()))
+    calcConnector.fetchAndGetFormData[AllowableLossesModel]("allowableLosses").map {
+      case Some(data) => Ok(calculation.allowableLosses(allowableLossesForm.fill(data)))
+      case None => Ok(calculation.allowableLosses(allowableLossesForm))
+    }
   }
 
   //################### Other Reliefs methods #######################
