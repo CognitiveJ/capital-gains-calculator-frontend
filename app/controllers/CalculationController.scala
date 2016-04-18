@@ -26,6 +26,7 @@ import forms.DisposalDateForm._
 import forms.DisposalValueForm._
 import forms.EntrepreneursReliefForm._
 import forms.DisposalCostsForm._
+import forms.ImprovementsFrom._
 import models._
 import play.api.mvc.Action
 import uk.gov.hmrc.play.frontend.controller.FrontendController
@@ -115,7 +116,10 @@ trait CalculationController extends FrontendController {
 
   //################### Improvements methods #######################
   val improvements = Action.async { implicit request =>
-    Future.successful(Ok(calculation.improvements()))
+    calcConnector.fetchAndGetFormData[ImprovementsModel]("improvements").map {
+      case Some(data) => Ok(calculation.improvements(improvementsForm.fill(data)))
+      case None => Ok(calculation.improvements(improvementsForm))
+    }
   }
 
   //################### Disposal Date methods #######################
