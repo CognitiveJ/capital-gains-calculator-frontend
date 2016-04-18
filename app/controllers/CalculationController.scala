@@ -24,6 +24,7 @@ import forms.DisabledTrusteeForm._
 import forms.AnnualExemptAmountForm._
 import forms.DisposalDateForm._
 import forms.DisposalValueForm._
+import forms.AllowableLossesForm._
 import forms.EntrepreneursReliefForm._
 import forms.DisposalCostsForm._
 import forms.ImprovementsForm._
@@ -48,6 +49,20 @@ trait CalculationController extends FrontendController {
       case Some(data) => Ok(calculation.customerType(customerTypeForm.fill(data)))
       case None => Ok(calculation.customerType(customerTypeForm))
     }
+  }
+
+  val submitCustomerType = Action { implicit request =>
+    customerTypeForm.bindFromRequest.fold(
+      errors => BadRequest(calculation.customerType(errors)),
+      success => {
+        calcConnector.saveFormData("customerType", success)
+        success.customerType match {
+          case "individual" => Redirect(routes.CalculationController.currentIncome())
+          case "trustee" => Redirect(routes.CalculationController.disabledTrustee())
+          case "personalRep" => Redirect(routes.CalculationController.otherProperties())
+        }
+      }
+    )
   }
 
   //################### Disabled Trustee methods #######################
@@ -161,7 +176,10 @@ trait CalculationController extends FrontendController {
 
   //################### Allowable Losses methods #######################
   val allowableLosses = Action.async { implicit request =>
-    Future.successful(Ok(calculation.allowableLosses()))
+    calcConnector.fetchAndGetFormData[AllowableLossesModel]("allowableLosses").map {
+      case Some(data) => Ok(calculation.allowableLosses(allowableLossesForm.fill(data)))
+      case None => Ok(calculation.allowableLosses(allowableLossesForm))
+    }
   }
 
   //################### Other Reliefs methods #######################
