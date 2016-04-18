@@ -22,6 +22,7 @@ import forms.AcquisitionValueForm._
 import forms.CustomerTypeForm._
 import forms.DisabledTrusteeForm._
 import forms.AnnualExemptAmountForm._
+import forms.DisposalDateForm._
 import forms.DisposalValueForm._
 import models._
 import play.api.mvc.Action
@@ -104,7 +105,10 @@ trait CalculationController extends FrontendController {
 
   //################### Disposal Date methods #######################
   val disposalDate = Action.async { implicit request =>
-    Future.successful(Ok(calculation.disposalDate()))
+    calcConnector.fetchAndGetFormData[DisposalDateModel]("disposalDate").map {
+      case Some(data) => Ok(calculation.disposalDate(disposalDateForm.fill(data)))
+      case None => Ok(calculation.disposalDate(disposalDateForm))
+    }
   }
 
   //################### Disposal Value methods #######################
