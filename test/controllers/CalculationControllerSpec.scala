@@ -204,17 +204,31 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       }
     }
 
-    "submitting an invalid form" should {
-      object OtherPropertiesTestDataItem extends fakeRequestToPost(
+    "submitting an invalid form with no content" should {
+      object CustomerTypeTestDataItem extends fakeRequestToPost(
         "customer-type",
         TestCalculationController.submitCustomerType,
-        ("annualExemptAmount", "")
+        ("customerType", "")
       )
       val testModel = new CustomerTypeModel("")
 
       "return a 400" in {
         keystoreCacheCondition[CustomerTypeModel](testModel)
-        status(OtherPropertiesTestDataItem.result) shouldBe 400
+        status(CustomerTypeTestDataItem.result) shouldBe 400
+      }
+    }
+
+    "submitting an invalid form with incorrect content" should {
+      object CustomerTypeTestDataItem extends fakeRequestToPost(
+        "customer-type",
+        TestCalculationController.submitCustomerType,
+        ("customerType", "invalid-user")
+      )
+      val testModel = new CustomerTypeModel("invalid-user")
+
+      "return a 400" in {
+        keystoreCacheCondition[CustomerTypeModel](testModel)
+        status(CustomerTypeTestDataItem.result) shouldBe 400
       }
     }
   }

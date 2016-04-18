@@ -19,11 +19,22 @@ package forms
 import play.api.data._
 import play.api.data.Forms._
 import models._
+import play.api.i18n.Messages
 
 object CustomerTypeForm {
+
+  def validate(customerType:String): Option[CustomerTypeModel] = {
+    customerType match {
+      case "individual" => Some(CustomerTypeModel(customerType))
+      case "trustee" => Some(CustomerTypeModel(customerType))
+      case "personalRep" => Some(CustomerTypeModel(customerType))
+      case _ => None
+    }
+  }
+
   val customerTypeForm = Form(
     mapping(
-      "customerType" -> nonEmptyText
+      "customerType" -> text.verifying(Messages("calc.common.invalidError"), customerType => validate(customerType).isDefined)
     )(CustomerTypeModel.apply)(CustomerTypeModel.unapply)
   )
 }
