@@ -170,7 +170,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new CustomerTypeModel("individual")
 
       "return a 303" in {
-        keystoreCacheCondition[OtherPropertiesModel](testModel)
+        keystoreCacheCondition[CustomerTypeModel](testModel)
         status(CustomerTypeTestDataItem.result) shouldBe 303
       }
     }
@@ -184,7 +184,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new CustomerTypeModel("trustee")
 
       "return a 303" in {
-        keystoreCacheCondition[OtherPropertiesModel](testModel)
+        keystoreCacheCondition[CustomerTypeModel](testModel)
         status(CustomerTypeTestDataItem.result) shouldBe 303
       }
     }
@@ -198,7 +198,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new CustomerTypeModel("personalRep")
 
       "return a 303" in {
-        keystoreCacheCondition[OtherPropertiesModel](testModel)
+        keystoreCacheCondition[CustomerTypeModel](testModel)
         status(CustomerTypeTestDataItem.result) shouldBe 303
       }
     }
