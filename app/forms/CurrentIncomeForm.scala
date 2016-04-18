@@ -21,9 +21,17 @@ import play.api.data.Forms._
 import models._
 
 object CurrentIncomeForm {
-val currentIncomeForm = Form(
-  mapping(
-    "currentIncome" -> bigDecimal
-  )(CurrentIncomeModel.apply)(CurrentIncomeModel.unapply)
-)
+
+  def validateNonNegative (data: BigDecimal): Option[BigDecimal] = {
+    data match {
+      case data if data < 0 => None
+      case _ => Some(data)
+    }
+  }
+
+  val currentIncomeForm = Form(
+    mapping(
+      "currentIncome" -> bigDecimal.verifying("Your income cannot be negative", currentIncome => validateNonNegative(currentIncome).isDefined)
+    )(CurrentIncomeModel.apply)(CurrentIncomeModel.unapply)
+  )
 }
