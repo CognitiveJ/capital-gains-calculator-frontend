@@ -37,6 +37,7 @@ import org.scalatest.mock.MockitoSugar
 import scala.concurrent.Future
 
 
+//noinspection ScalaStyle
 class CalculationControllerSpec extends UnitSpec with WithFakeApplication with MockitoSugar with BeforeAndAfterEach {
 
   val s = "Action(parser=BodyParser(anyContent))"
@@ -732,39 +733,81 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
   }
 
   //################### Improvements tests #######################
-  "In CalculationController calling the .improvements action " should {
+  "In CalculationController calling the .improvements action " when {
+    "not supplied with a pre-existing stored model" should {
+      object ImprovementsTestDataItem extends fakeRequestTo("improvements", TestCalculationController.improvements)
 
-    object ImprovementsTestDataItem extends fakeRequestTo("improvements", CalculationController.improvements)
+      "return a 200" in {
+        keystoreFetchCondition[ImprovementsModel](None)
+        status(ImprovementsTestDataItem.result) shouldBe 200
+      }
 
-    "return a 200" in {
-      status(ImprovementsTestDataItem.result) shouldBe 200
+      "return some HTML that" should {
+
+        "contain some text and use the character set utf-8" in {
+          contentType(ImprovementsTestDataItem.result) shouldBe Some("text/html")
+          charset(ImprovementsTestDataItem.result) shouldBe Some("utf-8")
+        }
+
+        "have the title 'Who owned the property?'" in {
+          ImprovementsTestDataItem.jsoupDoc.title shouldEqual Messages("calc.improvements.question")
+        }
+
+        "have the heading Calculate your tax (non-residents)" in {
+          ImprovementsTestDataItem.jsoupDoc.body.getElementsByTag("H1").text shouldEqual Messages("calc.base.pageHeading")
+        }
+
+        "display the correct wording for radio option `yes`" in {
+          ImprovementsTestDataItem.jsoupDoc.body.getElementById("isClaimingImprovements-yes").parent.text shouldEqual Messages("calc.base.yes")
+        }
+
+        "display the correct wording for radio option `no`" in {
+          ImprovementsTestDataItem.jsoupDoc.body.getElementById("isClaimingImprovements-no").parent.text shouldEqual Messages("calc.base.no")
+        }
+
+        "contain a hidden component with an input box" in {
+          ImprovementsTestDataItem.jsoupDoc.body.getElementById("improvementsAmt").parent.parent.parent.id shouldBe "hidden"
+        }
+      }
     }
+    "supplied with a pre-existing model with 'Yes' checked and value already entered" should {
+      val testImprovementsModelYes = new ImprovementsModel("Yes", 10000)
 
-    "return some HTML that" should {
-
-      "contain some text and use the character set utf-8" in {
-        contentType(ImprovementsTestDataItem.result) shouldBe Some("text/html")
-        charset(ImprovementsTestDataItem.result) shouldBe Some("utf-8")
+      "return a 200" in {
+        object ImprovementsTestDataItem extends fakeRequestTo("improvements", TestCalculationController.improvements)
+        keystoreFetchCondition[ImprovementsModel](Some(testImprovementsModelYes))
+        status(ImprovementsTestDataItem.result) shouldBe 200
       }
 
-      "have the title 'Who owned the property?'" in {
-        ImprovementsTestDataItem.jsoupDoc.title shouldEqual Messages("calc.improvements.question")
+      "return some HTML that" should {
+
+        "be pre populated with Yes box selected and a value of 10000 entered" in {
+          object ImprovementsTestDataItem extends fakeRequestTo("improvements", TestCalculationController.improvements)
+          keystoreFetchCondition[ImprovementsModel](Some(testImprovementsModelYes))
+
+          ImprovementsTestDataItem.jsoupDoc.getElementById("isClaimingImprovements-yes").attr("checked") shouldEqual "checked"
+          ImprovementsTestDataItem.jsoupDoc.getElementById("improvementsAmt").attr("value") shouldEqual "10000"
+        }
+      }
+    }
+    "supplied with a pre-existing model with 'No' checked and value already entered" should {
+      val testImprovementsModelNo = new ImprovementsModel("No", 0)
+
+      "return a 200" in {
+        object ImprovementsTestDataItem extends fakeRequestTo("improvements", TestCalculationController.improvements)
+        keystoreFetchCondition[ImprovementsModel](Some(testImprovementsModelNo))
+        status(ImprovementsTestDataItem.result) shouldBe 200
       }
 
-      "have the heading Calculate your tax (non-residents)" in {
-        ImprovementsTestDataItem.jsoupDoc.body.getElementsByTag("H1").text shouldEqual Messages("calc.base.pageHeading")
-      }
+      "return some HTML that" should {
 
-      "display the correct wording for radio option `yes`" in {
-        ImprovementsTestDataItem.jsoupDoc.body.getElementById("improvementsCheckYes").parent.text shouldEqual Messages("calc.base.yes")
-      }
+        "be pre populated with No box selected and a value of 0" in {
+          object ImprovementsTestDataItem extends fakeRequestTo("improvements", TestCalculationController.improvements)
+          keystoreFetchCondition[ImprovementsModel](Some(testImprovementsModelNo))
 
-      "display the correct wording for radio option `no`" in {
-        ImprovementsTestDataItem.jsoupDoc.body.getElementById("improvementsCheckNo").parent.text shouldEqual Messages("calc.base.no")
-      }
-
-      "contain a hidden component with an input box" in {
-        ImprovementsTestDataItem.jsoupDoc.body.getElementById("improvements").parent.parent.id shouldBe "hidden"
+          ImprovementsTestDataItem.jsoupDoc.getElementById("isClaimingImprovements-no").attr("checked") shouldEqual "checked"
+          ImprovementsTestDataItem.jsoupDoc.getElementById("improvementsAmt").attr("value") shouldEqual "0"
+        }
       }
     }
   }
@@ -830,7 +873,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           charset(DisposalDateTestDataItem.result) shouldBe Some("utf-8")
         }
 
-        "have be pre-populated with the date 10, 12, 2016" in {
+        "be pre-populated with the date 10, 12, 2016" in {
           keystoreFetchCondition[DisposalDateModel](Some(testDisposalDateModel))
           DisposalDateTestDataItem.jsoupDoc.body.getElementById("disposalDate.day").attr("value") shouldEqual testDisposalDateModel.day.toString
           DisposalDateTestDataItem.jsoupDoc.body.getElementById("disposalDate.month").attr("value") shouldEqual testDisposalDateModel.month.toString

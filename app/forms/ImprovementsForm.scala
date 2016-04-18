@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
-package models
+package forms
 
-import play.api.libs.json._
+import play.api.data._
+import play.api.data.Forms._
+import models._
 
-case class ImprovementsModel (isClaimingImprovements: String, improvementsAmt: BigDecimal)
-
-object ImprovementsModel {
-  implicit val format = Json.format[ImprovementsModel]
+object ImprovementsForm {
+  val improvementsForm = Form(
+    mapping(
+      "isClaimingImprovements" -> text,
+      "improvementsAmt" -> bigDecimal
+    )(ImprovementsModel.apply)(ImprovementsModel.unapply)
+  )
 }

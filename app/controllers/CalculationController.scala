@@ -17,6 +17,7 @@
 package controllers
 
 import connectors.CalculatorConnector
+
 import forms.OtherPropertiesForm._
 import forms.AcquisitionValueForm._
 import forms.CustomerTypeForm._
@@ -27,7 +28,9 @@ import forms.DisposalValueForm._
 import forms.AllowableLossesForm._
 import forms.EntrepreneursReliefForm._
 import forms.DisposalCostsForm._
+import forms.ImprovementsForm._
 import forms.PersonalAllowanceForm._
+
 import models._
 import play.api.mvc.Action
 import uk.gov.hmrc.play.frontend.controller.FrontendController
@@ -148,7 +151,10 @@ trait CalculationController extends FrontendController {
 
   //################### Improvements methods #######################
   val improvements = Action.async { implicit request =>
-    Future.successful(Ok(calculation.improvements()))
+    calcConnector.fetchAndGetFormData[ImprovementsModel]("improvements").map {
+      case Some(data) => Ok(calculation.improvements(improvementsForm.fill(data)))
+      case None => Ok(calculation.improvements(improvementsForm))
+    }
   }
 
   //################### Disposal Date methods #######################
