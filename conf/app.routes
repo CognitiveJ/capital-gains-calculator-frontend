@@ -18,6 +18,7 @@ POST        /customer-type           controllers.CalculationController.submitCus
 
 #Disabled Trustee
 GET         /disabled-trustee        controllers.CalculationController.disabledTrustee
+POST        /disabled-trustee        controllers.CalculationController.submitDisabledTrustee
 
 #Current Income
 GET         /current-income          controllers.CalculationController.currentIncome

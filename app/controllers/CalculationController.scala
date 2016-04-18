@@ -77,6 +77,16 @@ trait CalculationController extends FrontendController {
     }
   }
 
+  val submitDisabledTrustee = Action { implicit request =>
+    disabledTrusteeForm.bindFromRequest.fold(
+      errors => BadRequest(calculation.disabledTrustee(errors)),
+      success => {
+        calcConnector.saveFormData("isVulnerable",success)
+        Redirect(routes.CalculationController.otherProperties())
+      }
+    )
+  }
+
   //################### Current Income methods #######################
   val currentIncome = Action.async { implicit request =>
     Future.successful(Ok(calculation.currentIncome()))
