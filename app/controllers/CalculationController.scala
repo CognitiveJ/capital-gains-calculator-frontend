@@ -24,6 +24,7 @@ import forms.DisabledTrusteeForm._
 import forms.AnnualExemptAmountForm._
 import forms.DisposalDateForm._
 import forms.DisposalValueForm._
+import forms.OtherReliefsForm._
 import models._
 import play.api.mvc.Action
 import uk.gov.hmrc.play.frontend.controller.FrontendController
@@ -141,7 +142,10 @@ trait CalculationController extends FrontendController {
 
   //################### Other Reliefs methods #######################
   val otherReliefs = Action.async { implicit request =>
-    Future.successful(Ok(calculation.otherReliefs()))
+    calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefs").map {
+      case Some(data) => Ok(calculation.otherReliefs(otherReliefsForm.fill(data)))
+      case None => Ok(calculation.otherReliefs(otherReliefsForm))
+    }
   }
 
   //################### Summary Methods ##########################

@@ -918,42 +918,66 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
 
   //################### Other Reliefs tests #######################
-  "In CalculationController calling the .otherReliefs action " should {
+  "In CalculationController calling the .otherReliefs action " when {
+    "not supplied with a pre-existing stored model" should {
+      object OtherReliefsTestDataItem extends fakeRequestTo("other-reliefs", TestCalculationController.otherReliefs)
 
-    object OtherReliefsTestDataItem extends fakeRequestTo("other-reliefs", CalculationController.otherReliefs)
+      "return a 200" in {
+        keystoreFetchCondition[OtherReliefsModel](None)
+        status(OtherReliefsTestDataItem.result) shouldBe 200
+      }
 
-    "return a 200" in {
-      status(OtherReliefsTestDataItem.result) shouldBe 200
+      "return some HTML that" should {
+
+        "contain some text and use the character set utf-8" in {
+          contentType(OtherReliefsTestDataItem.result) shouldBe Some("text/html")
+          charset(OtherReliefsTestDataItem.result) shouldBe Some("utf-8")
+        }
+        "have the title 'How much extra tax relief are you claiming?'" in {
+          OtherReliefsTestDataItem.jsoupDoc.title shouldEqual Messages("calc.otherReliefs.question")
+        }
+
+        "have the heading Calculate your tax (non-residents) " in {
+          OtherReliefsTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+        }
+
+        "have a 'Back' link " in {
+          OtherReliefsTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+        }
+
+        "have the question 'How much extra tax relief are you claiming?' as the legend of the input" in {
+          OtherReliefsTestDataItem.jsoupDoc.body.getElementsByTag("label").text shouldEqual Messages("calc.otherReliefs.question")
+        }
+
+        "display an input box for the Other Tax Reliefs" in {
+          OtherReliefsTestDataItem.jsoupDoc.body.getElementById("otherReliefs").tagName() shouldEqual "input"
+        }
+
+        "display a 'Continue' button " in {
+          OtherReliefsTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+        }
+      }
     }
+    "supplied with a pre-existing stored model" should {
+      object OtherReliefsTestDataItem extends fakeRequestTo("other-reliefs", TestCalculationController.otherReliefs)
+      val testOtherReliefsModel = new OtherReliefsModel(5000)
 
-    "return some HTML that" should {
-
-      "contain some text and use the character set utf-8" in {
-        contentType(OtherReliefsTestDataItem.result) shouldBe Some("text/html")
-        charset(OtherReliefsTestDataItem.result) shouldBe Some("utf-8")
-      }
-      "have the title 'How much extra tax relief are you claiming?'" in {
-        OtherReliefsTestDataItem.jsoupDoc.title shouldEqual Messages("calc.otherReliefs.question")
+      "return a 200" in {
+        keystoreFetchCondition[OtherReliefsModel](Some(testOtherReliefsModel))
+        status(OtherReliefsTestDataItem.result) shouldBe 200
       }
 
-      "have the heading Calculate your tax (non-residents) " in {
-        OtherReliefsTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
-      }
+      "return some HTML that" should {
 
-      "have a 'Back' link " in {
-        OtherReliefsTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
-      }
+        "contain some text and use the character set utf-8" in {
+          contentType(OtherReliefsTestDataItem.result) shouldBe Some("text/html")
+          charset(OtherReliefsTestDataItem.result) shouldBe Some("utf-8")
+        }
 
-      "have the question 'How much extra tax relief are you claiming?' as the legend of the input" in {
-        OtherReliefsTestDataItem.jsoupDoc.body.getElementsByTag("label").text shouldEqual Messages("calc.otherReliefs.question")
-      }
-
-      "display an input box for the Other Tax Reliefs" in {
-        OtherReliefsTestDataItem.jsoupDoc.body.getElementById("otherReliefs").tagName() shouldEqual "input"
-      }
-
-      "display a 'Continue' button " in {
-        OtherReliefsTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+        "have the value 5000 auto-filled into the input box" in {
+          keystoreFetchCondition[OtherReliefsModel](Some(testOtherReliefsModel))
+          OtherReliefsTestDataItem.jsoupDoc.getElementById("otherReliefs").attr("value") shouldEqual "5000"
+        }
       }
     }
   }
