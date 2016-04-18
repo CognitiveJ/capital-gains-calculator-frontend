@@ -50,6 +50,20 @@ trait CalculationController extends FrontendController {
     }
   }
 
+  val submitCustomerType = Action { implicit request =>
+    customerTypeForm.bindFromRequest.fold(
+      errors => BadRequest(calculation.customerType(errors)),
+      success => {
+        calcConnector.saveFormData("customerType", success)
+        success.customerType match {
+          case "individual" => Redirect(routes.CalculationController.currentIncome())
+          case "trustee" => Redirect(routes.CalculationController.disabledTrustee())
+          case "personalRep" => Redirect(routes.CalculationController.otherProperties())
+        }
+      }
+    )
+  }
+
   //################### Disabled Trustee methods #######################
   val disabledTrustee = Action.async { implicit request =>
     calcConnector.fetchAndGetFormData[DisabledTrusteeModel]("isVulnerable").map {
