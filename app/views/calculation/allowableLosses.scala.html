@@ -1,9 +1,9 @@
-@()(implicit request: Request[_])
-
 @import views.html.helpers._
 
+@(allowableLossesForm: Form[AllowableLossesModel])(implicit request: Request[_])
+
 @hiddenYesNoContent = {
-    @simpleInputMoney("allowableLosses", Messages("calc.allowableLosses.question.two"))
+    @formInputMoney(allowableLossesForm,"allowableLossesAmt", Messages("calc.allowableLosses.question.two"))
 }
 
 @hiddenHelpTextContent = {
@@ -21,7 +21,7 @@
 
     <h1 class="heading-large">@Messages("calc.base.pageHeading")</h1>
 
-    @hiddenYesNoRadio("allowableLosses",Messages("calc.allowableLosses.question.one"),hiddenYesNoContent)
+    @formHiddenYesNoRadio(allowableLossesForm,"isClaimingAllowableLosses",Messages("calc.allowableLosses.question.one"),hiddenYesNoContent)
 
     @hiddenHelpText("allowableLossesHiddenHelp",Messages("calc.allowableLosses.helpText.title"),hiddenHelpTextContent)
 

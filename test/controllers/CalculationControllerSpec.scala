@@ -863,55 +863,101 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
 
   //################### Allowable Losses tests #######################
-  "In CalculationController calling the .allowableLosses action " should {
+  "In CalculationController calling the .allowableLosses action " when {
 
-    object AllowableLossesTestDataItem extends fakeRequestTo("allowable-losses", CalculationController.allowableLosses)
+    "not supplied with a pre-existing stored value" should {
 
-    "return a 200" in {
-      status(AllowableLossesTestDataItem.result) shouldBe 200
+      object AllowableLossesTestDataItem extends fakeRequestTo("allowable-losses", CalculationController.allowableLosses)
+
+      "return a 200" in {
+        keystoreFetchCondition[AllowableLossesModel](None)
+        status(AllowableLossesTestDataItem.result) shouldBe 200
+      }
+
+      "return some HTML that" should {
+
+        "contain some text and use the character set utf-8" in {
+          keystoreFetchCondition[AllowableLossesModel](None)
+          contentType(AllowableLossesTestDataItem.result) shouldBe Some("text/html")
+          charset(AllowableLossesTestDataItem.result) shouldBe Some("utf-8")
+        }
+
+        "have a back button" in {
+          keystoreFetchCondition[AllowableLossesModel](None)
+          AllowableLossesTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+        }
+
+        "have the title 'Are you claiming any allowable losses?'" in {
+          keystoreFetchCondition[AllowableLossesModel](None)
+          AllowableLossesTestDataItem.jsoupDoc.title shouldEqual Messages("calc.allowableLosses.question.one")
+        }
+
+        "have the heading 'Calculate your tax (non-residents)'" in {
+          keystoreFetchCondition[AllowableLossesModel](None)
+          AllowableLossesTestDataItem.jsoupDoc.body.getElementsByTag("H1").text shouldEqual Messages("calc.base.pageHeading")
+        }
+
+        "have a yes no helper with hidden content and question 'Are you claiming any allowable losses?'" in {
+          keystoreFetchCondition[AllowableLossesModel](None)
+          AllowableLossesTestDataItem.jsoupDoc.body.getElementById("isClaimingAllowableLosses-yes").parent.text shouldBe Messages("calc.base.yes")
+          AllowableLossesTestDataItem.jsoupDoc.body.getElementById("isClaimingAllowableLosses-no").parent.text shouldBe Messages("calc.base.no")
+          AllowableLossesTestDataItem.jsoupDoc.body.getElementsByTag("legend").text shouldBe Messages("calc.allowableLosses.question.one")
+        }
+
+        "have a hidden monetary input with question 'Whats the total value of your allowable losses?'" in {
+          keystoreFetchCondition[AllowableLossesModel](None)
+          AllowableLossesTestDataItem.jsoupDoc.body.getElementById("allowableLossesAmt").tagName shouldEqual "input"
+          AllowableLossesTestDataItem.jsoupDoc.select("label[for=allowableLossesAmt]").text shouldEqual Messages("calc.allowableLosses.question.two")
+        }
+
+        "have no value auto-filled into the input box" in {
+          keystoreFetchCondition[AcquisitionValueModel](None)
+          AllowableLossesTestDataItem.jsoupDoc.getElementById("allowableLossesAmt").attr("value") shouldEqual ""
+        }
+
+        "have a hidden help text section with summary 'What are allowable losses?' and correct content" in {
+          keystoreFetchCondition[AllowableLossesModel](None)
+          AllowableLossesTestDataItem.jsoupDoc.select("div#allowableLossesHiddenHelp").text should
+            include(Messages("calc.allowableLosses.helpText.title"))
+            include(Messages("calc.allowableLosses.helpText.paragraph.one"))
+            include(Messages("calc.allowableLosses.helpText.bullet.one"))
+            include(Messages("calc.allowableLosses.helpText.bullet.two"))
+            include(Messages("calc.allowableLosses.helpText.bullet.three"))
+        }
+
+        "has a Continue button" in {
+          keystoreFetchCondition[AllowableLossesModel](None)
+          AllowableLossesTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+        }
+      }
     }
+    "supplied with a pre-existing stored model" should {
 
-    "return some HTML that" should {
+      object AllowableLossesTestDataItem extends fakeRequestTo("allowable-losses", TestCalculationController.allowableLosses)
+      val testModel = new AllowableLossesModel("Yes",9999.54)
 
-      "contain some text and use the character set utf-8" in {
-        contentType(AllowableLossesTestDataItem.result) shouldBe Some("text/html")
-        charset(AllowableLossesTestDataItem.result) shouldBe Some("utf-8")
+      "return a 200" in {
+        keystoreFetchCondition[AllowableLossesModel](Some(testModel))
+        status(AllowableLossesTestDataItem.result) shouldBe 200
       }
 
-      "have a back button" in {
-        AllowableLossesTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
-      }
+      "return some HTML that" should {
 
-      "have the title 'Are you claiming any allowable losses?'" in {
-        AllowableLossesTestDataItem.jsoupDoc.title shouldEqual Messages("calc.allowableLosses.question.one")
-      }
+        "contain some text and use the character set utf-8" in {
+          keystoreFetchCondition[AllowableLossesModel](Some(testModel))
+          contentType(AllowableLossesTestDataItem.result) shouldBe Some("text/html")
+          charset(AllowableLossesTestDataItem.result) shouldBe Some("utf-8")
+        }
 
-      "have the heading 'Calculate your tax (non-residents)'" in {
-        AllowableLossesTestDataItem.jsoupDoc.body.getElementsByTag("H1").text shouldEqual Messages("calc.base.pageHeading")
-      }
+        "have the 'Yes' Radio option selected" in {
+          keystoreFetchCondition[AllowableLossesModel](Some(testModel))
+          AllowableLossesTestDataItem.jsoupDoc.getElementById("isClaimingAllowableLosses-yes").parent.classNames().contains("selected") shouldBe true
+        }
 
-      "have a yes no helper with hidden content and question 'Are you claiming any allowable losses?'" in {
-        AllowableLossesTestDataItem.jsoupDoc.body.getElementById("allowableLossesYes").parent.text shouldBe Messages("calc.base.yes")
-        AllowableLossesTestDataItem.jsoupDoc.body.getElementById("allowableLossesNo").parent.text shouldBe Messages("calc.base.no")
-        AllowableLossesTestDataItem.jsoupDoc.body.getElementsByTag("legend").text shouldBe Messages("calc.allowableLosses.question.one")
-      }
-
-      "have a hidden monetary input with question 'Whats the total value of your allowable losses?'" in {
-        AllowableLossesTestDataItem.jsoupDoc.body.getElementById("allowableLosses").tagName shouldEqual "input"
-        AllowableLossesTestDataItem.jsoupDoc.select("label[for=allowableLosses]").text shouldEqual Messages("calc.allowableLosses.question.two")
-      }
-
-      "have a hidden help text section with summary 'What are allowable losses?' and correct content" in {
-        AllowableLossesTestDataItem.jsoupDoc.select("div#allowableLossesHiddenHelp").text should
-          include(Messages("calc.allowableLosses.helpText.title"))
-        include(Messages("calc.allowableLosses.helpText.paragraph.one"))
-        include(Messages("calc.allowableLosses.helpText.bullet.one"))
-        include(Messages("calc.allowableLosses.helpText.bullet.two"))
-        include(Messages("calc.allowableLosses.helpText.bullet.three"))
-      }
-
-      "has a Continue button" in {
-        AllowableLossesTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+        "have the value 9999.54 auto-filled into the input box" in {
+          keystoreFetchCondition[AllowableLossesModel](Some(testModel))
+          AllowableLossesTestDataItem.jsoupDoc.getElementById("allowableLossesAmt").attr("value") shouldEqual ("9999.54")
+        }
       }
     }
   }

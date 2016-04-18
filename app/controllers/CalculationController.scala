@@ -24,6 +24,7 @@ import forms.DisabledTrusteeForm._
 import forms.AnnualExemptAmountForm._
 import forms.DisposalDateForm._
 import forms.DisposalValueForm._
+import forms.AllowableLossesForm._
 import models._
 import play.api.mvc.Action
 import uk.gov.hmrc.play.frontend.controller.FrontendController
@@ -136,7 +137,10 @@ trait CalculationController extends FrontendController {
 
   //################### Allowable Losses methods #######################
   val allowableLosses = Action.async { implicit request =>
-    Future.successful(Ok(calculation.allowableLosses()))
+    calcConnector.fetchAndGetFormData[AllowableLossesModel]("allowableLossesAmt").map {
+      case Some(data) => Ok(calculation.allowableLosses(allowableLossesForm.fill(data)))
+      case None => Ok(calculation.allowableLosses(allowableLossesForm))
+    }
   }
 
   //################### Other Reliefs methods #######################
