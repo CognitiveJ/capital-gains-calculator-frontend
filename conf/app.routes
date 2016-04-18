@@ -26,6 +26,7 @@ GET         /personalAllowance       controllers.CalculationController.personalA
 
 #Other Properties
 GET         /other-properties        controllers.CalculationController.otherProperties
+POST        /other-properties        controllers.CalculationController.submitOtherProperties
 
 #Allowance
 GET         /allowance               controllers.CalculationController.annualExemptAmount
