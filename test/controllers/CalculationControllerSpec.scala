@@ -293,59 +293,84 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
   }
 
-  //################### Current Income tests #######################
-  "In CalculationController calling the .currentIncome action " should {
-
-    "be Action(parser=BodyParser(anyContent)) for currentIncome" in {
-      val result = CalculationController.currentIncome.toString()
-      result shouldBe s
-    }
-  }
 
   //############## Personal Allowance tests ######################
   "In CalculationController calling the .personalAllowance action " should {
+    "not supplied with a model that already contains data" should {
+      object PersonalAllowanceTestDataItem extends fakeRequestTo("personal-allowance", TestCalculationController.personalAllowance)
 
-    object PersonalAllowanceTestDataItem extends fakeRequestTo("personal-allowance", CalculationController.personalAllowance)
+      "return a 200" in {
+        keystoreFetchCondition[PersonalAllowanceModel](None)
+        status(PersonalAllowanceTestDataItem.result) shouldBe 200
+      }
 
-    "return a 200" in {
-      status(PersonalAllowanceTestDataItem.result) shouldBe 200
+      "return some HTML that" should {
+
+        "contain some text and use the character set utf-8" in {
+          keystoreFetchCondition[PersonalAllowanceModel](None)
+          contentType(PersonalAllowanceTestDataItem.result) shouldBe Some("text/html")
+          charset(PersonalAllowanceTestDataItem.result) shouldBe Some("utf-8")
+        }
+
+        "have the title In the tax year when you stopped owning the property, what was your UK Personal Allowance?" in {
+          keystoreFetchCondition[PersonalAllowanceModel](None)
+          PersonalAllowanceTestDataItem.jsoupDoc.title shouldEqual Messages("calc.personalAllowance.question")
+        }
+
+        "have the heading Calculate your tax (non-residents) " in {
+          keystoreFetchCondition[PersonalAllowanceModel](None)
+          PersonalAllowanceTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+        }
+
+        "have a 'Back' link " in {
+          keystoreFetchCondition[PersonalAllowanceModel](None)
+          PersonalAllowanceTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+        }
+
+        "have the question 'In the tax year when you stopped owning the property, what was your UK Personal Allowance?' as the label of the input" in {
+          keystoreFetchCondition[PersonalAllowanceModel](None)
+          PersonalAllowanceTestDataItem.jsoupDoc.body.getElementsByTag("label").text shouldEqual Messages("calc.personalAllowance.question")
+        }
+
+        "display an input box for the Personal Allowance" in {
+          keystoreFetchCondition[PersonalAllowanceModel](None)
+          PersonalAllowanceTestDataItem.jsoupDoc.body.getElementById("personalAllowance").tagName() shouldEqual "input"
+        }
+
+        "have no value auto-filled into the input box" in {
+          keystoreFetchCondition[PersonalAllowanceModel](None)
+          PersonalAllowanceTestDataItem.jsoupDoc.getElementById("personalAllowance").attr("value") shouldBe empty
+        }
+
+        "display a 'Continue' button " in {
+          keystoreFetchCondition[PersonalAllowanceModel](None)
+          PersonalAllowanceTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+        }
+
+        "should contain a Read more sidebar with a link to personal allowances and taxation abroad" in {
+          keystoreFetchCondition[PersonalAllowanceModel](None)
+          PersonalAllowanceTestDataItem.jsoupDoc.select("aside h2").text shouldBe Messages("calc.common.readMore")
+          PersonalAllowanceTestDataItem.jsoupDoc.select("aside a").first().attr("href") shouldBe "https://www.gov.uk/income-tax-rates/current-rates-and-allowances"
+          PersonalAllowanceTestDataItem.jsoupDoc.select("aside a").last().attr("href") shouldBe "https://www.gov.uk/tax-uk-income-live-abroad/personal-allowance"
+        }
+      }
     }
 
-    "return some HTML that" should {
+    "supplied with a model that already contains data" should {
+      object PersonalAllowanceTestDataItem extends fakeRequestTo("personal-allowance", TestCalculationController.personalAllowance)
+      val testModel = new PersonalAllowanceModel(1000)
 
-      "contain some text and use the character set utf-8" in {
-        contentType(PersonalAllowanceTestDataItem.result) shouldBe Some("text/html")
-        charset(PersonalAllowanceTestDataItem.result) shouldBe Some("utf-8")
+      "return a 200" in {
+        keystoreFetchCondition[PersonalAllowanceModel](Some(testModel))
+        status(PersonalAllowanceTestDataItem.result) shouldBe 200
       }
 
-      "have the title In the tax year when you stopped owning the property, what was your UK Personal Allowance?" in {
-        PersonalAllowanceTestDataItem.jsoupDoc.title shouldEqual Messages("calc.personalAllowance.question")
-      }
+      "return some HTML that" should {
 
-      "have the heading Calculate your tax (non-residents) " in {
-        PersonalAllowanceTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
-      }
-
-      "have a 'Back' link " in {
-        PersonalAllowanceTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
-      }
-
-      "have the question 'In the tax year when you stopped owning the property, what was your UK Personal Allowance?' as the label of the input" in {
-        PersonalAllowanceTestDataItem.jsoupDoc.body.getElementsByTag("label").text shouldEqual Messages("calc.personalAllowance.question")
-      }
-
-      "display an input box for the Personal Allowance" in {
-        PersonalAllowanceTestDataItem.jsoupDoc.body.getElementById("personalAllowance").tagName() shouldEqual "input"
-      }
-
-      "display a 'Continue' button " in {
-        PersonalAllowanceTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
-      }
-
-      "should contain a Read more sidebar with a link to personal allowances and taxation abroad" in {
-        PersonalAllowanceTestDataItem.jsoupDoc.select("aside h2").text shouldBe Messages("calc.common.readMore")
-        PersonalAllowanceTestDataItem.jsoupDoc.select("aside a").first().attr("href") shouldBe "https://www.gov.uk/income-tax-rates/current-rates-and-allowances"
-        PersonalAllowanceTestDataItem.jsoupDoc.select("aside a").last().attr("href") shouldBe "https://www.gov.uk/tax-uk-income-live-abroad/personal-allowance"
+        "have the value 1000 auto-filled into the input box" in {
+          keystoreFetchCondition[PersonalAllowanceModel](Some(testModel))
+          PersonalAllowanceTestDataItem.jsoupDoc.getElementById("personalAllowance").attr("value") shouldEqual ("1000")
+        }
       }
     }
   }
@@ -720,11 +745,11 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
       "return some HTML that" should {
 
-        "be pre-poulated with Yes box selected and a value of 10000 entered" in {
+        "be pre populated with Yes box selected and a value of 10000 entered" in {
           object ImprovementsTestDataItem extends fakeRequestTo("improvements", TestCalculationController.improvements)
           keystoreFetchCondition[ImprovementsModel](Some(testImprovementsModelYes))
 
-          ImprovementsTestDataItem.jsoupDoc.getElementById("isClaimingImprovements-yes").attr("checked") shouldEqual ("checked")
+          ImprovementsTestDataItem.jsoupDoc.getElementById("isClaimingImprovements-yes").attr("checked") shouldEqual "checked"
           ImprovementsTestDataItem.jsoupDoc.getElementById("improvementsAmt").attr("value") shouldEqual "10000"
         }
       }
@@ -740,11 +765,11 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
       "return some HTML that" should {
 
-        "be pre-poulated with No box selected and a value of 0" in {
+        "be pre populated with No box selected and a value of 0" in {
           object ImprovementsTestDataItem extends fakeRequestTo("improvements", TestCalculationController.improvements)
           keystoreFetchCondition[ImprovementsModel](Some(testImprovementsModelNo))
 
-          ImprovementsTestDataItem.jsoupDoc.getElementById("isClaimingImprovements-no").attr("checked") shouldEqual ("checked")
+          ImprovementsTestDataItem.jsoupDoc.getElementById("isClaimingImprovements-no").attr("checked") shouldEqual "checked"
           ImprovementsTestDataItem.jsoupDoc.getElementById("improvementsAmt").attr("value") shouldEqual "0"
         }
       }
@@ -1396,4 +1421,74 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       }
     }
   }
+
+
+
+  //############## Current Income tests ######################
+  "In CalculationController calling the .currentIncome action " when {
+    "not supplied with a pre-existing stored model" should {
+      object CurrentIncomeTestDataItem extends fakeRequestTo("currentIncome", TestCalculationController.currentIncome)
+
+      "return a 200" in {
+        keystoreFetchCondition[CurrentIncomeModel](None)
+        status(CurrentIncomeTestDataItem.result) shouldBe 200
+      }
+
+      "return some HTML that" should {
+
+        "contain some text and use the character set utf-8" in {
+          keystoreFetchCondition[CurrentIncomeModel](None)
+          contentType(CurrentIncomeTestDataItem.result) shouldBe Some("text/html")
+          charset(CurrentIncomeTestDataItem.result) shouldBe Some("utf-8")
+        }
+
+        "have the title 'In the tax year when you stopped owning the property, what was your total UK income?'" in {
+          keystoreFetchCondition[CurrentIncomeModel](None)
+          CurrentIncomeTestDataItem.jsoupDoc.title shouldEqual Messages("calc.currentIncome.question")
+        }
+
+        "have the heading Calculate your tax (non-residents) " in {
+          keystoreFetchCondition[CurrentIncomeModel](None)
+          CurrentIncomeTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+        }
+
+        "have a 'Back' link " in {
+          keystoreFetchCondition[CurrentIncomeModel](None)
+          CurrentIncomeTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+        }
+
+        "have the question 'In the tax year when you stopped owning the property, what was your total UK income?' as the legend of the input" in {
+          keystoreFetchCondition[CurrentIncomeModel](None)
+          CurrentIncomeTestDataItem.jsoupDoc.body.getElementsByTag("label").text shouldEqual Messages("calc.currentIncome.question")
+        }
+
+        "display an input box for the Current Income Amount" in {
+          keystoreFetchCondition[CurrentIncomeModel](None)
+          CurrentIncomeTestDataItem.jsoupDoc.body.getElementById("currentIncome").tagName() shouldEqual "input"
+        }
+
+        "have no value auto-filled into the input box" in {
+          keystoreFetchCondition[CurrentIncomeModel](None)
+          CurrentIncomeTestDataItem.jsoupDoc.getElementById("currentIncome").attr("value") shouldBe empty
+        }
+
+        "display a 'Continue' button " in {
+          keystoreFetchCondition[CurrentIncomeModel](None)
+          CurrentIncomeTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+        }
+
+        "should contain a Read more sidebar with a link to CGT allowances" in {
+          keystoreFetchCondition[CurrentIncomeModel](None)
+          CurrentIncomeTestDataItem.jsoupDoc.select("aside h2").text shouldBe Messages("calc.common.readMore")
+          CurrentIncomeTestDataItem.jsoupDoc.select("aside a").first.text shouldBe Messages("calc.currentIncome.link.one")
+          CurrentIncomeTestDataItem.jsoupDoc.select("aside a").last.text shouldBe Messages("calc.currentIncome.link.two")
+        }
+      }
+    }
+  }
+
+
+
+
+
 }

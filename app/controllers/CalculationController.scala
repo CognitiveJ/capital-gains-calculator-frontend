@@ -17,6 +17,7 @@
 package controllers
 
 import connectors.CalculatorConnector
+
 import forms.OtherPropertiesForm._
 import forms.AcquisitionValueForm._
 import forms.CustomerTypeForm._
@@ -28,6 +29,8 @@ import forms.AllowableLossesForm._
 import forms.EntrepreneursReliefForm._
 import forms.DisposalCostsForm._
 import forms.ImprovementsForm._
+import forms.PersonalAllowanceForm._
+
 import models._
 import play.api.mvc.Action
 import uk.gov.hmrc.play.frontend.controller.FrontendController
@@ -74,11 +77,18 @@ trait CalculationController extends FrontendController {
   }
 
   //################### Current Income methods #######################
-  val currentIncome = TODO
+  val currentIncome = Action.async { implicit request =>
+    Future.successful(Ok(calculation.currentIncome()))
+  }
+
+
 
   //################### Personal Allowance methods #######################
   val personalAllowance = Action.async { implicit request =>
-    Future.successful(Ok(calculation.personalAllowance()))
+    calcConnector.fetchAndGetFormData[PersonalAllowanceModel]("personalAllowance").map {
+      case Some(data) => Ok(calculation.personalAllowance(personalAllowanceForm.fill(data)))
+      case None => Ok(calculation.personalAllowance(personalAllowanceForm))
+    }
   }
 
   //################### Other Properties methods #######################
