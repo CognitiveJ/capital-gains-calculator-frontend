@@ -1,4 +1,4 @@
-@()(implicit request: Request[_])
+@(personalAllowanceForm: Form[PersonalAllowanceModel])(implicit request: Request[_])
 
 @import helpers._
 
@@ -13,7 +13,7 @@
 
     <h1 class="heading-large">@Messages("calc.base.pageHeading")</h1>
 
-    @simpleInputMoney("personalAllowance", Messages("calc.personalAllowance.question"))
+    @formInputMoney(personalAllowanceForm, "personalAllowance", Messages("calc.personalAllowance.question"))
 
     <button class="button" type="submit" id="continue-button">@Messages("calc.base.continue")</button>
 
