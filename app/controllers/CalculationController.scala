@@ -25,6 +25,7 @@ import forms.AnnualExemptAmountForm._
 import forms.DisposalDateForm._
 import forms.DisposalValueForm._
 import forms.EntrepreneursReliefForm._
+import forms.DisposalCostsForm._
 import models._
 import play.api.mvc.Action
 import uk.gov.hmrc.play.frontend.controller.FrontendController
@@ -127,7 +128,10 @@ trait CalculationController extends FrontendController {
 
   //################### Disposal Costs methods #######################
   val disposalCosts = Action.async { implicit request =>
-    Future.successful(Ok(calculation.disposalCosts()))
+    calcConnector.fetchAndGetFormData[DisposalCostsModel]("disposalCosts").map {
+      case Some(data) => Ok(calculation.disposalCosts(disposalCostsForm.fill(data)))
+      case None => Ok(calculation.disposalCosts(disposalCostsForm))
+    }
   }
 
   //################### Entrepreneurs Relief methods #######################
