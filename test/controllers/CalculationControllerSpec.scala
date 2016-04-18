@@ -821,43 +821,76 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
   //################### Entrepreneurs Relief tests #######################
   "In CalculationController calling the .entrepreneursRelief action " should {
 
-    object EntrepreneursReliefTestDataItem extends fakeRequestTo("entrepreneurs-relief", CalculationController.entrepreneursRelief)
+    "not supplied with a pre-existing stored model" should {
+      object EntrepreneursReliefTestDataItem extends fakeRequestTo("entrepreneurs-relief", TestCalculationController.entrepreneursRelief)
 
-    "return a 200" in {
-      status(EntrepreneursReliefTestDataItem.result) shouldBe 200
+      "return a 200" in {
+        keystoreFetchCondition[EntrepreneursReliefModel](None)
+        status(EntrepreneursReliefTestDataItem.result) shouldBe 200
+      }
+
+      "return some HTML that" should {
+
+        "contain some text and use the character set utf-8" in {
+          keystoreFetchCondition[EntrepreneursReliefModel](None)
+          contentType(EntrepreneursReliefTestDataItem.result) shouldBe Some("text/html")
+          charset(EntrepreneursReliefTestDataItem.result) shouldBe Some("utf-8")
+        }
+
+        "have the title 'Are you claiming Entrepreneurs Relief?'" in {
+          keystoreFetchCondition[EntrepreneursReliefModel](None)
+          EntrepreneursReliefTestDataItem.jsoupDoc.title shouldEqual Messages("calc.entrepreneursRelief.question")
+        }
+
+        "have the heading Calculate your tax (non-residents) " in {
+          keystoreFetchCondition[EntrepreneursReliefModel](None)
+          EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+        }
+
+        "have a 'Back' link " in {
+          keystoreFetchCondition[EntrepreneursReliefModel](None)
+          EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+        }
+
+        "have the question 'Are you claiming Entrepreneurs Relief?' as the legend of the input" in {
+          keystoreFetchCondition[EntrepreneursReliefModel](None)
+          EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementsByTag("legend").text shouldEqual Messages("calc.entrepreneursRelief.question")
+        }
+
+        "display a 'Continue' button " in {
+          keystoreFetchCondition[EntrepreneursReliefModel](None)
+          EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+        }
+
+        "have a sidebar with additional links" in {
+          keystoreFetchCondition[EntrepreneursReliefModel](None)
+          EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementsByClass("sidebar")
+        }
+      }
     }
 
-    "return some HTML that" should {
+    "supplied with a pre-existing stored model" should {
 
-      "contain some text and use the character set utf-8" in {
-        contentType(EntrepreneursReliefTestDataItem.result) shouldBe Some("text/html")
-        charset(EntrepreneursReliefTestDataItem.result) shouldBe Some("utf-8")
+      "return a 200" in {
+        object EntrepreneursReliefTestDataItem extends fakeRequestTo("entrepreneurs-relief", TestCalculationController.entrepreneursRelief)
+        keystoreFetchCondition[EntrepreneursReliefModel](Some(EntrepreneursReliefModel("Yes")))
+        status(EntrepreneursReliefTestDataItem.result) shouldBe 200
       }
 
-      "have the title 'Are you claiming Entrepreneurs Relief?'" in {
-        EntrepreneursReliefTestDataItem.jsoupDoc.title shouldEqual Messages("calc.entrepreneursRelief.question")
-      }
+      "return some HTML that" should {
 
-      "have the heading Calculate your tax (non-residents) " in {
-        EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
-      }
+        "have the radio option `Yes` selected if `Yes` is supplied in the model" in {
+          object EntrepreneursReliefTestDataItem extends fakeRequestTo("entrepreneurs-relief", TestCalculationController.entrepreneursRelief)
+          keystoreFetchCondition[EntrepreneursReliefModel](Some(EntrepreneursReliefModel("Yes")))
+          EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementById("entrepreneursRelief-yes").parent.classNames().contains("selected") shouldBe true
+        }
 
-      "have a 'Back' link " in {
-        EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+        "have the radio option `No` selected if `No` is supplied in the model" in {
+          object EntrepreneursReliefTestDataItem extends fakeRequestTo("entrepreneurs-relief", TestCalculationController.entrepreneursRelief)
+          keystoreFetchCondition[EntrepreneursReliefModel](Some(EntrepreneursReliefModel("No")))
+          EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementById("entrepreneursRelief-no").parent.classNames().contains("selected") shouldBe true
+        }
       }
-
-      "have the question 'Are you claiming Entrepreneurs Relief?' as the legend of the input" in {
-        EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementsByTag("legend").text shouldEqual Messages("calc.entrepreneursRelief.question")
-      }
-
-      "display a 'Continue' button " in {
-        EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
-      }
-
-      "have a sidebar with additional links" in {
-        EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementsByClass("sidebar")
-      }
-
     }
   }
 
