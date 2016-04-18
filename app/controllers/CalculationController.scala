@@ -158,7 +158,7 @@ trait CalculationController extends FrontendController {
 
   //################### Allowable Losses methods #######################
   val allowableLosses = Action.async { implicit request =>
-    calcConnector.fetchAndGetFormData[AllowableLossesModel]("allowableLossesAmt").map {
+    calcConnector.fetchAndGetFormData[AllowableLossesModel]("allowableLosses").map {
       case Some(data) => Ok(calculation.allowableLosses(allowableLossesForm.fill(data)))
       case None => Ok(calculation.allowableLosses(allowableLossesForm))
     }
