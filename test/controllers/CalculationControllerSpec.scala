@@ -253,6 +253,36 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         contentType(PersonalAllowanceTestDataItem.result) shouldBe Some("text/html")
         charset(PersonalAllowanceTestDataItem.result) shouldBe Some("utf-8")
       }
+
+      "have the title In the tax year when you stopped owning the property, what was your UK Personal Allowance?" in {
+        PersonalAllowanceTestDataItem.jsoupDoc.title shouldEqual Messages("calc.personalAllowance.question")
+      }
+
+      "have the heading Calculate your tax (non-residents) " in {
+        PersonalAllowanceTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+      }
+
+      "have a 'Back' link " in {
+        PersonalAllowanceTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+      }
+
+      "have the question 'In the tax year when you stopped owning the property, what was your UK Personal Allowance?' as the label of the input" in {
+        PersonalAllowanceTestDataItem.jsoupDoc.body.getElementsByTag("label").text shouldEqual Messages("calc.personalAllowance.question")
+      }
+
+      "display an input box for the Personal Allowance" in {
+        PersonalAllowanceTestDataItem.jsoupDoc.body.getElementById("personalAllowance").tagName() shouldEqual "input"
+      }
+
+      "display a 'Continue' button " in {
+        PersonalAllowanceTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+      }
+
+      "should contain a Read more sidebar with a link to personal allowances and taxation abroad" in {
+        PersonalAllowanceTestDataItem.jsoupDoc.select("aside h2").text shouldBe Messages("calc.common.readMore")
+        PersonalAllowanceTestDataItem.jsoupDoc.select("aside a").first().attr("href") shouldBe "https://www.gov.uk/income-tax-rates/current-rates-and-allowances"
+        PersonalAllowanceTestDataItem.jsoupDoc.select("aside a").last().attr("href") shouldBe "https://www.gov.uk/tax-uk-income-live-abroad/personal-allowance"
+      }
     }
   }
 
