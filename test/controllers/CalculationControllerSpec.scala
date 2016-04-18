@@ -229,14 +229,6 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
   }
 
-  //################### Current Income tests #######################
-  "In CalculationController calling the .currentIncome action " should {
-
-    "be Action(parser=BodyParser(anyContent)) for currentIncome" in {
-      val result = CalculationController.currentIncome.toString()
-      result shouldBe s
-    }
-  }
 
   //############## Personal Allowance tests ######################
   "In CalculationController calling the .personalAllowance action " should {
@@ -1106,4 +1098,74 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       }
     }
   }
+
+
+
+  //############## Current Income tests ######################
+  "In CalculationController calling the .currentIncome action " when {
+    "not supplied with a pre-existing stored model" should {
+      object CurrentIncomeTestDataItem extends fakeRequestTo("currentIncome", TestCalculationController.currentIncome)
+
+      "return a 200" in {
+        keystoreFetchCondition[CurrentIncomeModel](None)
+        status(CurrentIncomeTestDataItem.result) shouldBe 200
+      }
+
+      "return some HTML that" should {
+
+        "contain some text and use the character set utf-8" in {
+          keystoreFetchCondition[CurrentIncomeModel](None)
+          contentType(CurrentIncomeTestDataItem.result) shouldBe Some("text/html")
+          charset(CurrentIncomeTestDataItem.result) shouldBe Some("utf-8")
+        }
+
+        "have the title 'In the tax year when you stopped owning the property, what was your total UK income?'" in {
+          keystoreFetchCondition[CurrentIncomeModel](None)
+          CurrentIncomeTestDataItem.jsoupDoc.title shouldEqual Messages("calc.currentIncome.question")
+        }
+
+        "have the heading Calculate your tax (non-residents) " in {
+          keystoreFetchCondition[CurrentIncomeModel](None)
+          CurrentIncomeTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+        }
+
+        "have a 'Back' link " in {
+          keystoreFetchCondition[CurrentIncomeModel](None)
+          CurrentIncomeTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+        }
+
+        "have the question 'In the tax year when you stopped owning the property, what was your total UK income?' as the legend of the input" in {
+          keystoreFetchCondition[CurrentIncomeModel](None)
+          CurrentIncomeTestDataItem.jsoupDoc.body.getElementsByTag("label").text shouldEqual Messages("calc.currentIncome.question")
+        }
+
+        "display an input box for the Current Income Amount" in {
+          keystoreFetchCondition[CurrentIncomeModel](None)
+          CurrentIncomeTestDataItem.jsoupDoc.body.getElementById("currentIncome").tagName() shouldEqual "input"
+        }
+
+        "have no value auto-filled into the input box" in {
+          keystoreFetchCondition[CurrentIncomeModel](None)
+          CurrentIncomeTestDataItem.jsoupDoc.getElementById("currentIncome").attr("value") shouldBe empty
+        }
+
+        "display a 'Continue' button " in {
+          keystoreFetchCondition[CurrentIncomeModel](None)
+          CurrentIncomeTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+        }
+
+        "should contain a Read more sidebar with a link to CGT allowances" in {
+          keystoreFetchCondition[CurrentIncomeModel](None)
+          CurrentIncomeTestDataItem.jsoupDoc.select("aside h2").text shouldBe Messages("calc.common.readMore")
+          CurrentIncomeTestDataItem.jsoupDoc.select("aside a").first.text shouldBe Messages("calc.currentIncome.link.one")
+          CurrentIncomeTestDataItem.jsoupDoc.select("aside a").last.text shouldBe Messages("calc.currentIncome.link.two")
+        }
+      }
+    }
+  }
+
+
+
+
+
 }
