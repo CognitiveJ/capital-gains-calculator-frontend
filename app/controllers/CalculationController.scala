@@ -31,6 +31,7 @@ import forms.EntrepreneursReliefForm._
 import forms.DisposalCostsForm._
 import forms.ImprovementsForm._
 import forms.PersonalAllowanceForm._
+import forms.AcquisitionCostsForm._
 
 import models._
 import play.api.mvc.Action
@@ -196,7 +197,17 @@ trait CalculationController extends FrontendController {
 
   //################### Acquisition Costs methods #######################
   val acquisitionCosts = Action.async { implicit request =>
-    Future.successful(Ok(calculation.acquisitionCosts()))
+    Future.successful(Ok(calculation.acquisitionCosts(acquisitionCostsForm)))
+  }
+
+  val submitAcquisitionCosts = Action { implicit request =>
+    acquisitionCostsForm.bindFromRequest.fold(
+      errors => BadRequest(calculation.acquisitionCosts(errors)),
+      success => {
+        calcConnector.saveFormData("acquisitionCosts", success)
+        Redirect(routes.CalculationController.disposalCosts())
+      }
+    )
   }
 
   //################### Disposal Costs methods #######################
