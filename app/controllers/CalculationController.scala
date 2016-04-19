@@ -168,6 +168,16 @@ trait CalculationController extends FrontendController {
     }
   }
 
+  val submitImprovements = Action { implicit request =>
+    improvementsForm.bindFromRequest.fold(
+      errors => BadRequest(calculation.improvements(errors)),
+      success => {
+        calcConnector.saveFormData("improvements", success)
+        Redirect(routes.CalculationController.disposalDate())
+      }
+    )
+  }
+
   //################### Disposal Date methods #######################
   val disposalDate = Action.async { implicit request =>
     calcConnector.fetchAndGetFormData[DisposalDateModel]("disposalDate").map {

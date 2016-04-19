@@ -40,6 +40,7 @@ POST        /acquisition-value       controllers.CalculationController.submitAcq
 
 #Improvements
 GET         /improvements            controllers.CalculationController.improvements
+POST        /improvements            controllers.CalculationController.submitImprovements
 
 #Disposal Date
 GET         /disposal-date           controllers.CalculationController.disposalDate
