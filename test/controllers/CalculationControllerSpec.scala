@@ -1580,9 +1580,14 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           CurrentIncomeTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
         }
 
-        "have the question 'In the tax year when you stopped owning the property, what was your total UK income?' as the legend of the input" in {
+        "have the question 'In the tax year when you stopped owning the property, what was your total UK income?' as the label of the input" in {
           keystoreFetchCondition[CurrentIncomeModel](None)
-          CurrentIncomeTestDataItem.jsoupDoc.body.getElementsByTag("label").text shouldEqual Messages("calc.currentIncome.question")
+          CurrentIncomeTestDataItem.jsoupDoc.body.getElementsByTag("label").text.contains(Messages("calc.currentIncome.question")) shouldBe true
+        }
+
+        "have the help text 'Tax years start on 6 April' as the form-hint of the input" in {
+          keystoreFetchCondition[CurrentIncomeModel](None)
+          CurrentIncomeTestDataItem.jsoupDoc.body.getElementsByClass("form-hint").text shouldEqual Messages("calc.currentIncome.helpText")
         }
 
         "display an input box for the Current Income Amount" in {
@@ -1605,6 +1610,23 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           CurrentIncomeTestDataItem.jsoupDoc.select("aside h2").text shouldBe Messages("calc.common.readMore")
           CurrentIncomeTestDataItem.jsoupDoc.select("aside a").first.text shouldBe Messages("calc.currentIncome.link.one")
           CurrentIncomeTestDataItem.jsoupDoc.select("aside a").last.text shouldBe Messages("calc.currentIncome.link.two")
+        }
+      }
+    }
+
+    "supplied with a pre-existing stored model" should {
+      object CurrentIncomeTestDataItem extends fakeRequestTo("currentIncome", TestCalculationController.currentIncome)
+      val testModel = new CurrentIncomeModel(1000)
+
+      "return a 200" in {
+        keystoreFetchCondition[CurrentIncomeModel](Some(testModel))
+        status(CurrentIncomeTestDataItem.result) shouldBe 200
+      }
+
+      "return some HTML that" should {
+        "have some value auto-filled into the input box" in {
+          keystoreFetchCondition[CurrentIncomeModel](Some(testModel))
+          CurrentIncomeTestDataItem.jsoupDoc.getElementById("currentIncome").attr("value") shouldBe "1000"
         }
       }
     }
