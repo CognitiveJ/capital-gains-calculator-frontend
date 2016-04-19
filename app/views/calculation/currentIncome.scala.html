@@ -17,7 +17,7 @@
 
     <h1 class="heading-large">@Messages("calc.base.pageHeading")</h1>
 
-    @govHelpers.form(action = routes.CalculationController.currentIncome) {
+    @govHelpers.form(action = routes.CalculationController.submitCurrentIncome) {
 
         @formInputMoney(currentIncomeForm, "currentIncome", Messages("calc.currentIncome.question"),Some(Messages("calc.currentIncome.helpText")))
 
