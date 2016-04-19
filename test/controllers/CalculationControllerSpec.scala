@@ -307,6 +307,54 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
   }
 
+  "In CalculationController calling the .submitDisabledTrustee action " should {
+
+    def keystoreCacheCondition[T](data: DisabledTrusteeModel): Unit = {
+      lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+      when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(returnedCacheMap))
+    }
+
+    "render errors when no option is selected" in {
+      object DisabledTrusteeTestDataItem extends fakeRequestToPost(
+        "disabled-trustee",
+        TestCalculationController.submitDisabledTrustee,
+        ("", "")
+      )
+      status(DisabledTrusteeTestDataItem.result) shouldBe 400
+    }
+
+    "when 'Yes' is selected" should {
+      object DisabledTrusteeTestDataItem extends fakeRequestToPost(
+        "disabled-trustee",
+        TestCalculationController.submitDisabledTrustee,
+        ("isVulnerable", "Yes")
+      )
+
+      "return a 303" in {
+        status(DisabledTrusteeTestDataItem.result) shouldBe 303
+      }
+
+      "redirect to the other-properties page" in {
+        redirectLocation(DisabledTrusteeTestDataItem.result) shouldBe Some(s"${routes.CalculationController.otherProperties}")
+      }
+    }
+    "when 'No' is selected" should {
+      object DisabledTrusteeTestDataItem extends fakeRequestToPost(
+        "disabled-trustee",
+        TestCalculationController.submitDisabledTrustee,
+        ("isVulnerable", "No")
+      )
+
+      "return a 303" in {
+        status(DisabledTrusteeTestDataItem.result) shouldBe 303
+      }
+
+      "redirect to the other-properties page" in {
+        redirectLocation(DisabledTrusteeTestDataItem.result) shouldBe Some(s"${routes.CalculationController.otherProperties}")
+      }
+    }
+  }
 
   //############## Personal Allowance tests ######################
   "In CalculationController calling the .personalAllowance action " should {
@@ -391,6 +439,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
   //############## Other Properties tests ######################
   "In CalculationController calling the .otherProperties action " when {
+
     "not supplied with a model that already contains data" should {
 
       object OtherPropertiesTestDataItem extends fakeRequestTo("other-properties", TestCalculationController.otherProperties)
@@ -617,13 +666,41 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       }
     }
 
-    "submitting an invalid form" should {
+    "submitting an invalid form with no value" should {
       object AnnualExemptAmountTestDataItem extends fakeRequestToPost(
         "allowance",
         TestCalculationController.submitAnnualExemptAmount,
         ("annualExemptAmount", "")
       )
       val testModel = new AnnualExemptAmountModel(0)
+
+      "return a 400" in {
+        keystoreCacheCondition[AnnualExemptAmountModel](testModel)
+        status(AnnualExemptAmountTestDataItem.result) shouldBe 400
+      }
+    }
+
+    "submitting an invalid form above the maximum value" should {
+      object AnnualExemptAmountTestDataItem extends fakeRequestToPost(
+        "allowance",
+        TestCalculationController.submitAnnualExemptAmount,
+        ("annualExemptAmount", "15000")
+      )
+      val testModel = new AnnualExemptAmountModel(15000)
+
+      "return a 400" in {
+        keystoreCacheCondition[AnnualExemptAmountModel](testModel)
+        status(AnnualExemptAmountTestDataItem.result) shouldBe 400
+      }
+    }
+
+    "submitting an invalid form below the minimum" should {
+      object AnnualExemptAmountTestDataItem extends fakeRequestToPost(
+        "allowance",
+        TestCalculationController.submitAnnualExemptAmount,
+        ("annualExemptAmount", "-1000")
+      )
+      val testModel = new AnnualExemptAmountModel(-1000)
 
       "return a 400" in {
         keystoreCacheCondition[AnnualExemptAmountModel](testModel)
@@ -731,12 +808,26 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       }
     }
 
-    "submitting an invalid form" should {
-      val testModel = new AcquisitionValueModel(1000)
+    "submitting an invalid form with no value" should {
+      val testModel = new AcquisitionValueModel(0)
       object AcquisitionValueTestDataItem extends fakeRequestToPost (
         "acquisition-value",
         TestCalculationController.submitAcquisitionValue,
         ("acquisitionValue", "")
+      )
+
+      "return a 400" in {
+        keystoreCacheCondition(testModel)
+        status(AcquisitionValueTestDataItem.result) shouldBe 400
+      }
+    }
+
+    "submitting an invalid form with a negative value" should {
+      val testModel = new AcquisitionValueModel(-1000)
+      object AcquisitionValueTestDataItem extends fakeRequestToPost (
+        "acquisition-value",
+        TestCalculationController.submitAcquisitionValue,
+        ("acquisitionValue", "-1000")
       )
 
       "return a 400" in {
@@ -1310,6 +1401,40 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
   }
 
+  "In CalculationController calling the .submitAllowableLosses action" when {
+    def keystoreCacheCondition[T](data: AllowableLossesModel): Unit = {
+      lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+      when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(returnedCacheMap))
+    }
+    "submitting a valid form with 'Yes' and an amount" should {
+      object OtherPropertiesTestDataItem extends fakeRequestToPost(
+        "allowable-losses",
+        TestCalculationController.submitAllowableLosses,
+        ("isClaimingAllowableLosses", "Yes"), ("allowableLossesAmt", "1000")
+      )
+      val testModel = new AllowableLossesModel("Yes", 1000)
+
+      "return a 303" in {
+        keystoreCacheCondition[AllowableLossesModel](testModel)
+        status(OtherPropertiesTestDataItem.result) shouldBe 303
+      }
+    }
+
+    "submitting an invalid form with no selection and an invalid amount" should {
+      object OtherPropertiesTestDataItem extends fakeRequestToPost(
+        "allowable-losses",
+        TestCalculationController.submitAllowableLosses,
+        ("isClaimingAllowableLosses", ""), ("allowableLossesAmt", "")
+      )
+      val testModel = new AllowableLossesModel("Yes", 1000)
+
+      "return a 400" in {
+        keystoreCacheCondition[AllowableLossesModel](testModel)
+        status(OtherPropertiesTestDataItem.result) shouldBe 400
+      }
+    }
+  }
 
   //################### Other Reliefs tests #######################
   "In CalculationController calling the .otherReliefs action " when {

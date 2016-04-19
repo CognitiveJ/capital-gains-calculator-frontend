@@ -20,11 +20,12 @@ import play.api.data._
 import play.api.data.Forms._
 import models._
 import play.api.data.format.Formats._
+import play.api.i18n.Messages
 
 object DisabledTrusteeForm {
   val disabledTrusteeForm = Form(
     mapping(
-      "isVulnerable" -> text
+      "isVulnerable" -> nonEmptyText
     )(DisabledTrusteeModel.apply)(DisabledTrusteeModel.unapply)
   )
 }

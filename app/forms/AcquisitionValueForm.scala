@@ -19,11 +19,21 @@ package forms
 import play.api.data._
 import play.api.data.Forms._
 import models._
+import play.api.i18n.Messages
 
 object AcquisitionValueForm {
+
+  def validatePositive(data: BigDecimal): Option[BigDecimal] = {
+    data match {
+      case data if data < 0 => None
+      case _ => Some(data)
+    }
+  }
+
   val acquisitionValueForm = Form(
     mapping(
       "acquisitionValue" -> bigDecimal
+        .verifying(Messages("calc.acquisitionValue.errorNegative"), acquisitionValue => validatePositive(acquisitionValue).isDefined)
     )(AcquisitionValueModel.apply)(AcquisitionValueModel.unapply)
   )
 }
