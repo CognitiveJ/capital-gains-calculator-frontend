@@ -925,7 +925,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
     
     "submitting a valid form with 'Yes' and a value of 12045" should {
-      object ImprovementsTestDataItem extends fakeRequestToPost("improvments", TestCalculationController.submitImprovements, ("isClaimingImprovements", "Yes"), ("improvementsAmt", "12045"))
+      object ImprovementsTestDataItem extends fakeRequestToPost("improvements", TestCalculationController.submitImprovements, ("isClaimingImprovements", "Yes"), ("improvementsAmt", "12045"))
       val improvementsTestModel = new ImprovementsModel("Yes", Some(12045))
 
       "return a 303" in {
@@ -935,13 +935,32 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
 
     "submitting an invalid form with 'Yes' and a value of 'fhu39awd8'" should {
-      object ImprovementsTestDataItem extends fakeRequestToPost("improvments", TestCalculationController.submitImprovements, ("isClaimingImprovements", "Yes"), ("improvementsAmt", "fhu39awd8"))
+      object ImprovementsTestDataItem extends fakeRequestToPost("improvements", TestCalculationController.submitImprovements, ("isClaimingImprovements", "Yes"), ("improvementsAmt", "fhu39awd8"))
       //This model actually has no bearing on the tes but the cachemap it produces is required.
       val improvementsTestModel = new ImprovementsModel("Yes", Some(9878))
 
       "return a 400" in {
         keystoreCacheCondition[ImprovementsModel](improvementsTestModel)
         status(ImprovementsTestDataItem.result) shouldBe 400
+      }
+
+      "return HTML that displays the error message " in {
+        ImprovementsTestDataItem.jsoupDoc.select("div#hidden span.error-notification").text shouldEqual "Real number value expected"
+      }
+    }
+
+    "submitting an invalid form with 'Yes' and a negative value of -100'" should {
+      object ImprovementsTestDataItem extends fakeRequestToPost("improvements", TestCalculationController.submitImprovements, ("isClaimingImprovements", "Yes"), ("improvementsAmt", "-100"))
+      //This model actually has no bearing on the tes but the cachemap it produces is required.
+      val improvementsTestModel = new ImprovementsModel("Yes", Some(-100))
+
+      "return a 400" in {
+        keystoreCacheCondition[ImprovementsModel](improvementsTestModel)
+        status(ImprovementsTestDataItem.result) shouldBe 400
+      }
+
+      "return HTML that displays the error message " in {
+        ImprovementsTestDataItem.jsoupDoc.select("div#hidden span.error-notification").text shouldEqual "The cost of the improvements cannot be negative."
       }
     }
   }
