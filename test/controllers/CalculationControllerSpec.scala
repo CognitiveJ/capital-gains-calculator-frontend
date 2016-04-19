@@ -55,10 +55,10 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     val jsoupDoc = Jsoup.parse(bodyOf(result))
   }
 
-  class fakeRequestToPost(url: String, controllerAction: Action[AnyContent], data: (String, String)) {
+  class fakeRequestToPost(url: String, controllerAction: Action[AnyContent], data: (String, String)*) {
     val fakeRequest = FakeRequest("POST", "/calculate-your-capital-gains/" + url)
       .withSession(SessionKeys.sessionId -> s"session-$sessionId")
-      .withFormUrlEncodedBody(data)
+      .withFormUrlEncodedBody(data:_*)
     val result = controllerAction(fakeRequest)
     val jsoupDoc = Jsoup.parse(bodyOf(result))
   }
@@ -785,7 +785,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       }
     }
     "supplied with a pre-existing model with 'Yes' checked and value already entered" should {
-      val testImprovementsModelYes = new ImprovementsModel("Yes", 10000)
+      val testImprovementsModelYes = new ImprovementsModel("Yes", Some(10000))
 
       "return a 200" in {
         object ImprovementsTestDataItem extends fakeRequestTo("improvements", TestCalculationController.improvements)
@@ -805,7 +805,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       }
     }
     "supplied with a pre-existing model with 'No' checked and value already entered" should {
-      val testImprovementsModelNo = new ImprovementsModel("No", 0)
+      val testImprovementsModelNo = new ImprovementsModel("No", Some(0))
 
       "return a 200" in {
         object ImprovementsTestDataItem extends fakeRequestTo("improvements", TestCalculationController.improvements)
@@ -822,6 +822,35 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           ImprovementsTestDataItem.jsoupDoc.getElementById("isClaimingImprovements-no").attr("checked") shouldEqual "checked"
           ImprovementsTestDataItem.jsoupDoc.getElementById("improvementsAmt").attr("value") shouldEqual "0"
         }
+      }
+    }
+  }
+
+  "In CalculationController calling the .submitImprovements action " when {
+    def keystoreCacheCondition[T](data: ImprovementsModel): Unit = {
+      lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+      when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(returnedCacheMap))
+    }
+    
+    "submitting a valid form with 'Yes' and a value of 12045" should {
+      object ImprovementsTestDataItem extends fakeRequestToPost("improvments", TestCalculationController.submitImprovements, ("isClaimingImprovements", "Yes"), ("improvementsAmt", "12045"))
+      val improvementsTestModel = new ImprovementsModel("Yes", Some(12045))
+
+      "return a 303" in {
+        keystoreCacheCondition[ImprovementsModel](improvementsTestModel)
+        status(ImprovementsTestDataItem.result) shouldBe 303
+      }
+    }
+
+    "submitting an invalid form with 'Yes' and a value of 'fhu39awd8'" should {
+      object ImprovementsTestDataItem extends fakeRequestToPost("improvments", TestCalculationController.submitImprovements, ("isClaimingImprovements", "Yes"), ("improvementsAmt", "fhu39awd8"))
+      //This model actually has no bearing on the tes but the cachemap it produces is required.
+      val improvementsTestModel = new ImprovementsModel("Yes", Some(9878))
+
+      "return a 303" in {
+        keystoreCacheCondition[ImprovementsModel](improvementsTestModel)
+        status(ImprovementsTestDataItem.result) shouldBe 400
       }
     }
   }
