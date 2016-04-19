@@ -215,6 +215,16 @@ trait CalculationController extends FrontendController {
     }
   }
 
+  val submitEntrepreneursRelief = Action { implicit request =>
+    entrepreneursReliefForm.bindFromRequest.fold(
+      errors => BadRequest(calculation.entrepreneursRelief(errors)),
+      success => {
+        calcConnector.saveFormData("entrepreneursRelief", success)
+        Redirect(routes.CalculationController.allowableLosses())
+      }
+    )
+  }
+
   //################### Allowable Losses methods #######################
   val allowableLosses = Action.async { implicit request =>
     calcConnector.fetchAndGetFormData[AllowableLossesModel]("allowableLosses").map {

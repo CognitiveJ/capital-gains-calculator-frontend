@@ -1121,7 +1121,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       "have a monetary field that" should {
 
         "have the title 'How much did you pay in costs when you became the property owner?'" in {
-          AcquisitionCostsTestDataItem.jsoupDoc.select("label[for=acquisitionCosts]").text shouldEqual Messages("calc.acquisitionCosts.question")
+          AcquisitionCostsTestDataItem.jsoupDoc.select("label[for=acquisitionCosts]").text.contains(Messages("calc.acquisitionCosts.question")) shouldBe true
         }
 
         "have the help text 'Costs include agent fees, legal fees and surveys'" in {
@@ -1296,6 +1296,41 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           keystoreFetchCondition[EntrepreneursReliefModel](Some(EntrepreneursReliefModel("No")))
           EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementById("entrepreneursRelief-no").parent.classNames().contains("selected") shouldBe true
         }
+      }
+    }
+  }
+
+  "In CalculationController calling the .submitEntrepreneursRelief action" when {
+    def keystoreCacheCondition[T](data: EntrepreneursReliefModel): Unit = {
+      lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+      when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(returnedCacheMap))
+    }
+    "submitting a valid form with 'Yes'" should {
+      object EntrepreneursReliefTestDataItem extends fakeRequestToPost(
+        "entrepreneurs-relief",
+        TestCalculationController.submitEntrepreneursRelief,
+        ("entrepreneursRelief", "yes")
+      )
+      val testModel = new EntrepreneursReliefModel("Yes")
+
+      "return a 303" in {
+        keystoreCacheCondition[EntrepreneursReliefModel](testModel)
+        status(EntrepreneursReliefTestDataItem.result) shouldBe 303
+      }
+    }
+
+    "submitting an invalid form with no data" should {
+      object EntrepreneursReliefTestDataItem extends fakeRequestToPost(
+        "entrepreneurs-relief",
+        TestCalculationController.submitEntrepreneursRelief,
+        ("entrepreneursRelief", "")
+      )
+      val testModel = new EntrepreneursReliefModel("")
+
+      "return a 400" in {
+        keystoreCacheCondition[EntrepreneursReliefModel](testModel)
+        status(EntrepreneursReliefTestDataItem.result) shouldBe 400
       }
     }
   }
