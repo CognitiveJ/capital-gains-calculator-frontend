@@ -213,6 +213,16 @@ trait CalculationController extends FrontendController {
     }
   }
 
+  val submitAllowableLosses = Action { implicit request =>
+    allowableLossesForm.bindFromRequest.fold(
+      errors => BadRequest(calculation.allowableLosses(errors)),
+      success => {
+        calcConnector.saveFormData("allowableLosses", success)
+        Redirect(routes.CalculationController.otherReliefs())
+      }
+    )
+  }
+
   //################### Other Reliefs methods #######################
   val otherReliefs = Action.async { implicit request =>
     calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefs").map {

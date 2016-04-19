@@ -58,6 +58,7 @@ GET         /entrepreneurs-relief    controllers.CalculationController.entrepren
 
 #Allowable Losses
 GET         /allowable-losses        controllers.CalculationController.allowableLosses
+POST        /allowable-losses        controllers.CalculationController.submitAllowableLosses
 
 #Other Reliefs
 GET         /other-reliefs           controllers.CalculationController.otherReliefs
