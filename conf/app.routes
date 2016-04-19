@@ -63,6 +63,7 @@ POST        /allowable-losses        controllers.CalculationController.submitAll
 
 #Other Reliefs
 GET         /other-reliefs           controllers.CalculationController.otherReliefs
+POST        /other-reliefs           controllers.CalculationController.submitOtherReliefs
 ########################################################
 
 
