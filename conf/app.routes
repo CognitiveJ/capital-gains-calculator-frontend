@@ -46,6 +46,7 @@ GET         /disposal-date           controllers.CalculationController.disposalD
 
 #Disposal Value
 GET         /disposal-value          controllers.CalculationController.disposalValue
+POST        /disposal-value          controllers.CalculationController.submitDisposalValue
 
 #Acquisition Costs
 GET         /acquisition-costs       controllers.CalculationController.acquisitionCosts
