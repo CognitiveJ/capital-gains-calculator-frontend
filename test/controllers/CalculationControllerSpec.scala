@@ -55,10 +55,10 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     val jsoupDoc = Jsoup.parse(bodyOf(result))
   }
 
-  class fakeRequestToPost(url: String, controllerAction: Action[AnyContent], data: (String, String)) {
+  class fakeRequestToPost(url: String, controllerAction: Action[AnyContent], data: (String, String)*) {
     val fakeRequest = FakeRequest("POST", "/calculate-your-capital-gains/" + url)
       .withSession(SessionKeys.sessionId -> s"session-$sessionId")
-      .withFormUrlEncodedBody(data)
+      .withFormUrlEncodedBody(data:_*)
     val result = controllerAction(fakeRequest)
     val jsoupDoc = Jsoup.parse(bodyOf(result))
   }
@@ -1330,6 +1330,40 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
   }
 
+  "In CalculationController calling the .submitAllowableLosses action" when {
+    def keystoreCacheCondition[T](data: AllowableLossesModel): Unit = {
+      lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+      when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(returnedCacheMap))
+    }
+    "submitting a valid form with 'Yes' and an amount" should {
+      object OtherPropertiesTestDataItem extends fakeRequestToPost(
+        "allowable-losses",
+        TestCalculationController.submitAllowableLosses,
+        ("isClaimingAllowableLosses", "Yes"), ("allowableLossesAmt", "1000")
+      )
+      val testModel = new AllowableLossesModel("Yes", 1000)
+
+      "return a 303" in {
+        keystoreCacheCondition[AllowableLossesModel](testModel)
+        status(OtherPropertiesTestDataItem.result) shouldBe 303
+      }
+    }
+
+    "submitting an invalid form with no selection and an invalid amount" should {
+      object OtherPropertiesTestDataItem extends fakeRequestToPost(
+        "allowable-losses",
+        TestCalculationController.submitAllowableLosses,
+        ("isClaimingAllowableLosses", ""), ("allowableLossesAmt", "")
+      )
+      val testModel = new AllowableLossesModel("Yes", 1000)
+
+      "return a 400" in {
+        keystoreCacheCondition[AllowableLossesModel](testModel)
+        status(OtherPropertiesTestDataItem.result) shouldBe 400
+      }
+    }
+  }
 
   //################### Other Reliefs tests #######################
   "In CalculationController calling the .otherReliefs action " when {
