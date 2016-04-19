@@ -31,6 +31,7 @@ import forms.EntrepreneursReliefForm._
 import forms.DisposalCostsForm._
 import forms.ImprovementsForm._
 import forms.PersonalAllowanceForm._
+import forms.CurrentIncomeForm._
 
 import models._
 import play.api.mvc.Action
@@ -77,9 +78,22 @@ trait CalculationController extends FrontendController {
     }
   }
 
+  val submitDisabledTrustee = Action { implicit request =>
+    disabledTrusteeForm.bindFromRequest.fold(
+      errors => BadRequest(calculation.disabledTrustee(errors)),
+      success => {
+        calcConnector.saveFormData("isVulnerable",success)
+        Redirect(routes.CalculationController.otherProperties())
+      }
+    )
+  }
+
   //################### Current Income methods #######################
   val currentIncome = Action.async { implicit request =>
-    Future.successful(Ok(calculation.currentIncome()))
+    calcConnector.fetchAndGetFormData[CurrentIncomeModel]("currentIncome").map {
+      case Some(data) => Ok(calculation.currentIncome(currentIncomeForm.fill(data)))
+      case None => Ok(calculation.currentIncome(currentIncomeForm))
+    }
   }
 
 
@@ -158,6 +172,16 @@ trait CalculationController extends FrontendController {
     }
   }
 
+  val submitImprovements = Action { implicit request =>
+    improvementsForm.bindFromRequest.fold(
+      errors => BadRequest(calculation.improvements(errors)),
+      success => {
+        calcConnector.saveFormData("improvements", success)
+        Redirect(routes.CalculationController.disposalDate())
+      }
+    )
+  }
+
   //################### Disposal Date methods #######################
   val disposalDate = Action.async { implicit request =>
     calcConnector.fetchAndGetFormData[DisposalDateModel]("disposalDate").map {
@@ -201,6 +225,16 @@ trait CalculationController extends FrontendController {
       case Some(data) => Ok(calculation.allowableLosses(allowableLossesForm.fill(data)))
       case None => Ok(calculation.allowableLosses(allowableLossesForm))
     }
+  }
+
+  val submitAllowableLosses = Action { implicit request =>
+    allowableLossesForm.bindFromRequest.fold(
+      errors => BadRequest(calculation.allowableLosses(errors)),
+      success => {
+        calcConnector.saveFormData("allowableLosses", success)
+        Redirect(routes.CalculationController.otherReliefs())
+      }
+    )
   }
 
   //################### Other Reliefs methods #######################

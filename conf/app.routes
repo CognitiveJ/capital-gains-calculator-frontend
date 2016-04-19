@@ -18,6 +18,7 @@ POST        /customer-type           controllers.CalculationController.submitCus
 
 #Disabled Trustee
 GET         /disabled-trustee        controllers.CalculationController.disabledTrustee
+POST        /disabled-trustee        controllers.CalculationController.submitDisabledTrustee
 
 #Current Income
 GET         /current-income          controllers.CalculationController.currentIncome
@@ -39,6 +40,7 @@ POST        /acquisition-value       controllers.CalculationController.submitAcq
 
 #Improvements
 GET         /improvements            controllers.CalculationController.improvements
+POST        /improvements            controllers.CalculationController.submitImprovements
 
 #Disposal Date
 GET         /disposal-date           controllers.CalculationController.disposalDate
@@ -57,6 +59,7 @@ GET         /entrepreneurs-relief    controllers.CalculationController.entrepren
 
 #Allowable Losses
 GET         /allowable-losses        controllers.CalculationController.allowableLosses
+POST        /allowable-losses        controllers.CalculationController.submitAllowableLosses
 
 #Other Reliefs
 GET         /other-reliefs           controllers.CalculationController.otherReliefs
