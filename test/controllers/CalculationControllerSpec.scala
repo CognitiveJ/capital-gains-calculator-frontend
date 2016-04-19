@@ -1408,7 +1408,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         .thenReturn(Future.successful(returnedCacheMap))
     }
     "submitting a valid form with 'Yes' and an amount" should {
-      object OtherPropertiesTestDataItem extends fakeRequestToPost(
+      object AllowableLossesTestDataItem extends fakeRequestToPost(
         "allowable-losses",
         TestCalculationController.submitAllowableLosses,
         ("isClaimingAllowableLosses", "Yes"), ("allowableLossesAmt", "1000")
@@ -1417,12 +1417,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
       "return a 303" in {
         keystoreCacheCondition[AllowableLossesModel](testModel)
-        status(OtherPropertiesTestDataItem.result) shouldBe 303
+        status(AllowableLossesTestDataItem.result) shouldBe 303
       }
     }
 
     "submitting an invalid form with no selection and an invalid amount" should {
-      object OtherPropertiesTestDataItem extends fakeRequestToPost(
+      object AllowableLossesTestDataItem extends fakeRequestToPost(
         "allowable-losses",
         TestCalculationController.submitAllowableLosses,
         ("isClaimingAllowableLosses", ""), ("allowableLossesAmt", "")
@@ -1431,7 +1431,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
       "return a 400" in {
         keystoreCacheCondition[AllowableLossesModel](testModel)
-        status(OtherPropertiesTestDataItem.result) shouldBe 400
+        status(AllowableLossesTestDataItem.result) shouldBe 400
       }
     }
   }
@@ -1497,6 +1497,27 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           keystoreFetchCondition[OtherReliefsModel](Some(testOtherReliefsModel))
           OtherReliefsTestDataItem.jsoupDoc.getElementById("otherReliefs").attr("value") shouldEqual "5000"
         }
+      }
+    }
+  }
+
+  "In CalculationController calling the .submitAllowableLosses action" when {
+    def keystoreCacheCondition[T](data: OtherReliefsModel): Unit = {
+      lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+      when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(returnedCacheMap))
+    }
+    "submitting a valid form with and an amount of 1000" should {
+      object OtherReliefsTestDataItem extends fakeRequestToPost(
+        "other-reliefs",
+        TestCalculationController.submitOtherReliefs,
+        ("otherReliefs", "1000")
+      )
+      val otherReliefsTestModel = new OtherReliefsModel(1000)
+
+      "return a 303" in {
+        keystoreCacheCondition[AllowableLossesModel](otherReliefsTestModel)
+        status(OtherReliefsTestDataItem.result) shouldBe 303
       }
     }
   }
