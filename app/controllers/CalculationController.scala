@@ -172,8 +172,7 @@ trait CalculationController extends FrontendController {
     improvementsForm.bindFromRequest.fold(
       errors => BadRequest(calculation.improvements(errors)),
       success => {
-        calcConnector.saveFormData("isClaimingImprovements", success.isClaimingImprovements)
-        calcConnector.saveFormData("improvementsAmt", success.improvementsAmt)
+        calcConnector.saveFormData("improvements", success)
         Redirect(routes.CalculationController.disposalDate())
       }
     )

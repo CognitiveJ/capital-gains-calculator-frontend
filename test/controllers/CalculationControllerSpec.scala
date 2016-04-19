@@ -939,7 +939,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       //This model actually has no bearing on the tes but the cachemap it produces is required.
       val improvementsTestModel = new ImprovementsModel("Yes", Some(9878))
 
-      "return a 303" in {
+      "return a 400" in {
         keystoreCacheCondition[ImprovementsModel](improvementsTestModel)
         status(ImprovementsTestDataItem.result) shouldBe 400
       }
