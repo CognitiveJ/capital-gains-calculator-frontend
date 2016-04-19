@@ -5,5 +5,5 @@
 @(inputForm: Form[_], fieldName: String, questionText: String, helpText: Option[String] = None)(implicit lang: play.api.i18n.Lang)
 
     <div class="form-group">
-        @simpleNoErrorInput(inputForm(fieldName), '_label -> questionText, '_inputHint -> helpText.getOrElse(""), '_dataAttributes -> "placeholder = £")
+        @govHelpers.input(inputForm(fieldName), '_label -> questionText, '_inputHint -> helpText.getOrElse(""), '_dataAttributes -> "placeholder = £")
     </div>
