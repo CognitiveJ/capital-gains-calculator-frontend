@@ -22,10 +22,25 @@ import models._
 
 object ImprovementsForm {
 
+  def verify(data: ImprovementsModel): Option[ImprovementsModel] = {
+    data.isClaimingImprovements match {
+      case "Yes" =>
+        if (data.improvementsAmt != None) {
+          Option(ImprovementsModel(data.isClaimingImprovements, data.improvementsAmt))
+        } else {
+          None
+        }
+      case "No" => Option(ImprovementsModel(data.isClaimingImprovements, None))
+    }
+  }
+
   val improvementsForm = Form(
     mapping(
       "isClaimingImprovements" -> text,
       "improvementsAmt" -> optional(bigDecimal)
     )(ImprovementsModel.apply)(ImprovementsModel.unapply)
+      .verifying(
+        "Please provide a value for your improvements",
+        improvementsForm => verify(ImprovementsModel(improvementsForm.isClaimingImprovements, improvementsForm.improvementsAmt)).isDefined)
   )
 }
