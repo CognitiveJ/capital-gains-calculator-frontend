@@ -1121,7 +1121,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       "have a monetary field that" should {
 
         "have the title 'How much did you pay in costs when you became the property owner?'" in {
-          AcquisitionCostsTestDataItem.jsoupDoc.select("label[for=acquisitionCosts]").text.contains(Messages("calc.acquisitionCosts.question")) shouldBe true
+          AcquisitionCostsTestDataItem.jsoupDoc.select("label[for=acquisitionCosts]").text shouldEqual Messages("calc.acquisitionCosts.question")
         }
 
         "have the help text 'Costs include agent fees, legal fees and surveys'" in {
