@@ -198,6 +198,16 @@ trait CalculationController extends FrontendController {
     }
   }
 
+  val submitDisposalValue = Action { implicit request =>
+    disposalValueForm.bindFromRequest.fold(
+      errors => BadRequest(calculation.disposalValue(errors)),
+      success => {
+        calcConnector.saveFormData("disposalValue", success)
+        Redirect(routes.CalculationController.acquisitionCosts())
+      }
+    )
+  }
+
   //################### Acquisition Costs methods #######################
   val acquisitionCosts = Action.async { implicit request =>
     Future.successful(Ok(calculation.acquisitionCosts()))
