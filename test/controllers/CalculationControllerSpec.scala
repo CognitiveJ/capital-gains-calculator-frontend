@@ -1036,6 +1036,194 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
   }
 
+  "In CalculationController calling the .submitDisposalDate action" when {
+    def keystoreCacheCondition[T](data: DisposalDateModel): Unit = {
+      lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+      when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(returnedCacheMap))
+    }
+    "submitting a valid date 31/01/2016" should {
+      object DisposalDateTestDataItem extends fakeRequestToPost(
+        "disposal-date",
+        TestCalculationController.submitDisposalDate,
+        ("disposalDate.day", "31"), ("disposalDate.month","1"), ("disposalDate.year","2016")
+      )
+      val testModel = new DisposalDateModel(31,1,2016)
+
+      "return a 303" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        status(DisposalDateTestDataItem.result) shouldBe 303
+      }
+
+      s"redirect to ${routes.CalculationController.disposalValue()}" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        redirectLocation(DisposalDateTestDataItem.result) shouldBe Some(s"${routes.CalculationController.disposalValue()}")
+      }
+    }
+    "submitting a valid leap year date 29/02/2016" should {
+      object DisposalDateTestDataItem extends fakeRequestToPost(
+        "disposal-date",
+        TestCalculationController.submitDisposalDate,
+        ("disposalDate.day", "29"), ("disposalDate.month","2"), ("disposalDate.year","2016")
+      )
+      val testModel = new DisposalDateModel(29,2,2016)
+
+      "return a 303" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        status(DisposalDateTestDataItem.result) shouldBe 303
+      }
+
+      s"redirect to ${routes.CalculationController.disposalValue()}" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        redirectLocation(DisposalDateTestDataItem.result) shouldBe Some(s"${routes.CalculationController.disposalValue()}")
+      }
+    }
+    "submitting an invalid leap year date 29/02/2017" should {
+      object DisposalDateTestDataItem extends fakeRequestToPost(
+        "disposal-date",
+        TestCalculationController.submitDisposalDate,
+        ("disposalDate.day", "29"), ("disposalDate.month","2"), ("disposalDate.year","2017")
+      )
+      val testModel = new DisposalDateModel(29,2,2017)
+
+      "return a 400" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        status(DisposalDateTestDataItem.result) shouldBe 400
+      }
+
+      s"should error with message '${Messages("calc.common.date.error.invalidDate")}'" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("calc.common.date.error.invalidDate"))
+      }
+    }
+    "submitting a day less than 1" should {
+      object DisposalDateTestDataItem extends fakeRequestToPost(
+        "disposal-date",
+        TestCalculationController.submitDisposalDate,
+        ("disposalDate.day", "0"), ("disposalDate.month","2"), ("disposalDate.year","2017")
+      )
+      val testModel = new DisposalDateModel(0,2,2017)
+
+      "return a 400" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        status(DisposalDateTestDataItem.result) shouldBe 400
+      }
+
+      s"should error with message '${Messages("calc.common.date.error.day.lessThan1")}'" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("calc.common.date.error.day.lessThan1"))
+      }
+    }
+    "submitting a day greater than 31" should {
+      object DisposalDateTestDataItem extends fakeRequestToPost(
+        "disposal-date",
+        TestCalculationController.submitDisposalDate,
+        ("disposalDate.day", "32"), ("disposalDate.month","2"), ("disposalDate.year","2017")
+      )
+      val testModel = new DisposalDateModel(32,2,2017)
+
+      "return a 400" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        status(DisposalDateTestDataItem.result) shouldBe 400
+      }
+
+      s"should error with message '${Messages("calc.common.date.error.day.greaterThan31")}'" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("calc.common.date.error.day.greaterThan31"))
+      }
+    }
+    "submitting a month greater than 12" should {
+      object DisposalDateTestDataItem extends fakeRequestToPost(
+        "disposal-date",
+        TestCalculationController.submitDisposalDate,
+        ("disposalDate.day", "31"), ("disposalDate.month","13"), ("disposalDate.year","2017")
+      )
+      val testModel = new DisposalDateModel(31,13,2017)
+
+      "return a 400" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        status(DisposalDateTestDataItem.result) shouldBe 400
+      }
+
+      s"should error with message '${Messages("calc.common.date.error.month.greaterThan12")}'" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("calc.common.date.error.month.greaterThan12"))
+      }
+    }
+    "submitting a month less than 1" should {
+      object DisposalDateTestDataItem extends fakeRequestToPost(
+        "disposal-date",
+        TestCalculationController.submitDisposalDate,
+        ("disposalDate.day", "31"), ("disposalDate.month","0"), ("disposalDate.year","2017")
+      )
+      val testModel = new DisposalDateModel(31,0,2017)
+
+      "return a 400" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        status(DisposalDateTestDataItem.result) shouldBe 400
+      }
+
+      s"should error with message '${Messages("calc.common.date.error.month.lessThan1")}'" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("calc.common.date.error.month.lessThan1"))
+      }
+    }
+    "submitting a day with no value" should {
+      object DisposalDateTestDataItem extends fakeRequestToPost(
+        "disposal-date",
+        TestCalculationController.submitDisposalDate,
+        ("disposalDate.day", ""), ("disposalDate.month","12"), ("disposalDate.year","2017")
+      )
+      val testModel = new DisposalDateModel(0,12,2017)
+
+      "return a 400" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        status(DisposalDateTestDataItem.result) shouldBe 400
+      }
+
+      "should error with message 'Numeric vaue expected'" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include ("Numeric value expected")
+      }
+    }
+    "submitting a month with no value" should {
+      object DisposalDateTestDataItem extends fakeRequestToPost(
+        "disposal-date",
+        TestCalculationController.submitDisposalDate,
+        ("disposalDate.day", "31"), ("disposalDate.month",""), ("disposalDate.year","2017")
+      )
+      val testModel = new DisposalDateModel(31,0,2017)
+
+      "return a 400" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        status(DisposalDateTestDataItem.result) shouldBe 400
+      }
+
+      "should error with message 'Numeric vaue expected'" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include ("Numeric value expected")
+      }
+    }
+    "submitting a year with no value" should {
+      object DisposalDateTestDataItem extends fakeRequestToPost(
+        "disposal-date",
+        TestCalculationController.submitDisposalDate,
+        ("disposalDate.day", "31"), ("disposalDate.month","12"), ("disposalDate.year","")
+      )
+      val testModel = new DisposalDateModel(31,12,0)
+
+      "return a 400" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        status(DisposalDateTestDataItem.result) shouldBe 400
+      }
+
+      "should error with message 'Numeric vaue expected'" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include ("Numeric value expected")
+      }
+    }
+  }
+
   //################### Disposal Value tests #######################
   "In CalculationController calling the .disposalValue action " when {
     "not supplied with a pre-existing stored model" should {
