@@ -780,12 +780,26 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       }
     }
 
-    "submitting an invalid form" should {
-      val testModel = new AcquisitionValueModel(1000)
+    "submitting an invalid form with no value" should {
+      val testModel = new AcquisitionValueModel(0)
       object AcquisitionValueTestDataItem extends fakeRequestToPost (
         "acquisition-value",
         TestCalculationController.submitAcquisitionValue,
         ("acquisitionValue", "")
+      )
+
+      "return a 400" in {
+        keystoreCacheCondition(testModel)
+        status(AcquisitionValueTestDataItem.result) shouldBe 400
+      }
+    }
+
+    "submitting an invalid form with a negative value" should {
+      val testModel = new AcquisitionValueModel(-1000)
+      object AcquisitionValueTestDataItem extends fakeRequestToPost (
+        "acquisition-value",
+        TestCalculationController.submitAcquisitionValue,
+        ("acquisitionValue", "-1000")
       )
 
       "return a 400" in {

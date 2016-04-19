@@ -74,6 +74,7 @@ calc.annualExemptAmount.link.one = Capital Gains Tax allowances
 
 ## Acquisition Value ##
 calc.acquisitionValue.question = How much did you pay for the property?
+calc.acquisitionValue.errorNegative = Acquisition value cannot be negative
 
 ## Improvements ##
 calc.improvements.question = Did you make any improvements to the property?
