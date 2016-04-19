@@ -2,7 +2,7 @@
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 @import play.api.data._
 
-@()(implicit request: Request[_])
+@(currentIncomeForm: Form[CurrentIncomeModel])(implicit request: Request[_])
 
 @import views.html.helpers._
 
@@ -19,7 +19,7 @@
 
     @govHelpers.form(action = routes.CalculationController.currentIncome) {
 
-        @simpleInputMoney("currentIncome", Messages("calc.currentIncome.question"),Some(Messages("calc.currentIncome.helpText")))
+        @formInputMoney(currentIncomeForm, "currentIncome", Messages("calc.currentIncome.question"),Some(Messages("calc.currentIncome.helpText")))
 
         <button class="button" type="submit" id="continue-button">@Messages("calc.base.continue")</button>
 

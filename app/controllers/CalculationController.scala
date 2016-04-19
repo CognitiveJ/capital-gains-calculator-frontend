@@ -32,6 +32,7 @@ import forms.DisposalCostsForm._
 import forms.ImprovementsForm._
 import forms.PersonalAllowanceForm._
 import forms.AcquisitionCostsForm._
+import forms.CurrentIncomeForm._
 
 import models._
 import play.api.mvc.Action
@@ -90,7 +91,10 @@ trait CalculationController extends FrontendController {
 
   //################### Current Income methods #######################
   val currentIncome = Action.async { implicit request =>
-    Future.successful(Ok(calculation.currentIncome()))
+    calcConnector.fetchAndGetFormData[CurrentIncomeModel]("currentIncome").map {
+      case Some(data) => Ok(calculation.currentIncome(currentIncomeForm.fill(data)))
+      case None => Ok(calculation.currentIncome(currentIncomeForm))
+    }
   }
 
 
@@ -193,6 +197,16 @@ trait CalculationController extends FrontendController {
       case Some(data) => Ok(calculation.disposalValue(disposalValueForm.fill(data)))
       case None => Ok(calculation.disposalValue(disposalValueForm))
     }
+  }
+
+  val submitDisposalValue = Action { implicit request =>
+    disposalValueForm.bindFromRequest.fold(
+      errors => BadRequest(calculation.disposalValue(errors)),
+      success => {
+        calcConnector.saveFormData("disposalValue", success)
+        Redirect(routes.CalculationController.acquisitionCosts())
+      }
+    )
   }
 
   //################### Acquisition Costs methods #######################

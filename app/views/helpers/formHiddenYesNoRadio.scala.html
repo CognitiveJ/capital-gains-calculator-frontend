@@ -1,6 +1,7 @@
 @(form: Form[_], fieldName: String, questionText:String, content:Html, helpText:Option[String] = None)(implicit lang: play.api.i18n.Lang)
 
-<div class="form-group" data-hidden='hidden'>
+@fieldsetClasses = @{if(form.hasErrors) "form-field-group--error fields-aligned" else "" }
+<div class="form-group @fieldsetClasses" data-hidden='hidden'>
 
     @formInputRadioGroup(
         field = form(fieldName),
@@ -15,6 +16,7 @@
         )
 
     <div class="panel-indent" id='hidden' style="display: none">
+        @form.errors.map { error => <span class="error-notification">@Messages(error.message)</span>}
         @content
     </div>
 </div>
