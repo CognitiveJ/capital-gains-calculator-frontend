@@ -1,4 +1,6 @@
 @import views.html.helpers._
+@import play.api.data._
+@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 
 @(allowableLossesForm: Form[AllowableLossesModel])(implicit request: Request[_])
 
@@ -21,10 +23,14 @@
 
     <h1 class="heading-large">@Messages("calc.base.pageHeading")</h1>
 
-    @formHiddenYesNoRadio(allowableLossesForm,"isClaimingAllowableLosses",Messages("calc.allowableLosses.question.one"),hiddenYesNoContent)
+    @govHelpers.form(action = routes.CalculationController.submitAllowableLosses) {
 
-    @hiddenHelpText("allowableLossesHiddenHelp",Messages("calc.allowableLosses.helpText.title"),hiddenHelpTextContent)
+        @formHiddenYesNoRadio(allowableLossesForm,"isClaimingAllowableLosses",Messages("calc.allowableLosses.question.one"),hiddenYesNoContent)
 
-    <button class="button" type="submit" id="continue-button">@Messages("calc.base.continue")</button>
+        @hiddenHelpText("allowableLossesHiddenHelp",Messages("calc.allowableLosses.helpText.title"),hiddenHelpTextContent)
+
+        <button class="button" type="submit" id="continue-button">@Messages("calc.base.continue")</button>
+
+    }
 
 }

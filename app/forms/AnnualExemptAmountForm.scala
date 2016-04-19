@@ -19,11 +19,29 @@ package forms
 import play.api.data._
 import play.api.data.Forms._
 import models._
+import play.api.i18n.Messages
 
 object AnnualExemptAmountForm {
-val annualExemptAmountForm = Form(
-  mapping(
-    "annualExemptAmount" -> bigDecimal
-  )(AnnualExemptAmountModel.apply)(AnnualExemptAmountModel.unapply)
-)
+
+  def validateMaximum(data: BigDecimal): Option[BigDecimal] = {
+    data match {
+      case data if data > 11000 => None
+      case _ => Some(data)
+    }
+  }
+
+  def validateMinimum(data: BigDecimal): Option[BigDecimal] = {
+    data match {
+      case data if data < 0 => None
+      case _ => Some(data)
+    }
+  }
+
+  val annualExemptAmountForm = Form(
+    mapping(
+      "annualExemptAmount" -> bigDecimal
+        .verifying(Messages("calc.annualExemptAmount.errorMax"), annualExemptAmount => validateMaximum(annualExemptAmount).isDefined)
+        .verifying(Messages("calc.annualExemptAmount.errorMin"), annualExemptAmount => validateMinimum(annualExemptAmount).isDefined)
+    )(AnnualExemptAmountModel.apply)(AnnualExemptAmountModel.unapply)
+  )
 }

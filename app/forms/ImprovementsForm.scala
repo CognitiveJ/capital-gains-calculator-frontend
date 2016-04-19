@@ -21,10 +21,11 @@ import play.api.data.Forms._
 import models._
 
 object ImprovementsForm {
+
   val improvementsForm = Form(
     mapping(
       "isClaimingImprovements" -> text,
-      "improvementsAmt" -> bigDecimal
+      "improvementsAmt" -> optional(bigDecimal)
     )(ImprovementsModel.apply)(ImprovementsModel.unapply)
   )
 }

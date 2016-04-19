@@ -55,10 +55,10 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     val jsoupDoc = Jsoup.parse(bodyOf(result))
   }
 
-  class fakeRequestToPost(url: String, controllerAction: Action[AnyContent], data: (String, String)) {
+  class fakeRequestToPost(url: String, controllerAction: Action[AnyContent], data: (String, String)*) {
     val fakeRequest = FakeRequest("POST", "/calculate-your-capital-gains/" + url)
       .withSession(SessionKeys.sessionId -> s"session-$sessionId")
-      .withFormUrlEncodedBody(data)
+      .withFormUrlEncodedBody(data:_*)
     val result = controllerAction(fakeRequest)
     val jsoupDoc = Jsoup.parse(bodyOf(result))
   }
@@ -307,6 +307,54 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
   }
 
+  "In CalculationController calling the .submitDisabledTrustee action " should {
+
+    def keystoreCacheCondition[T](data: DisabledTrusteeModel): Unit = {
+      lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+      when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(returnedCacheMap))
+    }
+
+    "render errors when no option is selected" in {
+      object DisabledTrusteeTestDataItem extends fakeRequestToPost(
+        "disabled-trustee",
+        TestCalculationController.submitDisabledTrustee,
+        ("", "")
+      )
+      status(DisabledTrusteeTestDataItem.result) shouldBe 400
+    }
+
+    "when 'Yes' is selected" should {
+      object DisabledTrusteeTestDataItem extends fakeRequestToPost(
+        "disabled-trustee",
+        TestCalculationController.submitDisabledTrustee,
+        ("isVulnerable", "Yes")
+      )
+
+      "return a 303" in {
+        status(DisabledTrusteeTestDataItem.result) shouldBe 303
+      }
+
+      "redirect to the other-properties page" in {
+        redirectLocation(DisabledTrusteeTestDataItem.result) shouldBe Some(s"${routes.CalculationController.otherProperties}")
+      }
+    }
+    "when 'No' is selected" should {
+      object DisabledTrusteeTestDataItem extends fakeRequestToPost(
+        "disabled-trustee",
+        TestCalculationController.submitDisabledTrustee,
+        ("isVulnerable", "No")
+      )
+
+      "return a 303" in {
+        status(DisabledTrusteeTestDataItem.result) shouldBe 303
+      }
+
+      "redirect to the other-properties page" in {
+        redirectLocation(DisabledTrusteeTestDataItem.result) shouldBe Some(s"${routes.CalculationController.otherProperties}")
+      }
+    }
+  }
 
   //############## Personal Allowance tests ######################
   "In CalculationController calling the .personalAllowance action " should {
@@ -391,6 +439,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
   //############## Other Properties tests ######################
   "In CalculationController calling the .otherProperties action " when {
+
     "not supplied with a model that already contains data" should {
 
       object OtherPropertiesTestDataItem extends fakeRequestTo("other-properties", TestCalculationController.otherProperties)
@@ -617,13 +666,41 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       }
     }
 
-    "submitting an invalid form" should {
+    "submitting an invalid form with no value" should {
       object AnnualExemptAmountTestDataItem extends fakeRequestToPost(
         "allowance",
         TestCalculationController.submitAnnualExemptAmount,
         ("annualExemptAmount", "")
       )
       val testModel = new AnnualExemptAmountModel(0)
+
+      "return a 400" in {
+        keystoreCacheCondition[AnnualExemptAmountModel](testModel)
+        status(AnnualExemptAmountTestDataItem.result) shouldBe 400
+      }
+    }
+
+    "submitting an invalid form above the maximum value" should {
+      object AnnualExemptAmountTestDataItem extends fakeRequestToPost(
+        "allowance",
+        TestCalculationController.submitAnnualExemptAmount,
+        ("annualExemptAmount", "15000")
+      )
+      val testModel = new AnnualExemptAmountModel(15000)
+
+      "return a 400" in {
+        keystoreCacheCondition[AnnualExemptAmountModel](testModel)
+        status(AnnualExemptAmountTestDataItem.result) shouldBe 400
+      }
+    }
+
+    "submitting an invalid form below the minimum" should {
+      object AnnualExemptAmountTestDataItem extends fakeRequestToPost(
+        "allowance",
+        TestCalculationController.submitAnnualExemptAmount,
+        ("annualExemptAmount", "-1000")
+      )
+      val testModel = new AnnualExemptAmountModel(-1000)
 
       "return a 400" in {
         keystoreCacheCondition[AnnualExemptAmountModel](testModel)
@@ -731,12 +808,26 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       }
     }
 
-    "submitting an invalid form" should {
-      val testModel = new AcquisitionValueModel(1000)
+    "submitting an invalid form with no value" should {
+      val testModel = new AcquisitionValueModel(0)
       object AcquisitionValueTestDataItem extends fakeRequestToPost (
         "acquisition-value",
         TestCalculationController.submitAcquisitionValue,
         ("acquisitionValue", "")
+      )
+
+      "return a 400" in {
+        keystoreCacheCondition(testModel)
+        status(AcquisitionValueTestDataItem.result) shouldBe 400
+      }
+    }
+
+    "submitting an invalid form with a negative value" should {
+      val testModel = new AcquisitionValueModel(-1000)
+      object AcquisitionValueTestDataItem extends fakeRequestToPost (
+        "acquisition-value",
+        TestCalculationController.submitAcquisitionValue,
+        ("acquisitionValue", "-1000")
       )
 
       "return a 400" in {
@@ -785,7 +876,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       }
     }
     "supplied with a pre-existing model with 'Yes' checked and value already entered" should {
-      val testImprovementsModelYes = new ImprovementsModel("Yes", 10000)
+      val testImprovementsModelYes = new ImprovementsModel("Yes", Some(10000))
 
       "return a 200" in {
         object ImprovementsTestDataItem extends fakeRequestTo("improvements", TestCalculationController.improvements)
@@ -805,7 +896,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       }
     }
     "supplied with a pre-existing model with 'No' checked and value already entered" should {
-      val testImprovementsModelNo = new ImprovementsModel("No", 0)
+      val testImprovementsModelNo = new ImprovementsModel("No", Some(0))
 
       "return a 200" in {
         object ImprovementsTestDataItem extends fakeRequestTo("improvements", TestCalculationController.improvements)
@@ -822,6 +913,35 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           ImprovementsTestDataItem.jsoupDoc.getElementById("isClaimingImprovements-no").attr("checked") shouldEqual "checked"
           ImprovementsTestDataItem.jsoupDoc.getElementById("improvementsAmt").attr("value") shouldEqual "0"
         }
+      }
+    }
+  }
+
+  "In CalculationController calling the .submitImprovements action " when {
+    def keystoreCacheCondition[T](data: ImprovementsModel): Unit = {
+      lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+      when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(returnedCacheMap))
+    }
+    
+    "submitting a valid form with 'Yes' and a value of 12045" should {
+      object ImprovementsTestDataItem extends fakeRequestToPost("improvments", TestCalculationController.submitImprovements, ("isClaimingImprovements", "Yes"), ("improvementsAmt", "12045"))
+      val improvementsTestModel = new ImprovementsModel("Yes", Some(12045))
+
+      "return a 303" in {
+        keystoreCacheCondition[ImprovementsModel](improvementsTestModel)
+        status(ImprovementsTestDataItem.result) shouldBe 303
+      }
+    }
+
+    "submitting an invalid form with 'Yes' and a value of 'fhu39awd8'" should {
+      object ImprovementsTestDataItem extends fakeRequestToPost("improvments", TestCalculationController.submitImprovements, ("isClaimingImprovements", "Yes"), ("improvementsAmt", "fhu39awd8"))
+      //This model actually has no bearing on the tes but the cachemap it produces is required.
+      val improvementsTestModel = new ImprovementsModel("Yes", Some(9878))
+
+      "return a 400" in {
+        keystoreCacheCondition[ImprovementsModel](improvementsTestModel)
+        status(ImprovementsTestDataItem.result) shouldBe 400
       }
     }
   }
@@ -1281,6 +1401,40 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
   }
 
+  "In CalculationController calling the .submitAllowableLosses action" when {
+    def keystoreCacheCondition[T](data: AllowableLossesModel): Unit = {
+      lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+      when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(returnedCacheMap))
+    }
+    "submitting a valid form with 'Yes' and an amount" should {
+      object OtherPropertiesTestDataItem extends fakeRequestToPost(
+        "allowable-losses",
+        TestCalculationController.submitAllowableLosses,
+        ("isClaimingAllowableLosses", "Yes"), ("allowableLossesAmt", "1000")
+      )
+      val testModel = new AllowableLossesModel("Yes", 1000)
+
+      "return a 303" in {
+        keystoreCacheCondition[AllowableLossesModel](testModel)
+        status(OtherPropertiesTestDataItem.result) shouldBe 303
+      }
+    }
+
+    "submitting an invalid form with no selection and an invalid amount" should {
+      object OtherPropertiesTestDataItem extends fakeRequestToPost(
+        "allowable-losses",
+        TestCalculationController.submitAllowableLosses,
+        ("isClaimingAllowableLosses", ""), ("allowableLossesAmt", "")
+      )
+      val testModel = new AllowableLossesModel("Yes", 1000)
+
+      "return a 400" in {
+        keystoreCacheCondition[AllowableLossesModel](testModel)
+        status(OtherPropertiesTestDataItem.result) shouldBe 400
+      }
+    }
+  }
 
   //################### Other Reliefs tests #######################
   "In CalculationController calling the .otherReliefs action " when {
@@ -1531,9 +1685,14 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           CurrentIncomeTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
         }
 
-        "have the question 'In the tax year when you stopped owning the property, what was your total UK income?' as the legend of the input" in {
+        "have the question 'In the tax year when you stopped owning the property, what was your total UK income?' as the label of the input" in {
           keystoreFetchCondition[CurrentIncomeModel](None)
-          CurrentIncomeTestDataItem.jsoupDoc.body.getElementsByTag("label").text shouldEqual Messages("calc.currentIncome.question")
+          CurrentIncomeTestDataItem.jsoupDoc.body.getElementsByTag("label").text.contains(Messages("calc.currentIncome.question")) shouldBe true
+        }
+
+        "have the help text 'Tax years start on 6 April' as the form-hint of the input" in {
+          keystoreFetchCondition[CurrentIncomeModel](None)
+          CurrentIncomeTestDataItem.jsoupDoc.body.getElementsByClass("form-hint").text shouldEqual Messages("calc.currentIncome.helpText")
         }
 
         "display an input box for the Current Income Amount" in {
@@ -1556,6 +1715,23 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           CurrentIncomeTestDataItem.jsoupDoc.select("aside h2").text shouldBe Messages("calc.common.readMore")
           CurrentIncomeTestDataItem.jsoupDoc.select("aside a").first.text shouldBe Messages("calc.currentIncome.link.one")
           CurrentIncomeTestDataItem.jsoupDoc.select("aside a").last.text shouldBe Messages("calc.currentIncome.link.two")
+        }
+      }
+    }
+
+    "supplied with a pre-existing stored model" should {
+      object CurrentIncomeTestDataItem extends fakeRequestTo("currentIncome", TestCalculationController.currentIncome)
+      val testModel = new CurrentIncomeModel(1000)
+
+      "return a 200" in {
+        keystoreFetchCondition[CurrentIncomeModel](Some(testModel))
+        status(CurrentIncomeTestDataItem.result) shouldBe 200
+      }
+
+      "return some HTML that" should {
+        "have some value auto-filled into the input box" in {
+          keystoreFetchCondition[CurrentIncomeModel](Some(testModel))
+          CurrentIncomeTestDataItem.jsoupDoc.getElementById("currentIncome").attr("value") shouldBe "1000"
         }
       }
     }
