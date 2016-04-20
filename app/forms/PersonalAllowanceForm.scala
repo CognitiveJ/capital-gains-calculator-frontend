@@ -19,11 +19,21 @@ package forms
 import play.api.data._
 import play.api.data.Forms._
 import models._
+import play.api.i18n.Messages
 
 object PersonalAllowanceForm {
+
+  def validatePositive(data: BigDecimal): Option[BigDecimal] = {
+    data match {
+      case data if data < 0 => None
+      case _ => Some(data)
+    }
+  }
+
   val personalAllowanceForm = Form (
     mapping(
-      "personalAllowance" -> bigDecimal
+      "personalAllowance" -> bigDecimal.verifying(Messages("calc.personalAllowance.errorNegative"),
+        personalAllowance => validatePositive(personalAllowance).isDefined)
     )(PersonalAllowanceModel.apply)(PersonalAllowanceModel.unapply)
   )
 }
