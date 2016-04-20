@@ -1863,7 +1863,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     "supplied with a pre-existing stored model" should {
 
       object AllowableLossesTestDataItem extends fakeRequestTo("allowable-losses", TestCalculationController.allowableLosses)
-      val testModel = new AllowableLossesModel("Yes",9999.54)
+      val testModel = new AllowableLossesModel("Yes", Some(9999.54))
 
       "return a 200" in {
         keystoreFetchCondition[AllowableLossesModel](Some(testModel))
@@ -1903,7 +1903,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         TestCalculationController.submitAllowableLosses,
         ("isClaimingAllowableLosses", "Yes"), ("allowableLossesAmt", "1000")
       )
-      val testModel = new AllowableLossesModel("Yes", 1000)
+      val testModel = new AllowableLossesModel("Yes", Some(1000))
 
       "return a 303" in {
         keystoreCacheCondition[AllowableLossesModel](testModel)
@@ -1911,13 +1911,69 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       }
     }
 
-    "submitting an invalid form with no selection and an invalid amount" should {
+    "submitting a valid form with 'No' and a null amount" should {
+      object AllowableLossesTestDataItem extends fakeRequestToPost(
+        "allowable-losses",
+        TestCalculationController.submitAllowableLosses,
+        ("isClaimingAllowableLosses", "No"), ("allowableLossesAmt", "")
+      )
+      val testModel = new AllowableLossesModel("No", None)
+
+      "return a 303" in {
+        keystoreCacheCondition[AllowableLossesModel](testModel)
+        status(AllowableLossesTestDataItem.result) shouldBe 303
+      }
+    }
+
+    "submitting a valid form with 'No' and a negative amount" should {
+      object AllowableLossesTestDataItem extends fakeRequestToPost(
+        "allowable-losses",
+        TestCalculationController.submitAllowableLosses,
+        ("isClaimingAllowableLosses", "No"), ("allowableLossesAmt", "-1000")
+      )
+      val testModel = new AllowableLossesModel("No", Some(-1000))
+
+      "return a 303" in {
+        keystoreCacheCondition[AllowableLossesModel](testModel)
+        status(AllowableLossesTestDataItem.result) shouldBe 303
+      }
+    }
+
+    "submitting an invalid form with no selection and a null amount" should {
       object AllowableLossesTestDataItem extends fakeRequestToPost(
         "allowable-losses",
         TestCalculationController.submitAllowableLosses,
         ("isClaimingAllowableLosses", ""), ("allowableLossesAmt", "")
       )
-      val testModel = new AllowableLossesModel("Yes", 1000)
+      val testModel = new AllowableLossesModel("Yes", Some(1000))
+
+      "return a 400" in {
+        keystoreCacheCondition[AllowableLossesModel](testModel)
+        status(AllowableLossesTestDataItem.result) shouldBe 400
+      }
+    }
+
+    "submitting an invalid form with 'Yes' selection and a null amount" should {
+      object AllowableLossesTestDataItem extends fakeRequestToPost(
+        "allowable-losses",
+        TestCalculationController.submitAllowableLosses,
+        ("isClaimingAllowableLosses", "Yes"), ("allowableLossesAmt", "")
+      )
+      val testModel = new AllowableLossesModel("Yes", None)
+
+      "return a 400" in {
+        keystoreCacheCondition[AllowableLossesModel](testModel)
+        status(AllowableLossesTestDataItem.result) shouldBe 400
+      }
+    }
+
+    "submitting an invalid form with 'Yes' selection and a negative amount" should {
+      object AllowableLossesTestDataItem extends fakeRequestToPost(
+        "allowable-losses",
+        TestCalculationController.submitAllowableLosses,
+        ("isClaimingAllowableLosses", "Yes"), ("allowableLossesAmt", "-1000")
+      )
+      val testModel = new AllowableLossesModel("Yes", Some(-1000))
 
       "return a 400" in {
         keystoreCacheCondition[AllowableLossesModel](testModel)

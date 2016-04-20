@@ -19,12 +19,37 @@ package forms
 import play.api.data._
 import play.api.data.Forms._
 import models._
+import play.api.i18n.Messages
 
 object AllowableLossesForm {
+
+  def validate(data: AllowableLossesModel): Boolean = {
+    data.isClaimingAllowableLosses match {
+      case "Yes" => data.allowableLossesAmt.isDefined
+      case "No" => true
+      }
+    }
+
+  def validateMinimum(data: AllowableLossesModel): Boolean = {
+    data.isClaimingAllowableLosses match {
+      case "Yes" => {
+        data.allowableLossesAmt match {
+          case Some(data) => data >= 0
+          case None => true
+        }
+      }
+      case "No" => true
+    }
+  }
+
   val allowableLossesForm = Form(
     mapping(
-      "isClaimingAllowableLosses" -> text,
-      "allowableLossesAmt" -> bigDecimal
+      "isClaimingAllowableLosses" -> nonEmptyText,
+      "allowableLossesAmt" -> optional(bigDecimal)
     )(AllowableLossesModel.apply)(AllowableLossesModel.unapply)
+      .verifying(Messages("calc.allowableLosses.errorQuestion"),
+        allowableLossesForm => validate(AllowableLossesModel(allowableLossesForm.isClaimingAllowableLosses, allowableLossesForm.allowableLossesAmt)))
+      .verifying(Messages("calc.allowableLosses.errorMinimum"),
+        allowableLossesForm => validateMinimum(AllowableLossesModel(allowableLossesForm.isClaimingAllowableLosses, allowableLossesForm.allowableLossesAmt)))
   )
 }

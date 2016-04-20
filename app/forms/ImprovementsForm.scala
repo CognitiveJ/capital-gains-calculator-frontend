@@ -26,7 +26,7 @@ object ImprovementsForm {
   def verify(data: ImprovementsModel): Option[ImprovementsModel] = {
     data.isClaimingImprovements match {
       case "Yes" =>
-        if (data.improvementsAmt != None) {
+        if (data.improvementsAmt.isDefined) {
           Option(ImprovementsModel(data.isClaimingImprovements, data.improvementsAmt))
         } else {
           None
