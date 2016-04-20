@@ -20,6 +20,7 @@ import play.api.data._
 import play.api.data.Forms._
 import models._
 import play.api.i18n.Messages
+import common.Validation._
 
 object AnnualExemptAmountForm {
 
@@ -30,18 +31,12 @@ object AnnualExemptAmountForm {
     }
   }
 
-  def validateMinimum(data: BigDecimal): Option[BigDecimal] = {
-    data match {
-      case data if data < 0 => None
-      case _ => Some(data)
-    }
-  }
-
   val annualExemptAmountForm = Form(
     mapping(
       "annualExemptAmount" -> bigDecimal
         .verifying(Messages("calc.annualExemptAmount.errorMax"), annualExemptAmount => validateMaximum(annualExemptAmount).isDefined)
-        .verifying(Messages("calc.annualExemptAmount.errorMin"), annualExemptAmount => validateMinimum(annualExemptAmount).isDefined)
+        .verifying(Messages("calc.annualExemptAmount.errorNegative"), annualExemptAmount => isPositive(annualExemptAmount))
+        .verifying(Messages("calc.annualExemptAmount.errorDecimalPlaces"), annualExemptAmount => isMaxTwoDecimalPlaces(annualExemptAmount))
     )(AnnualExemptAmountModel.apply)(AnnualExemptAmountModel.unapply)
   )
 }

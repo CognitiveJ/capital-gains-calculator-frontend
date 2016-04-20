@@ -490,6 +490,26 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         status(PersonalAllowanceTestDataItem.result) shouldBe 400
       }
     }
+
+    "submitting an invalid form with value 1.111" should {
+      object PersonalAllowanceTestDataItem extends fakeRequestToPost(
+        "personal-allowance",
+        TestCalculationController.submitPersonalAllowance,
+        ("personalAllowance", "1.111")
+      )
+      val testModel = new PersonalAllowanceModel(1.111)
+
+      "return a 400" in {
+        keystoreCacheCondition[PersonalAllowanceModel](testModel)
+        status(PersonalAllowanceTestDataItem.result) shouldBe 400
+      }
+
+      s"fail with message ${Messages("calc.personalAllowance.errorDecimalPlaces")}" in {
+        keystoreCacheCondition(testModel)
+        PersonalAllowanceTestDataItem.jsoupDoc.getElementsByClass("error-notification").text should include (Messages("calc.personalAllowance.errorDecimalPlaces"))
+      }
+    }
+
   }
 
   //############## Other Properties tests ######################
@@ -762,6 +782,25 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         status(AnnualExemptAmountTestDataItem.result) shouldBe 400
       }
     }
+
+    "submitting an invalid form with value 1.111" should {
+      object AnnualExemptAmountTestDataItem extends fakeRequestToPost(
+        "allowance",
+        TestCalculationController.submitAnnualExemptAmount,
+        ("annualExemptAmount", "1.111")
+      )
+      val testModel = new AnnualExemptAmountModel(-1000)
+
+      "return a 400" in {
+        keystoreCacheCondition[AnnualExemptAmountModel](testModel)
+        status(AnnualExemptAmountTestDataItem.result) shouldBe 400
+      }
+
+      s"fail with message ${Messages("calc.annualExemptAmount.errorDecimalPlaces")}" in {
+        keystoreCacheCondition(testModel)
+        AnnualExemptAmountTestDataItem.jsoupDoc.getElementsByClass("error-notification").text should include (Messages("calc.annualExemptAmount.errorDecimalPlaces"))
+      }
+    }
   }
 
   //############## Acquisition Value tests ######################
@@ -888,6 +927,25 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       "return a 400" in {
         keystoreCacheCondition(testModel)
         status(AcquisitionValueTestDataItem.result) shouldBe 400
+      }
+    }
+
+    "submitting an invalid form with value 1.111" should {
+      val testModel = new AcquisitionValueModel(1.111)
+      object AcquisitionValueTestDataItem extends fakeRequestToPost (
+        "acquisition-value",
+        TestCalculationController.submitAcquisitionValue,
+        ("acquisitionValue", "1.111")
+      )
+
+      "return a 400" in {
+        keystoreCacheCondition(testModel)
+        status(AcquisitionValueTestDataItem.result) shouldBe 400
+      }
+
+      s"fail with message ${Messages("calc.acquisitionValue.errorDecimalPlaces")}" in {
+        keystoreCacheCondition(testModel)
+        AcquisitionValueTestDataItem.jsoupDoc.getElementsByClass("error-notification").text should include (Messages("calc.acquisitionValue.errorDecimalPlaces"))
       }
     }
   }
@@ -1026,7 +1084,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       }
 
       "return HTML that displays the error message " in {
-        ImprovementsTestDataItem.jsoupDoc.select("div#hidden span.error-notification").text shouldEqual "The cost of the improvements cannot be negative."
+        ImprovementsTestDataItem.jsoupDoc.select("div#hidden span.error-notification").text shouldEqual Messages("calc.improvements.errorNegative")
       }
     }
 
@@ -1043,6 +1101,23 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
       "return HTML that displays the error message " in {
         ImprovementsTestDataItem.jsoupDoc.select("div#hidden span.error-notification").text shouldEqual Messages("calc.improvements.error.no.value.supplied")
+      }
+    }
+
+    "submitting an invalid form with 'Yes' and value 1.111'" should {
+      object ImprovementsTestDataItem extends fakeRequestToPost("improvements", TestCalculationController.submitImprovements,
+        ("isClaimingImprovements", "Yes"),
+        ("improvementsAmt", "1.111"))
+      //This model actually has no bearing on the tes but the cachemap it produces is required.
+      val improvementsTestModel = new ImprovementsModel("Yes", Some(1.111))
+
+      "return a 400" in {
+        keystoreCacheCondition[ImprovementsModel](improvementsTestModel)
+        status(ImprovementsTestDataItem.result) shouldBe 400
+      }
+
+      "return HTML that displays the error message " in {
+        ImprovementsTestDataItem.jsoupDoc.select("div#hidden span.error-notification").text shouldEqual Messages("calc.improvements.errorDecimalPlaces")
       }
     }
 
@@ -1429,6 +1504,25 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         status(DisposalValueTestDataItem.result) shouldBe 400
       }
     }
+
+    "submitting an invalid form with value 1.111" should {
+      val testModel = new DisposalValueModel(1.111)
+      object DisposalValueTestDataItem extends fakeRequestToPost (
+        "disposal-value",
+        TestCalculationController.submitDisposalValue,
+        ("disposalValue", "1.111")
+      )
+
+      "return a 400" in {
+        keystoreCacheCondition(testModel)
+        status(DisposalValueTestDataItem.result) shouldBe 400
+      }
+
+      s"fail with message ${Messages("calc.disposalValue.errorDecimalPlaces")}" in {
+        keystoreCacheCondition(testModel)
+        DisposalValueTestDataItem.jsoupDoc.getElementsByClass("error-notification").text should include (Messages("calc.disposalValue.errorDecimalPlaces"))
+      }
+    }
   }
 
   //################### Acquisition Costs tests #######################
@@ -1529,9 +1623,9 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           status(AcquisitionCostsTestDataItem.result) shouldBe 400
         }
 
-        s"fail with message ${Messages("calc.common.money.error.negative")}" in {
+        s"fail with message ${Messages("calc.acquisitionCosts.errorNegative")}" in {
           keystoreCacheCondition(testModel)
-          AcquisitionCostsTestDataItem.jsoupDoc.getElementsByClass("error-notification").text should include (Messages("calc.common.money.error.negative"))
+          AcquisitionCostsTestDataItem.jsoupDoc.getElementsByClass("error-notification").text should include (Messages("calc.acquisitionCosts.errorNegative"))
         }
       }
 
@@ -1548,9 +1642,9 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           status(AcquisitionCostsTestDataItem.result) shouldBe 400
         }
 
-        s"fail with message ${Messages("calc.common.money.error.moreThan2dp")}" in {
+        s"fail with message ${Messages("calc.acquisitionCosts.errorDecimalPlaces")}" in {
           keystoreCacheCondition(testModel)
-          AcquisitionCostsTestDataItem.jsoupDoc.getElementsByClass("error-notification").text should include(Messages("calc.common.money.error.moreThan2dp"))
+          AcquisitionCostsTestDataItem.jsoupDoc.getElementsByClass("error-notification").text should include(Messages("calc.acquisitionCosts.errorDecimalPlaces"))
         }
       }
     }
@@ -2304,6 +2398,24 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
       "return a 400" in {
         status(CurrentIncomeTestDataItem.result) shouldBe 400
+      }
+    }
+
+    "submitting an invalid form with value 1.111" should {
+      val testModel = new CurrentIncomeModel(1.111)
+      object CurrentIncomeTestDataItem extends fakeRequestToPost(
+        "current-income",
+        TestCalculationController.submitCurrentIncome,
+        ("currentIncome", "1.111")
+      )
+
+      "return a 400" in {
+        status(CurrentIncomeTestDataItem.result) shouldBe 400
+      }
+
+      s"fail with message ${Messages("calc.currentIncome.errorDecimalPlaces")}" in {
+        keystoreCacheCondition(testModel)
+        CurrentIncomeTestDataItem.jsoupDoc.getElementsByClass("error-notification").text should include (Messages("calc.currentIncome.errorDecimalPlaces"))
       }
     }
   }

@@ -20,6 +20,7 @@ import play.api.data._
 import play.api.data.Forms._
 import models._
 import play.api.i18n.Messages
+import common.Validation._
 
 object ImprovementsForm {
 
@@ -35,20 +36,12 @@ object ImprovementsForm {
     }
   }
 
-  def validateMinimum(data: BigDecimal): Option[BigDecimal] = {
-    data match {
-      case data if data < 0 => None
-      case _ => Some(data)
-    }
-  }
-
   val improvementsForm = Form(
     mapping(
       "isClaimingImprovements" -> text,
       "improvementsAmt" -> optional(bigDecimal)
-        .verifying(
-        Messages("calc.improvements.errorMin"),
-        improvementsAmt => validateMinimum(improvementsAmt.getOrElse(0)).isDefined)
+        .verifying(Messages("calc.improvements.errorNegative"), improvementsAmt => isPositive(improvementsAmt.getOrElse(0)))
+        .verifying(Messages("calc.improvements.errorDecimalPlaces"), improvementsAmt => isMaxTwoDecimalPlaces(improvementsAmt.getOrElse(0)))
     )(ImprovementsModel.apply)(ImprovementsModel.unapply)
       .verifying(
         Messages("calc.improvements.error.no.value.supplied"),

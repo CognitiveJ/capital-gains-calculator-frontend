@@ -20,20 +20,15 @@ import play.api.data._
 import play.api.data.Forms._
 import models._
 import play.api.i18n.Messages
+import common.Validation._
 
 object CurrentIncomeForm {
 
-
-  def validateMinimum(data: BigDecimal): Option[BigDecimal] = {
-    data match {
-      case data if data < 0 => None
-      case _ => Option(data)
-    }
-  }
-
   val currentIncomeForm = Form(
     mapping(
-      "currentIncome" -> bigDecimal.verifying(Messages("calc.currentIncome.errorNegative"), currentIncome => validateMinimum(currentIncome).isDefined)
+      "currentIncome" -> bigDecimal
+        .verifying(Messages("calc.currentIncome.errorNegative"), currentIncome => isPositive(currentIncome))
+        .verifying(Messages("calc.currentIncome.errorDecimalPlaces"), currentIncome => isMaxTwoDecimalPlaces(currentIncome))
     )(CurrentIncomeModel.apply)(CurrentIncomeModel.unapply)
   )
 }
