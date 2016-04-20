@@ -456,6 +456,11 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         keystoreCacheCondition[PersonalAllowanceModel](testModel)
         status(PersonalAllowanceTestDataItem.result) shouldBe 303
       }
+
+      s"redirect to ${routes.CalculationController.otherProperties()}" in {
+        keystoreCacheCondition[PersonalAllowanceModel](testModel)
+        redirectLocation(PersonalAllowanceTestDataItem.result) shouldBe Some(s"${routes.CalculationController.otherProperties()}")
+      }
     }
 
     "submitting an invalid form with no value" should {
