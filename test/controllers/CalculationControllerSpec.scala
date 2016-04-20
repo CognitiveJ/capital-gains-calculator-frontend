@@ -1642,8 +1642,8 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           keystoreCacheCondition(disposalCostsTestModel)
           status(DisposalCostsTestDataItem.result) shouldBe 400
         }
-
-
+      }
+    }
   }
 
   //################### Entrepreneurs Relief tests #######################
