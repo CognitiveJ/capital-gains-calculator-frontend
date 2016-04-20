@@ -2007,6 +2007,26 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       }
     }
 
+    "submitting an invalid form with no value" should {
+      object OtherReliefsTestDataItem extends fakeRequestToPost("other-reliefs", TestCalculationController.submitOtherReliefs, ("otherReliefs", ""))
+      val otherReliefsTestModel = new OtherReliefsModel(0)
+
+      "return a 400" in {
+        keystoreCacheCondition[OtherReliefsModel](otherReliefsTestModel)
+        status(OtherReliefsTestDataItem.result) shouldBe 400
+      }
+    }
+
+    "submitting an invalid form with a negative value" should {
+      object OtherReliefsTestDataItem extends fakeRequestToPost("other-reliefs", TestCalculationController.submitOtherReliefs, ("otherReliefs", "-1000"))
+      val otherReliefsTestModel = new OtherReliefsModel(-1000)
+
+      "return a 400" in {
+        keystoreCacheCondition[OtherReliefsModel](otherReliefsTestModel)
+        status(OtherReliefsTestDataItem.result) shouldBe 400
+      }
+    }
+
     "submitting an invalid form with an value of shdgsaf" should {
       object OtherReliefsTestDataItem extends fakeRequestToPost("other-reliefs", TestCalculationController.submitOtherReliefs, ("otherReliefs", "shdgsaf"))
       val otherReliefsTestModel = new OtherReliefsModel(1000)

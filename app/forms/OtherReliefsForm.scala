@@ -19,11 +19,20 @@ package forms
 import play.api.data._
 import play.api.data.Forms._
 import models._
+import play.api.i18n.Messages
 
 object OtherReliefsForm {
+
+  def validateMinimum(data: BigDecimal): Boolean = {
+    data match {
+      case data if data < 0 => false
+      case _ => true
+    }
+  }
+
   val otherReliefsForm = Form(
     mapping(
-      "otherReliefs" -> bigDecimal
+      "otherReliefs" -> bigDecimal.verifying(Messages("calc.otherReliefs.errorMinimum"), otherReliefs => validateMinimum(otherReliefs))
     )(OtherReliefsModel.apply)(OtherReliefsModel.unapply)
   )
 }

@@ -123,6 +123,7 @@ calc.allowableLosses.helpText.bullet.three = you haven''t already used in an all
 
 ## Other Reliefs ##
 calc.otherReliefs.question = How much extra tax relief are you claiming?
+calc.otherReliefs.errorMinimum = Other reliefs cannot be negative
 
 ## Summary ##
 calc.summary.title = Summary
