@@ -1419,55 +1419,83 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
   //################### Acquisition Costs tests #######################
   "In CalculationController calling the .acquisitionCosts action " should {
+    "not supplied with a pre-existing stored model" should {
+      object AcquisitionCostsTestDataItem extends fakeRequestTo("acquisition-costs", TestCalculationController.acquisitionCosts)
 
-    object AcquisitionCostsTestDataItem extends fakeRequestTo("acquisition-costs", CalculationController.acquisitionCosts)
+      "return a 200" in {
+        keystoreFetchCondition[AcquisitionCostsModel](None)
+        status(AcquisitionCostsTestDataItem.result) shouldBe 200
+      }
 
-    "return a 200" in {
-      status(AcquisitionCostsTestDataItem.result) shouldBe 200
+      "return some HTML that" should {
+
+        "contain some text and use the character set utf-8" in {
+          keystoreFetchCondition[AcquisitionCostsModel](None)
+          contentType(AcquisitionCostsTestDataItem.result) shouldBe Some("text/html")
+          charset(AcquisitionCostsTestDataItem.result) shouldBe Some("utf-8")
+        }
+
+        "have the title 'How much did you pay in costs when you became the property owner'" in {
+          keystoreFetchCondition[AcquisitionCostsModel](None)
+          AcquisitionCostsTestDataItem.jsoupDoc.getElementsByTag("title").text shouldEqual Messages("calc.acquisitionCosts.question")
+        }
+
+        "have a back link" in {
+          keystoreFetchCondition[AcquisitionCostsModel](None)
+          AcquisitionCostsTestDataItem.jsoupDoc.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+        }
+
+        "have the page heading 'Calculate your tax (non-residents)'" in {
+          keystoreFetchCondition[AcquisitionCostsModel](None)
+          AcquisitionCostsTestDataItem.jsoupDoc.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+        }
+
+        "have a monetary field that" should {
+
+          "have the title 'How much did you pay in costs when you became the property owner?'" in {
+            keystoreFetchCondition[AcquisitionCostsModel](None)
+            AcquisitionCostsTestDataItem.jsoupDoc.select("label[for=acquisitionCosts]").text.contains(Messages("calc.acquisitionCosts.question")) shouldBe true
+          }
+
+          "have the help text 'Costs include agent fees, legal fees and surveys'" in {
+            keystoreFetchCondition[AcquisitionCostsModel](None)
+            AcquisitionCostsTestDataItem.jsoupDoc.select("span.form-hint").text shouldEqual Messages("calc.acquisitionCosts.helpText")
+          }
+
+          "have an input box for the acquisition costs" in {
+            keystoreFetchCondition[AcquisitionCostsModel](None)
+            AcquisitionCostsTestDataItem.jsoupDoc.getElementById("acquisitionCosts").tagName shouldBe "input"
+          }
+        }
+
+        "have a continue button that" should {
+
+          "be a button element" in {
+            keystoreFetchCondition[AcquisitionCostsModel](None)
+            AcquisitionCostsTestDataItem.jsoupDoc.getElementById("continue-button").tagName shouldBe "button"
+          }
+
+          "have the text 'Continue'" in {
+            keystoreFetchCondition[AcquisitionCostsModel](None)
+            AcquisitionCostsTestDataItem.jsoupDoc.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+          }
+        }
+      }
     }
 
-    "return some HTML that" should {
+    "supplied with a pre-existing stored model" should {
+      object AcquisitionCostsTestDataItem extends fakeRequestTo("acquisition-costs", TestCalculationController.acquisitionCosts)
+      val testModel = new AcquisitionCostsModel(1000)
 
-      "contain some text and use the character set utf-8" in {
-        contentType(AcquisitionCostsTestDataItem.result) shouldBe Some("text/html")
-        charset(AcquisitionCostsTestDataItem.result) shouldBe Some("utf-8")
+      "return a 200" in {
+        keystoreFetchCondition[AcquisitionCostsModel](Some(testModel))
+        status(AcquisitionCostsTestDataItem.result) shouldBe 200
       }
 
-      "have the title 'How much did you pay in costs when you became the property owner'" in {
-        AcquisitionCostsTestDataItem.jsoupDoc.getElementsByTag("title").text shouldEqual Messages("calc.acquisitionCosts.question")
-      }
-
-      "have a back link" in {
-        AcquisitionCostsTestDataItem.jsoupDoc.getElementById("link-back").text shouldEqual Messages("calc.base.back")
-      }
-
-      "have the page heading 'Calculate your tax (non-residents)'" in {
-        AcquisitionCostsTestDataItem.jsoupDoc.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
-      }
-
-      "have a monetary field that" should {
-
-        "have the title 'How much did you pay in costs when you became the property owner?'" in {
-          AcquisitionCostsTestDataItem.jsoupDoc.select("label[for=acquisitionCosts]").text.contains(Messages("calc.acquisitionCosts.question")) shouldBe true
-        }
-
-        "have the help text 'Costs include agent fees, legal fees and surveys'" in {
-          AcquisitionCostsTestDataItem.jsoupDoc.select("span.form-hint").text shouldEqual Messages("calc.acquisitionCosts.helpText")
-        }
-
-        "have an input box for the acquisition costs" in {
-          AcquisitionCostsTestDataItem.jsoupDoc.getElementById("acquisitionCosts").tagName shouldBe "input"
-        }
-      }
-
-      "have a continue button that" should {
-
-        "be a button element" in {
-          AcquisitionCostsTestDataItem.jsoupDoc.getElementById("continue-button").tagName shouldBe "button"
-        }
-
-        "have the text 'Continue'" in {
-          AcquisitionCostsTestDataItem.jsoupDoc.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+      "return some HTML that" should {
+        "have the value 1000 auto-filled into the input box" in {
+          keystoreFetchCondition[AcquisitionCostsModel](Some(testModel))
+          AcquisitionCostsTestDataItem.jsoupDoc.getElementById("acquisitionCosts").attr("value") shouldEqual ("1000")
         }
       }
     }

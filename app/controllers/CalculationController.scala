@@ -239,8 +239,10 @@ trait CalculationController extends FrontendController {
 
   //################### Acquisition Costs methods #######################
   val acquisitionCosts = Action.async { implicit request =>
-    //TODO Missing jira task for keystore and form binding?
-    Future.successful(Ok(calculation.acquisitionCosts(acquisitionCostsForm)))
+    calcConnector.fetchAndGetFormData[AcquisitionCostsModel]("acquisitionCosts").map {
+      case Some(data) => Ok(calculation.acquisitionCosts(acquisitionCostsForm.fill(data)))
+      case None => Ok(calculation.acquisitionCosts(acquisitionCostsForm))
+    }
   }
 
   val submitAcquisitionCosts = Action { implicit request =>
