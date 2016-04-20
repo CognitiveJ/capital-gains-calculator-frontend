@@ -19,19 +19,21 @@ package forms
 import play.api.data._
 import play.api.data.Forms._
 import models._
+import play.api.i18n.Messages
 
 object CurrentIncomeForm {
 
-  def validateNonNegative (data: BigDecimal): Option[BigDecimal] = {
+
+  def validateMinimum(data: BigDecimal): Option[BigDecimal] = {
     data match {
       case data if data < 0 => None
-      case _ => Some(data)
+      case _ => Option(data)
     }
   }
 
   val currentIncomeForm = Form(
     mapping(
-      "currentIncome" -> bigDecimal.verifying("Your income cannot be negative", currentIncome => validateNonNegative(currentIncome).isDefined)
+      "currentIncome" -> bigDecimal.verifying(Messages("calc.currentIncome.errorNegative"), currentIncome => validateMinimum(currentIncome).isDefined)
     )(CurrentIncomeModel.apply)(CurrentIncomeModel.unapply)
   )
 }
