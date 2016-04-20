@@ -70,6 +70,7 @@ calc.currentIncome.errorNegative = Current income cannot be negative
 calc.personalAllowance.question = In the tax year when you stopped owning the property, what was your UK Personal Allowance?
 calc.personalAllowance.linkOne = Income Tax rates and Personal Allowances
 calc.personalAllowance.linkTwo = Tax on your UK income if you live abroad
+calc.personalAllowance.errorNegative = Your Personal Allowance cannot be negative.
 
 ## Other Properties ##
 calc.otherProperties.question = Did you sell or give away any other properties in that tax year?
