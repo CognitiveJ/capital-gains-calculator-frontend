@@ -48,6 +48,6 @@ trait CalculatorConnector {
   }
 
   def calculate(left: Int, right: Int)(implicit hc: HeaderCarrier): Future[Option[CalculationResultModel]] = {
-    http.GET[Option[CalculationResultModel]](s"$serviceUrl/capital-gains-calculator/calculate/$left/$right")
+    http.GET[Option[CalculationResultModel]](s"$serviceUrl/capital-gains-calculator/calculate?left=$left&right=$right")
   }
 }
