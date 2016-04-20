@@ -2047,8 +2047,44 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
   }
 
+  "In CalculationController calling the .submitCurrentIncome action " when {
 
+    def keystoreCacheCondition[T](data: CurrentIncomeModel): Unit = {
+      lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+      when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(returnedCacheMap))
+    }
 
+    "submitting a valid form" should {
+      val testModel = new CurrentIncomeModel(1000)
+      object CurrentIncomeTestDataItem extends fakeRequestToPost(
+        "current-income",
+        TestCalculationController.submitCurrentIncome,
+        ("currentIncome", "1000")
+      )
 
+      "return a 303" in {
+        keystoreCacheCondition(testModel)
+        status(CurrentIncomeTestDataItem.result) shouldBe 303
+      }
 
+      s"redirect to ${routes.CalculationController.personalAllowance()}" in {
+        keystoreCacheCondition[CurrentIncomeModel](testModel)
+        redirectLocation(CurrentIncomeTestDataItem.result) shouldBe Some(s"${routes.CalculationController.personalAllowance()}")
+      }
+    }
+
+    "submitting an invalid form" should {
+      val testModel = new CurrentIncomeModel(0)
+      object CurrentIncomeTestDataItem extends fakeRequestToPost(
+        "current-income",
+        TestCalculationController.submitCurrentIncome,
+        ("currentIncome", "")
+      )
+
+      "return a 400" in {
+        status(CurrentIncomeTestDataItem.result) shouldBe 400
+      }
+    }
+  }
 }

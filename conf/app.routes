@@ -22,6 +22,7 @@ POST        /disabled-trustee        controllers.CalculationController.submitDis
 
 #Current Income
 GET         /current-income          controllers.CalculationController.currentIncome
+POST        /current-income          controllers.CalculationController.submitCurrentIncome
 
 #Personal Allowance
 GET         /personal-allowance       controllers.CalculationController.personalAllowance
