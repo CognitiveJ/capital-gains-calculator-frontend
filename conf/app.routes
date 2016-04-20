@@ -22,9 +22,11 @@ POST        /disabled-trustee        controllers.CalculationController.submitDis
 
 #Current Income
 GET         /current-income          controllers.CalculationController.currentIncome
+POST        /current-income          controllers.CalculationController.submitCurrentIncome
 
 #Personal Allowance
-GET         /personal-allowance       controllers.CalculationController.personalAllowance
+GET         /personal-allowance      controllers.CalculationController.personalAllowance
+POST        /personal-allowance      controllers.CalculationController.submitPersonalAllowance
 
 #Other Properties
 GET         /other-properties        controllers.CalculationController.otherProperties
@@ -44,6 +46,7 @@ POST        /improvements            controllers.CalculationController.submitImp
 
 #Disposal Date
 GET         /disposal-date           controllers.CalculationController.disposalDate
+POST        /disposal-date           controllers.CalculationController.submitDisposalDate
 
 #Disposal Value
 GET         /disposal-value          controllers.CalculationController.disposalValue
@@ -51,12 +54,14 @@ POST        /disposal-value          controllers.CalculationController.submitDis
 
 #Acquisition Costs
 GET         /acquisition-costs       controllers.CalculationController.acquisitionCosts
+POST        /acquisition-costs       controllers.CalculationController.submitAcquisitionCosts
 
 #Disposal Costs
 GET         /disposal-costs          controllers.CalculationController.disposalCosts
 
 #Entrepreneurs Relief
 GET         /entrepreneurs-relief    controllers.CalculationController.entrepreneursRelief
+POST        /entrepreneurs-relief    controllers.CalculationController.submitEntrepreneursRelief
 
 #Allowable Losses
 GET         /allowable-losses        controllers.CalculationController.allowableLosses
@@ -64,6 +69,7 @@ POST        /allowable-losses        controllers.CalculationController.submitAll
 
 #Other Reliefs
 GET         /other-reliefs           controllers.CalculationController.otherReliefs
+POST        /other-reliefs           controllers.CalculationController.submitOtherReliefs
 ########################################################
 
 

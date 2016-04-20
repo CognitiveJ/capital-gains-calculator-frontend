@@ -437,6 +437,47 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
   }
 
+  "In CalculationController calling the .submitPersonalAllowance action" when {
+    def keystoreCacheCondition[T](data: PersonalAllowanceModel): Unit = {
+      lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+      when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(returnedCacheMap))
+    }
+
+    "submitting a valid form" should {
+      object PersonalAllowanceTestDataItem extends fakeRequestToPost(
+        "personal-allowance",
+        TestCalculationController.submitPersonalAllowance,
+        ("personalAllowance", "1000")
+      )
+      val testModel = new PersonalAllowanceModel(1000)
+
+      "return a 303" in {
+        keystoreCacheCondition[PersonalAllowanceModel](testModel)
+        status(PersonalAllowanceTestDataItem.result) shouldBe 303
+      }
+
+      s"redirect to ${routes.CalculationController.otherProperties()}" in {
+        keystoreCacheCondition[PersonalAllowanceModel](testModel)
+        redirectLocation(PersonalAllowanceTestDataItem.result) shouldBe Some(s"${routes.CalculationController.otherProperties()}")
+      }
+    }
+
+    "submitting an invalid form with no value" should {
+      object PersonalAllowanceTestDataItem extends fakeRequestToPost(
+        "personal-allowance",
+        TestCalculationController.submitPersonalAllowance,
+        ("personalAllowance", "")
+      )
+      val testModel = new PersonalAllowanceModel(0)
+
+      "return a 400" in {
+        keystoreCacheCondition[PersonalAllowanceModel](testModel)
+        status(PersonalAllowanceTestDataItem.result) shouldBe 400
+      }
+    }
+  }
+
   //############## Other Properties tests ######################
   "In CalculationController calling the .otherProperties action " when {
 
@@ -871,7 +912,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         }
 
         "contain a hidden component with an input box" in {
-          ImprovementsTestDataItem.jsoupDoc.body.getElementById("improvementsAmt").parent.parent.parent.id shouldBe "hidden"
+          ImprovementsTestDataItem.jsoupDoc.body.getElementById("improvementsAmt").parent.parent.id shouldBe "hidden"
         }
       }
     }
@@ -934,6 +975,17 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       }
     }
 
+    "submitting a valid form with 'No' and no value" should {
+      object ImprovementsTestDataItem extends fakeRequestToPost("improvements", TestCalculationController.submitImprovements, ("isClaimingImprovements", "No"), ("improvementsAmt", ""))
+      //This model actually has no bearing on the tes but the cachemap it produces is required.
+      val improvementsTestModel = new ImprovementsModel("No", None)
+
+      "return a 303" in {
+        keystoreCacheCondition[ImprovementsModel](improvementsTestModel)
+        status(ImprovementsTestDataItem.result) shouldBe 303
+      }
+    }
+
     "submitting an invalid form with 'Yes' and a value of 'fhu39awd8'" should {
       object ImprovementsTestDataItem extends fakeRequestToPost("improvements", TestCalculationController.submitImprovements, ("isClaimingImprovements", "Yes"), ("improvementsAmt", "fhu39awd8"))
       //This model actually has no bearing on the tes but the cachemap it produces is required.
@@ -963,6 +1015,24 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         ImprovementsTestDataItem.jsoupDoc.select("div#hidden span.error-notification").text shouldEqual "The cost of the improvements cannot be negative."
       }
     }
+
+
+    "submitting an invalid form with 'Yes' and an empty value'" should {
+      object ImprovementsTestDataItem extends fakeRequestToPost("improvements", TestCalculationController.submitImprovements, ("isClaimingImprovements", "Yes"), ("improvementsAmt", ""))
+      //This model actually has no bearing on the tes but the cachemap it produces is required.
+      val improvementsTestModel = new ImprovementsModel("Yes", Some(-100))
+
+      "return a 400" in {
+        keystoreCacheCondition[ImprovementsModel](improvementsTestModel)
+        status(ImprovementsTestDataItem.result) shouldBe 400
+      }
+
+      "return HTML that displays the error message " in {
+        ImprovementsTestDataItem.jsoupDoc.select("div#hidden span.error-notification").text shouldEqual Messages("calc.improvements.error.no.value.supplied")
+      }
+    }
+
+
   }
 
   //################### Disposal Date tests #######################
@@ -1032,6 +1102,194 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           DisposalDateTestDataItem.jsoupDoc.body.getElementById("disposalDate.month").attr("value") shouldEqual testDisposalDateModel.month.toString
           DisposalDateTestDataItem.jsoupDoc.body.getElementById("disposalDate.year").attr("value") shouldEqual testDisposalDateModel.year.toString
         }
+      }
+    }
+  }
+
+  "In CalculationController calling the .submitDisposalDate action" when {
+    def keystoreCacheCondition[T](data: DisposalDateModel): Unit = {
+      lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+      when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(returnedCacheMap))
+    }
+    "submitting a valid date 31/01/2016" should {
+      object DisposalDateTestDataItem extends fakeRequestToPost(
+        "disposal-date",
+        TestCalculationController.submitDisposalDate,
+        ("disposalDate.day", "31"), ("disposalDate.month","1"), ("disposalDate.year","2016")
+      )
+      val testModel = new DisposalDateModel(31,1,2016)
+
+      "return a 303" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        status(DisposalDateTestDataItem.result) shouldBe 303
+      }
+
+      s"redirect to ${routes.CalculationController.disposalValue()}" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        redirectLocation(DisposalDateTestDataItem.result) shouldBe Some(s"${routes.CalculationController.disposalValue()}")
+      }
+    }
+    "submitting a valid leap year date 29/02/2016" should {
+      object DisposalDateTestDataItem extends fakeRequestToPost(
+        "disposal-date",
+        TestCalculationController.submitDisposalDate,
+        ("disposalDate.day", "29"), ("disposalDate.month","2"), ("disposalDate.year","2016")
+      )
+      val testModel = new DisposalDateModel(29,2,2016)
+
+      "return a 303" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        status(DisposalDateTestDataItem.result) shouldBe 303
+      }
+
+      s"redirect to ${routes.CalculationController.disposalValue()}" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        redirectLocation(DisposalDateTestDataItem.result) shouldBe Some(s"${routes.CalculationController.disposalValue()}")
+      }
+    }
+    "submitting an invalid leap year date 29/02/2017" should {
+      object DisposalDateTestDataItem extends fakeRequestToPost(
+        "disposal-date",
+        TestCalculationController.submitDisposalDate,
+        ("disposalDate.day", "29"), ("disposalDate.month","2"), ("disposalDate.year","2017")
+      )
+      val testModel = new DisposalDateModel(29,2,2017)
+
+      "return a 400" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        status(DisposalDateTestDataItem.result) shouldBe 400
+      }
+
+      s"should error with message '${Messages("calc.common.date.error.invalidDate")}'" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("calc.common.date.error.invalidDate"))
+      }
+    }
+    "submitting a day less than 1" should {
+      object DisposalDateTestDataItem extends fakeRequestToPost(
+        "disposal-date",
+        TestCalculationController.submitDisposalDate,
+        ("disposalDate.day", "0"), ("disposalDate.month","2"), ("disposalDate.year","2017")
+      )
+      val testModel = new DisposalDateModel(0,2,2017)
+
+      "return a 400" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        status(DisposalDateTestDataItem.result) shouldBe 400
+      }
+
+      s"should error with message '${Messages("calc.common.date.error.day.lessThan1")}'" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("calc.common.date.error.day.lessThan1"))
+      }
+    }
+    "submitting a day greater than 31" should {
+      object DisposalDateTestDataItem extends fakeRequestToPost(
+        "disposal-date",
+        TestCalculationController.submitDisposalDate,
+        ("disposalDate.day", "32"), ("disposalDate.month","2"), ("disposalDate.year","2017")
+      )
+      val testModel = new DisposalDateModel(32,2,2017)
+
+      "return a 400" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        status(DisposalDateTestDataItem.result) shouldBe 400
+      }
+
+      s"should error with message '${Messages("calc.common.date.error.day.greaterThan31")}'" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("calc.common.date.error.day.greaterThan31"))
+      }
+    }
+    "submitting a month greater than 12" should {
+      object DisposalDateTestDataItem extends fakeRequestToPost(
+        "disposal-date",
+        TestCalculationController.submitDisposalDate,
+        ("disposalDate.day", "31"), ("disposalDate.month","13"), ("disposalDate.year","2017")
+      )
+      val testModel = new DisposalDateModel(31,13,2017)
+
+      "return a 400" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        status(DisposalDateTestDataItem.result) shouldBe 400
+      }
+
+      s"should error with message '${Messages("calc.common.date.error.month.greaterThan12")}'" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("calc.common.date.error.month.greaterThan12"))
+      }
+    }
+    "submitting a month less than 1" should {
+      object DisposalDateTestDataItem extends fakeRequestToPost(
+        "disposal-date",
+        TestCalculationController.submitDisposalDate,
+        ("disposalDate.day", "31"), ("disposalDate.month","0"), ("disposalDate.year","2017")
+      )
+      val testModel = new DisposalDateModel(31,0,2017)
+
+      "return a 400" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        status(DisposalDateTestDataItem.result) shouldBe 400
+      }
+
+      s"should error with message '${Messages("calc.common.date.error.month.lessThan1")}'" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("calc.common.date.error.month.lessThan1"))
+      }
+    }
+    "submitting a day with no value" should {
+      object DisposalDateTestDataItem extends fakeRequestToPost(
+        "disposal-date",
+        TestCalculationController.submitDisposalDate,
+        ("disposalDate.day", ""), ("disposalDate.month","12"), ("disposalDate.year","2017")
+      )
+      val testModel = new DisposalDateModel(0,12,2017)
+
+      "return a 400" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        status(DisposalDateTestDataItem.result) shouldBe 400
+      }
+
+      "should error with message 'Numeric vaue expected'" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include ("Numeric value expected")
+      }
+    }
+    "submitting a month with no value" should {
+      object DisposalDateTestDataItem extends fakeRequestToPost(
+        "disposal-date",
+        TestCalculationController.submitDisposalDate,
+        ("disposalDate.day", "31"), ("disposalDate.month",""), ("disposalDate.year","2017")
+      )
+      val testModel = new DisposalDateModel(31,0,2017)
+
+      "return a 400" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        status(DisposalDateTestDataItem.result) shouldBe 400
+      }
+
+      "should error with message 'Numeric vaue expected'" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include ("Numeric value expected")
+      }
+    }
+    "submitting a year with no value" should {
+      object DisposalDateTestDataItem extends fakeRequestToPost(
+        "disposal-date",
+        TestCalculationController.submitDisposalDate,
+        ("disposalDate.day", "31"), ("disposalDate.month","12"), ("disposalDate.year","")
+      )
+      val testModel = new DisposalDateModel(31,12,0)
+
+      "return a 400" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        status(DisposalDateTestDataItem.result) shouldBe 400
+      }
+
+      "should error with message 'Numeric vaue expected'" in {
+        keystoreCacheCondition[DisposalDateModel](testModel)
+        DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include ("Numeric value expected")
       }
     }
   }
@@ -1176,7 +1434,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       "have a monetary field that" should {
 
         "have the title 'How much did you pay in costs when you became the property owner?'" in {
-          AcquisitionCostsTestDataItem.jsoupDoc.select("label[for=acquisitionCosts]").text shouldEqual Messages("calc.acquisitionCosts.question")
+          AcquisitionCostsTestDataItem.jsoupDoc.select("label[for=acquisitionCosts]").text.contains(Messages("calc.acquisitionCosts.question")) shouldBe true
         }
 
         "have the help text 'Costs include agent fees, legal fees and surveys'" in {
@@ -1197,6 +1455,47 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         "have the text 'Continue'" in {
           AcquisitionCostsTestDataItem.jsoupDoc.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
         }
+      }
+    }
+  }
+
+  "In CalculationController calling the .submitAcquisitionCosts action" when {
+    def keystoreCacheCondition[T](data: AcquisitionCostsModel): Unit = {
+      lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+      when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(returnedCacheMap))
+    }
+
+    "submitting a valid form" should {
+      val testModel = new AcquisitionCostsModel(1000)
+      object AcquisitionCostsTestDataItem extends fakeRequestToPost(
+        "acquisition-costs",
+        TestCalculationController.submitAcquisitionCosts,
+        ("acquisitionCosts", "1000")
+      )
+
+      "return a 303" in {
+        keystoreCacheCondition(testModel)
+        status(AcquisitionCostsTestDataItem.result) shouldBe 303
+      }
+
+      s"redirect to ${routes.CalculationController.disposalCosts()}" in {
+        keystoreCacheCondition[AcquisitionCostsModel](testModel)
+        redirectLocation(AcquisitionCostsTestDataItem.result) shouldBe Some(s"${routes.CalculationController.disposalCosts()}")
+      }
+    }
+
+    "submitting an invalid form with no value" should {
+      val testModel = new AcquisitionCostsModel(0)
+      object AcquisitionCostsTestDataItem extends fakeRequestToPost(
+        "acquisition-costs",
+        TestCalculationController.submitAcquisitionCosts,
+        ("acquisitionCosts", "")
+      )
+
+      "return a 400" in {
+        keystoreCacheCondition(testModel)
+        status(AcquisitionCostsTestDataItem.result) shouldBe 400
       }
     }
   }
@@ -1355,6 +1654,46 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
   }
 
+  "In CalculationController calling the .submitEntrepreneursRelief action" when {
+    def keystoreCacheCondition[T](data: EntrepreneursReliefModel): Unit = {
+      lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+      when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(returnedCacheMap))
+    }
+    "submitting a valid form with 'Yes'" should {
+      object EntrepreneursReliefTestDataItem extends fakeRequestToPost(
+        "entrepreneurs-relief",
+        TestCalculationController.submitEntrepreneursRelief,
+        ("entrepreneursRelief", "yes")
+      )
+      val testModel = new EntrepreneursReliefModel("Yes")
+
+      "return a 303" in {
+        keystoreCacheCondition[EntrepreneursReliefModel](testModel)
+        status(EntrepreneursReliefTestDataItem.result) shouldBe 303
+      }
+
+      s"redirect to ${routes.CalculationController.allowableLosses()}" in {
+        keystoreCacheCondition[EntrepreneursReliefModel](testModel)
+        redirectLocation(EntrepreneursReliefTestDataItem.result) shouldBe Some(s"${routes.CalculationController.allowableLosses()}")
+      }
+    }
+
+    "submitting an invalid form with no data" should {
+      object EntrepreneursReliefTestDataItem extends fakeRequestToPost(
+        "entrepreneurs-relief",
+        TestCalculationController.submitEntrepreneursRelief,
+        ("entrepreneursRelief", "")
+      )
+      val testModel = new EntrepreneursReliefModel("")
+
+      "return a 400" in {
+        keystoreCacheCondition[EntrepreneursReliefModel](testModel)
+        status(EntrepreneursReliefTestDataItem.result) shouldBe 400
+      }
+    }
+  }
+
 
   //################### Allowable Losses tests #######################
   "In CalculationController calling the .allowableLosses action " when {
@@ -1463,7 +1802,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         .thenReturn(Future.successful(returnedCacheMap))
     }
     "submitting a valid form with 'Yes' and an amount" should {
-      object OtherPropertiesTestDataItem extends fakeRequestToPost(
+      object AllowableLossesTestDataItem extends fakeRequestToPost(
         "allowable-losses",
         TestCalculationController.submitAllowableLosses,
         ("isClaimingAllowableLosses", "Yes"), ("allowableLossesAmt", "1000")
@@ -1472,12 +1811,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
       "return a 303" in {
         keystoreCacheCondition[AllowableLossesModel](testModel)
-        status(OtherPropertiesTestDataItem.result) shouldBe 303
+        status(AllowableLossesTestDataItem.result) shouldBe 303
       }
     }
 
     "submitting an invalid form with no selection and an invalid amount" should {
-      object OtherPropertiesTestDataItem extends fakeRequestToPost(
+      object AllowableLossesTestDataItem extends fakeRequestToPost(
         "allowable-losses",
         TestCalculationController.submitAllowableLosses,
         ("isClaimingAllowableLosses", ""), ("allowableLossesAmt", "")
@@ -1486,7 +1825,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
       "return a 400" in {
         keystoreCacheCondition[AllowableLossesModel](testModel)
-        status(OtherPropertiesTestDataItem.result) shouldBe 400
+        status(AllowableLossesTestDataItem.result) shouldBe 400
       }
     }
   }
@@ -1552,6 +1891,33 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           keystoreFetchCondition[OtherReliefsModel](Some(testOtherReliefsModel))
           OtherReliefsTestDataItem.jsoupDoc.getElementById("otherReliefs").attr("value") shouldEqual "5000"
         }
+      }
+    }
+  }
+
+  "In CalculationController calling the .submitOtherReliefs action" when {
+    def keystoreCacheCondition[T](data: OtherReliefsModel): Unit = {
+      lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+      when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(returnedCacheMap))
+    }
+    "submitting a valid form with and an amount of 1000" should {
+      object OtherReliefsTestDataItem extends fakeRequestToPost("other-reliefs", TestCalculationController.submitOtherReliefs, ("otherReliefs", "1000"))
+      val otherReliefsTestModel = new OtherReliefsModel(1000)
+
+      "return a 303" in {
+        keystoreCacheCondition[OtherReliefsModel](otherReliefsTestModel)
+        status(OtherReliefsTestDataItem.result) shouldBe 303
+      }
+    }
+
+    "submitting an invalid form with an value of shdgsaf" should {
+      object OtherReliefsTestDataItem extends fakeRequestToPost("other-reliefs", TestCalculationController.submitOtherReliefs, ("otherReliefs", "shdgsaf"))
+      val otherReliefsTestModel = new OtherReliefsModel(1000)
+
+      "return a 400" in {
+        keystoreCacheCondition[OtherReliefsModel](otherReliefsTestModel)
+        status(OtherReliefsTestDataItem.result) shouldBe 400
       }
     }
   }
@@ -1792,8 +2158,44 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
   }
 
+  "In CalculationController calling the .submitCurrentIncome action " when {
 
+    def keystoreCacheCondition[T](data: CurrentIncomeModel): Unit = {
+      lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+      when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(returnedCacheMap))
+    }
 
+    "submitting a valid form" should {
+      val testModel = new CurrentIncomeModel(1000)
+      object CurrentIncomeTestDataItem extends fakeRequestToPost(
+        "current-income",
+        TestCalculationController.submitCurrentIncome,
+        ("currentIncome", "1000")
+      )
 
+      "return a 303" in {
+        keystoreCacheCondition(testModel)
+        status(CurrentIncomeTestDataItem.result) shouldBe 303
+      }
 
+      s"redirect to ${routes.CalculationController.personalAllowance()}" in {
+        keystoreCacheCondition[CurrentIncomeModel](testModel)
+        redirectLocation(CurrentIncomeTestDataItem.result) shouldBe Some(s"${routes.CalculationController.personalAllowance()}")
+      }
+    }
+
+    "submitting an invalid form" should {
+      val testModel = new CurrentIncomeModel(0)
+      object CurrentIncomeTestDataItem extends fakeRequestToPost(
+        "current-income",
+        TestCalculationController.submitCurrentIncome,
+        ("currentIncome", "")
+      )
+
+      "return a 400" in {
+        status(CurrentIncomeTestDataItem.result) shouldBe 400
+      }
+    }
+  }
 }

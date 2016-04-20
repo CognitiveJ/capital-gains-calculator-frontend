@@ -31,6 +31,7 @@ import forms.EntrepreneursReliefForm._
 import forms.DisposalCostsForm._
 import forms.ImprovementsForm._
 import forms.PersonalAllowanceForm._
+import forms.AcquisitionCostsForm._
 import forms.CurrentIncomeForm._
 
 import models._
@@ -96,7 +97,15 @@ trait CalculationController extends FrontendController {
     }
   }
 
-
+  val submitCurrentIncome = Action { implicit request =>
+   currentIncomeForm.bindFromRequest.fold(
+     errors => BadRequest(calculation.currentIncome(errors)),
+     success => {
+       calcConnector.saveFormData("currentIncome", success)
+       Redirect(routes.CalculationController.personalAllowance())
+     }
+   )
+  }
 
   //################### Personal Allowance methods #######################
   val personalAllowance = Action.async { implicit request =>
@@ -104,6 +113,16 @@ trait CalculationController extends FrontendController {
       case Some(data) => Ok(calculation.personalAllowance(personalAllowanceForm.fill(data)))
       case None => Ok(calculation.personalAllowance(personalAllowanceForm))
     }
+  }
+
+  val submitPersonalAllowance = Action { implicit request =>
+    personalAllowanceForm.bindFromRequest.fold(
+      errors => BadRequest(calculation.personalAllowance(errors)),
+      success => {
+        calcConnector.saveFormData("personalAllowance", success)
+        Redirect(routes.CalculationController.otherProperties())
+      }
+    )
   }
 
   //################### Other Properties methods #######################
@@ -190,6 +209,16 @@ trait CalculationController extends FrontendController {
     }
   }
 
+  val submitDisposalDate = Action { implicit request =>
+    disposalDateForm.bindFromRequest.fold(
+      errors => BadRequest(calculation.disposalDate(errors)),
+      success => {
+        calcConnector.saveFormData("disposalDate", success)
+        Redirect(routes.CalculationController.disposalValue())
+      }
+    )
+  }
+
   //################### Disposal Value methods #######################
   val disposalValue = Action.async { implicit request =>
     calcConnector.fetchAndGetFormData[DisposalValueModel]("disposalValue").map {
@@ -210,7 +239,18 @@ trait CalculationController extends FrontendController {
 
   //################### Acquisition Costs methods #######################
   val acquisitionCosts = Action.async { implicit request =>
-    Future.successful(Ok(calculation.acquisitionCosts()))
+    //TODO Missing jira task for keystore and form binding?
+    Future.successful(Ok(calculation.acquisitionCosts(acquisitionCostsForm)))
+  }
+
+  val submitAcquisitionCosts = Action { implicit request =>
+    acquisitionCostsForm.bindFromRequest.fold(
+      errors => BadRequest(calculation.acquisitionCosts(errors)),
+      success => {
+        calcConnector.saveFormData("acquisitionCosts", success)
+        Redirect(routes.CalculationController.disposalCosts())
+      }
+    )
   }
 
   //################### Disposal Costs methods #######################
@@ -227,6 +267,16 @@ trait CalculationController extends FrontendController {
       case Some(data) => Ok(calculation.entrepreneursRelief(entrepreneursReliefForm.fill(data)))
       case None => Ok(calculation.entrepreneursRelief(entrepreneursReliefForm))
     }
+  }
+
+  val submitEntrepreneursRelief = Action { implicit request =>
+    entrepreneursReliefForm.bindFromRequest.fold(
+      errors => BadRequest(calculation.entrepreneursRelief(errors)),
+      success => {
+        calcConnector.saveFormData("entrepreneursRelief", success)
+        Redirect(routes.CalculationController.allowableLosses())
+      }
+    )
   }
 
   //################### Allowable Losses methods #######################
@@ -253,6 +303,16 @@ trait CalculationController extends FrontendController {
       case Some(data) => Ok(calculation.otherReliefs(otherReliefsForm.fill(data)))
       case None => Ok(calculation.otherReliefs(otherReliefsForm))
     }
+  }
+
+  val submitOtherReliefs = Action { implicit request =>
+    otherReliefsForm.bindFromRequest.fold(
+      errors => BadRequest(calculation.otherReliefs(errors)),
+      success => {
+        calcConnector.saveFormData("otherReliefs", success)
+        Redirect(routes.CalculationController.summary())
+      }
+    )
   }
 
   //################### Summary Methods ##########################

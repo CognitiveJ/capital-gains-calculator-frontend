@@ -4,39 +4,47 @@
 @import play.api.i18n._
 @import uk.gov.hmrc.play.mappers.DateFormatSymbols._
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+@import java.text.SimpleDateFormat
 
+@fieldsetClasses = @{if(formItem.hasErrors) "form-field--error fields-aligned" else "" }
 
-
-@fieldsetClasses = @{if(formItem(fieldName).hasErrors) "form-field--error" else "" }
+@dayErrorClass = @{if(formItem(s"${fieldName}.day").hasErrors) "error-field" else "" }
+@monthErrorClass = @{if(formItem(s"${fieldName}.month").hasErrors) "error-field" else "" }
+@yearErrorClass = @{if(formItem(s"${fieldName}.year").hasErrors) "error-field" else "" }
 
 <fieldset class="form-group form-date @fieldsetClasses" id="@fieldName-fieldset">
 
-    <legend>@questionText</legend>
+    @formItem.errors.map { error => <span class="error-notification">@Messages(error.message)</span>}
 
-    @formItem(fieldName).errors.map { error => <span class="error-notification">@Messages(error.message)</span>}
+    <legend>@questionText</legend>
 
     <span class="form-hint">@Messages("calc.common.date.hint")</span>
 
-    @govHelpers.input(
+    @simpleNoErrorInput(
         formItem(s"${fieldName}.day"),
         '_label -> Messages("calc.common.date.fields.day"),
         '_labelClass -> "form-group form-group-day",
-        '_inputClass -> "form-control input--xsmall",
-        '_emptyValueText -> " "
+        '_inputClass -> s"input--xxsmall input--no-spinner ${dayErrorClass} ",
+        '_maxlength -> "2",
+        '_type -> "number"
     )
-    @govHelpers.input(
+
+    @simpleNoErrorInput(
         formItem(s"${fieldName}.month"),
         '_label -> Messages("calc.common.date.fields.month"),
         '_labelClass -> "form-group form-group-month",
-        '_inputClass -> "form-control input--xsmall",
-        '_emptyValueText -> " "
+        '_inputClass -> s"input--xxsmall input--no-spinner ${monthErrorClass} ",
+        '_maxlength -> "2",
+        '_type -> "number"
     )
-    @govHelpers.input(
+
+    @simpleNoErrorInput(
         formItem(s"${fieldName}.year"),
         '_label -> Messages("calc.common.date.fields.year"),
         '_labelClass -> "form-group form-group-year",
-        '_inputClass -> "form-control input--xsmall",
-        '_emptyValueText -> " "
+        '_inputClass -> s"input--small input--no-spinner ${yearErrorClass} ",
+        '_maxlength -> "4",
+        '_type -> "number"
     )
 
 </fieldset>
