@@ -23,6 +23,7 @@ import scala.concurrent.Future
 
 class ValidationSpec extends UnitSpec {
 
+  //############# Tests for isValidDate function ##########################################
   "calling common.Validation.isValidDate(day, month, year) " should {
 
     "with no day value supplied 'isValidDate(0,1,2016)' return false" in {
@@ -51,6 +52,44 @@ class ValidationSpec extends UnitSpec {
 
     "with valid  date 'isValidDate(12,09,1990)' return true" in {
       isValidDate(12,9,1990) shouldBe true
+    }
+  }
+
+
+  //############# Tests for isPositive function ##########################################
+  "calling common.Validation.isPositive(amount) " should {
+
+    "with a positive numeric supplied isPositive(1) return true" in {
+      isPositive(1) shouldBe true
+    }
+
+    "with Zero supplied return true" in {
+      isPositive(0) shouldBe true
+    }
+
+    "with Negative supplied return false" in {
+      isPositive(-1) shouldBe false
+    }
+  }
+
+
+  //############# Tests for isMaxTwoDecimalPlaces ##########################################
+  "calling common.Validation.isMaxTwoDecimalPlaces(amount) " should {
+
+    "with no decimals supplied isMaxTwoDecimalPlaces(1) return true" in {
+      isMaxTwoDecimalPlaces(1) shouldBe true
+    }
+
+    "with one decimal place supplied isMaxTwoDecimalPlaces(1.1) return true" in {
+      isMaxTwoDecimalPlaces(1.1) shouldBe true
+    }
+
+    "with two decimal places supplied isMaxTwoDecimalPlaces(1.11) return true" in {
+      isMaxTwoDecimalPlaces(1.11) shouldBe true
+    }
+
+    "with three decimal places supplied isMaxTwoDecimalPlaces(1.111) return false" in {
+      isMaxTwoDecimalPlaces(1.111) shouldBe false
     }
   }
 }

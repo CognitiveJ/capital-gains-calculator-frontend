@@ -30,4 +30,21 @@ object Validation {
       case e: Exception => false
     }
   }
+
+  def isMaxTwoDecimalPlaces(amount: BigDecimal): Boolean = {
+    try{
+      val splitAmount: Array[String] = amount.toString.split("\\.")
+      splitAmount(1).length <= 2
+    } catch {
+      case e: Exception => true
+    }
+  }
+
+  def isPositive(amount: BigDecimal): Boolean = {
+    try {
+      amount >= 0
+    } catch {
+      case e: Exception => true
+    }
+  }
 }
