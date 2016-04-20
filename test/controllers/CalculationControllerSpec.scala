@@ -1495,7 +1495,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
 
     "submitting a valid form" should {
-      val testModel = new AcquisitionCostsModel(1000)
+      val testModel = new AcquisitionCostsModel(Some(1000))
       object AcquisitionCostsTestDataItem extends fakeRequestToPost(
         "acquisition-costs",
         TestCalculationController.submitAcquisitionCosts,
@@ -1513,17 +1513,45 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       }
     }
 
-    "submitting an invalid form with no value" should {
-      val testModel = new AcquisitionCostsModel(0)
-      object AcquisitionCostsTestDataItem extends fakeRequestToPost(
-        "acquisition-costs",
-        TestCalculationController.submitAcquisitionCosts,
-        ("acquisitionCosts", "")
-      )
+    "submitting an invalid form" should {
+      val testModel = new AcquisitionCostsModel(Some(0))
 
-      "return a 400" in {
-        keystoreCacheCondition(testModel)
-        status(AcquisitionCostsTestDataItem.result) shouldBe 400
+      "with value -1" should {
+
+        object AcquisitionCostsTestDataItem extends fakeRequestToPost(
+          "acquisition-costs",
+          TestCalculationController.submitAcquisitionCosts,
+          ("acquisitionCosts", "-1")
+        )
+
+        "return a 400" in {
+          keystoreCacheCondition(testModel)
+          status(AcquisitionCostsTestDataItem.result) shouldBe 400
+        }
+
+        s"fail with message ${Messages("calc.common.money.error.negative")}" in {
+          keystoreCacheCondition(testModel)
+          AcquisitionCostsTestDataItem.jsoupDoc.getElementsByClass("error-notification").text should include (Messages("calc.common.money.error.negative"))
+        }
+      }
+
+      "with value 1.111" should {
+
+        object AcquisitionCostsTestDataItem extends fakeRequestToPost(
+          "acquisition-costs",
+          TestCalculationController.submitAcquisitionCosts,
+          ("acquisitionCosts", "1.111")
+        )
+
+        "return a 400" in {
+          keystoreCacheCondition(testModel)
+          status(AcquisitionCostsTestDataItem.result) shouldBe 400
+        }
+
+        s"fail with message ${Messages("calc.common.money.error.moreThan2dp")}" in {
+          keystoreCacheCondition(testModel)
+          AcquisitionCostsTestDataItem.jsoupDoc.getElementsByClass("error-notification").text should include(Messages("calc.common.money.error.moreThan2dp"))
+        }
       }
     }
   }

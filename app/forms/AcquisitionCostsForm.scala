@@ -19,12 +19,16 @@ package forms
 import play.api.data._
 import play.api.data.Forms._
 import models._
+import play.api.i18n.Messages
+import common.Validation._
 
 object AcquisitionCostsForm {
 
   val acquisitionCostsForm = Form(
     mapping(
-      "acquisitionCosts" -> bigDecimal
+      "acquisitionCosts" -> optional(bigDecimal)
+        .verifying(Messages("calc.common.money.error.negative"), costs => isPositive(costs.getOrElse(0)))
+        .verifying(Messages("calc.common.money.error.moreThan2dp"), costs => isMaxTwoDecimalPlaces(costs.getOrElse(0)))
     )(AcquisitionCostsModel.apply)(AcquisitionCostsModel.unapply)
   )
 

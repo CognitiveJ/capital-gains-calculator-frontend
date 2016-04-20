@@ -24,6 +24,8 @@ calc.common.date.error.invalidDate = You must supply a valid date
 calc.common.readMore = Read more
 calc.common.next.actions.heading = What to do next
 calc.common.invalidError = Invalid selection!
+calc.common.money.error.negative = You can''t provide us with a negative amount
+calc.common.money.error.moreThan2dp = You can''t use more than two decimal places
 
 ## Introduction ##
 calc.introduction.title = Introduction
