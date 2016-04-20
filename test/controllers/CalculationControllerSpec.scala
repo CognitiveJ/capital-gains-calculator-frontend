@@ -476,6 +476,20 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         status(PersonalAllowanceTestDataItem.result) shouldBe 400
       }
     }
+
+    "submitting an invalid form with a negative value of -342" should {
+      object PersonalAllowanceTestDataItem extends fakeRequestToPost(
+        "personal-allowance",
+        TestCalculationController.submitPersonalAllowance,
+        ("personalAllowance", "-342")
+      )
+      val testModel = new PersonalAllowanceModel(-342)
+
+      "return a 400" in {
+        keystoreCacheCondition[PersonalAllowanceModel](testModel)
+        status(PersonalAllowanceTestDataItem.result) shouldBe 400
+      }
+    }
   }
 
   //############## Other Properties tests ######################
