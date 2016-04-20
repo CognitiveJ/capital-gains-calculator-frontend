@@ -437,6 +437,47 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
   }
 
+  "In CalculationController calling the .submitPersonalAllowance action" when {
+    def keystoreCacheCondition[T](data: PersonalAllowanceModel): Unit = {
+      lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+      when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(returnedCacheMap))
+    }
+
+    "submitting a valid form" should {
+      object PersonalAllowanceTestDataItem extends fakeRequestToPost(
+        "personal-allowance",
+        TestCalculationController.submitPersonalAllowance,
+        ("personalAllowance", "1000")
+      )
+      val testModel = new PersonalAllowanceModel(1000)
+
+      "return a 303" in {
+        keystoreCacheCondition[PersonalAllowanceModel](testModel)
+        status(PersonalAllowanceTestDataItem.result) shouldBe 303
+      }
+
+      s"redirect to ${routes.CalculationController.otherProperties()}" in {
+        keystoreCacheCondition[PersonalAllowanceModel](testModel)
+        redirectLocation(PersonalAllowanceTestDataItem.result) shouldBe Some(s"${routes.CalculationController.otherProperties()}")
+      }
+    }
+
+    "submitting an invalid form with no value" should {
+      object PersonalAllowanceTestDataItem extends fakeRequestToPost(
+        "personal-allowance",
+        TestCalculationController.submitPersonalAllowance,
+        ("personalAllowance", "")
+      )
+      val testModel = new PersonalAllowanceModel(0)
+
+      "return a 400" in {
+        keystoreCacheCondition[PersonalAllowanceModel](testModel)
+        status(PersonalAllowanceTestDataItem.result) shouldBe 400
+      }
+    }
+  }
+
   //############## Other Properties tests ######################
   "In CalculationController calling the .otherProperties action " when {
 
@@ -871,7 +912,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         }
 
         "contain a hidden component with an input box" in {
-          ImprovementsTestDataItem.jsoupDoc.body.getElementById("improvementsAmt").parent.parent.parent.id shouldBe "hidden"
+          ImprovementsTestDataItem.jsoupDoc.body.getElementById("improvementsAmt").parent.parent.id shouldBe "hidden"
         }
       }
     }

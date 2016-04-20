@@ -114,6 +114,16 @@ trait CalculationController extends FrontendController {
     }
   }
 
+  val submitPersonalAllowance = Action { implicit request =>
+    personalAllowanceForm.bindFromRequest.fold(
+      errors => BadRequest(calculation.personalAllowance(errors)),
+      success => {
+        calcConnector.saveFormData("personalAllowance", success)
+        Redirect(routes.CalculationController.otherProperties())
+      }
+    )
+  }
+
   //################### Other Properties methods #######################
   val otherProperties = Action.async { implicit request =>
 

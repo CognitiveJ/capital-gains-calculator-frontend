@@ -25,7 +25,8 @@ GET         /current-income          controllers.CalculationController.currentIn
 POST        /current-income          controllers.CalculationController.submitCurrentIncome
 
 #Personal Allowance
-GET         /personal-allowance       controllers.CalculationController.personalAllowance
+GET         /personal-allowance      controllers.CalculationController.personalAllowance
+POST        /personal-allowance      controllers.CalculationController.submitPersonalAllowance
 
 #Other Properties
 GET         /other-properties        controllers.CalculationController.otherProperties
