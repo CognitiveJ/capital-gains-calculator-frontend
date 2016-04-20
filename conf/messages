@@ -16,6 +16,11 @@ calc.common.date.fields.day = Day
 calc.common.date.fields.month = Month
 calc.common.date.fields.year = Year
 calc.common.date.hint = For example, 4 9 2016
+calc.common.date.error.day.lessThan1 = Day must be greater than 0
+calc.common.date.error.day.greaterThan31 = Day must be less than 32
+calc.common.date.error.month.lessThan1 = Month must be greater than 0
+calc.common.date.error.month.greaterThan12 = Month must be less than 13
+calc.common.date.error.invalidDate = You must supply a valid date
 calc.common.readMore = Read more
 calc.common.next.actions.heading = What to do next
 calc.common.invalidError = Invalid selection!
@@ -83,6 +88,8 @@ calc.acquisitionValue.errorNegative = Acquisition value cannot be negative
 calc.improvements.question = Did you make any improvements to the property?
 calc.improvements.help = Improvements are permanent changes that raise the value of a property, like adding extensions or garages.
 calc.improvements.questionTwo = How much did the improvements cost?
+calc.improvements.error.no.value.supplied = Please provide a value for your improvements.
+calc.improvements.errorMin = The cost of the improvements cannot be negative.
 
 ## Disposal Date ##
 calc.disposalDate.question = When did you sign the contract that made someone else the owner?

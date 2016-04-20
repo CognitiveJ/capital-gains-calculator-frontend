@@ -20,10 +20,12 @@ import play.api.data._
 import play.api.data.Forms._
 import models._
 
-object EntrepreneursReliefForm {
-  val entrepreneursReliefForm = Form(
+object AcquisitionCostsForm {
+
+  val acquisitionCostsForm = Form(
     mapping(
-      "entrepreneursRelief" -> nonEmptyText
-    )(EntrepreneursReliefModel.apply)(EntrepreneursReliefModel.unapply)
+      "acquisitionCosts" -> bigDecimal
+    )(AcquisitionCostsModel.apply)(AcquisitionCostsModel.unapply)
   )
+
 }

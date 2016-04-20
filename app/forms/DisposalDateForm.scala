@@ -19,13 +19,20 @@ package forms
 import play.api.data._
 import play.api.data.Forms._
 import models._
+import common.Validation._
+import play.api.i18n.Messages
 
 object DisposalDateForm {
+
   val disposalDateForm = Form(
     mapping(
-        "disposalDate.day" -> number,
-        "disposalDate.month" -> number,
-        "disposalDate.year" -> number
-    )(DisposalDateModel.apply)(DisposalDateModel.unapply)
-  )
+      "disposalDate.day" -> number
+        .verifying(Messages("calc.common.date.error.day.lessThan1"), day => day > 0)
+        .verifying(Messages("calc.common.date.error.day.greaterThan31"), day => day < 32),
+      "disposalDate.month" -> number
+        .verifying(Messages("calc.common.date.error.month.lessThan1"), month => month > 0)
+        .verifying(Messages("calc.common.date.error.month.greaterThan12"), month => month < 13),
+      "disposalDate.year" -> number
+    )(DisposalDateModel.apply)(DisposalDateModel.unapply) verifying(Messages("calc.common.date.error.invalidDate"), fields =>
+      isValidDate(fields.day, fields.month, fields.year)))
 }

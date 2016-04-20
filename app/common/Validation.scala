@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-package forms
+package common
 
-import play.api.data._
-import play.api.data.Forms._
-import models._
+import java.text.SimpleDateFormat
 
-object EntrepreneursReliefForm {
-  val entrepreneursReliefForm = Form(
-    mapping(
-      "entrepreneursRelief" -> nonEmptyText
-    )(EntrepreneursReliefModel.apply)(EntrepreneursReliefModel.unapply)
-  )
+object Validation {
+
+  def isValidDate(day:Int,month:Int,year:Int): Boolean = {
+    try {
+      val fmt = new SimpleDateFormat("dd/MM/yyyy")
+      fmt.setLenient(false)
+      fmt.parse(s"${day}/${month}/${year}")
+      true
+    } catch {
+      case e: Exception => false
+    }
+  }
 }

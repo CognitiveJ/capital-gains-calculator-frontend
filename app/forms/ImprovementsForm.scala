@@ -19,13 +19,39 @@ package forms
 import play.api.data._
 import play.api.data.Forms._
 import models._
+import play.api.i18n.Messages
 
 object ImprovementsForm {
+
+  def verify(data: ImprovementsModel): Option[ImprovementsModel] = {
+    data.isClaimingImprovements match {
+      case "Yes" =>
+        if (data.improvementsAmt != None) {
+          Option(ImprovementsModel(data.isClaimingImprovements, data.improvementsAmt))
+        } else {
+          None
+        }
+      case "No" => Option(ImprovementsModel(data.isClaimingImprovements, None))
+    }
+  }
+
+  def validateMinimum(data: BigDecimal): Option[BigDecimal] = {
+    data match {
+      case data if data < 0 => None
+      case _ => Some(data)
+    }
+  }
 
   val improvementsForm = Form(
     mapping(
       "isClaimingImprovements" -> text,
       "improvementsAmt" -> optional(bigDecimal)
+        .verifying(
+        Messages("calc.improvements.errorMin"),
+        improvementsAmt => validateMinimum(improvementsAmt.getOrElse(0)).isDefined)
     )(ImprovementsModel.apply)(ImprovementsModel.unapply)
+      .verifying(
+        Messages("calc.improvements.error.no.value.supplied"),
+        improvementsForm => verify(ImprovementsModel(improvementsForm.isClaimingImprovements, improvementsForm.improvementsAmt)).isDefined)
   )
 }
