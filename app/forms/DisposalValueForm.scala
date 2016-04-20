@@ -19,11 +19,20 @@ package forms
 import play.api.data._
 import play.api.data.Forms._
 import models._
+import play.api.i18n.Messages
 
 object DisposalValueForm {
+
+  def validateMinimum(data: BigDecimal): Option[BigDecimal] = {
+    data match {
+      case data if data < 0 => None
+      case _ => Some(data)
+    }
+  }
+
   val disposalValueForm = Form(
     mapping(
-      "disposalValue" -> bigDecimal
+      "disposalValue" -> bigDecimal.verifying(Messages("calc.disposalValue.errorMin"), disposalValue => validateMinimum(disposalValue).isDefined)
     )(DisposalValueModel.apply)(DisposalValueModel.unapply)
   )
 }

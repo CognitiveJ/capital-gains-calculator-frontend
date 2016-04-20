@@ -16,14 +16,20 @@
 
 package forms
 
-import models.OtherPropertiesModel
-import play.api.data.Forms._
 import play.api.data._
+import play.api.data.Forms._
+import models._
+import play.api.i18n.Messages
+import common.Validation._
 
-object OtherPropertiesForm {
-  val otherPropertiesForm = Form (
+object AcquisitionCostsForm {
+
+  val acquisitionCostsForm = Form(
     mapping(
-      "otherProperties" -> nonEmptyText
-    )(OtherPropertiesModel.apply)(OtherPropertiesModel.unapply)
+      "acquisitionCosts" -> optional(bigDecimal)
+        .verifying(Messages("calc.common.money.error.negative"), costs => isPositive(costs.getOrElse(0)))
+        .verifying(Messages("calc.common.money.error.moreThan2dp"), costs => isMaxTwoDecimalPlaces(costs.getOrElse(0)))
+    )(AcquisitionCostsModel.apply)(AcquisitionCostsModel.unapply)
   )
+
 }

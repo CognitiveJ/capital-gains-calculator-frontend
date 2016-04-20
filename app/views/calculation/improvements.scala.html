@@ -10,7 +10,7 @@
 
     @govHelpers.form(action = routes.CalculationController.submitImprovements) {
 
-        @formHiddenYesNoRadio(improvementsForm, "isClaimingImprovements", Messages("calc.improvements.question"), formInputMoney(improvementsForm, "improvementsAmt", Messages("calc.improvements.questionTwo")), Option(Messages("calc.improvements.help")))
+        @formHiddenYesNoRadio(improvementsForm, "isClaimingImprovements", Messages("calc.improvements.question"), simpleNoErrorInput(improvementsForm("improvementsAmt"), '_label -> Messages("calc.improvements.questionTwo"), '_inputHint -> Option(Messages("calc.improvements.help")).getOrElse(""), '_dataAttributes -> "placeholder = £"))
 
         <button class="button" type="submit" id="continue-button">@Messages("calc.base.continue")</button>
     }

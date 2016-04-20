@@ -23,7 +23,7 @@ import models._
 object EntrepreneursReliefForm {
   val entrepreneursReliefForm = Form(
     mapping(
-      "entrepreneursRelief" -> text
+      "entrepreneursRelief" -> nonEmptyText
     )(EntrepreneursReliefModel.apply)(EntrepreneursReliefModel.unapply)
   )
 }

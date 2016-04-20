@@ -48,7 +48,7 @@ object ImprovementsForm {
       "improvementsAmt" -> optional(bigDecimal)
         .verifying(
         Messages("calc.improvements.errorMin"),
-        improvementsAmt => validateMinimum(improvementsAmt.get).isDefined)
+        improvementsAmt => validateMinimum(improvementsAmt.getOrElse(0)).isDefined)
     )(ImprovementsModel.apply)(ImprovementsModel.unapply)
       .verifying(
         Messages("calc.improvements.error.no.value.supplied"),

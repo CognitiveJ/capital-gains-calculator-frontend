@@ -16,9 +16,16 @@ calc.common.date.fields.day = Day
 calc.common.date.fields.month = Month
 calc.common.date.fields.year = Year
 calc.common.date.hint = For example, 4 9 2016
+calc.common.date.error.day.lessThan1 = Day must be greater than 0
+calc.common.date.error.day.greaterThan31 = Day must be less than 32
+calc.common.date.error.month.lessThan1 = Month must be greater than 0
+calc.common.date.error.month.greaterThan12 = Month must be less than 13
+calc.common.date.error.invalidDate = You must supply a valid date
 calc.common.readMore = Read more
 calc.common.next.actions.heading = What to do next
 calc.common.invalidError = Invalid selection!
+calc.common.money.error.negative = You can''t provide us with a negative amount
+calc.common.money.error.moreThan2dp = You can''t use more than two decimal places
 
 ## Introduction ##
 calc.introduction.title = Introduction
@@ -59,11 +66,13 @@ calc.currentIncome.question = In the tax year when you stopped owning the proper
 calc.currentIncome.link.one = Income Tax
 calc.currentIncome.link.two = Previous tax years
 calc.currentIncome.helpText = Tax years start on 6 April
+calc.currentIncome.errorNegative = Current income cannot be negative
 
 ## Personal Allowance ##
 calc.personalAllowance.question = In the tax year when you stopped owning the property, what was your UK Personal Allowance?
 calc.personalAllowance.linkOne = Income Tax rates and Personal Allowances
 calc.personalAllowance.linkTwo = Tax on your UK income if you live abroad
+calc.personalAllowance.errorNegative = Your Personal Allowance cannot be negative.
 
 ## Other Properties ##
 calc.otherProperties.question = Did you sell or give away any other properties in that tax year?
@@ -90,6 +99,7 @@ calc.disposalDate.question = When did you sign the contract that made someone el
 
 ## Disposal Value ##
 calc.disposalValue.question = How much did you sell or give away the property for?
+calc.disposalValue.errorMin = Disposal value cannot be negative
 
 ## Acquisition Costs ##
 calc.acquisitionCosts.question = How much did you pay in costs when you became the property owner?
