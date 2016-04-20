@@ -194,7 +194,7 @@ trait CalculationController extends FrontendController {
     disposalDateForm.bindFromRequest.fold(
       errors => BadRequest(calculation.disposalDate(errors)),
       success => {
-        calcConnector.saveFormData("acquisitionValue", success)
+        calcConnector.saveFormData("disposalDate", success)
         Redirect(routes.CalculationController.disposalValue())
       }
     )
