@@ -1,4 +1,5 @@
 @import models.DisposalCostsModel
+@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 @import views.html.helpers._
 
 @(disposalCostsForm: Form[DisposalCostsModel])(implicit request: Request[_])
@@ -7,8 +8,11 @@
     <a id="link-back" class="link-back" href="@routes.CalculationController.otherProperties">Back</a>
     <h1 class="heading-large">@Messages("calc.base.pageHeading")</h1>
 
-    @formInputMoney(disposalCostsForm, "disposalCosts", Messages("calc.disposalCosts.question"))
+    @govHelpers.form(action = routes.CalculationController.submitDisposalCosts) {
 
-    <button class="button" type="submit" id="continue-button">@Messages("calc.base.continue")</button>
+        @formInputMoney(disposalCostsForm, "disposalCosts", Messages("calc.disposalCosts.question"))
 
+        <button class="button" type="submit" id="continue-button">@Messages("calc.base.continue")</button>
+
+    }
 }

@@ -58,6 +58,7 @@ POST        /acquisition-costs       controllers.CalculationController.submitAcq
 
 #Disposal Costs
 GET         /disposal-costs          controllers.CalculationController.disposalCosts
+POST        /disposal-costs          controllers.CalculationController.submitDisposalCosts
 
 #Entrepreneurs Relief
 GET         /entrepreneurs-relief    controllers.CalculationController.entrepreneursRelief

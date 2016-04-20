@@ -1602,8 +1602,48 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           DisposalCostsTestDataItem.jsoupDoc.getElementById("disposalCosts").attr("value") shouldEqual ("1000")
         }
       }
-
     }
+
+    "In CalculationController calling the .submitDisposalCosts action" when {
+      def keystoreCacheCondition[T](data: DisposalCostsModel): Unit = {
+        lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+        when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+          .thenReturn(Future.successful(returnedCacheMap))
+      }
+
+      "submitting a valid form" should {
+        val disposalCostsTestModel = new DisposalCostsModel(1000)
+        object DisposalCostsTestDataItem extends fakeRequestToPost(
+          "disposal-costs",
+          TestCalculationController.submitDisposalCosts,
+          ("disposalCosts", "1000")
+        )
+
+        "return a 303" in {
+          keystoreCacheCondition(disposalCostsTestModel)
+          status(DisposalCostsTestDataItem.result) shouldBe 303
+        }
+
+        s"redirect to ${routes.CalculationController.entrepreneursRelief()}" in {
+          keystoreCacheCondition[DisposalCostsModel](disposalCostsTestModel)
+          redirectLocation(DisposalCostsTestDataItem.result) shouldBe Some(s"${routes.CalculationController.entrepreneursRelief()}")
+        }
+      }
+
+      "submitting an invalid form with no value" should {
+        val disposalCostsTestModel = new DisposalCostsModel(0)
+        object DisposalCostsTestDataItem extends fakeRequestToPost(
+          "disposal-costs",
+          TestCalculationController.submitDisposalCosts,
+          ("disposalCosts", "")
+        )
+
+        "return a 400" in {
+          keystoreCacheCondition(disposalCostsTestModel)
+          status(DisposalCostsTestDataItem.result) shouldBe 400
+        }
+
+
   }
 
   //################### Entrepreneurs Relief tests #######################
