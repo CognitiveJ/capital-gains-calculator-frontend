@@ -24,8 +24,6 @@ calc.common.date.error.invalidDate = You must supply a valid date
 calc.common.readMore = Read more
 calc.common.next.actions.heading = What to do next
 calc.common.invalidError = Invalid selection!
-calc.common.money.error.negative = You can''t provide us with a negative amount
-calc.common.money.error.moreThan2dp = You can''t use more than two decimal places
 
 ## Introduction ##
 calc.introduction.title = Introduction
@@ -66,13 +64,15 @@ calc.currentIncome.question = In the tax year when you stopped owning the proper
 calc.currentIncome.link.one = Income Tax
 calc.currentIncome.link.two = Previous tax years
 calc.currentIncome.helpText = Tax years start on 6 April
-calc.currentIncome.errorNegative = Current income cannot be negative
+calc.currentIncome.errorNegative = Current income can''t be negative
+calc.currentIncome.errorDecimalPlaces = Current income has too many decimal numbers
 
 ## Personal Allowance ##
 calc.personalAllowance.question = In the tax year when you stopped owning the property, what was your UK Personal Allowance?
 calc.personalAllowance.linkOne = Income Tax rates and Personal Allowances
 calc.personalAllowance.linkTwo = Tax on your UK income if you live abroad
-calc.personalAllowance.errorNegative = Your Personal Allowance cannot be negative.
+calc.personalAllowance.errorNegative = Your Personal Allowance can''t be negative
+calc.personalAllowance.errorDecimalPlaces = Your Personal Allowance has too many decimal places
 
 ## Other Properties ##
 calc.otherProperties.question = Did you sell or give away any other properties in that tax year?
@@ -81,29 +81,36 @@ calc.otherProperties.question = Did you sell or give away any other properties i
 calc.annualExemptAmount.question = How much of your Capital Gains Tax allowance have you got left?
 calc.annualExemptAmount.link.one = Capital Gains Tax allowances
 calc.annualExemptAmount.errorMax = Maximum allowance is £11000
-calc.annualExemptAmount.errorMin = Allowance cannot be negative
+calc.annualExemptAmount.errorNegative = Allowance can''t be negative
+calc.annualExemptAmount.errorDecimalPlaces = Allowance has too many decimal numbers
 
 ## Acquisition Value ##
 calc.acquisitionValue.question = How much did you pay for the property?
-calc.acquisitionValue.errorNegative = Acquisition value cannot be negative
+calc.acquisitionValue.errorNegative = Acquisition value can''t be negative
+calc.acquisitionValue.errorDecimalPlaces = Acquisition value has too many decimal numbers
 
 ## Improvements ##
 calc.improvements.question = Did you make any improvements to the property?
 calc.improvements.help = Improvements are permanent changes that raise the value of a property, like adding extensions or garages.
 calc.improvements.questionTwo = How much did the improvements cost?
 calc.improvements.error.no.value.supplied = Please provide a value for your improvements.
-calc.improvements.errorMin = The cost of the improvements cannot be negative.
+calc.improvements.errorNegative = The cost of the improvements can''t be negative
+calc.improvements.errorDecimalPlaces = The cost of the improvements has too many decimal numbers
+
 
 ## Disposal Date ##
 calc.disposalDate.question = When did you sign the contract that made someone else the owner?
 
 ## Disposal Value ##
 calc.disposalValue.question = How much did you sell or give away the property for?
-calc.disposalValue.errorMin = Disposal value cannot be negative
+calc.disposalValue.errorNegative = Disposal value can''t be negative
+calc.disposalValue.errorDecimalPlaces = Disposal value has too many decimal numbers
 
 ## Acquisition Costs ##
 calc.acquisitionCosts.question = How much did you pay in costs when you became the property owner?
 calc.acquisitionCosts.helpText = Costs include agent fees, legal fees and surveys
+calc.acquisitionCosts.errorNegative = The costs can''t be negative
+calc.acquisitionCosts.errorDecimalPlaces = The costs have too many decimal numbers
 
 ## Disposal Costs ##
 calc.disposalCosts.question = How much did you pay in costs when you stopped being the property owner?

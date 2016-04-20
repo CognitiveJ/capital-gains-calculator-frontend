@@ -20,20 +20,15 @@ import play.api.data._
 import play.api.data.Forms._
 import models._
 import play.api.i18n.Messages
+import common.Validation._
 
 object AcquisitionValueForm {
-
-  def validatePositive(data: BigDecimal): Option[BigDecimal] = {
-    data match {
-      case data if data < 0 => None
-      case _ => Some(data)
-    }
-  }
 
   val acquisitionValueForm = Form(
     mapping(
       "acquisitionValue" -> bigDecimal
-        .verifying(Messages("calc.acquisitionValue.errorNegative"), acquisitionValue => validatePositive(acquisitionValue).isDefined)
+        .verifying(Messages("calc.acquisitionValue.errorNegative"), acquisitionValue => isPositive(acquisitionValue))
+        .verifying(Messages("calc.acquisitionValue.errorDecimalPlaces"), acquisitionValue => isMaxTwoDecimalPlaces(acquisitionValue))
     )(AcquisitionValueModel.apply)(AcquisitionValueModel.unapply)
   )
 }
