@@ -1,5 +1,7 @@
 @import models.DisposalValueModel
 @import views.html.helpers._
+@import play.api.data._
+@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 
 @(disposalValueForm: Form[DisposalValueModel])(implicit request: Request[_])
 
@@ -7,7 +9,11 @@
     <a id="link-back" class="link-back" href="@routes.CalculationController.improvements">@Messages("calc.base.back")</a>
     <h1 class="heading-large">@Messages("calc.base.calculate.tax.heading")</h1>
 
-    @formInputMoney(disposalValueForm, "disposalValue", Messages("calc.disposalValue.question"))
+    @govHelpers.form(action = routes.CalculationController.submitDisposalValue) {
 
-    <button id="continue-button" class="button">@Messages("calc.base.button.continue")</button>
+        @formInputMoney(disposalValueForm, "disposalValue", Messages("calc.disposalValue.question"))
+
+        <button id="continue-button" class="button">@Messages("calc.base.button.continue")</button>
+
+    }
 }

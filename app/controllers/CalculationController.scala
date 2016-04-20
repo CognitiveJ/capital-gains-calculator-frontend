@@ -31,6 +31,7 @@ import forms.EntrepreneursReliefForm._
 import forms.DisposalCostsForm._
 import forms.ImprovementsForm._
 import forms.PersonalAllowanceForm._
+import forms.CurrentIncomeForm._
 
 import models._
 import play.api.mvc.Action
@@ -89,7 +90,10 @@ trait CalculationController extends FrontendController {
 
   //################### Current Income methods #######################
   val currentIncome = Action.async { implicit request =>
-    Future.successful(Ok(calculation.currentIncome()))
+    calcConnector.fetchAndGetFormData[CurrentIncomeModel]("currentIncome").map {
+      case Some(data) => Ok(calculation.currentIncome(currentIncomeForm.fill(data)))
+      case None => Ok(calculation.currentIncome(currentIncomeForm))
+    }
   }
 
 
@@ -194,6 +198,16 @@ trait CalculationController extends FrontendController {
     }
   }
 
+  val submitDisposalValue = Action { implicit request =>
+    disposalValueForm.bindFromRequest.fold(
+      errors => BadRequest(calculation.disposalValue(errors)),
+      success => {
+        calcConnector.saveFormData("disposalValue", success)
+        Redirect(routes.CalculationController.acquisitionCosts())
+      }
+    )
+  }
+
   //################### Acquisition Costs methods #######################
   val acquisitionCosts = Action.async { implicit request =>
     Future.successful(Ok(calculation.acquisitionCosts()))
@@ -249,6 +263,16 @@ trait CalculationController extends FrontendController {
       case Some(data) => Ok(calculation.otherReliefs(otherReliefsForm.fill(data)))
       case None => Ok(calculation.otherReliefs(otherReliefsForm))
     }
+  }
+
+  val submitOtherReliefs = Action { implicit request =>
+    otherReliefsForm.bindFromRequest.fold(
+      errors => BadRequest(calculation.otherReliefs(errors)),
+      success => {
+        calcConnector.saveFormData("otherReliefs", success)
+        Redirect(routes.CalculationController.summary())
+      }
+    )
   }
 
   //################### Summary Methods ##########################
