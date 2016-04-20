@@ -560,7 +560,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
     "submitting a valid form with 'Yes'" should {
       object OtherPropertiesTestDataItem extends fakeRequestToPost(
-        "allowance",
+        "other-properties",
         TestCalculationController.submitOtherProperties,
         ("otherProperties", "Yes")
       )
@@ -574,7 +574,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
     "submitting a valid form with 'No'" should {
       object OtherPropertiesTestDataItem extends fakeRequestToPost(
-        "allowance",
+        "other-properties",
         TestCalculationController.submitOtherProperties,
         ("otherProperties", "No")
       )
@@ -588,14 +588,14 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
     "submitting an invalid form" should {
       object OtherPropertiesTestDataItem extends fakeRequestToPost(
-        "allowance",
+        "other-properties",
         TestCalculationController.submitOtherProperties,
-        ("annualExemptAmount", "")
+        ("otherProperties", "")
       )
       val testModel = new OtherPropertiesModel("")
 
       "return a 400" in {
-        keystoreCacheCondition[AnnualExemptAmountModel](testModel)
+        keystoreCacheCondition[OtherPropertiesModel](testModel)
         status(OtherPropertiesTestDataItem.result) shouldBe 400
       }
     }
