@@ -261,6 +261,16 @@ trait CalculationController extends FrontendController {
     }
   }
 
+  val submitDisposalCosts = Action { implicit request =>
+    disposalCostsForm.bindFromRequest.fold(
+      errors => BadRequest(calculation.disposalCosts(errors)),
+      success => {
+        calcConnector.saveFormData("disposalCosts", success)
+        Redirect(routes.CalculationController.entrepreneursRelief())
+      }
+    )
+  }
+
   //################### Entrepreneurs Relief methods #######################
   val entrepreneursRelief = Action.async { implicit request =>
     calcConnector.fetchAndGetFormData[EntrepreneursReliefModel]("entrepreneursRelief").map {
