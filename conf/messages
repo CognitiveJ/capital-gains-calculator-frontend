@@ -72,7 +72,7 @@ calc.personalAllowance.question = In the tax year when you stopped owning the pr
 calc.personalAllowance.linkOne = Income Tax rates and Personal Allowances
 calc.personalAllowance.linkTwo = Tax on your UK income if you live abroad
 calc.personalAllowance.errorNegative = Your Personal Allowance can''t be negative
-calc.personalAllowance.errorDecimalPlaces = Your Personal Allowance has too many decimal places
+calc.personalAllowance.errorDecimalPlaces = Your Personal Allowance has too many decimal numbers
 
 ## Other Properties ##
 calc.otherProperties.question = Did you sell or give away any other properties in that tax year?
