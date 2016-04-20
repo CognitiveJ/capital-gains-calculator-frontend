@@ -1405,7 +1405,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       "have a monetary field that" should {
 
         "have the title 'How much did you pay in costs when you became the property owner?'" in {
-          AcquisitionCostsTestDataItem.jsoupDoc.select("label[for=acquisitionCosts]").text shouldEqual Messages("calc.acquisitionCosts.question")
+          AcquisitionCostsTestDataItem.jsoupDoc.select("label[for=acquisitionCosts]").text.contains(Messages("calc.acquisitionCosts.question")) shouldBe true
         }
 
         "have the help text 'Costs include agent fees, legal fees and surveys'" in {
@@ -1426,6 +1426,47 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         "have the text 'Continue'" in {
           AcquisitionCostsTestDataItem.jsoupDoc.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
         }
+      }
+    }
+  }
+
+  "In CalculationController calling the .submitAcquisitionCosts action" when {
+    def keystoreCacheCondition[T](data: AcquisitionCostsModel): Unit = {
+      lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+      when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(returnedCacheMap))
+    }
+
+    "submitting a valid form" should {
+      val testModel = new AcquisitionCostsModel(1000)
+      object AcquisitionCostsTestDataItem extends fakeRequestToPost(
+        "acquisition-costs",
+        TestCalculationController.submitAcquisitionCosts,
+        ("acquisitionCosts", "1000")
+      )
+
+      "return a 303" in {
+        keystoreCacheCondition(testModel)
+        status(AcquisitionCostsTestDataItem.result) shouldBe 303
+      }
+
+      s"redirect to ${routes.CalculationController.disposalCosts()}" in {
+        keystoreCacheCondition[AcquisitionCostsModel](testModel)
+        redirectLocation(AcquisitionCostsTestDataItem.result) shouldBe Some(s"${routes.CalculationController.disposalCosts()}")
+      }
+    }
+
+    "submitting an invalid form with no value" should {
+      val testModel = new AcquisitionCostsModel(0)
+      object AcquisitionCostsTestDataItem extends fakeRequestToPost(
+        "acquisition-costs",
+        TestCalculationController.submitAcquisitionCosts,
+        ("acquisitionCosts", "")
+      )
+
+      "return a 400" in {
+        keystoreCacheCondition(testModel)
+        status(AcquisitionCostsTestDataItem.result) shouldBe 400
       }
     }
   }

@@ -54,6 +54,7 @@ POST        /disposal-value          controllers.CalculationController.submitDis
 
 #Acquisition Costs
 GET         /acquisition-costs       controllers.CalculationController.acquisitionCosts
+POST        /acquisition-costs       controllers.CalculationController.submitAcquisitionCosts
 
 #Disposal Costs
 GET         /disposal-costs          controllers.CalculationController.disposalCosts
