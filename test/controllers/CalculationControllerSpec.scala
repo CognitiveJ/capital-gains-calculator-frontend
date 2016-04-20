@@ -476,6 +476,20 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         status(PersonalAllowanceTestDataItem.result) shouldBe 400
       }
     }
+
+    "submitting an invalid form with a negative value of -342" should {
+      object PersonalAllowanceTestDataItem extends fakeRequestToPost(
+        "personal-allowance",
+        TestCalculationController.submitPersonalAllowance,
+        ("personalAllowance", "-342")
+      )
+      val testModel = new PersonalAllowanceModel(-342)
+
+      "return a 400" in {
+        keystoreCacheCondition[PersonalAllowanceModel](testModel)
+        status(PersonalAllowanceTestDataItem.result) shouldBe 400
+      }
+    }
   }
 
   //############## Other Properties tests ######################
@@ -560,7 +574,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
     "submitting a valid form with 'Yes'" should {
       object OtherPropertiesTestDataItem extends fakeRequestToPost(
-        "allowance",
+        "other-properties",
         TestCalculationController.submitOtherProperties,
         ("otherProperties", "Yes")
       )
@@ -574,7 +588,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
     "submitting a valid form with 'No'" should {
       object OtherPropertiesTestDataItem extends fakeRequestToPost(
-        "allowance",
+        "other-properties",
         TestCalculationController.submitOtherProperties,
         ("otherProperties", "No")
       )
@@ -588,14 +602,14 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
     "submitting an invalid form" should {
       object OtherPropertiesTestDataItem extends fakeRequestToPost(
-        "allowance",
+        "other-properties",
         TestCalculationController.submitOtherProperties,
-        ("annualExemptAmount", "")
+        ("otherProperties", "")
       )
       val testModel = new OtherPropertiesModel("")
 
       "return a 400" in {
-        keystoreCacheCondition[AnnualExemptAmountModel](testModel)
+        keystoreCacheCondition[OtherPropertiesModel](testModel)
         status(OtherPropertiesTestDataItem.result) shouldBe 400
       }
     }
@@ -1394,6 +1408,20 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         "disposal-value",
         TestCalculationController.submitDisposalValue,
         ("disposalValue", "")
+      )
+
+      "return a 400" in {
+        keystoreCacheCondition(testModel)
+        status(DisposalValueTestDataItem.result) shouldBe 400
+      }
+    }
+
+    "submitting an invalid form with a negative value" should {
+      val testModel = new DisposalValueModel(-1000)
+      object DisposalValueTestDataItem extends fakeRequestToPost (
+        "disposal-value",
+        TestCalculationController.submitDisposalValue,
+        ("disposalValue", "-1000")
       )
 
       "return a 400" in {
@@ -2213,12 +2241,25 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       }
     }
 
-    "submitting an invalid form" should {
+    "submitting an invalid form with no data" should {
       val testModel = new CurrentIncomeModel(0)
       object CurrentIncomeTestDataItem extends fakeRequestToPost(
         "current-income",
         TestCalculationController.submitCurrentIncome,
         ("currentIncome", "")
+      )
+
+      "return a 400" in {
+        status(CurrentIncomeTestDataItem.result) shouldBe 400
+      }
+    }
+
+    "submitting an invalid form with a negative value" should {
+      val testModel = new CurrentIncomeModel(-1000)
+      object CurrentIncomeTestDataItem extends fakeRequestToPost(
+        "current-income",
+        TestCalculationController.submitCurrentIncome,
+        ("currentIncome", "-1000")
       )
 
       "return a 400" in {

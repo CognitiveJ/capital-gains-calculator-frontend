@@ -66,11 +66,13 @@ calc.currentIncome.question = In the tax year when you stopped owning the proper
 calc.currentIncome.link.one = Income Tax
 calc.currentIncome.link.two = Previous tax years
 calc.currentIncome.helpText = Tax years start on 6 April
+calc.currentIncome.errorNegative = Current income cannot be negative
 
 ## Personal Allowance ##
 calc.personalAllowance.question = In the tax year when you stopped owning the property, what was your UK Personal Allowance?
 calc.personalAllowance.linkOne = Income Tax rates and Personal Allowances
 calc.personalAllowance.linkTwo = Tax on your UK income if you live abroad
+calc.personalAllowance.errorNegative = Your Personal Allowance cannot be negative.
 
 ## Other Properties ##
 calc.otherProperties.question = Did you sell or give away any other properties in that tax year?
@@ -97,6 +99,7 @@ calc.disposalDate.question = When did you sign the contract that made someone el
 
 ## Disposal Value ##
 calc.disposalValue.question = How much did you sell or give away the property for?
+calc.disposalValue.errorMin = Disposal value cannot be negative
 
 ## Acquisition Costs ##
 calc.acquisitionCosts.question = How much did you pay in costs when you became the property owner?
