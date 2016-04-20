@@ -934,6 +934,17 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       }
     }
 
+    "submitting a valid form with 'No' and no value" should {
+      object ImprovementsTestDataItem extends fakeRequestToPost("improvements", TestCalculationController.submitImprovements, ("isClaimingImprovements", "No"), ("improvementsAmt", ""))
+      //This model actually has no bearing on the tes but the cachemap it produces is required.
+      val improvementsTestModel = new ImprovementsModel("No", None)
+
+      "return a 303" in {
+        keystoreCacheCondition[ImprovementsModel](improvementsTestModel)
+        status(ImprovementsTestDataItem.result) shouldBe 303
+      }
+    }
+
     "submitting an invalid form with 'Yes' and a value of 'fhu39awd8'" should {
       object ImprovementsTestDataItem extends fakeRequestToPost("improvements", TestCalculationController.submitImprovements, ("isClaimingImprovements", "Yes"), ("improvementsAmt", "fhu39awd8"))
       //This model actually has no bearing on the tes but the cachemap it produces is required.
@@ -963,6 +974,24 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         ImprovementsTestDataItem.jsoupDoc.select("div#hidden span.error-notification").text shouldEqual "The cost of the improvements cannot be negative."
       }
     }
+
+
+    "submitting an invalid form with 'Yes' and an empty value'" should {
+      object ImprovementsTestDataItem extends fakeRequestToPost("improvements", TestCalculationController.submitImprovements, ("isClaimingImprovements", "Yes"), ("improvementsAmt", ""))
+      //This model actually has no bearing on the tes but the cachemap it produces is required.
+      val improvementsTestModel = new ImprovementsModel("Yes", Some(-100))
+
+      "return a 400" in {
+        keystoreCacheCondition[ImprovementsModel](improvementsTestModel)
+        status(ImprovementsTestDataItem.result) shouldBe 400
+      }
+
+      "return HTML that displays the error message " in {
+        ImprovementsTestDataItem.jsoupDoc.select("div#hidden span.error-notification").text shouldEqual Messages("calc.improvements.error.no.value.supplied")
+      }
+    }
+
+
   }
 
   //################### Disposal Date tests #######################
