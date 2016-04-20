@@ -64,6 +64,7 @@ calc.currentIncome.question = In the tax year when you stopped owning the proper
 calc.currentIncome.link.one = Income Tax
 calc.currentIncome.link.two = Previous tax years
 calc.currentIncome.helpText = Tax years start on 6 April
+calc.currentIncome.errorNegative = Current income cannot be negative
 
 ## Personal Allowance ##
 calc.personalAllowance.question = In the tax year when you stopped owning the property, what was your UK Personal Allowance?

@@ -2185,12 +2185,25 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       }
     }
 
-    "submitting an invalid form" should {
+    "submitting an invalid form with no data" should {
       val testModel = new CurrentIncomeModel(0)
       object CurrentIncomeTestDataItem extends fakeRequestToPost(
         "current-income",
         TestCalculationController.submitCurrentIncome,
         ("currentIncome", "")
+      )
+
+      "return a 400" in {
+        status(CurrentIncomeTestDataItem.result) shouldBe 400
+      }
+    }
+
+    "submitting an invalid form with a negative value" should {
+      val testModel = new CurrentIncomeModel(-1000)
+      object CurrentIncomeTestDataItem extends fakeRequestToPost(
+        "current-income",
+        TestCalculationController.submitCurrentIncome,
+        ("currentIncome", "-1000")
       )
 
       "return a 400" in {
