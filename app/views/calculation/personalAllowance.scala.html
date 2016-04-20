@@ -5,8 +5,14 @@
 @(personalAllowanceForm: Form[PersonalAllowanceModel])(implicit request: Request[_])
 
 @sidebar = {
-    <a href="https://www.gov.uk/income-tax-rates/current-rates-and-allowances" target="_blank">@Messages("calc.personalAllowance.linkOne")</a>
-    <a href="https://www.gov.uk/tax-uk-income-live-abroad/personal-allowance" target="_blank">@Messages("calc.personalAllowance.linkTwo")</a>
+    <ul>
+        <li>
+            <a href="https://www.gov.uk/income-tax-rates/current-rates-and-allowances" target="_blank">@Messages("calc.personalAllowance.linkOne")</a>
+        </li>
+        <li>
+            <a href="https://www.gov.uk/tax-uk-income-live-abroad/personal-allowance" target="_blank">@Messages("calc.personalAllowance.linkTwo")</a>
+        </li>
+    </ul>
 }
 
 @main_template(Messages("calc.personalAllowance.question"), sidebarLinks = Some(sidebar)) {
