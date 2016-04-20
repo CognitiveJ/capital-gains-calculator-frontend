@@ -96,6 +96,7 @@ calc.disposalDate.question = When did you sign the contract that made someone el
 
 ## Disposal Value ##
 calc.disposalValue.question = How much did you sell or give away the property for?
+calc.disposalValue.errorMin = Disposal value cannot be negative
 
 ## Acquisition Costs ##
 calc.acquisitionCosts.question = How much did you pay in costs when you became the property owner?
