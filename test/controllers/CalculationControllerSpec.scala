@@ -1543,6 +1543,46 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
   }
 
+  "In CalculationController calling the .submitEntrepreneursRelief action" when {
+    def keystoreCacheCondition[T](data: EntrepreneursReliefModel): Unit = {
+      lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+      when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(returnedCacheMap))
+    }
+    "submitting a valid form with 'Yes'" should {
+      object EntrepreneursReliefTestDataItem extends fakeRequestToPost(
+        "entrepreneurs-relief",
+        TestCalculationController.submitEntrepreneursRelief,
+        ("entrepreneursRelief", "yes")
+      )
+      val testModel = new EntrepreneursReliefModel("Yes")
+
+      "return a 303" in {
+        keystoreCacheCondition[EntrepreneursReliefModel](testModel)
+        status(EntrepreneursReliefTestDataItem.result) shouldBe 303
+      }
+
+      s"redirect to ${routes.CalculationController.allowableLosses()}" in {
+        keystoreCacheCondition[EntrepreneursReliefModel](testModel)
+        redirectLocation(EntrepreneursReliefTestDataItem.result) shouldBe Some(s"${routes.CalculationController.allowableLosses()}")
+      }
+    }
+
+    "submitting an invalid form with no data" should {
+      object EntrepreneursReliefTestDataItem extends fakeRequestToPost(
+        "entrepreneurs-relief",
+        TestCalculationController.submitEntrepreneursRelief,
+        ("entrepreneursRelief", "")
+      )
+      val testModel = new EntrepreneursReliefModel("")
+
+      "return a 400" in {
+        keystoreCacheCondition[EntrepreneursReliefModel](testModel)
+        status(EntrepreneursReliefTestDataItem.result) shouldBe 400
+      }
+    }
+  }
+
 
   //################### Allowable Losses tests #######################
   "In CalculationController calling the .allowableLosses action " when {
