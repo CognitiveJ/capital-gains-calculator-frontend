@@ -16,19 +16,28 @@
 
 package connectors
 
-import config.CalculatorSessionCache
+import config.{CalculatorSessionCache, WSHttp}
+import models.CalculationResultModel
 import play.api.libs.json.Format
-import uk.gov.hmrc.http.cache.client.{SessionCache, CacheMap}
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.cache.client.{CacheMap, SessionCache}
+import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet, HttpResponse}
+
 import scala.concurrent.Future
 
-object CalculatorConnector extends CalculatorConnector {
-  val sessionCache = CalculatorSessionCache
+object CalculatorConnector extends CalculatorConnector with ServicesConfig {
+  override val sessionCache = CalculatorSessionCache
+  override val http = WSHttp
+  override val serviceUrl = baseUrl("capital-gains-calculator")
 }
 
 trait CalculatorConnector {
 
   val sessionCache: SessionCache
+  val http: HttpGet
+  val serviceUrl: String
+
+  implicit val hc: HeaderCarrier = HeaderCarrier().withExtraHeaders("Accept" -> "application/vnd.hmrc.1.0+json")
 
   def saveFormData[T](key: String, data: T)(implicit hc: HeaderCarrier, formats: Format[T]): Future[CacheMap] = {
     sessionCache.cache(key, data)
@@ -36,5 +45,9 @@ trait CalculatorConnector {
 
   def fetchAndGetFormData[T](key: String)(implicit hc: HeaderCarrier, formats: Format[T]): Future[Option[T]] = {
     sessionCache.fetchAndGetEntry(key)
+  }
+
+  def calculate(left: Int, right: Int)(implicit hc: HeaderCarrier): Future[Option[CalculationResultModel]] = {
+    http.GET[Option[CalculationResultModel]]("http://localhost:9090/capital-gains-calculator/calculate/1/1")
   }
 }

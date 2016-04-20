@@ -18,16 +18,13 @@ package connectors
 
 import java.util.UUID
 
-import config.{CalculatorSessionCache, WSHttp}
-import CalculatorSessionCache._
-import models.CustomerTypeModel
+import models.{CalculationResultModel, CustomerTypeModel}
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import play.api.libs.json.Json
-import uk.gov.hmrc.http.cache.client.{SessionCache, CacheMap}
-import uk.gov.hmrc.play.config.{AppName, ServicesConfig}
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.cache.client.{CacheMap, SessionCache}
+import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet}
 import uk.gov.hmrc.play.http.logging.SessionId
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -35,11 +32,14 @@ import scala.concurrent.Future
 
 class CalculatorConnectorSpec extends UnitSpec with MockitoSugar {
 
-  lazy val mockSessionCache  = mock[SessionCache]
-  lazy val sessionId = UUID.randomUUID.toString
+  val mockHttp = mock[HttpGet]
+  val mockSessionCache = mock[SessionCache]
+  val sessionId = UUID.randomUUID.toString
 
-  object TestCalculatorConnector extends CalculatorConnector{
-    lazy val sessionCache = mockSessionCache
+  object TargetCalculatorConnector extends CalculatorConnector {
+    override val sessionCache = mockSessionCache
+    override val http = mockHttp
+    override val serviceUrl = "dummy"
   }
 
   implicit val hc: HeaderCarrier = HeaderCarrier(sessionId = Some(SessionId(sessionId.toString)))
@@ -50,7 +50,8 @@ class CalculatorConnectorSpec extends UnitSpec with MockitoSugar {
       val testModel = CustomerTypeModel("trustee")
       when(mockSessionCache.fetchAndGetEntry[CustomerTypeModel](Matchers.anyString())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(Option(testModel)))
-      lazy val result = TestCalculatorConnector.fetchAndGetFormData[CustomerTypeModel]("customerType")
+
+      lazy val result = TargetCalculatorConnector.fetchAndGetFormData[CustomerTypeModel]("customerType")
       await(result) shouldBe Some(testModel)
     }
 
@@ -59,8 +60,21 @@ class CalculatorConnectorSpec extends UnitSpec with MockitoSugar {
       val returnedCacheMap = CacheMap("customerType", Map("data" -> Json.toJson(testModel)))
       when(mockSessionCache.cache[CustomerTypeModel](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(returnedCacheMap))
-      lazy val result = TestCalculatorConnector.saveFormData("customerType", testModel)
+
+      lazy val result = TargetCalculatorConnector.saveFormData("customerType", testModel)
       await(result) shouldBe returnedCacheMap
+    }
+  }
+
+  "Calling calculate" should {
+
+    val validResponse = CalculationResultModel(1, 1, 2)
+    when(mockHttp.GET[Option[CalculationResultModel]](Matchers.any())(Matchers.any(), Matchers.any()))
+      .thenReturn(Future.successful(Some(validResponse)))
+
+    "return a valid response" in {
+      val result = TargetCalculatorConnector.calculate(1, 1)
+      await(result) shouldBe Some(validResponse)
     }
   }
 }
