@@ -1401,6 +1401,20 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         status(DisposalValueTestDataItem.result) shouldBe 400
       }
     }
+
+    "submitting an invalid form with a negative value" should {
+      val testModel = new DisposalValueModel(-1000)
+      object DisposalValueTestDataItem extends fakeRequestToPost (
+        "disposal-value",
+        TestCalculationController.submitDisposalValue,
+        ("disposalValue", "-1000")
+      )
+
+      "return a 400" in {
+        keystoreCacheCondition(testModel)
+        status(DisposalValueTestDataItem.result) shouldBe 400
+      }
+    }
   }
 
   //################### Acquisition Costs tests #######################
