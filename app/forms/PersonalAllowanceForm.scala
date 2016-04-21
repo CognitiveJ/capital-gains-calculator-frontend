@@ -20,20 +20,15 @@ import play.api.data._
 import play.api.data.Forms._
 import models._
 import play.api.i18n.Messages
+import common.Validation._
 
 object PersonalAllowanceForm {
 
-  def validatePositive(data: BigDecimal): Option[BigDecimal] = {
-    data match {
-      case data if data < 0 => None
-      case _ => Some(data)
-    }
-  }
-
   val personalAllowanceForm = Form (
     mapping(
-      "personalAllowance" -> bigDecimal.verifying(Messages("calc.personalAllowance.errorNegative"),
-        personalAllowance => validatePositive(personalAllowance).isDefined)
+      "personalAllowance" -> bigDecimal
+        .verifying(Messages("calc.personalAllowance.errorNegative"), personalAllowance => isPositive(personalAllowance))
+        .verifying(Messages("calc.personalAllowance.errorDecimalPlaces"), personalAllowance => isMaxTwoDecimalPlaces(personalAllowance))
     )(PersonalAllowanceModel.apply)(PersonalAllowanceModel.unapply)
   )
 }

@@ -20,19 +20,15 @@ import play.api.data._
 import play.api.data.Forms._
 import models._
 import play.api.i18n.Messages
+import common.Validation._
 
 object DisposalValueForm {
 
-  def validateMinimum(data: BigDecimal): Option[BigDecimal] = {
-    data match {
-      case data if data < 0 => None
-      case _ => Some(data)
-    }
-  }
-
   val disposalValueForm = Form(
     mapping(
-      "disposalValue" -> bigDecimal.verifying(Messages("calc.disposalValue.errorMin"), disposalValue => validateMinimum(disposalValue).isDefined)
+      "disposalValue" -> bigDecimal
+        .verifying(Messages("calc.disposalValue.errorNegative"), disposalValue => isPositive(disposalValue))
+        .verifying(Messages("calc.disposalValue.errorDecimalPlaces"), disposalValue => isMaxTwoDecimalPlaces(disposalValue))
     )(DisposalValueModel.apply)(DisposalValueModel.unapply)
   )
 }
