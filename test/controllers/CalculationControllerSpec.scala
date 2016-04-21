@@ -1617,21 +1617,43 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
 
     "submitting a valid form" should {
-      val testModel = new AcquisitionCostsModel(Some(1000))
-      object AcquisitionCostsTestDataItem extends fakeRequestToPost(
-        "acquisition-costs",
-        TestCalculationController.submitAcquisitionCosts,
-        ("acquisitionCosts", "1000")
-      )
 
-      "return a 303" in {
-        keystoreCacheCondition(testModel)
-        status(AcquisitionCostsTestDataItem.result) shouldBe 303
+      "with value 1000" should {
+        val testModel = new AcquisitionCostsModel(Some(1000))
+        object AcquisitionCostsTestDataItem extends fakeRequestToPost(
+          "acquisition-costs",
+          TestCalculationController.submitAcquisitionCosts,
+          ("acquisitionCosts", "1000")
+        )
+
+        "return a 303" in {
+          keystoreCacheCondition(testModel)
+          status(AcquisitionCostsTestDataItem.result) shouldBe 303
+        }
+
+        s"redirect to ${routes.CalculationController.disposalCosts()}" in {
+          keystoreCacheCondition[AcquisitionCostsModel](testModel)
+          redirectLocation(AcquisitionCostsTestDataItem.result) shouldBe Some(s"${routes.CalculationController.disposalCosts()}")
+        }
       }
 
-      s"redirect to ${routes.CalculationController.disposalCosts()}" in {
-        keystoreCacheCondition[AcquisitionCostsModel](testModel)
-        redirectLocation(AcquisitionCostsTestDataItem.result) shouldBe Some(s"${routes.CalculationController.disposalCosts()}")
+      "with no value" should {
+        val testModel = new AcquisitionCostsModel(Some(0))
+        object AcquisitionCostsTestDataItem extends fakeRequestToPost(
+          "acquisition-costs",
+          TestCalculationController.submitAcquisitionCosts,
+          ("acquisitionCosts", "")
+        )
+
+        "return a 303" in {
+          keystoreCacheCondition(testModel)
+          status(AcquisitionCostsTestDataItem.result) shouldBe 303
+        }
+
+        s"redirect to ${routes.CalculationController.disposalCosts()}" in {
+          keystoreCacheCondition[AcquisitionCostsModel](testModel)
+          redirectLocation(AcquisitionCostsTestDataItem.result) shouldBe Some(s"${routes.CalculationController.disposalCosts()}")
+        }
       }
     }
 
@@ -1793,6 +1815,62 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           status(DisposalCostsTestDataItem.result) shouldBe 400
         }
       }
+      "submitting an invalid form with a negative value of -432" should {
+        val disposalCostsTestModel = new DisposalCostsModel(0)
+        object DisposalCostsTestDataItem extends fakeRequestToPost(
+          "disposal-costs",
+          TestCalculationController.submitDisposalCosts,
+          ("disposalCosts", "-432")
+        )
+
+        "return a 400" in {
+          keystoreCacheCondition(disposalCostsTestModel)
+          status(DisposalCostsTestDataItem.result) shouldBe 400
+        }
+
+        "display the error message 'Disposal costs can't be negative'" in {
+          keystoreFetchCondition[DisposalCostsModel](None)
+          DisposalCostsTestDataItem.jsoupDoc.select("div label span.error-notification").text shouldEqual Messages("calc.disposalCosts.errorNegativeNumber")
+        }
+      }
+
+      "submitting an invalid form with a value that has more than two decimal places" should {
+        val disposalCostsTestModel = new DisposalCostsModel(0)
+        object DisposalCostsTestDataItem extends fakeRequestToPost(
+          "disposal-costs",
+          TestCalculationController.submitDisposalCosts,
+          ("disposalCosts", "432.00023")
+        )
+
+        "return a 400" in {
+          keystoreCacheCondition(disposalCostsTestModel)
+          status(DisposalCostsTestDataItem.result) shouldBe 400
+        }
+
+        "display the error message 'The costs have too many decimal places'" in {
+          keystoreFetchCondition[DisposalCostsModel](None)
+          DisposalCostsTestDataItem.jsoupDoc.select("div label span.error-notification").text shouldEqual Messages("calc.disposalCosts.errorDecimalPlaces")
+        }
+      }
+
+      "submitting an invalid form with a value that is negative and has more than two decimal places" should {
+        val disposalCostsTestModel = new DisposalCostsModel(0)
+        object DisposalCostsTestDataItem extends fakeRequestToPost(
+          "disposal-costs",
+          TestCalculationController.submitDisposalCosts,
+          ("disposalCosts", "-432.00023")
+        )
+
+        "return a 400" in {
+          keystoreCacheCondition(disposalCostsTestModel)
+          status(DisposalCostsTestDataItem.result) shouldBe 400
+        }
+
+        "display the error message 'Disposal costs cannot be negative' and 'The costs have too many decimal places'" in {
+          keystoreFetchCondition[DisposalCostsModel](None)
+          DisposalCostsTestDataItem.jsoupDoc.select("div label span.error-notification").text shouldEqual (Messages("calc.disposalCosts.errorNegativeNumber") + " " + Messages("calc.disposalCosts.errorDecimalPlaces"))
+        }
+      }
     }
   }
 
@@ -1897,6 +1975,25 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       }
     }
 
+    "submitting a valid form with 'No'" should {
+      object EntrepreneursReliefTestDataItem extends fakeRequestToPost(
+        "entrepreneurs-relief",
+        TestCalculationController.submitEntrepreneursRelief,
+        ("entrepreneursRelief", "no")
+      )
+      val testModel = new EntrepreneursReliefModel("no")
+
+      "return a 303" in {
+        keystoreCacheCondition[EntrepreneursReliefModel](testModel)
+        status(EntrepreneursReliefTestDataItem.result) shouldBe 303
+      }
+
+      s"redirect to ${routes.CalculationController.allowableLosses()}" in {
+        keystoreCacheCondition[EntrepreneursReliefModel](testModel)
+        redirectLocation(EntrepreneursReliefTestDataItem.result) shouldBe Some(s"${routes.CalculationController.allowableLosses()}")
+      }
+    }
+
     "submitting an invalid form with no data" should {
       object EntrepreneursReliefTestDataItem extends fakeRequestToPost(
         "entrepreneurs-relief",
@@ -1985,7 +2082,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     "supplied with a pre-existing stored model" should {
 
       object AllowableLossesTestDataItem extends fakeRequestTo("allowable-losses", TestCalculationController.allowableLosses)
-      val testModel = new AllowableLossesModel("Yes",9999.54)
+      val testModel = new AllowableLossesModel("Yes", Some(9999.54))
 
       "return a 200" in {
         keystoreFetchCondition[AllowableLossesModel](Some(testModel))
@@ -2025,7 +2122,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         TestCalculationController.submitAllowableLosses,
         ("isClaimingAllowableLosses", "Yes"), ("allowableLossesAmt", "1000")
       )
-      val testModel = new AllowableLossesModel("Yes", 1000)
+      val testModel = new AllowableLossesModel("Yes", Some(1000))
 
       "return a 303" in {
         keystoreCacheCondition[AllowableLossesModel](testModel)
@@ -2033,13 +2130,97 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       }
     }
 
-    "submitting an invalid form with no selection and an invalid amount" should {
+    "submitting a valid form with 'Yes' and an amount with two decimal places" should {
+      object AllowableLossesTestDataItem extends fakeRequestToPost(
+        "allowable-losses",
+        TestCalculationController.submitAllowableLosses,
+        ("isClaimingAllowableLosses", "Yes"), ("allowableLossesAmt", "1000.11")
+      )
+      val testModel = new AllowableLossesModel("Yes", Some(1000.11))
+
+      "return a 303" in {
+        keystoreCacheCondition[AllowableLossesModel](testModel)
+        status(AllowableLossesTestDataItem.result) shouldBe 303
+      }
+    }
+
+    "submitting a valid form with 'No' and a null amount" should {
+      object AllowableLossesTestDataItem extends fakeRequestToPost(
+        "allowable-losses",
+        TestCalculationController.submitAllowableLosses,
+        ("isClaimingAllowableLosses", "No"), ("allowableLossesAmt", "")
+      )
+      val testModel = new AllowableLossesModel("No", None)
+
+      "return a 303" in {
+        keystoreCacheCondition[AllowableLossesModel](testModel)
+        status(AllowableLossesTestDataItem.result) shouldBe 303
+      }
+    }
+
+    "submitting a valid form with 'No' and a negative amount" should {
+      object AllowableLossesTestDataItem extends fakeRequestToPost(
+        "allowable-losses",
+        TestCalculationController.submitAllowableLosses,
+        ("isClaimingAllowableLosses", "No"), ("allowableLossesAmt", "-1000")
+      )
+      val testModel = new AllowableLossesModel("No", Some(-1000))
+
+      "return a 303" in {
+        keystoreCacheCondition[AllowableLossesModel](testModel)
+        status(AllowableLossesTestDataItem.result) shouldBe 303
+      }
+    }
+
+    "submitting an invalid form with no selection and a null amount" should {
       object AllowableLossesTestDataItem extends fakeRequestToPost(
         "allowable-losses",
         TestCalculationController.submitAllowableLosses,
         ("isClaimingAllowableLosses", ""), ("allowableLossesAmt", "")
       )
-      val testModel = new AllowableLossesModel("Yes", 1000)
+      val testModel = new AllowableLossesModel("Yes", Some(1000))
+
+      "return a 400" in {
+        keystoreCacheCondition[AllowableLossesModel](testModel)
+        status(AllowableLossesTestDataItem.result) shouldBe 400
+      }
+    }
+
+    "submitting an invalid form with 'Yes' selection and a null amount" should {
+      object AllowableLossesTestDataItem extends fakeRequestToPost(
+        "allowable-losses",
+        TestCalculationController.submitAllowableLosses,
+        ("isClaimingAllowableLosses", "Yes"), ("allowableLossesAmt", "")
+      )
+      val testModel = new AllowableLossesModel("Yes", None)
+
+      "return a 400" in {
+        keystoreCacheCondition[AllowableLossesModel](testModel)
+        status(AllowableLossesTestDataItem.result) shouldBe 400
+      }
+    }
+
+    "submitting an invalid form with 'Yes' selection and an amount with three decimal places" should {
+      object AllowableLossesTestDataItem extends fakeRequestToPost(
+        "allowable-losses",
+        TestCalculationController.submitAllowableLosses,
+        ("isClaimingAllowableLosses", "Yes"), ("allowableLossesAmt", "1000.111")
+      )
+      val testModel = new AllowableLossesModel("Yes", Some(1000.111))
+
+      "return a 400" in {
+        keystoreCacheCondition[AllowableLossesModel](testModel)
+        status(AllowableLossesTestDataItem.result) shouldBe 400
+      }
+    }
+
+    "submitting an invalid form with 'Yes' selection and a negative amount" should {
+      object AllowableLossesTestDataItem extends fakeRequestToPost(
+        "allowable-losses",
+        TestCalculationController.submitAllowableLosses,
+        ("isClaimingAllowableLosses", "Yes"), ("allowableLossesAmt", "-1000")
+      )
+      val testModel = new AllowableLossesModel("Yes", Some(-1000))
 
       "return a 400" in {
         keystoreCacheCondition[AllowableLossesModel](testModel)
@@ -2119,6 +2300,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(returnedCacheMap))
     }
+
     "submitting a valid form with and an amount of 1000" should {
       object OtherReliefsTestDataItem extends fakeRequestToPost("other-reliefs", TestCalculationController.submitOtherReliefs, ("otherReliefs", "1000"))
       val otherReliefsTestModel = new OtherReliefsModel(1000)
@@ -2126,6 +2308,46 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       "return a 303" in {
         keystoreCacheCondition[OtherReliefsModel](otherReliefsTestModel)
         status(OtherReliefsTestDataItem.result) shouldBe 303
+      }
+    }
+
+    "submitting a valid form with and an amount with two decimal places" should {
+      object OtherReliefsTestDataItem extends fakeRequestToPost("other-reliefs", TestCalculationController.submitOtherReliefs, ("otherReliefs", "1000.11"))
+      val otherReliefsTestModel = new OtherReliefsModel(1000.11)
+
+      "return a 303" in {
+        keystoreCacheCondition[OtherReliefsModel](otherReliefsTestModel)
+        status(OtherReliefsTestDataItem.result) shouldBe 303
+      }
+    }
+
+    "submitting an invalid form with no value" should {
+      object OtherReliefsTestDataItem extends fakeRequestToPost("other-reliefs", TestCalculationController.submitOtherReliefs, ("otherReliefs", ""))
+      val otherReliefsTestModel = new OtherReliefsModel(0)
+
+      "return a 400" in {
+        keystoreCacheCondition[OtherReliefsModel](otherReliefsTestModel)
+        status(OtherReliefsTestDataItem.result) shouldBe 400
+      }
+    }
+
+    "submitting an invalid form with an amount with three decimal places" should {
+      object OtherReliefsTestDataItem extends fakeRequestToPost("other-reliefs", TestCalculationController.submitOtherReliefs, ("otherReliefs", "1000.111"))
+      val otherReliefsTestModel = new OtherReliefsModel(1000.111)
+
+      "return a 400" in {
+        keystoreCacheCondition[OtherReliefsModel](otherReliefsTestModel)
+        status(OtherReliefsTestDataItem.result) shouldBe 400
+      }
+    }
+
+    "submitting an invalid form with a negative value" should {
+      object OtherReliefsTestDataItem extends fakeRequestToPost("other-reliefs", TestCalculationController.submitOtherReliefs, ("otherReliefs", "-1000"))
+      val otherReliefsTestModel = new OtherReliefsModel(-1000)
+
+      "return a 400" in {
+        keystoreCacheCondition[OtherReliefsModel](otherReliefsTestModel)
+        status(OtherReliefsTestDataItem.result) shouldBe 400
       }
     }
 

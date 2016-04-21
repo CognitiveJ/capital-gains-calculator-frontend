@@ -110,10 +110,12 @@ calc.disposalValue.errorDecimalPlaces = Disposal value has too many decimal numb
 calc.acquisitionCosts.question = How much did you pay in costs when you became the property owner?
 calc.acquisitionCosts.helpText = Costs include agent fees, legal fees and surveys
 calc.acquisitionCosts.errorNegative = The costs can''t be negative
-calc.acquisitionCosts.errorDecimalPlaces = The costs have too many decimal numbers
+calc.acquisitionCosts.errorDecimalPlaces = The costs have too many decimal places
 
 ## Disposal Costs ##
 calc.disposalCosts.question = How much did you pay in costs when you stopped being the property owner?
+calc.disposalCosts.errorNegativeNumber = Disposal costs can''t be negative
+calc.disposalCosts.errorDecimalPlaces = The costs have too many decimal places
 
 ## Entrepreneurs Relief ##
 calc.entrepreneursRelief.question = Are you claiming Entrepreneurs'' Relief?
@@ -127,9 +129,12 @@ calc.allowableLosses.helpText.paragraph.one = They''re losses you''ve made on UK
 calc.allowableLosses.helpText.bullet.one = are covered by Capital Gains Tax
 calc.allowableLosses.helpText.bullet.two = you''ve declared to HMRC within four years of making the loss
 calc.allowableLosses.helpText.bullet.three = you haven''t already used in an allowable losses claim
+calc.allowableLosses.errorQuestion = Please provide a value for your allowable losses.
+calc.allowableLosses.errorMinimum = The value of your allowable losses cannot be negative.
 
 ## Other Reliefs ##
 calc.otherReliefs.question = How much extra tax relief are you claiming?
+calc.otherReliefs.errorMinimum = Other reliefs cannot be negative
 
 ## Summary ##
 calc.summary.title = Summary
