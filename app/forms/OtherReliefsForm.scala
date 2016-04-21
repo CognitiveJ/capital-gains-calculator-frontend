@@ -28,7 +28,7 @@ object OtherReliefsForm {
     mapping(
       "otherReliefs" -> bigDecimal
         .verifying(Messages("calc.otherReliefs.errorMinimum"), otherReliefs => isPositive(otherReliefs))
-        .verifying(Messages("calc.common.money.error.moreThan2dp"), otherReliefs => isMaxTwoDecimalPlaces(otherReliefs))
+        .verifying(Messages("calc.otherReliefs.errorDecimal"), otherReliefs => isMaxTwoDecimalPlaces(otherReliefs))
     )(OtherReliefsModel.apply)(OtherReliefsModel.unapply)
   )
 }
