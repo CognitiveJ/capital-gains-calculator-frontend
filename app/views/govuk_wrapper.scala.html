@@ -16,13 +16,17 @@
 @import views.html.helpers._
 
 @scriptElement = {
-<script type="text/javascript" src='@controllers.routes.Assets.at("javascripts/cgt.js")'></script>
+    <script type="text/javascript" src='@controllers.routes.Assets.at("javascripts/cgt.js")'></script>
+}
+
+@linksElement = {
+    <link rel="stylesheet" type="text/css" href='@controllers.routes.Assets.at("stylesheets/cgt.css")'>
 }
 
 @head = {
     @uiLayouts.head(
       assetsPrefix = appConfig.assetsPrefix,
-      linkElem = None,
+      linkElem = Some(linksElement),
       headScripts = None)
     <meta name="format-detection" content="telephone=no" />
 }

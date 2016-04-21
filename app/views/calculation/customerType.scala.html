@@ -1,26 +1,26 @@
 @import models.CustomerTypeModel
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 @import play.api.data._
+@import views.html.helpers._
 
 @(customerTypeForm: Form[CustomerTypeModel])(implicit request: Request[_])
 
 @main_template(title = Messages("calc.customerType.question")) {
 
-  <a id="link-back" class="link-back" href="@routes.IntroductionController.introduction">@Messages("calc.base.back")</a>
+  <a id="back-link" class="back-link" href="@routes.IntroductionController.introduction">@Messages("calc.base.back")</a>
 
   <h1 class="heading-large">@Messages("calc.base.pageHeading")</h1> 
 
   @govHelpers.form(action = routes.CalculationController.submitCustomerType) {
 
     <div class="form-group">
-        @govHelpers.inputRadioGroup(
+        @formInputRadioGroup(
             field = customerTypeForm("customerType"),
             Seq(
                 "individual"->Messages("calc.customerType.individual"),
                 "trustee"->Messages("calc.customerType.trustee"),
                 "personalRep"->Messages("calc.customerType.personalRep")),
             '_legend -> Messages("calc.customerType.question"),
-            '_labelAfter -> true,
             '_labelClass -> "block-label"
         )
     </div>

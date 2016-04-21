@@ -24,15 +24,24 @@ import common.Validation._
 
 object ImprovementsForm {
 
-  def verify(data: ImprovementsModel): Option[ImprovementsModel] = {
+  def verifyAmountSupplied(data: ImprovementsModel): Boolean = {
     data.isClaimingImprovements match {
-      case "Yes" =>
-        if (data.improvementsAmt.isDefined) {
-          Option(ImprovementsModel(data.isClaimingImprovements, data.improvementsAmt))
-        } else {
-          None
-        }
-      case "No" => Option(ImprovementsModel(data.isClaimingImprovements, None))
+      case "Yes" => data.improvementsAmt.isDefined
+      case "No" => true
+    }
+  }
+
+  def verifyPositive(data: ImprovementsModel): Boolean = {
+    data.isClaimingImprovements match {
+      case "Yes" => isPositive(data.improvementsAmt.getOrElse(0))
+      case "No" => true
+    }
+  }
+
+  def verifyTwoDecimalPlaces(data: ImprovementsModel): Boolean = {
+    data.isClaimingImprovements match {
+      case "Yes" => isMaxTwoDecimalPlaces(data.improvementsAmt.getOrElse(0))
+      case "No" => true
     }
   }
 
@@ -40,11 +49,12 @@ object ImprovementsForm {
     mapping(
       "isClaimingImprovements" -> text,
       "improvementsAmt" -> optional(bigDecimal)
-        .verifying(Messages("calc.improvements.errorNegative"), improvementsAmt => isPositive(improvementsAmt.getOrElse(0)))
-        .verifying(Messages("calc.improvements.errorDecimalPlaces"), improvementsAmt => isMaxTwoDecimalPlaces(improvementsAmt.getOrElse(0)))
     )(ImprovementsModel.apply)(ImprovementsModel.unapply)
-      .verifying(
-        Messages("calc.improvements.error.no.value.supplied"),
-        improvementsForm => verify(ImprovementsModel(improvementsForm.isClaimingImprovements, improvementsForm.improvementsAmt)).isDefined)
+      .verifying(Messages("calc.improvements.error.no.value.supplied"),
+        improvementsForm => verifyAmountSupplied(ImprovementsModel(improvementsForm.isClaimingImprovements, improvementsForm.improvementsAmt)))
+      .verifying(Messages("calc.improvements.errorNegative"),
+        improvementsForm => verifyPositive(improvementsForm))
+      .verifying(Messages("calc.improvements.errorDecimalPlaces"),
+        improvementsForm => verifyTwoDecimalPlaces(improvementsForm))
   )
 }

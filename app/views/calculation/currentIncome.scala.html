@@ -1,19 +1,26 @@
 @import models.CurrentIncomeModel
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 @import play.api.data._
+@import views.html.helpers._
 
 @(currentIncomeForm: Form[CurrentIncomeModel])(implicit request: Request[_])
 
-@import views.html.helpers._
-
 @sidebar = {
-    <a id="helpLink1" href="https://www.gov.uk/income-tax/overview">@Messages("calc.currentIncome.link.one")</a>
-    <a id="helpLink2" href="https://www.gov.uk/income-tax-rates/previous-tax-years">@Messages("calc.currentIncome.link.two")</a>
+    <ul>
+        <li>
+            <a id="helpLink1" href="https://www.gov.uk/income-tax/overview">@Messages("calc.currentIncome.link.one")</a>
+        </li>
+    </ul>
+    <ul>
+        <li>
+            <a id="helpLink2" href="https://www.gov.uk/income-tax-rates/previous-tax-years">@Messages("calc.currentIncome.link.two")</a>
+        </li>
+    </ul>
 }
 
 @main_template(Messages("calc.currentIncome.question"), sidebarLinks = Some(sidebar)) {
 
-    <a id="link-back" class="link-back" href="@routes.CalculationController.customerType">Back</a>
+    <a id="back-link" class="back-link" href="@routes.CalculationController.customerType">Back</a>
 
     <h1 class="heading-large">@Messages("calc.base.pageHeading")</h1>
 
