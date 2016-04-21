@@ -134,6 +134,7 @@ calc.allowableLosses.errorMinimum = The value of your allowable losses cannot be
 
 ## Other Reliefs ##
 calc.otherReliefs.question = How much extra tax relief are you claiming?
+calc.otherReliefs.errorMinimum = Other reliefs cannot be negative
 
 ## Summary ##
 calc.summary.title = Summary

@@ -19,11 +19,16 @@ package forms
 import play.api.data._
 import play.api.data.Forms._
 import models._
+import play.api.i18n.Messages
+import common.Validation._
 
 object OtherReliefsForm {
+
   val otherReliefsForm = Form(
     mapping(
       "otherReliefs" -> bigDecimal
+        .verifying(Messages("calc.otherReliefs.errorMinimum"), otherReliefs => isPositive(otherReliefs))
+        .verifying(Messages("calc.common.money.error.moreThan2dp"), otherReliefs => isMaxTwoDecimalPlaces(otherReliefs))
     )(OtherReliefsModel.apply)(OtherReliefsModel.unapply)
   )
 }
