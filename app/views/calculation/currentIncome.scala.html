@@ -7,8 +7,8 @@
 @import views.html.helpers._
 
 @sidebar = {
-    <a href="https://www.gov.uk/income-tax/overview">@Messages("calc.currentIncome.link.one")</a>
-    <a href="https://www.gov.uk/income-tax-rates/previous-tax-years">@Messages("calc.currentIncome.link.two")</a>
+    <a href="https://www.gov.uk/income-tax/overview" target="_blank">@Messages("calc.currentIncome.link.one")</a>
+    <a href="https://www.gov.uk/income-tax-rates/previous-tax-years" target="_blank">@Messages("calc.currentIncome.link.two")</a>
 }
 
 @main_template(Messages("calc.currentIncome.question"), sidebarLinks = Some(sidebar)) {
