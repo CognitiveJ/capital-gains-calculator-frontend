@@ -20,6 +20,7 @@ import play.api.data._
 import play.api.data.Forms._
 import models._
 import play.api.i18n.Messages
+import common.Validation._
 
 object AllowableLossesForm {
 
@@ -32,12 +33,14 @@ object AllowableLossesForm {
 
   def validateMinimum(data: AllowableLossesModel): Boolean = {
     data.isClaimingAllowableLosses match {
-      case "Yes" => {
-        data.allowableLossesAmt match {
-          case Some(data) => data >= 0
-          case None => true
-        }
-      }
+      case "Yes" => isPositive(data.allowableLossesAmt.getOrElse(0))
+      case "No" => true
+    }
+  }
+
+  def validateTwoDec(data: AllowableLossesModel): Boolean = {
+    data.isClaimingAllowableLosses match {
+      case "Yes" => isMaxTwoDecimalPlaces(data.allowableLossesAmt.getOrElse(0))
       case "No" => true
     }
   }
@@ -51,5 +54,7 @@ object AllowableLossesForm {
         allowableLossesForm => validate(AllowableLossesModel(allowableLossesForm.isClaimingAllowableLosses, allowableLossesForm.allowableLossesAmt)))
       .verifying(Messages("calc.allowableLosses.errorMinimum"),
         allowableLossesForm => validateMinimum(AllowableLossesModel(allowableLossesForm.isClaimingAllowableLosses, allowableLossesForm.allowableLossesAmt)))
+      .verifying(Messages("calc.common.money.error.moreThan2dp"),
+        allowableLossesForm => validateTwoDec(AllowableLossesModel(allowableLossesForm.isClaimingAllowableLosses, allowableLossesForm.allowableLossesAmt)))
   )
 }
