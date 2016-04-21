@@ -110,10 +110,12 @@ calc.disposalValue.errorDecimalPlaces = Disposal value has too many decimal numb
 calc.acquisitionCosts.question = How much did you pay in costs when you became the property owner?
 calc.acquisitionCosts.helpText = Costs include agent fees, legal fees and surveys
 calc.acquisitionCosts.errorNegative = The costs can''t be negative
-calc.acquisitionCosts.errorDecimalPlaces = The costs have too many decimal numbers
+calc.acquisitionCosts.errorDecimalPlaces = The costs have too many decimal places
 
 ## Disposal Costs ##
 calc.disposalCosts.question = How much did you pay in costs when you stopped being the property owner?
+calc.disposalCosts.errorNegativeNumber = Disposal costs can''t be negative
+calc.disposalCosts.errorDecimalPlaces = The costs have too many decimal places
 
 ## Entrepreneurs Relief ##
 calc.entrepreneursRelief.question = Are you claiming Entrepreneurs'' Relief?

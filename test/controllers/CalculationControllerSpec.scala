@@ -1793,6 +1793,62 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           status(DisposalCostsTestDataItem.result) shouldBe 400
         }
       }
+      "submitting an invalid form with a negative value of -432" should {
+        val disposalCostsTestModel = new DisposalCostsModel(0)
+        object DisposalCostsTestDataItem extends fakeRequestToPost(
+          "disposal-costs",
+          TestCalculationController.submitDisposalCosts,
+          ("disposalCosts", "-432")
+        )
+
+        "return a 400" in {
+          keystoreCacheCondition(disposalCostsTestModel)
+          status(DisposalCostsTestDataItem.result) shouldBe 400
+        }
+
+        "display the error message 'Disposal costs can't be negative'" in {
+          keystoreFetchCondition[DisposalCostsModel](None)
+          DisposalCostsTestDataItem.jsoupDoc.select("div label span.error-notification").text shouldEqual Messages("calc.disposalCosts.errorNegativeNumber")
+        }
+      }
+
+      "submitting an invalid form with a value that has more than two decimal places" should {
+        val disposalCostsTestModel = new DisposalCostsModel(0)
+        object DisposalCostsTestDataItem extends fakeRequestToPost(
+          "disposal-costs",
+          TestCalculationController.submitDisposalCosts,
+          ("disposalCosts", "432.00023")
+        )
+
+        "return a 400" in {
+          keystoreCacheCondition(disposalCostsTestModel)
+          status(DisposalCostsTestDataItem.result) shouldBe 400
+        }
+
+        "display the error message 'The costs have too many decimal places'" in {
+          keystoreFetchCondition[DisposalCostsModel](None)
+          DisposalCostsTestDataItem.jsoupDoc.select("div label span.error-notification").text shouldEqual Messages("calc.disposalCosts.errorDecimalPlaces")
+        }
+      }
+
+      "submitting an invalid form with a value that is negative and has more than two decimal places" should {
+        val disposalCostsTestModel = new DisposalCostsModel(0)
+        object DisposalCostsTestDataItem extends fakeRequestToPost(
+          "disposal-costs",
+          TestCalculationController.submitDisposalCosts,
+          ("disposalCosts", "-432.00023")
+        )
+
+        "return a 400" in {
+          keystoreCacheCondition(disposalCostsTestModel)
+          status(DisposalCostsTestDataItem.result) shouldBe 400
+        }
+
+        "display the error message 'Disposal costs cannot be negative' and 'The costs have too many decimal places'" in {
+          keystoreFetchCondition[DisposalCostsModel](None)
+          DisposalCostsTestDataItem.jsoupDoc.select("div label span.error-notification").text shouldEqual (Messages("calc.disposalCosts.errorNegativeNumber") + " " + Messages("calc.disposalCosts.errorDecimalPlaces"))
+        }
+      }
     }
   }
 
