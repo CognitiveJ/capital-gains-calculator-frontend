@@ -1617,21 +1617,43 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
 
     "submitting a valid form" should {
-      val testModel = new AcquisitionCostsModel(Some(1000))
-      object AcquisitionCostsTestDataItem extends fakeRequestToPost(
-        "acquisition-costs",
-        TestCalculationController.submitAcquisitionCosts,
-        ("acquisitionCosts", "1000")
-      )
 
-      "return a 303" in {
-        keystoreCacheCondition(testModel)
-        status(AcquisitionCostsTestDataItem.result) shouldBe 303
+      "with value 1000" should {
+        val testModel = new AcquisitionCostsModel(Some(1000))
+        object AcquisitionCostsTestDataItem extends fakeRequestToPost(
+          "acquisition-costs",
+          TestCalculationController.submitAcquisitionCosts,
+          ("acquisitionCosts", "1000")
+        )
+
+        "return a 303" in {
+          keystoreCacheCondition(testModel)
+          status(AcquisitionCostsTestDataItem.result) shouldBe 303
+        }
+
+        s"redirect to ${routes.CalculationController.disposalCosts()}" in {
+          keystoreCacheCondition[AcquisitionCostsModel](testModel)
+          redirectLocation(AcquisitionCostsTestDataItem.result) shouldBe Some(s"${routes.CalculationController.disposalCosts()}")
+        }
       }
 
-      s"redirect to ${routes.CalculationController.disposalCosts()}" in {
-        keystoreCacheCondition[AcquisitionCostsModel](testModel)
-        redirectLocation(AcquisitionCostsTestDataItem.result) shouldBe Some(s"${routes.CalculationController.disposalCosts()}")
+      "with no value" should {
+        val testModel = new AcquisitionCostsModel(Some(0))
+        object AcquisitionCostsTestDataItem extends fakeRequestToPost(
+          "acquisition-costs",
+          TestCalculationController.submitAcquisitionCosts,
+          ("acquisitionCosts", "")
+        )
+
+        "return a 303" in {
+          keystoreCacheCondition(testModel)
+          status(AcquisitionCostsTestDataItem.result) shouldBe 303
+        }
+
+        s"redirect to ${routes.CalculationController.disposalCosts()}" in {
+          keystoreCacheCondition[AcquisitionCostsModel](testModel)
+          redirectLocation(AcquisitionCostsTestDataItem.result) shouldBe Some(s"${routes.CalculationController.disposalCosts()}")
+        }
       }
     }
 
