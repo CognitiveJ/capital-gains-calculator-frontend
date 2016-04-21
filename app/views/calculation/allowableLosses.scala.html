@@ -5,7 +5,7 @@
 @(allowableLossesForm: Form[AllowableLossesModel])(implicit request: Request[_])
 
 @hiddenYesNoContent = {
-    @formInputMoney(allowableLossesForm,"allowableLossesAmt", Messages("calc.allowableLosses.question.two"))
+    @simpleNoErrorInput(allowableLossesForm("allowableLossesAmt"), '_label -> Messages("calc.allowableLosses.question.two"), '_dataAttributes -> "placeholder = £")
 }
 
 @hiddenHelpTextContent = {

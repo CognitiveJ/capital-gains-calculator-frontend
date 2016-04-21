@@ -20,7 +20,7 @@ import play.api.libs.json._
 
 case class AllowableLossesModel (
                                   isClaimingAllowableLosses: String,
-                                  allowableLossesAmt: BigDecimal)
+                                  allowableLossesAmt: Option[BigDecimal])
 
 object AllowableLossesModel {
   implicit val format = Json.format[AllowableLossesModel]

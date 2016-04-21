@@ -19,12 +19,42 @@ package forms
 import play.api.data._
 import play.api.data.Forms._
 import models._
+import play.api.i18n.Messages
+import common.Validation._
 
 object AllowableLossesForm {
+
+  def validate(data: AllowableLossesModel): Boolean = {
+    data.isClaimingAllowableLosses match {
+      case "Yes" => data.allowableLossesAmt.isDefined
+      case "No" => true
+      }
+    }
+
+  def validateMinimum(data: AllowableLossesModel): Boolean = {
+    data.isClaimingAllowableLosses match {
+      case "Yes" => isPositive(data.allowableLossesAmt.getOrElse(0))
+      case "No" => true
+    }
+  }
+
+  def validateTwoDec(data: AllowableLossesModel): Boolean = {
+    data.isClaimingAllowableLosses match {
+      case "Yes" => isMaxTwoDecimalPlaces(data.allowableLossesAmt.getOrElse(0))
+      case "No" => true
+    }
+  }
+
   val allowableLossesForm = Form(
     mapping(
-      "isClaimingAllowableLosses" -> text,
-      "allowableLossesAmt" -> bigDecimal
+      "isClaimingAllowableLosses" -> nonEmptyText,
+      "allowableLossesAmt" -> optional(bigDecimal)
     )(AllowableLossesModel.apply)(AllowableLossesModel.unapply)
+      .verifying(Messages("calc.allowableLosses.errorQuestion"),
+        allowableLossesForm => validate(AllowableLossesModel(allowableLossesForm.isClaimingAllowableLosses, allowableLossesForm.allowableLossesAmt)))
+      .verifying(Messages("calc.allowableLosses.errorMinimum"),
+        allowableLossesForm => validateMinimum(AllowableLossesModel(allowableLossesForm.isClaimingAllowableLosses, allowableLossesForm.allowableLossesAmt)))
+      .verifying(Messages("calc.common.money.error.moreThan2dp"),
+        allowableLossesForm => validateTwoDec(AllowableLossesModel(allowableLossesForm.isClaimingAllowableLosses, allowableLossesForm.allowableLossesAmt)))
   )
 }

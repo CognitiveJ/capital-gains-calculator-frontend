@@ -129,6 +129,8 @@ calc.allowableLosses.helpText.paragraph.one = They''re losses you''ve made on UK
 calc.allowableLosses.helpText.bullet.one = are covered by Capital Gains Tax
 calc.allowableLosses.helpText.bullet.two = you''ve declared to HMRC within four years of making the loss
 calc.allowableLosses.helpText.bullet.three = you haven''t already used in an allowable losses claim
+calc.allowableLosses.errorQuestion = Please provide a value for your allowable losses.
+calc.allowableLosses.errorMinimum = The value of your allowable losses cannot be negative.
 
 ## Other Reliefs ##
 calc.otherReliefs.question = How much extra tax relief are you claiming?
