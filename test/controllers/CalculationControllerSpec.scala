@@ -1778,7 +1778,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           status(DisposalCostsTestDataItem.result) shouldBe 400
         }
 
-        "display the error message 'Disposal costs cannot be negative'" in {
+        "display the error message 'Disposal costs can't be negative'" in {
           keystoreFetchCondition[DisposalCostsModel](None)
           DisposalCostsTestDataItem.jsoupDoc.select("div label span.error-notification").text shouldEqual Messages("calc.disposalCosts.errorNegativeNumber")
         }

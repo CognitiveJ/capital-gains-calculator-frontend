@@ -114,7 +114,7 @@ calc.acquisitionCosts.errorDecimalPlaces = The costs have too many decimal place
 
 ## Disposal Costs ##
 calc.disposalCosts.question = How much did you pay in costs when you stopped being the property owner?
-calc.disposalCosts.errorNegativeNumber = Disposal cost''s cannot be negative
+calc.disposalCosts.errorNegativeNumber = Disposal costs can''t be negative
 calc.disposalCosts.errorDecimalPlaces = The costs have too many decimal places
 
 ## Entrepreneurs Relief ##
