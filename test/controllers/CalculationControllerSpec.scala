@@ -1997,6 +1997,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(returnedCacheMap))
     }
+
     "submitting a valid form with and an amount of 1000" should {
       object OtherReliefsTestDataItem extends fakeRequestToPost("other-reliefs", TestCalculationController.submitOtherReliefs, ("otherReliefs", "1000"))
       val otherReliefsTestModel = new OtherReliefsModel(1000)
@@ -2007,9 +2008,29 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       }
     }
 
+    "submitting a valid form with and an amount with two decimal places" should {
+      object OtherReliefsTestDataItem extends fakeRequestToPost("other-reliefs", TestCalculationController.submitOtherReliefs, ("otherReliefs", "1000.11"))
+      val otherReliefsTestModel = new OtherReliefsModel(1000.11)
+
+      "return a 303" in {
+        keystoreCacheCondition[OtherReliefsModel](otherReliefsTestModel)
+        status(OtherReliefsTestDataItem.result) shouldBe 303
+      }
+    }
+
     "submitting an invalid form with no value" should {
       object OtherReliefsTestDataItem extends fakeRequestToPost("other-reliefs", TestCalculationController.submitOtherReliefs, ("otherReliefs", ""))
       val otherReliefsTestModel = new OtherReliefsModel(0)
+
+      "return a 400" in {
+        keystoreCacheCondition[OtherReliefsModel](otherReliefsTestModel)
+        status(OtherReliefsTestDataItem.result) shouldBe 400
+      }
+    }
+
+    "submitting an invalid form with an amount with three decimal places" should {
+      object OtherReliefsTestDataItem extends fakeRequestToPost("other-reliefs", TestCalculationController.submitOtherReliefs, ("otherReliefs", "1000.111"))
+      val otherReliefsTestModel = new OtherReliefsModel(1000.111)
 
       "return a 400" in {
         keystoreCacheCondition[OtherReliefsModel](otherReliefsTestModel)
