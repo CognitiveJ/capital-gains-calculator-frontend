@@ -1975,6 +1975,25 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       }
     }
 
+    "submitting a valid form with 'No'" should {
+      object EntrepreneursReliefTestDataItem extends fakeRequestToPost(
+        "entrepreneurs-relief",
+        TestCalculationController.submitEntrepreneursRelief,
+        ("entrepreneursRelief", "no")
+      )
+      val testModel = new EntrepreneursReliefModel("no")
+
+      "return a 303" in {
+        keystoreCacheCondition[EntrepreneursReliefModel](testModel)
+        status(EntrepreneursReliefTestDataItem.result) shouldBe 303
+      }
+
+      s"redirect to ${routes.CalculationController.allowableLosses()}" in {
+        keystoreCacheCondition[EntrepreneursReliefModel](testModel)
+        redirectLocation(EntrepreneursReliefTestDataItem.result) shouldBe Some(s"${routes.CalculationController.allowableLosses()}")
+      }
+    }
+
     "submitting an invalid form with no data" should {
       object EntrepreneursReliefTestDataItem extends fakeRequestToPost(
         "entrepreneurs-relief",
