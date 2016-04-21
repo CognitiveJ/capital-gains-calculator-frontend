@@ -1593,7 +1593,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
     "supplied with a pre-existing stored model" should {
       object AcquisitionCostsTestDataItem extends fakeRequestTo("acquisition-costs", TestCalculationController.acquisitionCosts)
-      val testModel = new AcquisitionCostsModel(1000)
+      val testModel = new AcquisitionCostsModel(Some(1000))
 
       "return a 200" in {
         keystoreFetchCondition[AcquisitionCostsModel](Some(testModel))
