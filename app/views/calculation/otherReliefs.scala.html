@@ -10,8 +10,18 @@
 
     @govHelpers.form(action = routes.CalculationController.submitOtherReliefs) {
 
-        @formInputMoney(otherReliefsForm, "otherReliefs", Messages("calc.otherReliefs.question"))
+        <label for="otherReliefs">@Messages("calc.otherReliefs.question")</label>
 
-        <button id="continue-button" class="button">@Messages("calc.base.button.continue")</button>
+        <div class="panel-indent">
+            <ul class="list list-bullet">
+                <li id="totalGain">£XXXX.pp<br><span class="font-xsmall">@Messages("calc.otherReliefs.totalGain")</span></li>
+
+                <li id="taxableGain">£XXXX.pp<br><span class="font-xsmall">@Messages("calc.otherReliefs.taxableGain")</span></li>
+            </ul>
+        </div>
+
+        @formInputMoney(otherReliefsForm, "otherReliefs", "")
+
+        <button id="add-relief-button" class="button">@Messages("calc.otherReliefs.button.addRelief")</button>
     }
 }

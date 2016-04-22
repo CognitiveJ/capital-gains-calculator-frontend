@@ -2265,8 +2265,16 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           OtherReliefsTestDataItem.jsoupDoc.body.getElementById("otherReliefs").tagName() shouldEqual "input"
         }
 
-        "display a 'Continue' button " in {
-          OtherReliefsTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+        "display an 'Add relief' button " in {
+          OtherReliefsTestDataItem.jsoupDoc.body.getElementById("add-relief-button").text shouldEqual Messages("calc.otherReliefs.button.addRelief")
+        }
+
+        "include helptext for 'Total gain'" in {
+          OtherReliefsTestDataItem.jsoupDoc.body.getElementById("totalGain").text should include (Messages("calc.otherReliefs.totalGain"))
+        }
+
+        "include helptext for 'Taxable gain'" in {
+          OtherReliefsTestDataItem.jsoupDoc.body.getElementById("taxableGain").text should include (Messages("calc.otherReliefs.taxableGain"))
         }
       }
     }
