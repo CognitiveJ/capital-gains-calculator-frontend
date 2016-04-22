@@ -54,7 +54,7 @@ object AllowableLossesForm {
         allowableLossesForm => validate(AllowableLossesModel(allowableLossesForm.isClaimingAllowableLosses, allowableLossesForm.allowableLossesAmt)))
       .verifying(Messages("calc.allowableLosses.errorMinimum"),
         allowableLossesForm => validateMinimum(AllowableLossesModel(allowableLossesForm.isClaimingAllowableLosses, allowableLossesForm.allowableLossesAmt)))
-      .verifying(Messages("calc.common.money.error.moreThan2dp"),
+      .verifying(Messages("calc.allowableLosses.errorDecimal"),
         allowableLossesForm => validateTwoDec(AllowableLossesModel(allowableLossesForm.isClaimingAllowableLosses, allowableLossesForm.allowableLossesAmt)))
   )
 }
