@@ -5,7 +5,7 @@
 @(allowableLossesForm: Form[AllowableLossesModel])(implicit request: Request[_])
 
 @hiddenYesNoContent = {
-    @simpleNoErrorInput(allowableLossesForm("allowableLossesAmt"), '_label -> Messages("calc.allowableLosses.question.two"), '_dataAttributes -> "placeholder = £")
+    @formInputMoney(allowableLossesForm, "allowableLossesAmt", Messages("calc.allowableLosses.question.two"))
 }
 
 @hiddenHelpTextContent = {
@@ -19,13 +19,18 @@
 
 @main_template(Messages("calc.allowableLosses.question.one")) {
 
-    <a id="link-back" class="link-back" href="@routes.CalculationController.entrepreneursRelief">Back</a>
+    <a id="back-link" class="back-link" href="@routes.CalculationController.entrepreneursRelief">Back</a>
 
     <h1 class="heading-large">@Messages("calc.base.pageHeading")</h1>
 
     @govHelpers.form(action = routes.CalculationController.submitAllowableLosses) {
 
-        @formHiddenYesNoRadio(allowableLossesForm,"isClaimingAllowableLosses",Messages("calc.allowableLosses.question.one"),hiddenYesNoContent)
+        @formHiddenYesNoRadio(
+            allowableLossesForm,
+            "isClaimingAllowableLosses",
+            Messages("calc.allowableLosses.question.one"),
+            hiddenYesNoContent
+        )
 
         @hiddenHelpText("allowableLossesHiddenHelp",Messages("calc.allowableLosses.helpText.title"),hiddenHelpTextContent)
 

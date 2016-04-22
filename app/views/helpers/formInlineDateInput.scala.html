@@ -6,7 +6,7 @@
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 @import java.text.SimpleDateFormat
 
-@fieldsetClasses = @{if(formItem.hasErrors) "form-field--error fields-aligned" else "" }
+@fieldsetClasses = @{if(formItem.hasErrors) "form-field--error" else "" }
 
 @dayErrorClass = @{if(formItem(s"${fieldName}.day").hasErrors) "error-field" else "" }
 @monthErrorClass = @{if(formItem(s"${fieldName}.month").hasErrors) "error-field" else "" }
@@ -16,7 +16,7 @@
 
     @formItem.errors.map { error => <span class="error-notification">@Messages(error.message)</span>}
 
-    <legend>@questionText</legend>
+    @questionText
 
     <span class="form-hint">@Messages("calc.common.date.hint")</span>
 

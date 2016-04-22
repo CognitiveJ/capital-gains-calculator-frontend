@@ -4,6 +4,16 @@
 
 @(inputForm: Form[_], fieldName: String, questionText: String, helpText: Option[String] = None)(implicit lang: play.api.i18n.Lang)
 
+    <style>
+
+    </style>
+
     <div class="form-group">
-        @govHelpers.input(inputForm(fieldName), '_label -> questionText, '_inputHint -> helpText.getOrElse(""), '_dataAttributes -> "placeholder = £")
+        @moneyInputFormat(
+            inputForm(fieldName),
+            '_label -> questionText,
+            '_inputHint -> helpText.getOrElse(""),
+            '_type -> "number",
+            '_inputClass -> "input--no-spinner"
+        )
     </div>

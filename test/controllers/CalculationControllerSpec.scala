@@ -98,7 +98,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
         "have a 'Back' link " in {
           keystoreFetchCondition[CustomerTypeModel](None)
-          CustomerTypeTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+          CustomerTypeTestDataItem.jsoupDoc.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
         }
 
         "have the question 'Who owned the property?' as the legend of the input" in {
@@ -264,7 +264,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
         "have a 'Back' link " in {
           keystoreFetchCondition[DisabledTrusteeModel](None)
-          DisabledTrusteeTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+          DisabledTrusteeTestDataItem.jsoupDoc.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
         }
 
         "have the question 'When did you sign the contract that made someone else the owner?' as the legend of the input" in {
@@ -386,12 +386,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
         "have a 'Back' link " in {
           keystoreFetchCondition[PersonalAllowanceModel](None)
-          PersonalAllowanceTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+          PersonalAllowanceTestDataItem.jsoupDoc.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
         }
 
         "have the question 'In the tax year when you stopped owning the property, what was your UK Personal Allowance?' as the label of the input" in {
           keystoreFetchCondition[PersonalAllowanceModel](None)
-          PersonalAllowanceTestDataItem.jsoupDoc.body.getElementsByTag("label").text shouldEqual Messages("calc.personalAllowance.question")
+          PersonalAllowanceTestDataItem.jsoupDoc.body.getElementsByTag("label").text should include (Messages("calc.personalAllowance.question"))
         }
 
         "display an input box for the Personal Allowance" in {
@@ -540,7 +540,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         }
 
         "have a 'Back' link " in {
-          OtherPropertiesTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+          OtherPropertiesTestDataItem.jsoupDoc.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
         }
 
         "have the question 'Did you sell or give away any other properties in that tax year?' as the legend of the input" in {
@@ -665,12 +665,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
         "have a 'Back' link " in {
           keystoreFetchCondition[AnnualExemptAmountModel](None)
-          AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+          AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
         }
 
         "have the question 'How much of your Capital Gains Tax allowance have you got left?' as the legend of the input" in {
           keystoreFetchCondition[AnnualExemptAmountModel](None)
-          AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementsByTag("label").text shouldEqual Messages("calc.annualExemptAmount.question")
+          AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementsByTag("label").text should include (Messages("calc.annualExemptAmount.question"))
         }
 
         "display an input box for the Annual Exempt Amount" in {
@@ -833,12 +833,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
         "have a 'Back' link " in {
           keystoreFetchCondition[AcquisitionValueModel](None)
-          AcquisitionValueTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+          AcquisitionValueTestDataItem.jsoupDoc.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
         }
 
         "have the question 'How much did you pay for the property?'" in {
           keystoreFetchCondition[AcquisitionValueModel](None)
-          AcquisitionValueTestDataItem.jsoupDoc.body.getElementsByTag("label").text shouldEqual Messages("calc.acquisitionValue.question")
+          AcquisitionValueTestDataItem.jsoupDoc.body.getElementsByTag("label").text should include (Messages("calc.acquisitionValue.question"))
         }
 
         "display an input box for the Acquisition Value" in {
@@ -984,7 +984,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         }
 
         "contain a hidden component with an input box" in {
-          ImprovementsTestDataItem.jsoupDoc.body.getElementById("improvementsAmt").parent.parent.id shouldBe "hidden"
+          ImprovementsTestDataItem.jsoupDoc.body.getElementById("hidden").html should include ("input")
         }
       }
     }
@@ -1151,11 +1151,11 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         }
 
         "have a 'Back' link " in {
-          DisposalDateTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+          DisposalDateTestDataItem.jsoupDoc.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
         }
 
-        "have the question 'Who owned the property?' as the legend of the input" in {
-          DisposalDateTestDataItem.jsoupDoc.body.getElementsByTag("legend").text shouldEqual Messages("calc.disposalDate.question")
+        s"have the question '${Messages("calc.disposalDate.question")}'" in {
+          DisposalDateTestDataItem.jsoupDoc.body.getElementsByTag("fieldset").text should include (Messages("calc.disposalDate.question"))
         }
 
         "display three input boxes with labels Day, Month and Year respectively" in {
@@ -1413,12 +1413,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
         "have a 'Back' link " in {
           keystoreFetchCondition[DisposalValueModel](None)
-          DisposalValueTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+          DisposalValueTestDataItem.jsoupDoc.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
         }
 
         "have the question 'How much did you sell or give away the property for?' as the legend of the input" in {
           keystoreFetchCondition[DisposalValueModel](None)
-          DisposalValueTestDataItem.jsoupDoc.body.getElementsByTag("label").text shouldEqual Messages("calc.disposalValue.question")
+          DisposalValueTestDataItem.jsoupDoc.body.getElementsByTag("label").text should include (Messages("calc.disposalValue.question"))
         }
 
         "display an input box for the Annual Exempt Amount" in {
@@ -1550,7 +1550,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
         "have a back link" in {
           keystoreFetchCondition[AcquisitionCostsModel](None)
-          AcquisitionCostsTestDataItem.jsoupDoc.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+          AcquisitionCostsTestDataItem.jsoupDoc.getElementById("back-link").text shouldEqual Messages("calc.base.back")
         }
 
         "have the page heading 'Calculate your tax (non-residents)'" in {
@@ -1562,7 +1562,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
           "have the title 'How much did you pay in costs when you became the property owner?'" in {
             keystoreFetchCondition[AcquisitionCostsModel](None)
-            AcquisitionCostsTestDataItem.jsoupDoc.select("label[for=acquisitionCosts]").text.contains(Messages("calc.acquisitionCosts.question")) shouldBe true
+            AcquisitionCostsTestDataItem.jsoupDoc.select("label[for=acquisitionCosts]").text should include (Messages("calc.acquisitionCosts.question"))
           }
 
           "have the help text 'Costs include agent fees, legal fees and surveys'" in {
@@ -1722,7 +1722,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         }
 
         "have a back link" in {
-          DisposalCostsTestDataItem.jsoupDoc.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+          DisposalCostsTestDataItem.jsoupDoc.getElementById("back-link").text shouldEqual Messages("calc.base.back")
         }
 
         "have the heading 'Calculate your tax (non-residents)'" in {
@@ -1732,7 +1732,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         "have a monetary field that" should {
 
           "have the title 'How much did you pay in costs when you became the property owner?'" in {
-            DisposalCostsTestDataItem.jsoupDoc.select("label[for=disposalCosts]").text shouldEqual Messages("calc.disposalCosts.question")
+            DisposalCostsTestDataItem.jsoupDoc.select("label[for=disposalCosts]").text should include (Messages("calc.disposalCosts.question"))
           }
 
           "have an input box for the disposal costs" in {
@@ -1754,7 +1754,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
     "supplied with a pre-existing stored model" should {
       object DisposalCostsTestDataItem extends fakeRequestTo("disposal-costs", TestCalculationController.disposalCosts)
-      val disposalCostsTestModel = new DisposalCostsModel(1000)
+      val disposalCostsTestModel = new DisposalCostsModel(Some(1000))
 
       "return a 200" in {
         keystoreFetchCondition[DisposalCostsModel](Some(disposalCostsTestModel))
@@ -1784,7 +1784,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       }
 
       "submitting a valid form" should {
-        val disposalCostsTestModel = new DisposalCostsModel(1000)
+        val disposalCostsTestModel = new DisposalCostsModel(Some(1000))
         object DisposalCostsTestDataItem extends fakeRequestToPost(
           "disposal-costs",
           TestCalculationController.submitDisposalCosts,
@@ -1802,21 +1802,21 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         }
       }
 
-      "submitting an invalid form with no value" should {
-        val disposalCostsTestModel = new DisposalCostsModel(0)
+      "submitting an valid form with no value" should {
+        val disposalCostsTestModel = new DisposalCostsModel(Some(0))
         object DisposalCostsTestDataItem extends fakeRequestToPost(
           "disposal-costs",
           TestCalculationController.submitDisposalCosts,
           ("disposalCosts", "")
         )
 
-        "return a 400" in {
+        "return a 303" in {
           keystoreCacheCondition(disposalCostsTestModel)
-          status(DisposalCostsTestDataItem.result) shouldBe 400
+          status(DisposalCostsTestDataItem.result) shouldBe 303
         }
       }
       "submitting an invalid form with a negative value of -432" should {
-        val disposalCostsTestModel = new DisposalCostsModel(0)
+        val disposalCostsTestModel = new DisposalCostsModel(Some(0))
         object DisposalCostsTestDataItem extends fakeRequestToPost(
           "disposal-costs",
           TestCalculationController.submitDisposalCosts,
@@ -1835,7 +1835,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       }
 
       "submitting an invalid form with a value that has more than two decimal places" should {
-        val disposalCostsTestModel = new DisposalCostsModel(0)
+        val disposalCostsTestModel = new DisposalCostsModel(Some(0))
         object DisposalCostsTestDataItem extends fakeRequestToPost(
           "disposal-costs",
           TestCalculationController.submitDisposalCosts,
@@ -1854,7 +1854,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       }
 
       "submitting an invalid form with a value that is negative and has more than two decimal places" should {
-        val disposalCostsTestModel = new DisposalCostsModel(0)
+        val disposalCostsTestModel = new DisposalCostsModel(Some(0))
         object DisposalCostsTestDataItem extends fakeRequestToPost(
           "disposal-costs",
           TestCalculationController.submitDisposalCosts,
@@ -1905,7 +1905,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
         "have a 'Back' link " in {
           keystoreFetchCondition[EntrepreneursReliefModel](None)
-          EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+          EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
         }
 
         "have the question 'Are you claiming Entrepreneurs Relief?' as the legend of the input" in {
@@ -2032,7 +2032,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
         "have a back button" in {
           keystoreFetchCondition[AllowableLossesModel](None)
-          AllowableLossesTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+          AllowableLossesTestDataItem.jsoupDoc.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
         }
 
         "have the title 'Are you claiming any allowable losses?'" in {
@@ -2055,7 +2055,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         "have a hidden monetary input with question 'Whats the total value of your allowable losses?'" in {
           keystoreFetchCondition[AllowableLossesModel](None)
           AllowableLossesTestDataItem.jsoupDoc.body.getElementById("allowableLossesAmt").tagName shouldEqual "input"
-          AllowableLossesTestDataItem.jsoupDoc.select("label[for=allowableLossesAmt]").text shouldEqual Messages("calc.allowableLosses.question.two")
+          AllowableLossesTestDataItem.jsoupDoc.select("label[for=allowableLossesAmt]").text should include (Messages("calc.allowableLosses.question.two"))
         }
 
         "have no value auto-filled into the input box" in {
@@ -2254,19 +2254,27 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         }
 
         "have a 'Back' link " in {
-          OtherReliefsTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+          OtherReliefsTestDataItem.jsoupDoc.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
         }
 
         "have the question 'How much extra tax relief are you claiming?' as the legend of the input" in {
-          OtherReliefsTestDataItem.jsoupDoc.body.getElementsByTag("label").text shouldEqual Messages("calc.otherReliefs.question")
+          OtherReliefsTestDataItem.jsoupDoc.body.getElementsByTag("label").text should include (Messages("calc.otherReliefs.question"))
         }
 
         "display an input box for the Other Tax Reliefs" in {
           OtherReliefsTestDataItem.jsoupDoc.body.getElementById("otherReliefs").tagName() shouldEqual "input"
         }
 
-        "display a 'Continue' button " in {
-          OtherReliefsTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+        "display an 'Add relief' button " in {
+          OtherReliefsTestDataItem.jsoupDoc.body.getElementById("add-relief-button").text shouldEqual Messages("calc.otherReliefs.button.addRelief")
+        }
+
+        "include helptext for 'Total gain'" in {
+          OtherReliefsTestDataItem.jsoupDoc.body.getElementById("totalGain").text should include (Messages("calc.otherReliefs.totalGain"))
+        }
+
+        "include helptext for 'Taxable gain'" in {
+          OtherReliefsTestDataItem.jsoupDoc.body.getElementById("taxableGain").text should include (Messages("calc.otherReliefs.taxableGain"))
         }
       }
     }
@@ -2543,7 +2551,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
         "have a 'Back' link " in {
           keystoreFetchCondition[CurrentIncomeModel](None)
-          CurrentIncomeTestDataItem.jsoupDoc.body.getElementById("link-back").text shouldEqual Messages("calc.base.back")
+          CurrentIncomeTestDataItem.jsoupDoc.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
         }
 
         "have the question 'In the tax year when you stopped owning the property, what was your total UK income?' as the label of the input" in {

@@ -1,9 +1,9 @@
 ## Base ##
-calc.base.pageHeading = Calculate your tax (non-residents)
+calc.base.pageHeading = Calculate your Capital Gains Tax
 calc.base.continue = Continue
 calc.base.taxStart = 6 April 2015
 calc.base.back = Back
-calc.base.calculate.tax.heading = Calculate your tax (non-residents)
+calc.base.calculate.tax.heading = Calculate your Capital Gains Tax
 calc.base.percentage.comp = complete
 calc.base.button.continue = Continue
 calc.base.yes = Yes
@@ -29,7 +29,7 @@ calc.common.invalidError = Invalid selection!
 calc.introduction.title = Introduction
 calc.introduction.header = Capital Gains Tax calculator for non-residents
 calc.introduction.lede = Capital Gains Tax for non-residents came into effect from
-calc.introduction.textOne = If you’ve made or lost money on a UK residential property since then you can use this calculator to work out how much tax you owe.
+calc.introduction.textOne = If you''ve made or lost money on a UK residential property since then you can use this calculator to work out how much tax you owe.
 calc.introduction.textTwo = You should tell HMRC less than 30 days after you stop owning a property.
 calc.introduction.listOneTitle = Before you start
 calc.introduction.listOneText = Make sure you know:
@@ -40,13 +40,13 @@ calc.introduction.listTwoTitle = Residential properties
 calc.introduction.listTwoText = Residential properties can be:
 calc.introduction.listTwoBulletOne = houses
 calc.introduction.listTwoBulletTwo = apartments
-calc.introduction.listTwoBulletThree = properties that haven't been built yet
+calc.introduction.listTwoBulletThree = properties that haven''t been built yet
 calc.introduction.listThreeTitle = Changing owners
 calc.introduction.listThreeText = You no longer own a property when you either:
 calc.introduction.listThreeBulletOne = sell it
 calc.introduction.listThreeBulletTwo = give it away
 calc.introduction.listThreeBulletThree = swap it
-calc.introduction.listThreeBulletFour = get compensation if it's destroyed
+calc.introduction.listThreeBulletFour = get compensation if it''s destroyed
 calc.introduction.start = Start
 
 ## Customer Type ##
@@ -56,8 +56,8 @@ calc.customerType.trustee = I was a trustee
 calc.customerType.personalRep = I was the executor of an estate
 
 ## Disabled Trustee ##
-calc.disabledTrustee.question = Are you a trustee for someone who’s vulnerable?
-calc.disabledTrustee.helptext = A person’s vulnerable if they’re disabled, or if they’re under 18 and their parents have died
+calc.disabledTrustee.question = Are you a trustee for someone who''s vulnerable?
+calc.disabledTrustee.helptext = A person''s vulnerable if they''re disabled, or if they''re under 18 and their parents have died
 
 ## Current Income ##
 calc.currentIncome.question = In the tax year when you stopped owning the property, what was your total UK income?
@@ -75,7 +75,7 @@ calc.personalAllowance.errorNegative = Your Personal Allowance can''t be negativ
 calc.personalAllowance.errorDecimalPlaces = Your Personal Allowance has too many decimal numbers
 
 ## Other Properties ##
-calc.otherProperties.question = Did you sell or give away any other properties in that tax year?
+calc.otherProperties.question = In the tax year when you stopped owning the property, did you sell or give away anything else that''s covered by Capital Gains Tax?
 
 ## Annual Exempt Amount ##
 calc.annualExemptAmount.question = How much of your Capital Gains Tax allowance have you got left?
@@ -135,6 +135,9 @@ calc.allowableLosses.errorDecimal = The allowable loss has too many decimal plac
 
 ## Other Reliefs ##
 calc.otherReliefs.question = How much extra tax relief are you claiming?
+calc.otherReliefs.totalGain = Total gain
+calc.otherReliefs.taxableGain = Taxable gain
+calc.otherReliefs.button.addRelief = Add relief
 calc.otherReliefs.errorMinimum = Other reliefs cannot be negative
 calc.otherReliefs.errorDecimal = The reliefs have too many decimal places
 
