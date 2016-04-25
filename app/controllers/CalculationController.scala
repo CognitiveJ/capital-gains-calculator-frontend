@@ -16,6 +16,8 @@
 
 package controllers
 
+import java.util.concurrent.TimeUnit
+
 import connectors.CalculatorConnector
 
 import forms.OtherPropertiesForm._
@@ -38,8 +40,10 @@ import models._
 import play.api.mvc.Action
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
 import views.html._
+
+import scala.concurrent.duration.Duration
 
 object CalculationController extends CalculationController {
   val calcConnector = CalculatorConnector
@@ -329,7 +333,24 @@ trait CalculationController extends FrontendController {
 
   //################### Summary Methods ##########################
   val summary = Action.async { implicit request =>
-    Future.successful(Ok(calculation.summary()))
+    val construct = new SummaryModel(
+      calcConnector.fetchAndGetValue[CustomerTypeModel]("customerType").orNull,
+      calcConnector.fetchAndGetValue[DisabledTrusteeModel]("disabledTrustee"),
+      calcConnector.fetchAndGetValue[CurrentIncomeModel]("currentIncome"),
+      calcConnector.fetchAndGetValue[PersonalAllowanceModel]("personalAllowance"),
+      calcConnector.fetchAndGetValue[OtherPropertiesModel]("otherProperties").orNull,
+      calcConnector.fetchAndGetValue[AnnualExemptAmountModel]("annualExemptAmount"),
+      calcConnector.fetchAndGetValue[AcquisitionValueModel]("acquisitionValue").orNull,
+      calcConnector.fetchAndGetValue[ImprovementsModel]("improvements").orNull,
+      calcConnector.fetchAndGetValue[DisposalDateModel]("disposalDate").orNull,
+      calcConnector.fetchAndGetValue[DisposalValueModel]("disposalValue").orNull,
+      calcConnector.fetchAndGetValue[AcquisitionCostsModel]("acquisitionCosts").orNull,
+      calcConnector.fetchAndGetValue[DisposalCostsModel]("disposalCosts").orNull,
+      calcConnector.fetchAndGetValue[EntrepreneursReliefModel]("entrepreneursRelief").orNull,
+      calcConnector.fetchAndGetValue[AllowableLossesModel]("allowableLosses").orNull,
+      calcConnector.fetchAndGetValue[OtherReliefsModel]("otherReliefs").orNull
+    )
+    val result = calcConnector.calculate(construct).value.get.get.get
+    Future.successful(Ok(calculation.summary(construct, result)))
   }
-
 }

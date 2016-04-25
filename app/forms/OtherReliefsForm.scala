@@ -26,9 +26,9 @@ object OtherReliefsForm {
 
   val otherReliefsForm = Form(
     mapping(
-      "otherReliefs" -> bigDecimal
-        .verifying(Messages("calc.otherReliefs.errorMinimum"), otherReliefs => isPositive(otherReliefs))
-        .verifying(Messages("calc.otherReliefs.errorDecimal"), otherReliefs => isMaxTwoDecimalPlaces(otherReliefs))
+      "otherReliefs" -> optional(bigDecimal)
+        .verifying(Messages("calc.otherReliefs.errorMinimum"), otherReliefs => isPositive(otherReliefs.getOrElse(0)))
+        .verifying(Messages("calc.otherReliefs.errorDecimal"), otherReliefs => isMaxTwoDecimalPlaces(otherReliefs.getOrElse(0)))
     )(OtherReliefsModel.apply)(OtherReliefsModel.unapply)
   )
 }

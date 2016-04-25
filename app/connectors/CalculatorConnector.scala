@@ -16,14 +16,17 @@
 
 package connectors
 
+import akka.actor.Status.Success
 import config.{CalculatorSessionCache, WSHttp}
-import models.CalculationResultModel
+import models.{SummaryModel, CalculationResultModel}
 import play.api.libs.json.Format
 import uk.gov.hmrc.http.cache.client.{CacheMap, SessionCache}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet, HttpResponse}
+import scala.concurrent.ExecutionContext.Implicits.global
 
-import scala.concurrent.Future
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 
 object CalculatorConnector extends CalculatorConnector with ServicesConfig {
   override val sessionCache = CalculatorSessionCache
@@ -47,7 +50,15 @@ trait CalculatorConnector {
     sessionCache.fetchAndGetEntry(key)
   }
 
-  def calculate(left: Int, right: Int)(implicit hc: HeaderCarrier): Future[Option[CalculationResultModel]] = {
-    http.GET[Option[CalculationResultModel]](s"$serviceUrl/capital-gains-calculator/calculate?left=$left&right=$right")
+  def fetchAndGetValue[T](key: String)(implicit hc: HeaderCarrier, formats: Format[T]): Option[T] ={
+    Await.result(fetchAndGetFormData(key).map {
+      case Some(data) => Some(data)
+      case None => None
+    }, Duration("5s"))
+  }
+
+  def calculate(data: SummaryModel)(implicit hc: HeaderCarrier): Future[Option[CalculationResultModel]] = {
+//    http.GET[Option[CalculationResultModel]](s"$serviceUrl/capital-gains-calculator/calculate?left=$left&right=$right")
+    Future.successful(Some(new CalculationResultModel(8000, 40000, 32000, 18, Some(8000), Some(28))))
   }
 }

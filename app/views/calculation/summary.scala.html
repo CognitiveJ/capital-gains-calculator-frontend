@@ -1,6 +1,10 @@
-@()(implicit request: Request[_])
+@(summary: SummaryModel, result: CalculationResultModel)(implicit request: Request[_])
 
 @import views.html.helpers._
+@import org.apache.commons.lang3.text.WordUtils
+@import java.text.SimpleDateFormat
+@import java.util.Date
+@import java.util.GregorianCalendar
 
 @main_template(Messages("calc.summary.title"), articleLayout = false) {
 
@@ -12,7 +16,7 @@
     <div>
         <h1 class="heading-xlarge heading-xxlarge">
             <span class="heading-secondary">@Messages("calc.summary.secondaryHeading")</span>
-            <b>&pound;NNNN.pp</b>
+            <b>&pound;@result.taxOwed.setScale(2)</b>
         </h1>
     </div>
 
@@ -20,35 +24,62 @@
      *  Calculation Details Section
      *@
      @summaryPageSection("calcDetails",Messages("calc.summary.calculation.details.title"),
-        Array(
-            Map(
-                "question" -> Messages("calc.summary.calculation.details.totalGain"),
-                "answer" -> ""),
-            Map(
-                "question" -> Messages("calc.summary.calculation.details.taxableGain"),
-                "answer" -> ""),
-            Map(
-                "question" -> Messages("calc.summary.calculation.details.taxRate"),
-                "answer" -> "")
-        )
-    )
+        result.upperTaxGain match {
+            case Some(data) => Array(
+                Map(
+                    "question" -> Messages("calc.summary.calculation.details.totalGain"),
+                    "answer" -> ("&pound;" + result.totalGain.setScale(2).toString)),
+                Map(
+                    "question" -> Messages("calc.summary.calculation.details.taxableGain"),
+                    "answer" -> ("&pound;" + (result.baseTaxGain + result.upperTaxGain.get).setScale(2).toString)),
+                Map(
+                    "question" -> Messages("calc.summary.calculation.details.taxRate"),
+                    "answer" -> ("&pound;" + result.baseTaxGain.setScale(2).toString + " at " + result.baseTaxRate + "%")),
+                Map(
+                    "question" -> "",
+                    "answer" -> ("&pound;" + result.upperTaxGain.get.setScale(2).toString + " at " + result.upperTaxRate.get.toString + "%"))
+            )
+            case None => Array(
+                Map(
+                    "question" -> Messages("calc.summary.calculation.details.totalGain"),
+                    "answer" -> ("&pound;" + result.totalGain.setScale(2).toString)),
+                Map(
+                    "question" -> Messages("calc.summary.calculation.details.taxableGain"),
+                    "answer" -> ("&pound;" + (result.baseTaxGain + result.upperTaxGain.getOrElse(0)).setScale(2).toString)),
+                Map(
+                    "question" -> Messages("calc.summary.calculation.details.taxRate"),
+                    "answer" -> (result.baseTaxRate + "%"))
+            )
+        }
+     )
 
 
     @*
     *  Personal Details Section
     *@
     @summaryPageSection("personalDetails",Messages("calc.summary.personal.details.title"),
-        Array(
-            Map(
-                "question" -> Messages("calc.customerType.question"),
-                "answer" -> ""),
-            Map(
-                "question" -> Messages("calc.disabledTrustee.question"),
-                "answer" -> ""),
-            Map(
-                "question" -> Messages("calc.annualExemptAmount.question"),
-                "answer" -> "")
-        )
+        summary.disabledTrusteeModel match {
+            case Some(data) =>Array(
+                Map(
+                    "question" -> Messages("calc.customerType.question"),
+                    "answer" -> WordUtils.capitalize(summary.customerTypeModel.customerType)),
+                Map(
+                    "question" -> Messages("calc.disabledTrustee.question"),
+                    "answer" -> summary.disabledTrusteeModel.get.isVulnerable),
+                Map(
+                    "question" -> Messages("calc.annualExemptAmount.question"),
+                    "answer" -> summary.annualExemptAmountModel.getOrElse(11500).toString)
+            )
+            case None => Array(
+                Map(
+                    "question" -> Messages("calc.customerType.question"),
+                    "answer" -> WordUtils.capitalize(summary.customerTypeModel.customerType)),
+                Map(
+                    "question" -> Messages("calc.annualExemptAmount.question"),
+                    "answer" -> ("&pound;" + summary.annualExemptAmountModel.getOrElse(11500).toString))
+            )
+        }
+
     )
 
 
@@ -59,10 +90,10 @@
         Array(
             Map(
                 "question" -> Messages("calc.acquisitionValue.question"),
-                "answer" -> ""),
+                "answer" -> ("&pound;" + summary.acquisitionValueModel.acquisitionValueAmt.toString)),
             Map(
                 "question" -> Messages("calc.acquisitionCosts.question"),
-                "answer" -> "")
+                "answer" -> ("&pound;" + summary.acquisitionCostsModel.acquisitionCostsAmt.getOrElse(0)))
         )
     )
 
@@ -71,11 +102,22 @@
     *  Property Details Section
     *@
     @summaryPageSection("propertyDetails",Messages("calc.summary.property.details.title"),
-        Array(
-            Map(
-                "question" -> Messages("calc.improvements.question"),
-                "answer" -> "")
-        )
+        summary.improvementsModel.improvementsAmt match {
+            case Some(data) => Array(
+                Map(
+                    "question" -> Messages("calc.improvements.question"),
+                    "answer" -> summary.improvementsModel.isClaimingImprovements),
+                Map(
+                    "question" -> Messages("calc.improvements.questionTwo"),
+                    "answer" -> ("&pound;" + summary.improvementsModel.improvementsAmt.get))
+            )
+            case None => Array(
+                Map(
+                    "question" -> Messages("calc.improvements.question"),
+                    "answer" -> summary.improvementsModel.isClaimingImprovements)
+            )
+        }
+
     )
 
 
@@ -86,13 +128,13 @@
         Array(
             Map(
                 "question" -> Messages("calc.disposalDate.question"),
-                "answer" -> ""),
+                "answer" -> new SimpleDateFormat("dd MMMM yyyy").format(new GregorianCalendar(summary.disposalDateModel.year, summary.disposalDateModel.month - 1, summary.disposalDateModel.day).getTime)),
             Map(
                 "question" -> Messages("calc.disposalValue.question"),
-                "answer" -> ""),
+                "answer" -> ("&pound;" + summary.disposalValueModel.disposalValue.toString)),
             Map(
                 "question" -> Messages("calc.disposalCosts.question"),
-                "answer" -> "")
+                "answer" -> ("&pound;" + summary.disposalCostsModel.disposalCosts.getOrElse(0).toString))
         )
     )
 
@@ -104,10 +146,13 @@
         Array(
             Map(
                 "question" -> Messages("calc.entrepreneursRelief.question"),
-                "answer" -> ""),
+                "answer" -> summary.entrepreneursReliefModel.entReliefClaimed),
             Map(
                 "question" -> Messages("calc.allowableLosses.question.two"),
-                "answer" -> "")
+                "answer" -> ("&pound;" + summary.allowableLossesModel.allowableLossesAmt.getOrElse(0).toString)),
+            Map(
+                "question" -> Messages("calc.otherReliefs.question"),
+                "answer" -> ("&pound;" + summary.otherReliefsModel.otherReliefs.getOrElse(0).toString))
         )
     )
 
