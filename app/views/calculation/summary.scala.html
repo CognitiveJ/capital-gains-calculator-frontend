@@ -31,7 +31,7 @@
                     "answer" -> ("&pound;" + result.totalGain.setScale(2).toString)),
                 Map(
                     "question" -> Messages("calc.summary.calculation.details.taxableGain"),
-                    "answer" -> ("&pound;" + (result.baseTaxGain + result.upperTaxGain.get).setScale(2).toString)),
+                    "answer" -> ("&pound;" + (result.taxableGain).setScale(2).toString)),
                 Map(
                     "question" -> Messages("calc.summary.calculation.details.taxRate"),
                     "answer" -> ("&pound;" + result.baseTaxGain.setScale(2).toString + " at " + result.baseTaxRate + "%")),
