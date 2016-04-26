@@ -17,7 +17,7 @@
             <ul class="list list-bullet">
                 <li id="totalGain">&pound;@{result.totalGain.setScale(2).toString}<br><span class="font-xsmall">@Messages("calc.otherReliefs.totalGain")</span></li>
 
-                <li id="taxableGain">&pound;@{{result.baseTaxGain + result.baseTaxGain + result.upperTaxGain.getOrElse(0)}.setScale(2).toString}<br><span class="font-xsmall">@Messages("calc.otherReliefs.taxableGain")</span></li>
+                <li id="taxableGain">&pound;@{{result.baseTaxGain + result.upperTaxGain.getOrElse(0)}.setScale(2).toString}<br><span class="font-xsmall">@Messages("calc.otherReliefs.taxableGain")</span></li>
             </ul>
         </div>
 
