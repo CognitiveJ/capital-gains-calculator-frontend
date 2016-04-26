@@ -1270,7 +1270,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
       s"should error with message '${Messages("calc.common.date.error.day.lessThan1")}'" in {
         keystoreCacheCondition[DisposalDateModel](testModel)
-        DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("calc.common.date.error.day.lessThan1"))
+        DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("calc.common.date.error.invalidDate"))
       }
     }
     "submitting a day greater than 31" should {
@@ -1288,7 +1288,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
       s"should error with message '${Messages("calc.common.date.error.day.greaterThan31")}'" in {
         keystoreCacheCondition[DisposalDateModel](testModel)
-        DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("calc.common.date.error.day.greaterThan31"))
+        DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("calc.common.date.error.invalidDate"))
       }
     }
     "submitting a month greater than 12" should {
@@ -1306,7 +1306,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
       s"should error with message '${Messages("calc.common.date.error.month.greaterThan12")}'" in {
         keystoreCacheCondition[DisposalDateModel](testModel)
-        DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("calc.common.date.error.month.greaterThan12"))
+        DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("calc.common.date.error.invalidDate"))
       }
     }
     "submitting a month less than 1" should {
@@ -1324,7 +1324,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
       s"should error with message '${Messages("calc.common.date.error.month.lessThan1")}'" in {
         keystoreCacheCondition[DisposalDateModel](testModel)
-        DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("calc.common.date.error.month.lessThan1"))
+        DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("calc.common.date.error.invalidDate"))
       }
     }
     "submitting a day with no value" should {
@@ -1342,7 +1342,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
       "should error with message 'Numeric vaue expected'" in {
         keystoreCacheCondition[DisposalDateModel](testModel)
-        DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include ("Numeric value expected")
+        DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include ("You must supply a valid date")
       }
     }
     "submitting a month with no value" should {
@@ -1360,7 +1360,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
       "should error with message 'Numeric vaue expected'" in {
         keystoreCacheCondition[DisposalDateModel](testModel)
-        DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include ("Numeric value expected")
+        DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include ("You must supply a valid date")
       }
     }
     "submitting a year with no value" should {
@@ -1378,7 +1378,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
       "should error with message 'Numeric vaue expected'" in {
         keystoreCacheCondition[DisposalDateModel](testModel)
-        DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include ("Numeric value expected")
+        DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include ("You must supply a valid date")
       }
     }
   }
