@@ -14,7 +14,9 @@
 
 <fieldset class="form-group form-date @fieldsetClasses" id="@fieldName-fieldset">
 
-    @formItem.errors.map { error => <span class="error-notification">@Messages(error.message)</span>}
+    @if(formItem.hasErrors) {
+        <span class="error-notification">@Messages("calc.common.date.error.invalidDate")</span>
+    }
 
     @questionText
 
