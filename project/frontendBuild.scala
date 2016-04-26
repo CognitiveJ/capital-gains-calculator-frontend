@@ -34,15 +34,17 @@ private object AppDependencies {
   import play.PlayImport._
   import play.core.PlayVersion
 
-  private val playHealthVersion = "1.1.0"    
-  private val playJsonLoggerVersion = "2.1.1"      
-  private val frontendBootstrapVersion = "6.2.0"
+  private val playHealthVersion = "1.1.0"
+  private val playJsonLoggerVersion = "2.1.1"
+  private val frontendBootstrapVersion = "6.4.0"
   private val govukTemplateVersion = "4.0.0"
   private val playUiVersion = "4.11.0"
   private val playPartialsVersion = "4.2.0"
-  private val playAuthorisedFrontendVersion = "4.6.0"
+  private val playAuthorisedFrontendVersion = "5.0.0"
   private val playConfigVersion = "2.0.1"
-  private val hmrcTestVersion = "1.5.0"
+  private val hmrcTestVersion = "1.6.0"
+  private val cachingClientVersion = "5.3.0"
+  private val mongoCachingVersion = "3.1.0"
   
   val compile = Seq(
     ws,
@@ -54,8 +56,8 @@ private object AppDependencies {
     "uk.gov.hmrc" %% "govuk-template" % govukTemplateVersion,
     "uk.gov.hmrc" %% "play-health" % playHealthVersion,
     "uk.gov.hmrc" %% "play-ui" % playUiVersion,
-    "uk.gov.hmrc" %% "http-caching-client" % "5.3.0",
-    "uk.gov.hmrc" %% "mongo-caching" % "3.0.0"
+    "uk.gov.hmrc" %% "http-caching-client" % cachingClientVersion,
+    "uk.gov.hmrc" %% "mongo-caching" % mongoCachingVersion
   )
 
   trait TestDependencies {
