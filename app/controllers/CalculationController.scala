@@ -346,9 +346,7 @@ trait CalculationController extends FrontendController {
   //################### Summary Methods ##########################
   def summary = Action.async { implicit request =>
     val construct = calcConnector.createSummary(hc)
-    calcConnector.
-      calculate(construct)
-      .map {
+    calcConnector.calculate(construct).map {
       case Some(data) => Ok(calculation.summary(construct, data))
       case None => BadRequest(calculation.summary(construct, CalculationResultModel(0.0, 0.0, 0.0, 0, None, None)))
     }

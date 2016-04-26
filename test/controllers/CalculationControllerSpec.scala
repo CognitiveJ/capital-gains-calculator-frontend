@@ -2288,6 +2288,8 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       object OtherReliefsTestDataItem extends fakeRequestTo("other-reliefs", TestCalculationController.otherReliefs)
 
       "return a 200" in {
+        keystoreSummaryValue(sumModel)
+        keystoreCalculateValue(calcModel)
         keystoreFetchCondition[OtherReliefsModel](None)
         status(OtherReliefsTestDataItem.result) shouldBe 200
       }
@@ -2295,38 +2297,56 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       "return some HTML that" should {
 
         "contain some text and use the character set utf-8" in {
+          keystoreSummaryValue(sumModel)
+          keystoreCalculateValue(calcModel)
           contentType(OtherReliefsTestDataItem.result) shouldBe Some("text/html")
           charset(OtherReliefsTestDataItem.result) shouldBe Some("utf-8")
         }
         "have the title 'How much extra tax relief are you claiming?'" in {
+          keystoreSummaryValue(sumModel)
+          keystoreCalculateValue(calcModel)
           OtherReliefsTestDataItem.jsoupDoc.title shouldEqual Messages("calc.otherReliefs.question")
         }
 
         "have the heading Calculate your tax (non-residents) " in {
+          keystoreSummaryValue(sumModel)
+          keystoreCalculateValue(calcModel)
           OtherReliefsTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
         }
 
         "have a 'Back' link " in {
+          keystoreSummaryValue(sumModel)
+          keystoreCalculateValue(calcModel)
           OtherReliefsTestDataItem.jsoupDoc.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
         }
 
         "have the question 'How much extra tax relief are you claiming?' as the legend of the input" in {
+          keystoreSummaryValue(sumModel)
+          keystoreCalculateValue(calcModel)
           OtherReliefsTestDataItem.jsoupDoc.body.getElementsByTag("label").text should include (Messages("calc.otherReliefs.question"))
         }
 
         "display an input box for the Other Tax Reliefs" in {
+          keystoreSummaryValue(sumModel)
+          keystoreCalculateValue(calcModel)
           OtherReliefsTestDataItem.jsoupDoc.body.getElementById("otherReliefs").tagName() shouldEqual "input"
         }
 
         "display an 'Add relief' button " in {
+          keystoreSummaryValue(sumModel)
+          keystoreCalculateValue(calcModel)
           OtherReliefsTestDataItem.jsoupDoc.body.getElementById("add-relief-button").text shouldEqual Messages("calc.otherReliefs.button.addRelief")
         }
 
         "include helptext for 'Total gain'" in {
+          keystoreSummaryValue(sumModel)
+          keystoreCalculateValue(calcModel)
           OtherReliefsTestDataItem.jsoupDoc.body.getElementById("totalGain").text should include (Messages("calc.otherReliefs.totalGain"))
         }
 
         "include helptext for 'Taxable gain'" in {
+          keystoreSummaryValue(sumModel)
+          keystoreCalculateValue(calcModel)
           OtherReliefsTestDataItem.jsoupDoc.body.getElementById("taxableGain").text should include (Messages("calc.otherReliefs.taxableGain"))
         }
       }
@@ -2336,6 +2356,8 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testOtherReliefsModel = new OtherReliefsModel(Some(5000))
 
       "return a 200" in {
+        keystoreSummaryValue(sumModel)
+        keystoreCalculateValue(calcModel)
         keystoreFetchCondition[OtherReliefsModel](Some(testOtherReliefsModel))
         status(OtherReliefsTestDataItem.result) shouldBe 200
       }
@@ -2343,11 +2365,15 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       "return some HTML that" should {
 
         "contain some text and use the character set utf-8" in {
+          keystoreSummaryValue(sumModel)
+          keystoreCalculateValue(calcModel)
           contentType(OtherReliefsTestDataItem.result) shouldBe Some("text/html")
           charset(OtherReliefsTestDataItem.result) shouldBe Some("utf-8")
         }
 
         "have the value 5000 auto-filled into the input box" in {
+          keystoreSummaryValue(sumModel)
+          keystoreCalculateValue(calcModel)
           keystoreFetchCondition[OtherReliefsModel](Some(testOtherReliefsModel))
           OtherReliefsTestDataItem.jsoupDoc.getElementById("otherReliefs").attr("value") shouldEqual "5000"
         }
@@ -2367,6 +2393,8 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val otherReliefsTestModel = new OtherReliefsModel(Some(1000))
 
       "return a 303" in {
+        keystoreSummaryValue(sumModel)
+        keystoreCalculateValue(calcModel)
         keystoreCacheCondition[OtherReliefsModel](otherReliefsTestModel)
         status(OtherReliefsTestDataItem.result) shouldBe 303
       }
@@ -2377,6 +2405,8 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val otherReliefsTestModel = new OtherReliefsModel(Some(1000.11))
 
       "return a 303" in {
+        keystoreSummaryValue(sumModel)
+        keystoreCalculateValue(calcModel)
         keystoreCacheCondition[OtherReliefsModel](otherReliefsTestModel)
         status(OtherReliefsTestDataItem.result) shouldBe 303
       }
@@ -2387,6 +2417,8 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val otherReliefsTestModel = new OtherReliefsModel(Some(0))
 
       "return a 303" in {
+        keystoreSummaryValue(sumModel)
+        keystoreCalculateValue(calcModel)
         keystoreCacheCondition[OtherReliefsModel](otherReliefsTestModel)
         status(OtherReliefsTestDataItem.result) shouldBe 303
       }
@@ -2397,6 +2429,8 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val otherReliefsTestModel = new OtherReliefsModel(Some(1000.111))
 
       "return a 400" in {
+        keystoreSummaryValue(sumModel)
+        keystoreCalculateValue(calcModel)
         keystoreCacheCondition[OtherReliefsModel](otherReliefsTestModel)
         status(OtherReliefsTestDataItem.result) shouldBe 400
       }
@@ -2407,6 +2441,8 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val otherReliefsTestModel = new OtherReliefsModel(Some(-1000))
 
       "return a 400" in {
+        keystoreSummaryValue(sumModel)
+        keystoreCalculateValue(calcModel)
         keystoreCacheCondition[OtherReliefsModel](otherReliefsTestModel)
         status(OtherReliefsTestDataItem.result) shouldBe 400
       }
@@ -2417,6 +2453,8 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val otherReliefsTestModel = new OtherReliefsModel(Some(1000))
 
       "return a 400" in {
+        keystoreSummaryValue(sumModel)
+        keystoreCalculateValue(calcModel)
         keystoreCacheCondition[OtherReliefsModel](otherReliefsTestModel)
         status(OtherReliefsTestDataItem.result) shouldBe 400
       }

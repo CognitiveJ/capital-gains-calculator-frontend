@@ -18,7 +18,7 @@ package connectors
 
 import java.util.UUID
 
-import models.{CalculationResultModel, CustomerTypeModel, SummaryModel}
+import models._
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
@@ -43,6 +43,24 @@ class CalculatorConnectorSpec extends UnitSpec with MockitoSugar {
   }
 
   implicit val hc: HeaderCarrier = HeaderCarrier(sessionId = Some(SessionId(sessionId.toString)))
+
+  val sumModel = SummaryModel(
+    CustomerTypeModel("individual"),
+    None,
+    Some(CurrentIncomeModel(1000)),
+    Some(PersonalAllowanceModel(11100)),
+    OtherPropertiesModel("No"),
+    None,
+    AcquisitionValueModel(100000),
+    ImprovementsModel("No", None),
+    DisposalDateModel(10, 10, 2010),
+    DisposalValueModel(150000),
+    AcquisitionCostsModel(None),
+    DisposalCostsModel(None),
+    EntrepreneursReliefModel("No"),
+    AllowableLossesModel("No", None),
+    OtherReliefsModel(None)
+  )
 
   "Calculator Connector" should {
 
@@ -73,7 +91,7 @@ class CalculatorConnectorSpec extends UnitSpec with MockitoSugar {
       .thenReturn(Future.successful(Some(validResponse)))
 
     "return a valid response" in {
-      val testModel: SummaryModel = null
+      val testModel: SummaryModel = sumModel
       val result = TargetCalculatorConnector.calculate(testModel)
       await(result) shouldBe Some(validResponse)
     }
