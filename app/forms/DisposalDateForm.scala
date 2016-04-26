@@ -33,6 +33,7 @@ object DisposalDateForm {
         .verifying(Messages("calc.common.date.error.month.lessThan1"), month => month > 0)
         .verifying(Messages("calc.common.date.error.month.greaterThan12"), month => month < 13),
       "disposalDate.year" -> number
+        .verifying(Messages("calc.common.date.error.invalidDate"), year => year > 0)
     )(DisposalDateModel.apply)(DisposalDateModel.unapply) verifying(Messages("calc.common.date.error.invalidDate"), fields =>
       isValidDate(fields.day, fields.month, fields.year)))
 }
