@@ -316,15 +316,26 @@ trait CalculationController extends FrontendController {
 
   //################### Other Reliefs methods #######################
   val otherReliefs = Action.async { implicit request =>
-    calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefs").map {
-      case Some(data) => Ok(calculation.otherReliefs(otherReliefsForm.fill(data)))
-      case None => Ok(calculation.otherReliefs(otherReliefsForm))
-    }
+    val construct = calcConnector.createSummary(hc)
+    calcConnector.calculate(construct).map {
+        case Some(dataResult) => {
+          Await.result(calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefs").map {
+            case Some(data) => Ok(calculation.otherReliefs(otherReliefsForm.fill(data), dataResult))
+            case None => Ok(calculation.otherReliefs(otherReliefsForm, dataResult))
+          }, Duration("5s"))
+        }
+        case None => {
+          Await.result(calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefs").map {
+            case Some(data) => Ok(calculation.otherReliefs(otherReliefsForm.fill(data), CalculationResultModel(0.0, 0.0, 0.0, 0, None, None)))
+            case None => Ok(calculation.otherReliefs(otherReliefsForm, CalculationResultModel(0.0, 0.0, 0.0, 0, None, None)))
+          }, Duration("5s"))
+        }
+      }
   }
 
   val submitOtherReliefs = Action { implicit request =>
     otherReliefsForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.otherReliefs(errors)),
+      errors => BadRequest(calculation.otherReliefs(errors, CalculationResultModel(0.0, 0.0, 0.0, 0, None, None))),
       success => {
         calcConnector.saveFormData("otherReliefs", success)
         Redirect(routes.CalculationController.summary())

@@ -58,9 +58,47 @@ trait CalculatorConnector {
     }, Duration("5s"))
   }
 
-  def calculate(data: SummaryModel)(implicit hc: HeaderCarrier): Future[Option[CalculationResultModel]] = {
-//    http.GET[Option[CalculationResultModel]](s"$serviceUrl/capital-gains-calculator/calculate?data=$data")
-    Future.successful(Some(new CalculationResultModel(8000, 40000, 32000, 18, Some(8000), Some(28))))
+  def calculate(input: SummaryModel)(implicit hc: HeaderCarrier): Future[Option[CalculationResultModel]] = {
+    http.GET[Option[CalculationResultModel]](s"$serviceUrl/capital-gains-calculator/calculate?customerType=${
+      input.customerTypeModel.customerType}&priorDisposal=${
+      input.otherPropertiesModel.otherProperties}" +{
+      input.annualExemptAmountModel match {
+        case Some(data) => "&annualExemptAmount=" + Some(data.annualExemptAmount)
+        case None => ""
+      }
+      } + {
+      input.disabledTrusteeModel match {
+        case Some(data) => "&isVulnerable=" + Some(data.isVulnerable)
+        case None => ""
+      }
+    } + {
+      input.currentIncomeModel match {
+        case Some(data) => "&currentIncome=" + data.currentIncome
+        case None => ""
+      }
+    } + {
+      input.personalAllowanceModel match {
+        case Some(data) => "&personalAllowanceAmt=" + data.personalAllowanceAmt
+        case None => ""
+      }
+    } + "&disposalValue=" + {
+      input.disposalValueModel.disposalValue
+    } + "&disposalCosts=" + {
+      input.disposalCostsModel.disposalCosts.getOrElse(0)
+    } + "&acquisitionValueAmt=" + {
+      input.acquisitionValueModel.acquisitionValueAmt
+    } + "&acquisitionCostsAmt=" + {
+      input.acquisitionCostsModel.acquisitionCostsAmt.getOrElse(0)
+    } + "&improvementsAmt=" + {
+      input.improvementsModel.improvementsAmt.getOrElse(0)
+    } + "&reliefs=" +{
+      input.otherReliefsModel.otherReliefs.getOrElse(0)
+    } + "&allowableLossesAmt=" +{
+      input.allowableLossesModel.allowableLossesAmt.getOrElse(0)
+    } + "&entReliefClaimed=" +{
+      input.entrepreneursReliefModel.entReliefClaimed
+    })
+//    Future.successful(Some(new CalculationResultModel(8000, 40000, 32000, 18, Some(8000), Some(28))))
   }
 
   def createSummary(implicit hc: HeaderCarrier): SummaryModel = {
