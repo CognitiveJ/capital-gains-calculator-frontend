@@ -18,7 +18,7 @@ package connectors
 
 import akka.actor.Status.Success
 import config.{CalculatorSessionCache, WSHttp}
-import models.{SummaryModel, CalculationResultModel}
+import models._
 import play.api.libs.json.Format
 import uk.gov.hmrc.http.cache.client.{CacheMap, SessionCache}
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -54,11 +54,33 @@ trait CalculatorConnector {
     Await.result(fetchAndGetFormData(key).map {
       case Some(data) => Some(data)
       case None => None
+      case _ => None
     }, Duration("5s"))
   }
 
   def calculate(data: SummaryModel)(implicit hc: HeaderCarrier): Future[Option[CalculationResultModel]] = {
-//    http.GET[Option[CalculationResultModel]](s"$serviceUrl/capital-gains-calculator/calculate?left=$left&right=$right")
+//    http.GET[Option[CalculationResultModel]](s"$serviceUrl/capital-gains-calculator/calculate?data=$data")
     Future.successful(Some(new CalculationResultModel(8000, 40000, 32000, 18, Some(8000), Some(28))))
   }
+
+  def createSummary(implicit hc: HeaderCarrier): SummaryModel = {
+    SummaryModel(
+      fetchAndGetValue[CustomerTypeModel]("customerType").getOrElse(CustomerTypeModel("null")),
+      fetchAndGetValue[DisabledTrusteeModel]("disabledTrustee"),
+      fetchAndGetValue[CurrentIncomeModel]("currentIncome"),
+      fetchAndGetValue[PersonalAllowanceModel]("personalAllowance"),
+      fetchAndGetValue[OtherPropertiesModel]("otherProperties").getOrElse(OtherPropertiesModel("No")),
+      fetchAndGetValue[AnnualExemptAmountModel]("annualExemptAmount"),
+      fetchAndGetValue[AcquisitionValueModel]("acquisitionValue").getOrElse(AcquisitionValueModel(0)),
+      fetchAndGetValue[ImprovementsModel]("improvements").getOrElse(ImprovementsModel("No", None)),
+      fetchAndGetValue[DisposalDateModel]("disposalDate").getOrElse(DisposalDateModel(1, 1, 1900)),
+      fetchAndGetValue[DisposalValueModel]("disposalValue").getOrElse(DisposalValueModel(0)),
+      fetchAndGetValue[AcquisitionCostsModel]("acquisitionCosts").getOrElse(AcquisitionCostsModel(None)),
+      fetchAndGetValue[DisposalCostsModel]("disposalCosts").getOrElse(DisposalCostsModel(None)),
+      fetchAndGetValue[EntrepreneursReliefModel]("entrepreneursRelief").getOrElse(EntrepreneursReliefModel("No")),
+      fetchAndGetValue[AllowableLossesModel]("allowableLosses").getOrElse(AllowableLossesModel("No", None)),
+      fetchAndGetValue[OtherReliefsModel]("otherReliefs").getOrElse(OtherReliefsModel(None))
+    )
+  }
+
 }

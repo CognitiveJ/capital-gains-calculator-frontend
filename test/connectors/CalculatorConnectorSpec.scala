@@ -18,7 +18,7 @@ package connectors
 
 import java.util.UUID
 
-import models.{CalculationResultModel, CustomerTypeModel}
+import models.{CalculationResultModel, CustomerTypeModel, SummaryModel}
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
@@ -68,12 +68,13 @@ class CalculatorConnectorSpec extends UnitSpec with MockitoSugar {
 
   "Calling calculate" should {
 
-    val validResponse = CalculationResultModel(1, 1, 2)
+    val validResponse = CalculationResultModel(8000, 40000, 32000, 18, Some(8000), Some(28))
     when(mockHttp.GET[Option[CalculationResultModel]](Matchers.any())(Matchers.any(), Matchers.any()))
       .thenReturn(Future.successful(Some(validResponse)))
 
     "return a valid response" in {
-      val result = TargetCalculatorConnector.calculate(1, 1)
+      val testModel: SummaryModel = null
+      val result = TargetCalculatorConnector.calculate(testModel)
       await(result) shouldBe Some(validResponse)
     }
   }
