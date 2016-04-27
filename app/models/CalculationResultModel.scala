@@ -18,7 +18,15 @@ package models
 
 import play.api.libs.json.Json
 
-case class CalculationResultModel(left: Int, right: Int, result: Int)
+case class CalculationResultModel(taxOwed: BigDecimal,
+                                  totalGain: BigDecimal,
+                                  baseTaxGain: BigDecimal,
+                                  baseTaxRate: Int,
+                                  upperTaxGain: Option[BigDecimal],
+                                  upperTaxRate: Option[Int]) {
+
+  val taxableGain: BigDecimal = baseTaxGain + upperTaxGain.getOrElse(0)
+}
 
 object CalculationResultModel {
   implicit val formats = Json.format[CalculationResultModel]

@@ -16,6 +16,8 @@
 
 package controllers
 
+import java.util.concurrent.TimeUnit
+
 import connectors.CalculatorConnector
 
 import forms.OtherPropertiesForm._
@@ -37,9 +39,12 @@ import forms.CurrentIncomeForm._
 import models._
 import play.api.mvc.Action
 import uk.gov.hmrc.play.frontend.controller.FrontendController
+import uk.gov.hmrc.play.http.HeaderCarrier
 
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
 import views.html._
+
+import scala.concurrent.duration.Duration
 
 object CalculationController extends CalculationController {
   val calcConnector = CalculatorConnector
@@ -311,15 +316,26 @@ trait CalculationController extends FrontendController {
 
   //################### Other Reliefs methods #######################
   val otherReliefs = Action.async { implicit request =>
-    calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefs").map {
-      case Some(data) => Ok(calculation.otherReliefs(otherReliefsForm.fill(data)))
-      case None => Ok(calculation.otherReliefs(otherReliefsForm))
-    }
+    val construct = calcConnector.createSummary(hc)
+    calcConnector.calculate(construct).map {
+        case Some(dataResult) => {
+          Await.result(calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefs").map {
+            case Some(data) => Ok(calculation.otherReliefs(otherReliefsForm.fill(data), dataResult))
+            case None => Ok(calculation.otherReliefs(otherReliefsForm, dataResult))
+          }, Duration("5s"))
+        }
+        case None => {
+          Await.result(calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefs").map {
+            case Some(data) => Ok(calculation.otherReliefs(otherReliefsForm.fill(data), CalculationResultModel(0.0, 0.0, 0.0, 0, None, None)))
+            case None => Ok(calculation.otherReliefs(otherReliefsForm, CalculationResultModel(0.0, 0.0, 0.0, 0, None, None)))
+          }, Duration("5s"))
+        }
+      }
   }
 
   val submitOtherReliefs = Action { implicit request =>
     otherReliefsForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.otherReliefs(errors)),
+      errors => BadRequest(calculation.otherReliefs(errors, CalculationResultModel(0.0, 0.0, 0.0, 0, None, None))),
       success => {
         calcConnector.saveFormData("otherReliefs", success)
         Redirect(routes.CalculationController.summary())
@@ -328,8 +344,11 @@ trait CalculationController extends FrontendController {
   }
 
   //################### Summary Methods ##########################
-  val summary = Action.async { implicit request =>
-    Future.successful(Ok(calculation.summary()))
+  def summary = Action.async { implicit request =>
+    val construct = calcConnector.createSummary(hc)
+    calcConnector.calculate(construct).map {
+      case Some(data) => Ok(calculation.summary(construct, data))
+      case None => BadRequest(calculation.summary(construct, CalculationResultModel(0.0, 0.0, 0.0, 0, None, None)))
+    }
   }
-
 }

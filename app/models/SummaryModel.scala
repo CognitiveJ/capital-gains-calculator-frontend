@@ -20,11 +20,11 @@ import play.api.libs.json.Json
 
 case class SummaryModel (
                           customerTypeModel: CustomerTypeModel,
-                          disabledTrusteeModel: DisabledTrusteeModel,
-//                          currentIncomeModel : currentIncomeModel,
-                          personalAllowanceModel: PersonalAllowanceModel,
+                          disabledTrusteeModel: Option[DisabledTrusteeModel],
+                          currentIncomeModel : Option[CurrentIncomeModel],
+                          personalAllowanceModel: Option[PersonalAllowanceModel],
                           otherPropertiesModel: OtherPropertiesModel,
-                          annualExemptAmountModel: AnnualExemptAmountModel,
+                          annualExemptAmountModel: Option[AnnualExemptAmountModel],
                           acquisitionValueModel: AcquisitionValueModel,
                           improvementsModel: ImprovementsModel,
                           disposalDateModel: DisposalDateModel,
@@ -32,8 +32,8 @@ case class SummaryModel (
                           acquisitionCostsModel: AcquisitionCostsModel,
                           disposalCostsModel : DisposalCostsModel,
                           entrepreneursReliefModel : EntrepreneursReliefModel,
-                          allowableLossesModel : AllowableLossesModel
-//                          otherReliefsModel : otherReliefsModel
+                          allowableLossesModel : AllowableLossesModel,
+                          otherReliefsModel : OtherReliefsModel
                         )
 
 object SummaryModel {
