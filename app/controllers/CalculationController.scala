@@ -327,7 +327,7 @@ trait CalculationController extends FrontendController {
   //################### Other Reliefs methods #######################
   val otherReliefs = Action.async { implicit request =>
     val construct = calcConnector.createSummary(hc)
-    calcConnector.calculate(construct).map {
+    calcConnector.calculateFlat(construct).map {
         case Some(dataResult) => {
           Await.result(calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefs").map {
             case Some(data) => Ok(calculation.otherReliefs(otherReliefsForm.fill(data), dataResult))
@@ -361,7 +361,7 @@ trait CalculationController extends FrontendController {
   //################### Summary Methods ##########################
   def summary = Action.async { implicit request =>
     val construct = calcConnector.createSummary(hc)
-    calcConnector.calculate(construct).map {
+    calcConnector.calculateFlat(construct).map {
       case Some(data) => Ok(calculation.summary(construct, data))
       case None => BadRequest(calculation.summary(construct, CalculationResultModel(0.0, 0.0, 0.0, 0, None, None)))
     }

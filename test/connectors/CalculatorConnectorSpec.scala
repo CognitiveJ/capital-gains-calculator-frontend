@@ -92,7 +92,7 @@ class CalculatorConnectorSpec extends UnitSpec with MockitoSugar {
 
     "return a valid response" in {
       val testModel: SummaryModel = sumModel
-      val result = TargetCalculatorConnector.calculate(testModel)
+      val result = TargetCalculatorConnector.calculateFlat(testModel)
       await(result) shouldBe Some(validResponse)
     }
   }

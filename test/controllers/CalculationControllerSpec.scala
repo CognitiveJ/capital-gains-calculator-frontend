@@ -94,7 +94,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
   }
 
   def keystoreCalculateValue(data: CalculationResultModel): Unit = {
-    when(mockCalcConnector.calculate(Matchers.any())(Matchers.any()))
+    when(mockCalcConnector.calculateFlat(Matchers.any())(Matchers.any()))
       .thenReturn(Future.successful(Some(data)))
   }
 
