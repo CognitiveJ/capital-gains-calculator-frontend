@@ -2411,6 +2411,8 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           keystoreFetchCondition[OtherReliefsModel](Some(testOtherReliefsModel))
           OtherReliefsTestDataItem.jsoupDoc.getElementById("otherReliefs").attr("value") shouldEqual "5000"
         }
+
+
       }
     }
   }
@@ -2509,6 +2511,38 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       "contain some text and use the character set utf-8" in {
         contentType(OtherReliefsTATestDataItem.result) shouldBe Some("text/html")
         charset(OtherReliefsTATestDataItem.result) shouldBe Some("utf-8")
+      }
+      
+      "have the title 'How much extra tax relief are you claiming?'" in {
+        OtherReliefsTATestDataItem.jsoupDoc.title shouldEqual Messages("calc.otherReliefs.question")
+      }
+
+      "have the heading Calculate your tax (non-residents) " in {
+        OtherReliefsTATestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+      }
+
+      "have a 'Back' link " in {
+        OtherReliefsTATestDataItem.jsoupDoc.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+      }
+
+      "have the question 'How much extra tax relief are you claiming?' as the legend of the input" in {
+        OtherReliefsTATestDataItem.jsoupDoc.body.getElementsByTag("label").text should include (Messages("calc.otherReliefs.question"))
+      }
+
+      "display an input box for the Other Tax Reliefs" in {
+        OtherReliefsTATestDataItem.jsoupDoc.body.getElementById("otherReliefs").tagName() shouldEqual "input"
+      }
+
+      "display an 'Add relief' button " in {
+        OtherReliefsTATestDataItem.jsoupDoc.body.getElementById("add-relief-button").text shouldEqual Messages("calc.otherReliefs.button.addRelief")
+      }
+
+      "include helptext for 'Total gain'" in {
+        OtherReliefsTATestDataItem.jsoupDoc.body.getElementById("totalGain").text should include (Messages("calc.otherReliefs.totalGain"))
+      }
+
+      "include helptext for 'Taxable gain'" in {
+        OtherReliefsTATestDataItem.jsoupDoc.body.getElementById("taxableGain").text should include (Messages("calc.otherReliefs.taxableGain"))
       }
     }
   }
