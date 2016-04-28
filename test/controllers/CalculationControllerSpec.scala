@@ -2461,6 +2461,24 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
   }
 
+  //################### Time Apportioned Other Relief tests ###################
+  "In CalculationController calling the .otherReliefsTA action " should  {
+
+  object OtherReliefsTATestDataItem extends fakeRequestTo("other-reliefs-time-apportioned", TestCalculationController.otherReliefsTA)
+
+    "return a 200" in {
+      status(OtherReliefsTATestDataItem.result) shouldBe 200
+    }
+
+    "return some HTML that" should {
+
+      "contain some text and use the character set utf-8" in {
+        contentType(OtherReliefsTATestDataItem.result) shouldBe Some("text/html")
+        charset(OtherReliefsTATestDataItem.result) shouldBe Some("utf-8")
+      }
+    }
+  }
+
   //################### Summary tests #######################
   "In CalculationController calling the .summary action " should {
 
