@@ -106,6 +106,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       Some(PersonalAllowanceModel(11100)),
       OtherPropertiesModel("No"),
       None,
+      AcquisitionDateModel("No", None, None, None),
       AcquisitionValueModel(100000),
       ImprovementsModel("No", None),
       DisposalDateModel(10, 10, 2010),
@@ -114,6 +115,8 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       DisposalCostsModel(None),
       EntrepreneursReliefModel("No"),
       AllowableLossesModel("No", None),
+      CalculationElectionModel("flat-calculation"),
+      OtherReliefsModel(None),
       OtherReliefsModel(None)
     )
 

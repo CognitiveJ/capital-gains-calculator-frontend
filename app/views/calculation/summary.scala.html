@@ -187,7 +187,7 @@
                 }))),
             Map(
                 "question" -> Messages("calc.otherReliefs.question"),
-                "answer" -> ("&pound;" + (summary.otherReliefsModel.otherReliefs match {
+                "answer" -> ("&pound;" + (summary.otherReliefsModelFlat.otherReliefs match {
                     case Some(data) => data.setScale(2).toString
                     case None => "0.00"
                 })))

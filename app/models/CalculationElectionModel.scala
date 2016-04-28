@@ -18,9 +18,9 @@ package models
 
 import play.api.libs.json._
 
-case class CalculationElection(calculationType: String)
+case class CalculationElectionModel(calculationType: String)
 
-object CalculationElection {
-  implicit val formats = Json.format[CalculationElection]
+object CalculationElectionModel {
+  implicit val formats = Json.format[CalculationElectionModel]
 }
 

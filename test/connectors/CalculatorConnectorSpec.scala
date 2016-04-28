@@ -51,6 +51,7 @@ class CalculatorConnectorSpec extends UnitSpec with MockitoSugar {
     Some(PersonalAllowanceModel(11100)),
     OtherPropertiesModel("No"),
     None,
+    AcquisitionDateModel("No", None, None, None),
     AcquisitionValueModel(100000),
     ImprovementsModel("No", None),
     DisposalDateModel(10, 10, 2010),
@@ -59,6 +60,8 @@ class CalculatorConnectorSpec extends UnitSpec with MockitoSugar {
     DisposalCostsModel(None),
     EntrepreneursReliefModel("No"),
     AllowableLossesModel("No", None),
+    CalculationElectionModel("flat-calculation"),
+    OtherReliefsModel(None),
     OtherReliefsModel(None)
   )
 
