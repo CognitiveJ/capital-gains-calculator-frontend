@@ -2494,6 +2494,24 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
   }
 
+  //################### Rebased Other Relief tests ###################
+  "In CalculationController calling the .otherReliefsRebased action " should  {
+
+    object OtherReliefsRebasedTestDataItem extends fakeRequestTo("other-reliefs-rebased", TestCalculationController.otherReliefsRebased)
+
+    "return a 200" in {
+      status(OtherReliefsRebasedTestDataItem.result) shouldBe 200
+    }
+
+    "return some HTML that" should {
+
+      "contain some text and use the character set utf-8" in {
+        contentType(OtherReliefsRebasedTestDataItem.result) shouldBe Some("text/html")
+        charset(OtherReliefsRebasedTestDataItem.result) shouldBe Some("utf-8")
+      }
+    }
+  }
+
   //################### Summary tests #######################
   "In CalculationController calling the .summary action " should {
 

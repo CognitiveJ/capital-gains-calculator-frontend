@@ -352,6 +352,11 @@ trait CalculationController extends FrontendController {
     Future.successful(Ok(calculation.otherReliefsTA()))
   }
 
+  //################### Rebased Other Reliefs methods #######################
+  val otherReliefsRebased = Action.async {implicit request =>
+    Future.successful(Ok(calculation.otherReliefsRebased()))
+  }
+
   //################### Summary Methods ##########################
   def summary = Action.async { implicit request =>
     val construct = calcConnector.createSummary(hc)
