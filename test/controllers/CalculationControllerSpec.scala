@@ -2282,6 +2282,21 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
   }
 
+  //################### Calculation Election tests #########################
+
+  "In CalculationController calling the .calculationElection action" should {
+
+    object CalculationElectionTestDataItem extends fakeRequestTo("calculation-election", CalculationController.calculationElection)
+    "return a 200" in {
+      status(CalculationElectionTestDataItem.result) shouldBe 200
+    }
+
+    "return some HTML" in {
+      contentType(CalculationElectionTestDataItem.result) shouldBe Some("text/html")
+      charset(CalculationElectionTestDataItem.result) shouldBe Some("utf-8")
+    }
+  }
+
   //################### Other Reliefs tests #######################
   "In CalculationController calling the .otherReliefs action " when {
     "not supplied with a pre-existing stored model" should {
