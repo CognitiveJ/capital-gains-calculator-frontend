@@ -72,9 +72,14 @@ POST        /entrepreneurs-relief    controllers.CalculationController.submitEnt
 GET         /allowable-losses        controllers.CalculationController.allowableLosses
 POST        /allowable-losses        controllers.CalculationController.submitAllowableLosses
 
+#Calculation Election
+GET         /calculation-election    controllers.CalculationController.calculationElection
+
 #Other Reliefs
 GET         /other-reliefs           controllers.CalculationController.otherReliefs
 POST        /other-reliefs           controllers.CalculationController.submitOtherReliefs
+
+GET         /other-reliefs-time-apportioned     controllers.CalculationController.otherReliefsTA
 ########################################################
 
 

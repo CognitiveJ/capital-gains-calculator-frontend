@@ -2301,6 +2301,21 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
   }
 
+  //################### Calculation Election tests #########################
+
+  "In CalculationController calling the .calculationElection action" should {
+
+    object CalculationElectionTestDataItem extends fakeRequestTo("calculation-election", CalculationController.calculationElection)
+    "return a 200" in {
+      status(CalculationElectionTestDataItem.result) shouldBe 200
+    }
+
+    "return some HTML" in {
+      contentType(CalculationElectionTestDataItem.result) shouldBe Some("text/html")
+      charset(CalculationElectionTestDataItem.result) shouldBe Some("utf-8")
+    }
+  }
+
   //################### Other Reliefs tests #######################
   "In CalculationController calling the .otherReliefs action " when {
     "not supplied with a pre-existing stored model" should {
@@ -2476,6 +2491,24 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         keystoreCalculateValue(calcModel)
         keystoreCacheCondition[OtherReliefsModel](otherReliefsTestModel)
         status(OtherReliefsTestDataItem.result) shouldBe 400
+      }
+    }
+  }
+
+  //################### Time Apportioned Other Relief tests ###################
+  "In CalculationController calling the .otherReliefsTA action " should  {
+
+  object OtherReliefsTATestDataItem extends fakeRequestTo("other-reliefs-time-apportioned", TestCalculationController.otherReliefsTA)
+
+    "return a 200" in {
+      status(OtherReliefsTATestDataItem.result) shouldBe 200
+    }
+
+    "return some HTML that" should {
+
+      "contain some text and use the character set utf-8" in {
+        contentType(OtherReliefsTATestDataItem.result) shouldBe Some("text/html")
+        charset(OtherReliefsTATestDataItem.result) shouldBe Some("utf-8")
       }
     }
   }

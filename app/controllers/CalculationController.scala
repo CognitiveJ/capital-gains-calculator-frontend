@@ -319,6 +319,10 @@ trait CalculationController extends FrontendController {
       }
     )
   }
+  //################### Calculation Election methods #######################
+  val calculationElection = Action.async { implicit request =>
+    Future.successful(Ok(calculation.calculationElection()))
+  }
 
   //################### Other Reliefs methods #######################
   val otherReliefs = Action.async { implicit request =>
@@ -347,6 +351,11 @@ trait CalculationController extends FrontendController {
         Redirect(routes.CalculationController.summary())
       }
     )
+  }
+
+  //################### Time Apportioned Other Reliefs methods #######################
+  val otherReliefsTA = Action.async { implicit request =>
+    Future.successful(Ok(calculation.otherReliefsTA()))
   }
 
   //################### Summary Methods ##########################
