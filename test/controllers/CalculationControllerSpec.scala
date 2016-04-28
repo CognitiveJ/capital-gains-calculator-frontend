@@ -1003,6 +1003,23 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
   }
 
+  //################### Rebased Costs Tests #######################
+  "In CalculationController calling the .rebasedCosts action " should {
+    object RebasedCostsDataItem extends fakeRequestTo("rebased-costs", TestCalculationController.rebasedCosts)
+
+    "return a 200" in {
+      status(RebasedCostsDataItem.result) shouldBe 200
+    }
+
+    "return some HTML that" should {
+
+      "contain some text and use the character set utf-8" in{
+        contentType(RebasedCostsDataItem.result) shouldBe Some("text/html")
+        charset(RebasedCostsDataItem.result) shouldBe Some("utf-8")
+      }
+    }
+  }
+
   //################### Improvements tests #######################
   "In CalculationController calling the .improvements action " when {
     "not supplied with a pre-existing stored model" should {

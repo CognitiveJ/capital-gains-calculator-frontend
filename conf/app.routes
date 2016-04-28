@@ -40,6 +40,9 @@ POST        /allowance               controllers.CalculationController.submitAnn
 GET         /acquisition-value       controllers.CalculationController.acquisitionValue
 POST        /acquisition-value       controllers.CalculationController.submitAcquisitionValue
 
+#Rebased Costs
+GET         /rebased-costs           controllers.CalculationController.rebasedCosts
+
 #Improvements
 GET         /improvements            controllers.CalculationController.improvements
 POST        /improvements            controllers.CalculationController.submitImprovements

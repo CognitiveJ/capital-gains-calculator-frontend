@@ -188,6 +188,11 @@ trait CalculationController extends FrontendController {
     )
   }
 
+  //################### Rebased costs methods #######################
+  val rebasedCosts = Action.async {implicit request =>
+    Future.successful(Ok(calculation.rebasedCosts()))
+  }
+
   //################### Improvements methods #######################
   val improvements = Action.async { implicit request =>
     calcConnector.fetchAndGetFormData[ImprovementsModel]("improvements").map {
