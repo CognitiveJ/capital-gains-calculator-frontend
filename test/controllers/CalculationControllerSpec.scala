@@ -856,6 +856,25 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
   }
 
+  //############## Acquisition Date tests ######################
+  "In CalculationController calling the .acquisitionDate action " should {
+
+    object AcquisitionDateTestDataItem extends fakeRequestTo("acquisition-date", TestCalculationController.acquisitionDate)
+
+    "return a 200" in {
+      status(AcquisitionDateTestDataItem.result) shouldBe 200
+    }
+
+    "return some HTML that" should {
+
+      "contain some text and use the character set utf-8" in {
+        contentType(AcquisitionDateTestDataItem.result) shouldBe Some("text/html")
+        charset(AcquisitionDateTestDataItem.result) shouldBe Some("utf-8")
+      }
+    }
+  }
+
+
   //############## Acquisition Value tests ######################
   "In CalculationController calling the .acquisitionValue action " when {
     "not supplied with a pre-existing stored model" should {
