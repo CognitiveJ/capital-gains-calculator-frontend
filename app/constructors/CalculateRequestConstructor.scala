@@ -16,7 +16,6 @@
 
 package constructors
 
-import connectors.CalculatorConnector
 import models.SummaryModel
 
 object CalculateRequestConstructor {

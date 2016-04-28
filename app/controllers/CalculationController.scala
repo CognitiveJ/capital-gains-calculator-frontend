@@ -361,9 +361,19 @@ trait CalculationController extends FrontendController {
   //################### Summary Methods ##########################
   def summary = Action.async { implicit request =>
     val construct = calcConnector.createSummary(hc)
-    calcConnector.calculateFlat(construct).map {
-      case Some(data) => Ok(calculation.summary(construct, data))
-      case None => BadRequest(calculation.summary(construct, CalculationResultModel(0.0, 0.0, 0.0, 0, None, None)))
+    construct.CalculationElectionModel.calculationType match {
+      case "flat-calculation" => {
+        calcConnector.calculateFlat(construct).map {
+          case Some(data) => Ok(calculation.summary(construct, data))
+          case None => BadRequest(calculation.summary(construct, CalculationResultModel(0.0, 0.0, 0.0, 0, None, None)))
+        }
+      }
+      case "time-apportioned-calculation" => {
+        calcConnector.calculateTA(construct).map {
+          case Some(data) => Ok(calculation.summary(construct, data))
+          case None => BadRequest(calculation.summary(construct, CalculationResultModel(0.0, 0.0, 0.0, 0, None, None)))
+        }
+      }
     }
   }
 }

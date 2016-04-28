@@ -64,7 +64,7 @@ trait CalculatorConnector {
       CalculateRequestConstructor.baseCalcUrl(input)}${
       CalculateRequestConstructor.flatCalcUrlExtra(input)}")
   }
-  
+
   def calculateTA(input: SummaryModel)(implicit hc: HeaderCarrier): Future[Option[CalculationResultModel]] = {
     http.GET[Option[CalculationResultModel]](s"$serviceUrl/capital-gains-calculator/calculate-time-apportionment?${
       CalculateRequestConstructor.baseCalcUrl(input)}${
