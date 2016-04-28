@@ -55,7 +55,6 @@ trait CalculatorConnector {
     Await.result(fetchAndGetFormData(key).map {
       case Some(data) => Some(data)
       case None => None
-      case _ => None
     }, Duration("5s"))
   }
 

@@ -72,7 +72,7 @@ object CalculateRequestConstructor {
     }&disposalDate=${
       input.disposalDateModel.day}${input.disposalDateModel.month}${input.disposalDateModel.year
     }&acquisitionDate=${
-      input.acquisitionDateModel.day}${input.acquisitionDateModel.month}${input.acquisitionDateModel.year
+      input.acquisitionDateModel.day.get}${input.acquisitionDateModel.month.get}${input.acquisitionDateModel.year.get
     }"
   }
 }

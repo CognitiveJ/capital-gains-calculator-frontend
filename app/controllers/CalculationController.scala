@@ -371,7 +371,7 @@ trait CalculationController extends FrontendController {
   //################### Summary Methods ##########################
   def summary = Action.async { implicit request =>
     val construct = calcConnector.createSummary(hc)
-    construct.CalculationElectionModel.calculationType match {
+    construct.calculationElectionModel.calculationType match {
       case "flat-calculation" => {
         calcConnector.calculateFlat(construct).map {
           case Some(data) => Ok(calculation.summary(construct, data))
