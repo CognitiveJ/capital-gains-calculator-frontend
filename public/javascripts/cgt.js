@@ -30,3 +30,18 @@ $(function() {
         });
     });``
 });
+
+$(function() {
+    $('.additional-option-block').hide();
+
+    //prototype hack
+    $('.additional-option-block').find('span').parent().show();
+
+    $('input[type="radio"]').on('click', function(e){
+        var o = $(this).parent().next('.additional-option-block');
+        if(o.index() == 1){
+            $('.additional-option-block').hide();
+            o.show();
+        }
+    });
+});

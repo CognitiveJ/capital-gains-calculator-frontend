@@ -129,6 +129,10 @@ calc.allowableLosses.errorQuestion = Please provide a value for your allowable l
 calc.allowableLosses.errorMinimum = The value of your allowable losses cannot be negative
 calc.allowableLosses.errorDecimal = The allowable loss has too many decimal places
 
+## Calculation Election ##
+calc.calculationElection.based = Based on
+calc.calculationElection.other = Add other tax relief
+
 ## Other Reliefs ##
 calc.otherReliefs.question = How much extra tax relief are you claiming?
 calc.otherReliefs.totalGain = Total gain
