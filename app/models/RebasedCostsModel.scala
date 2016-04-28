@@ -16,11 +16,10 @@
 
 package models
 
-import play.api.libs.json._
+import play.api.libs.json.Json
 
-case class CalculationElection(calculationType: String)
+case class RebasedCostsModel(rebasedCosts: Option[BigDecimal])
 
-object CalculationElection {
-  implicit val formats = Json.format[CalculationElection]
+object RebasedCostsModel {
+  implicit val format = Json.format[RebasedCostsModel]
 }
-

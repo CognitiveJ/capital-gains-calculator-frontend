@@ -59,6 +59,7 @@ trait CalculatorConnector {
     }, Duration("5s"))
   }
 
+
   def calculateFlat(input: SummaryModel)(implicit hc: HeaderCarrier): Future[Option[CalculationResultModel]] = {
     http.GET[Option[CalculationResultModel]](s"$serviceUrl/capital-gains-calculator/calculate-flat?${
       CalculateRequestConstructor.baseCalcUrl(input)}${
@@ -71,6 +72,7 @@ trait CalculatorConnector {
       CalculateRequestConstructor.taCalcUrlExtra(input)}")
   }
 
+  // $COVERAGE-OFF$
   def createSummary(implicit hc: HeaderCarrier): SummaryModel = {
     SummaryModel(
       fetchAndGetValue[CustomerTypeModel]("customerType").getOrElse(CustomerTypeModel("null")),
@@ -79,6 +81,7 @@ trait CalculatorConnector {
       fetchAndGetValue[PersonalAllowanceModel]("personalAllowance"),
       fetchAndGetValue[OtherPropertiesModel]("otherProperties").getOrElse(OtherPropertiesModel("No")),
       fetchAndGetValue[AnnualExemptAmountModel]("annualExemptAmount"),
+      fetchAndGetValue[AcquisitionDateModel]("acquisitionDate").getOrElse(AcquisitionDateModel("No", None, None, None)),
       fetchAndGetValue[AcquisitionValueModel]("acquisitionValue").getOrElse(AcquisitionValueModel(0)),
       fetchAndGetValue[ImprovementsModel]("improvements").getOrElse(ImprovementsModel("No", None)),
       fetchAndGetValue[DisposalDateModel]("disposalDate").getOrElse(DisposalDateModel(1, 1, 1900)),
@@ -87,8 +90,11 @@ trait CalculatorConnector {
       fetchAndGetValue[DisposalCostsModel]("disposalCosts").getOrElse(DisposalCostsModel(None)),
       fetchAndGetValue[EntrepreneursReliefModel]("entrepreneursRelief").getOrElse(EntrepreneursReliefModel("No")),
       fetchAndGetValue[AllowableLossesModel]("allowableLosses").getOrElse(AllowableLossesModel("No", None)),
-      fetchAndGetValue[OtherReliefsModel]("otherReliefs").getOrElse(OtherReliefsModel(None))
+      fetchAndGetValue[CalculationElectionModel]("calculationElection").getOrElse(CalculationElectionModel("null")),
+      fetchAndGetValue[OtherReliefsModel]("otherReliefsFlat").getOrElse(OtherReliefsModel(None)),
+      fetchAndGetValue[OtherReliefsModel]("otherReliefsTA").getOrElse(OtherReliefsModel(None))
     )
   }
+  // $COVERAGE-ON$
 
 }
