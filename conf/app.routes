@@ -36,6 +36,10 @@ POST        /other-properties        controllers.CalculationController.submitOth
 GET         /allowance               controllers.CalculationController.annualExemptAmount
 POST        /allowance               controllers.CalculationController.submitAnnualExemptAmount
 
+#Acquisition Date
+
+GET         /acquisition-date        controllers.CalculationController.acquisitionDate
+
 #Acquisition Value
 GET         /acquisition-value       controllers.CalculationController.acquisitionValue
 POST        /acquisition-value       controllers.CalculationController.submitAcquisitionValue

@@ -170,6 +170,12 @@ trait CalculationController extends FrontendController {
     )
   }
 
+  //################### Acquisition Date methods #######################
+  val acquisitionDate = Action.async { implicit request =>
+    Future.successful(Ok(calculation.acquisitionDate()))
+  }
+
+
   //################### Acquisition Value methods #######################
   val acquisitionValue = Action.async { implicit request =>
     calcConnector.fetchAndGetFormData[AcquisitionValueModel]("acquisitionValue").map {
