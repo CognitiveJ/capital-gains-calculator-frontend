@@ -80,8 +80,8 @@ class CalculateRequestConstructorSpec extends UnitSpec {
     }
 
     "return a string from the taCalcUrlExtra" in {
-      CalculateRequestConstructor.taCalcUrlExtra(sumModel) shouldEqual "&improvementsAmt=0&disposalDate=10102010" +
-        "&acquisitionDate=991990"
+      CalculateRequestConstructor.taCalcUrlExtra(sumModel) shouldEqual "&improvementsAmt=0&disposalDate=2010-10-10" +
+        "&acquisitionDate=1990-9-9"
     }
   }
 

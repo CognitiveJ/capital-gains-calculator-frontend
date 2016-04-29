@@ -70,9 +70,9 @@ object CalculateRequestConstructor {
     s"&improvementsAmt=${
       input.improvementsModel.improvementsAmt.getOrElse(0)
     }&disposalDate=${
-      input.disposalDateModel.day}${input.disposalDateModel.month}${input.disposalDateModel.year
+      input.disposalDateModel.year}-${input.disposalDateModel.month}-${input.disposalDateModel.day
     }&acquisitionDate=${
-      input.acquisitionDateModel.day.get}${input.acquisitionDateModel.month.get}${input.acquisitionDateModel.year.get
+      input.acquisitionDateModel.year.get}-${input.acquisitionDateModel.month.get}-${input.acquisitionDateModel.day.get
     }"
   }
 }
