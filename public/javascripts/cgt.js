@@ -1,4 +1,4 @@
-$(function() {
+$(document).ready($(function() {
 
     $('*[data-hidden]').each(function() {
 
@@ -6,17 +6,11 @@ $(function() {
         var $hidden = $('#hidden')
         var $input = $self.find('input');
 
-        $input.each(function() {
-
-            var $this = $(this);
-
-            if ($this.val() === 'Yes' && $this.prop('checked')) {
-                $hidden.show();
-            }
-            else if($this.val() === 'No' && $this.prop('checked')){
-                $hidden.hide();
-            }
-        });
+        if ($input.val() === 'Yes' && $input.prop('checked')) {
+            $hidden.show();
+        } else {
+            $hidden.hide();
+        }
 
         $input.change(function() {
 
@@ -28,5 +22,5 @@ $(function() {
                 $hidden.hide();
             }
         });
-    });``
-});
+    });
+}));

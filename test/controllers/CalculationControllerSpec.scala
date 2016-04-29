@@ -871,9 +871,46 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         contentType(AcquisitionDateTestDataItem.result) shouldBe Some("text/html")
         charset(AcquisitionDateTestDataItem.result) shouldBe Some("utf-8")
       }
+
+      s"have the title '${Messages("calc.acquisitionDate.question")}'" in {
+        AcquisitionDateTestDataItem.jsoupDoc.title shouldEqual Messages("calc.acquisitionDate.question")
+      }
+
+      "have the heading Calculate your tax (non-residents) " in {
+        AcquisitionDateTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+      }
+
+      "have a 'Back' link " in {
+        AcquisitionDateTestDataItem.jsoupDoc.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+      }
+
+      s"have the question '${Messages("calc.acquisitionDate.question")}" in {
+        AcquisitionDateTestDataItem.jsoupDoc.body.getElementsByTag("legend").text should include (Messages("calc.acquisitionDate.question"))
+      }
+
+      "display the correct wording for radio option `yes`" in {
+        AcquisitionDateTestDataItem.jsoupDoc.body.getElementById("hasAcquisitionDateYes").parent.text shouldEqual Messages("calc.base.yes")
+      }
+
+      "display the correct wording for radio option `no`" in {
+        AcquisitionDateTestDataItem.jsoupDoc.body.getElementById("hasAcquisitionDateNo").parent.text shouldEqual Messages("calc.base.no")
+      }
+
+      "contain a hidden component with an input box" in {
+        AcquisitionDateTestDataItem.jsoupDoc.body.getElementById("hidden").html should include ("input")
+      }
+
+      "display three input boxes with labels Day, Month and Year respectively" in {
+        AcquisitionDateTestDataItem.jsoupDoc.select("label[for=acquisitionDate.day]").text shouldEqual Messages("calc.common.date.fields.day")
+        AcquisitionDateTestDataItem.jsoupDoc.select("label[for=acquisitionDate.month]").text shouldEqual Messages("calc.common.date.fields.month")
+        AcquisitionDateTestDataItem.jsoupDoc.select("label[for=acquisitionDate.year]").text shouldEqual Messages("calc.common.date.fields.year")
+      }
+
+      "display a 'Continue' button " in {
+        AcquisitionDateTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+      }
     }
   }
-
 
   //############## Acquisition Value tests ######################
   "In CalculationController calling the .acquisitionValue action " when {

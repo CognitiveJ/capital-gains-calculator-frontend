@@ -80,6 +80,9 @@ calc.annualExemptAmount.errorMax = Maximum allowance is £11000
 calc.annualExemptAmount.errorNegative = Allowance can''t be negative
 calc.annualExemptAmount.errorDecimalPlaces = Allowance has too many decimal numbers
 
+## Acquisition Date ##
+calc.acquisitionDate.question = Do you know the date you signed the contract that made you the owner?
+
 ## Acquisition Value ##
 calc.acquisitionValue.question = How much did you pay for the property?
 calc.acquisitionValue.errorNegative = Acquisition value can''t be negative
