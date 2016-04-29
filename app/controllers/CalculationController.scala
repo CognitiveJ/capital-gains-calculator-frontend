@@ -165,7 +165,7 @@ trait CalculationController extends FrontendController {
       errors => BadRequest(calculation.annualExemptAmount(errors)),
       success => {
         calcConnector.saveFormData("annualExemptAmount", success)
-        Redirect(routes.CalculationController.acquisitionValue())
+        Redirect(routes.CalculationController.acquisitionDate())
       }
     )
   }
