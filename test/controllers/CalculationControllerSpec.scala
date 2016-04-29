@@ -93,13 +93,18 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       .thenReturn(data)
   }
 
-  def keystoreCalculateValue(data: CalculationResultModel): Unit = {
+  def keystoreFlatCalculateValue(data: Option[CalculationResultModel]): Unit = {
     when(mockCalcConnector.calculateFlat(Matchers.any())(Matchers.any()))
-      .thenReturn(Future.successful(Some(data)))
+      .thenReturn(Future.successful(data))
+  }
+
+  def keystoreTACalculateValue(data: Option[CalculationResultModel]): Unit = {
+    when(mockCalcConnector.calculateTA(Matchers.any())(Matchers.any()))
+      .thenReturn(Future.successful(data))
   }
 
 //  def valueConditions(): Unit = {
-    val sumModel = SummaryModel(
+    val sumModelFlat = SummaryModel(
       CustomerTypeModel("individual"),
       None,
       Some(CurrentIncomeModel(1000)),
@@ -119,6 +124,27 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       OtherReliefsModel(None),
       OtherReliefsModel(None)
     )
+
+  val sumModelTA = SummaryModel(
+    CustomerTypeModel("individual"),
+    None,
+    Some(CurrentIncomeModel(1000)),
+    Some(PersonalAllowanceModel(11100)),
+    OtherPropertiesModel("No"),
+    None,
+    AcquisitionDateModel("Yes", Some(9), Some(9), Some(9)),
+    AcquisitionValueModel(100000),
+    ImprovementsModel("No", None),
+    DisposalDateModel(10, 10, 2010),
+    DisposalValueModel(150000),
+    AcquisitionCostsModel(None),
+    DisposalCostsModel(None),
+    EntrepreneursReliefModel("No"),
+    AllowableLossesModel("No", None),
+    CalculationElectionModel("time-apportioned-calculation"),
+    OtherReliefsModel(None),
+    OtherReliefsModel(None)
+  )
 
   val calcModel = CalculationResultModel(8000, 40000, 32000, 18, Some(8000), Some(28))
 //   keystoreSummaryValue(sumModel)
@@ -1128,7 +1154,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(returnedCacheMap))
     }
-    
+
     "submitting a valid form with 'Yes' and a value of 12045" should {
       object ImprovementsTestDataItem extends fakeRequestToPost("improvements", TestCalculationController.submitImprovements, ("isClaimingImprovements", "Yes"), ("improvementsAmt", "12045"))
       val improvementsTestModel = new ImprovementsModel("Yes", Some(12045))
@@ -2341,9 +2367,17 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     "not supplied with a pre-existing stored model" should {
       object OtherReliefsTestDataItem extends fakeRequestTo("other-reliefs", TestCalculationController.otherReliefs)
 
-      "return a 200" in {
-        keystoreSummaryValue(sumModel)
-        keystoreCalculateValue(calcModel)
+      "return a 200 with a valid calculation result" in {
+        keystoreSummaryValue(sumModelFlat)
+        keystoreFlatCalculateValue(Some(calcModel))
+        keystoreFetchCondition[OtherReliefsModel](None)
+        status(OtherReliefsTestDataItem.result) shouldBe 200
+      }
+
+      "return a 200 with an invalid calculation result" in {
+        object OtherReliefsTestDataItem extends fakeRequestTo("other-reliefs", TestCalculationController.otherReliefs)
+        keystoreSummaryValue(sumModelFlat)
+        keystoreFlatCalculateValue(None)
         keystoreFetchCondition[OtherReliefsModel](None)
         status(OtherReliefsTestDataItem.result) shouldBe 200
       }
@@ -2351,56 +2385,56 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       "return some HTML that" should {
 
         "contain some text and use the character set utf-8" in {
-          keystoreSummaryValue(sumModel)
-          keystoreCalculateValue(calcModel)
+          keystoreSummaryValue(sumModelFlat)
+          keystoreFlatCalculateValue(Some(calcModel))
           contentType(OtherReliefsTestDataItem.result) shouldBe Some("text/html")
           charset(OtherReliefsTestDataItem.result) shouldBe Some("utf-8")
         }
         "have the title 'How much extra tax relief are you claiming?'" in {
-          keystoreSummaryValue(sumModel)
-          keystoreCalculateValue(calcModel)
+          keystoreSummaryValue(sumModelFlat)
+          keystoreFlatCalculateValue(Some(calcModel))
           OtherReliefsTestDataItem.jsoupDoc.title shouldEqual Messages("calc.otherReliefs.question")
         }
 
         "have the heading Calculate your tax (non-residents) " in {
-          keystoreSummaryValue(sumModel)
-          keystoreCalculateValue(calcModel)
+          keystoreSummaryValue(sumModelFlat)
+          keystoreFlatCalculateValue(Some(calcModel))
           OtherReliefsTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
         }
 
         "have a 'Back' link " in {
-          keystoreSummaryValue(sumModel)
-          keystoreCalculateValue(calcModel)
+          keystoreSummaryValue(sumModelFlat)
+          keystoreFlatCalculateValue(Some(calcModel))
           OtherReliefsTestDataItem.jsoupDoc.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
         }
 
         "have the question 'How much extra tax relief are you claiming?' as the legend of the input" in {
-          keystoreSummaryValue(sumModel)
-          keystoreCalculateValue(calcModel)
+          keystoreSummaryValue(sumModelFlat)
+          keystoreFlatCalculateValue(Some(calcModel))
           OtherReliefsTestDataItem.jsoupDoc.body.getElementsByTag("label").text should include (Messages("calc.otherReliefs.question"))
         }
 
         "display an input box for the Other Tax Reliefs" in {
-          keystoreSummaryValue(sumModel)
-          keystoreCalculateValue(calcModel)
+          keystoreSummaryValue(sumModelFlat)
+          keystoreFlatCalculateValue(Some(calcModel))
           OtherReliefsTestDataItem.jsoupDoc.body.getElementById("otherReliefs").tagName() shouldEqual "input"
         }
 
         "display an 'Add relief' button " in {
-          keystoreSummaryValue(sumModel)
-          keystoreCalculateValue(calcModel)
+          keystoreSummaryValue(sumModelFlat)
+          keystoreFlatCalculateValue(Some(calcModel))
           OtherReliefsTestDataItem.jsoupDoc.body.getElementById("add-relief-button").text shouldEqual Messages("calc.otherReliefs.button.addRelief")
         }
 
         "include helptext for 'Total gain'" in {
-          keystoreSummaryValue(sumModel)
-          keystoreCalculateValue(calcModel)
+          keystoreSummaryValue(sumModelFlat)
+          keystoreFlatCalculateValue(Some(calcModel))
           OtherReliefsTestDataItem.jsoupDoc.body.getElementById("totalGain").text should include (Messages("calc.otherReliefs.totalGain"))
         }
 
         "include helptext for 'Taxable gain'" in {
-          keystoreSummaryValue(sumModel)
-          keystoreCalculateValue(calcModel)
+          keystoreSummaryValue(sumModelFlat)
+          keystoreFlatCalculateValue(Some(calcModel))
           OtherReliefsTestDataItem.jsoupDoc.body.getElementById("taxableGain").text should include (Messages("calc.otherReliefs.taxableGain"))
         }
       }
@@ -2409,9 +2443,17 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       object OtherReliefsTestDataItem extends fakeRequestTo("other-reliefs", TestCalculationController.otherReliefs)
       val testOtherReliefsModel = new OtherReliefsModel(Some(5000))
 
-      "return a 200" in {
-        keystoreSummaryValue(sumModel)
-        keystoreCalculateValue(calcModel)
+      "return a 200 with a valid calculation call" in {
+        keystoreSummaryValue(sumModelFlat)
+        keystoreFlatCalculateValue(Some(calcModel))
+        keystoreFetchCondition[OtherReliefsModel](Some(testOtherReliefsModel))
+        status(OtherReliefsTestDataItem.result) shouldBe 200
+      }
+
+      "return a 200 with an invalid calculation call" in {
+        object OtherReliefsTestDataItem extends fakeRequestTo("other-reliefs", TestCalculationController.otherReliefs)
+        keystoreSummaryValue(sumModelFlat)
+        keystoreFlatCalculateValue(None)
         keystoreFetchCondition[OtherReliefsModel](Some(testOtherReliefsModel))
         status(OtherReliefsTestDataItem.result) shouldBe 200
       }
@@ -2419,15 +2461,15 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       "return some HTML that" should {
 
         "contain some text and use the character set utf-8" in {
-          keystoreSummaryValue(sumModel)
-          keystoreCalculateValue(calcModel)
+          keystoreSummaryValue(sumModelFlat)
+          keystoreFlatCalculateValue(Some(calcModel))
           contentType(OtherReliefsTestDataItem.result) shouldBe Some("text/html")
           charset(OtherReliefsTestDataItem.result) shouldBe Some("utf-8")
         }
 
         "have the value 5000 auto-filled into the input box" in {
-          keystoreSummaryValue(sumModel)
-          keystoreCalculateValue(calcModel)
+          keystoreSummaryValue(sumModelFlat)
+          keystoreFlatCalculateValue(Some(calcModel))
           keystoreFetchCondition[OtherReliefsModel](Some(testOtherReliefsModel))
           OtherReliefsTestDataItem.jsoupDoc.getElementById("otherReliefs").attr("value") shouldEqual "5000"
         }
@@ -2449,8 +2491,8 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val otherReliefsTestModel = new OtherReliefsModel(Some(1000))
 
       "return a 303" in {
-        keystoreSummaryValue(sumModel)
-        keystoreCalculateValue(calcModel)
+        keystoreSummaryValue(sumModelFlat)
+        keystoreFlatCalculateValue(Some(calcModel))
         keystoreCacheCondition[OtherReliefsModel](otherReliefsTestModel)
         status(OtherReliefsTestDataItem.result) shouldBe 303
       }
@@ -2461,8 +2503,8 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val otherReliefsTestModel = new OtherReliefsModel(Some(1000.11))
 
       "return a 303" in {
-        keystoreSummaryValue(sumModel)
-        keystoreCalculateValue(calcModel)
+        keystoreSummaryValue(sumModelFlat)
+        keystoreFlatCalculateValue(Some(calcModel))
         keystoreCacheCondition[OtherReliefsModel](otherReliefsTestModel)
         status(OtherReliefsTestDataItem.result) shouldBe 303
       }
@@ -2473,8 +2515,8 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val otherReliefsTestModel = new OtherReliefsModel(Some(0))
 
       "return a 303" in {
-        keystoreSummaryValue(sumModel)
-        keystoreCalculateValue(calcModel)
+        keystoreSummaryValue(sumModelFlat)
+        keystoreFlatCalculateValue(Some(calcModel))
         keystoreCacheCondition[OtherReliefsModel](otherReliefsTestModel)
         status(OtherReliefsTestDataItem.result) shouldBe 303
       }
@@ -2485,8 +2527,8 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val otherReliefsTestModel = new OtherReliefsModel(Some(1000.111))
 
       "return a 400" in {
-        keystoreSummaryValue(sumModel)
-        keystoreCalculateValue(calcModel)
+        keystoreSummaryValue(sumModelFlat)
+        keystoreFlatCalculateValue(Some(calcModel))
         keystoreCacheCondition[OtherReliefsModel](otherReliefsTestModel)
         status(OtherReliefsTestDataItem.result) shouldBe 400
       }
@@ -2497,8 +2539,8 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val otherReliefsTestModel = new OtherReliefsModel(Some(-1000))
 
       "return a 400" in {
-        keystoreSummaryValue(sumModel)
-        keystoreCalculateValue(calcModel)
+        keystoreSummaryValue(sumModelFlat)
+        keystoreFlatCalculateValue(Some(calcModel))
         keystoreCacheCondition[OtherReliefsModel](otherReliefsTestModel)
         status(OtherReliefsTestDataItem.result) shouldBe 400
       }
@@ -2509,8 +2551,8 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val otherReliefsTestModel = new OtherReliefsModel(Some(1000))
 
       "return a 400" in {
-        keystoreSummaryValue(sumModel)
-        keystoreCalculateValue(calcModel)
+        keystoreSummaryValue(sumModelFlat)
+        keystoreFlatCalculateValue(Some(calcModel))
         keystoreCacheCondition[OtherReliefsModel](otherReliefsTestModel)
         status(OtherReliefsTestDataItem.result) shouldBe 400
       }
@@ -2532,7 +2574,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         contentType(OtherReliefsTATestDataItem.result) shouldBe Some("text/html")
         charset(OtherReliefsTATestDataItem.result) shouldBe Some("utf-8")
       }
-      
+
       "have the title 'How much extra tax relief are you claiming?'" in {
         OtherReliefsTATestDataItem.jsoupDoc.title shouldEqual Messages("calc.otherReliefs.question")
       }
@@ -2586,202 +2628,228 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
   }
 
   //################### Summary tests #######################
-  "In CalculationController calling the .summary action " should {
+  "In CalculationController calling the .summary action " when {
 
-    object SummaryTestDataItem extends fakeRequestTo("summary", TestCalculationController.summary)
+    "flat calculation is chosen" should {
+      object SummaryTestDataItem extends fakeRequestTo("summary", TestCalculationController.summary)
 
-    "return a 200" in {
-      keystoreSummaryValue(sumModel)
-      keystoreCalculateValue(calcModel)
-      status(SummaryTestDataItem.result) shouldBe 200
+      "return a 200 with a valid calculation result" in {
+        keystoreSummaryValue(sumModelFlat)
+        keystoreFlatCalculateValue(Some(calcModel))
+        status(SummaryTestDataItem.result) shouldBe 200
+      }
+
+      "return a 200 with an invalid calculation result" in {
+        object SummaryTestDataItem extends fakeRequestTo("summary", TestCalculationController.summary)
+        keystoreSummaryValue(sumModelFlat)
+        keystoreFlatCalculateValue(None)
+        status(SummaryTestDataItem.result) shouldBe 200
+      }
+
+      "return some HTML that" should {
+
+        "contain some text and use the character set utf-8" in {
+          keystoreSummaryValue(sumModelFlat)
+          keystoreFlatCalculateValue(Some(calcModel))
+          contentType(SummaryTestDataItem.result) shouldBe Some("text/html")
+          charset(SummaryTestDataItem.result) shouldBe Some("utf-8")
+        }
+
+        "should have the title 'Summary'" in {
+          keystoreSummaryValue(sumModelFlat)
+          keystoreFlatCalculateValue(Some(calcModel))
+          SummaryTestDataItem.jsoupDoc.getElementsByTag("title").text shouldEqual Messages("calc.summary.title")
+        }
+
+        "have a back button" in {
+          keystoreSummaryValue(sumModelFlat)
+          keystoreFlatCalculateValue(Some(calcModel))
+          SummaryTestDataItem.jsoupDoc.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+        }
+
+        "have the correct sub-heading 'You owe'" in {
+          keystoreSummaryValue(sumModelFlat)
+          keystoreFlatCalculateValue(Some(calcModel))
+          SummaryTestDataItem.jsoupDoc.select("h1 span").text shouldEqual Messages("calc.summary.secondaryHeading")
+        }
+
+        "have a result amount currently set to £8000.00" in {
+          keystoreSummaryValue(sumModelFlat)
+          keystoreFlatCalculateValue(Some(calcModel))
+          SummaryTestDataItem.jsoupDoc.select("h1 b").text shouldEqual "£8000.00"
+        }
+
+        "have a 'Calculation details' section that" should {
+
+          "include the section heading 'Calculation details" in {
+            keystoreSummaryValue(sumModelFlat)
+            keystoreFlatCalculateValue(Some(calcModel))
+            SummaryTestDataItem.jsoupDoc.select("#calcDetails").text should include(Messages("calc.summary.calculation.details.title"))
+          }
+
+          "include 'Your total gain'" in {
+            keystoreSummaryValue(sumModelFlat)
+            keystoreFlatCalculateValue(Some(calcModel))
+            SummaryTestDataItem.jsoupDoc.select("#calcDetails").text should include(Messages("calc.summary.calculation.details.totalGain"))
+          }
+
+          "include 'Your taxable gain'" in {
+            keystoreSummaryValue(sumModelFlat)
+            keystoreFlatCalculateValue(Some(calcModel))
+            SummaryTestDataItem.jsoupDoc.select("#calcDetails").text should include(Messages("calc.summary.calculation.details.taxableGain"))
+          }
+
+          "include 'Your tax rate'" in {
+            keystoreSummaryValue(sumModelFlat)
+            keystoreFlatCalculateValue(Some(calcModel))
+            SummaryTestDataItem.jsoupDoc.select("#calcDetails").text should include(Messages("calc.summary.calculation.details.taxRate"))
+          }
+        }
+
+        "have a 'Personal details' section that" should {
+
+          "include the section heading 'Personal details" in {
+            keystoreSummaryValue(sumModelFlat)
+            keystoreFlatCalculateValue(Some(calcModel))
+            SummaryTestDataItem.jsoupDoc.select("#personalDetails").text should include(Messages("calc.summary.personal.details.title"))
+          }
+
+          "include the question 'Who owned the property?'" in {
+            keystoreSummaryValue(sumModelFlat)
+            keystoreFlatCalculateValue(Some(calcModel))
+            SummaryTestDataItem.jsoupDoc.select("#personalDetails").text should include(Messages("calc.customerType.question"))
+          }
+
+          "include the question 'How much of your Capital Gains Tax allowance have you got left'" in {
+            keystoreSummaryValue(sumModelFlat)
+            keystoreFlatCalculateValue(Some(calcModel))
+            SummaryTestDataItem.jsoupDoc.select("#personalDetails").text should include(Messages("calc.annualExemptAmount.question"))
+          }
+        }
+
+        "have a 'Purchase details' section that" should {
+
+          "include the section heading 'Purchase details" in {
+            keystoreSummaryValue(sumModelFlat)
+            keystoreFlatCalculateValue(Some(calcModel))
+            SummaryTestDataItem.jsoupDoc.select("#purchaseDetails").text should include(Messages("calc.summary.purchase.details.title"))
+          }
+
+          "include the question 'How much did you pay for the property?'" in {
+            keystoreSummaryValue(sumModelFlat)
+            keystoreFlatCalculateValue(Some(calcModel))
+            SummaryTestDataItem.jsoupDoc.select("#purchaseDetails").text should include(Messages("calc.acquisitionValue.question"))
+          }
+
+          "include the question 'How much did you pay in costs when you became the property owner?'" in {
+            keystoreSummaryValue(sumModelFlat)
+            keystoreFlatCalculateValue(Some(calcModel))
+            SummaryTestDataItem.jsoupDoc.select("#purchaseDetails").text should include(Messages("calc.acquisitionCosts.question"))
+          }
+        }
+
+        "have a 'Property details' section that" should {
+
+          "include the section heading 'Property details" in {
+            keystoreSummaryValue(sumModelFlat)
+            keystoreFlatCalculateValue(Some(calcModel))
+            SummaryTestDataItem.jsoupDoc.select("#propertyDetails").text should include(Messages("calc.summary.property.details.title"))
+          }
+
+          "include the question 'How much did you pay for the property?'" in {
+            keystoreSummaryValue(sumModelFlat)
+            keystoreFlatCalculateValue(Some(calcModel))
+            SummaryTestDataItem.jsoupDoc.select("#propertyDetails").text should include(Messages("calc.improvements.question"))
+          }
+        }
+
+        "have a 'Sale details' section that" should {
+
+          "include the section heading 'Sale details" in {
+            keystoreSummaryValue(sumModelFlat)
+            keystoreFlatCalculateValue(Some(calcModel))
+            SummaryTestDataItem.jsoupDoc.select("#saleDetails").text should include(Messages("calc.summary.sale.details.title"))
+          }
+
+          "include the question 'When did you sign the contract that made someone else the owner?'" in {
+            keystoreSummaryValue(sumModelFlat)
+            keystoreFlatCalculateValue(Some(calcModel))
+            SummaryTestDataItem.jsoupDoc.select("#saleDetails").text should include(Messages("calc.disposalDate.question"))
+          }
+
+          "include the question 'How much did you sell or give away the property for?'" in {
+            keystoreSummaryValue(sumModelFlat)
+            keystoreFlatCalculateValue(Some(calcModel))
+            SummaryTestDataItem.jsoupDoc.select("#saleDetails").text should include(Messages("calc.disposalValue.question"))
+          }
+
+          "include the question 'How much did you pay in costs when you stopped being the property owner?'" in {
+            keystoreSummaryValue(sumModelFlat)
+            keystoreFlatCalculateValue(Some(calcModel))
+            SummaryTestDataItem.jsoupDoc.select("#saleDetails").text should include(Messages("calc.disposalCosts.question"))
+          }
+        }
+
+        "have a 'Deductions details' section that" should {
+
+          "include the section heading 'Deductions" in {
+            keystoreSummaryValue(sumModelFlat)
+            keystoreFlatCalculateValue(Some(calcModel))
+            SummaryTestDataItem.jsoupDoc.select("#deductions").text should include(Messages("calc.summary.deductions.title"))
+          }
+
+          "include the question 'Are you claiming Entrepreneurs' Relief?'" in {
+            keystoreSummaryValue(sumModelFlat)
+            keystoreFlatCalculateValue(Some(calcModel))
+            SummaryTestDataItem.jsoupDoc.select("#deductions").text should include(Messages("calc.entrepreneursRelief.question"))
+          }
+
+          "include the question 'Whats the total value of your allowable losses?'" in {
+            keystoreSummaryValue(sumModelFlat)
+            keystoreFlatCalculateValue(Some(calcModel))
+            SummaryTestDataItem.jsoupDoc.select("#deductions").text should include(Messages("calc.allowableLosses.question.two"))
+          }
+        }
+
+        "have a 'What to do next' section that" should {
+
+          "have the heading 'What to do next'" in {
+            keystoreSummaryValue(sumModelFlat)
+            keystoreFlatCalculateValue(Some(calcModel))
+            SummaryTestDataItem.jsoupDoc.select("#whatToDoNext H2").text shouldEqual (Messages("calc.common.next.actions.heading"))
+          }
+
+          "include the text 'You need to tell HMRC about the property'" in {
+            keystoreSummaryValue(sumModelFlat)
+            keystoreFlatCalculateValue(Some(calcModel))
+            SummaryTestDataItem.jsoupDoc.select("#whatToDoNext").text should
+              include(Messages("calc.summary.next.actions.text"))
+            include(Messages("calc.summary.next.actions.link"))
+          }
+        }
+
+        "have a link to 'Start again'" in {
+          keystoreSummaryValue(sumModelFlat)
+          keystoreFlatCalculateValue(Some(calcModel))
+          SummaryTestDataItem.jsoupDoc.select("#startAgain").text shouldEqual Messages("calc.summary.startAgain")
+        }
+      }
     }
 
-    "return some HTML that" should {
+    "time apportioned calculation is chosen" should {
+      object SummaryTestDataItem extends fakeRequestTo("summary", TestCalculationController.summary)
 
-      "contain some text and use the character set utf-8" in {
-        keystoreSummaryValue(sumModel)
-        keystoreCalculateValue(calcModel)
-        contentType(SummaryTestDataItem.result) shouldBe Some("text/html")
-        charset(SummaryTestDataItem.result) shouldBe Some("utf-8")
+      "return a 200 with a valid calculation result" in {
+        keystoreSummaryValue(sumModelTA)
+        keystoreTACalculateValue(Some(calcModel))
+        status(SummaryTestDataItem.result) shouldBe 200
       }
 
-      "should have the title 'Summary'" in {
-        keystoreSummaryValue(sumModel)
-        keystoreCalculateValue(calcModel)
-        SummaryTestDataItem.jsoupDoc.getElementsByTag("title").text shouldEqual Messages("calc.summary.title")
-      }
-
-      "have a back button" in {
-        keystoreSummaryValue(sumModel)
-        keystoreCalculateValue(calcModel)
-        SummaryTestDataItem.jsoupDoc.getElementById("back-link").text shouldEqual Messages("calc.base.back")
-      }
-
-      "have the correct sub-heading 'You owe'" in {
-        keystoreSummaryValue(sumModel)
-        keystoreCalculateValue(calcModel)
-        SummaryTestDataItem.jsoupDoc.select("h1 span").text shouldEqual Messages("calc.summary.secondaryHeading")
-      }
-
-      "have a result amount currently set to £8000.00" in {
-        keystoreSummaryValue(sumModel)
-        keystoreCalculateValue(calcModel)
-        SummaryTestDataItem.jsoupDoc.select("h1 b").text shouldEqual "£8000.00"
-      }
-
-      "have a 'Calculation details' section that" should {
-
-        "include the section heading 'Calculation details" in {
-          keystoreSummaryValue(sumModel)
-          keystoreCalculateValue(calcModel)
-          SummaryTestDataItem.jsoupDoc.select("#calcDetails").text should include(Messages("calc.summary.calculation.details.title"))
-        }
-
-        "include 'Your total gain'" in {
-          keystoreSummaryValue(sumModel)
-          keystoreCalculateValue(calcModel)
-          SummaryTestDataItem.jsoupDoc.select("#calcDetails").text should include(Messages("calc.summary.calculation.details.totalGain"))
-        }
-
-        "include 'Your taxable gain'" in {
-          keystoreSummaryValue(sumModel)
-          keystoreCalculateValue(calcModel)
-          SummaryTestDataItem.jsoupDoc.select("#calcDetails").text should include(Messages("calc.summary.calculation.details.taxableGain"))
-        }
-
-        "include 'Your tax rate'" in {
-          keystoreSummaryValue(sumModel)
-          keystoreCalculateValue(calcModel)
-          SummaryTestDataItem.jsoupDoc.select("#calcDetails").text should include(Messages("calc.summary.calculation.details.taxRate"))
-        }
-      }
-
-      "have a 'Personal details' section that" should {
-
-        "include the section heading 'Personal details" in {
-          keystoreSummaryValue(sumModel)
-          keystoreCalculateValue(calcModel)
-          SummaryTestDataItem.jsoupDoc.select("#personalDetails").text should include(Messages("calc.summary.personal.details.title"))
-        }
-
-        "include the question 'Who owned the property?'" in {
-          keystoreSummaryValue(sumModel)
-          keystoreCalculateValue(calcModel)
-          SummaryTestDataItem.jsoupDoc.select("#personalDetails").text should include(Messages("calc.customerType.question"))
-        }
-
-        "include the question 'How much of your Capital Gains Tax allowance have you got left'" in {
-          keystoreSummaryValue(sumModel)
-          keystoreCalculateValue(calcModel)
-          SummaryTestDataItem.jsoupDoc.select("#personalDetails").text should include(Messages("calc.annualExemptAmount.question"))
-        }
-      }
-
-      "have a 'Purchase details' section that" should {
-
-        "include the section heading 'Purchase details" in {
-          keystoreSummaryValue(sumModel)
-          keystoreCalculateValue(calcModel)
-          SummaryTestDataItem.jsoupDoc.select("#purchaseDetails").text should include(Messages("calc.summary.purchase.details.title"))
-        }
-
-        "include the question 'How much did you pay for the property?'" in {
-          keystoreSummaryValue(sumModel)
-          keystoreCalculateValue(calcModel)
-          SummaryTestDataItem.jsoupDoc.select("#purchaseDetails").text should include(Messages("calc.acquisitionValue.question"))
-        }
-
-        "include the question 'How much did you pay in costs when you became the property owner?'" in {
-          keystoreSummaryValue(sumModel)
-          keystoreCalculateValue(calcModel)
-          SummaryTestDataItem.jsoupDoc.select("#purchaseDetails").text should include(Messages("calc.acquisitionCosts.question"))
-        }
-      }
-
-      "have a 'Property details' section that" should {
-
-        "include the section heading 'Property details" in {
-          keystoreSummaryValue(sumModel)
-          keystoreCalculateValue(calcModel)
-          SummaryTestDataItem.jsoupDoc.select("#propertyDetails").text should include(Messages("calc.summary.property.details.title"))
-        }
-
-        "include the question 'How much did you pay for the property?'" in {
-          keystoreSummaryValue(sumModel)
-          keystoreCalculateValue(calcModel)
-          SummaryTestDataItem.jsoupDoc.select("#propertyDetails").text should include(Messages("calc.improvements.question"))
-        }
-      }
-
-      "have a 'Sale details' section that" should {
-
-        "include the section heading 'Sale details" in {
-          keystoreSummaryValue(sumModel)
-          keystoreCalculateValue(calcModel)
-          SummaryTestDataItem.jsoupDoc.select("#saleDetails").text should include(Messages("calc.summary.sale.details.title"))
-        }
-
-        "include the question 'When did you sign the contract that made someone else the owner?'" in {
-          keystoreSummaryValue(sumModel)
-          keystoreCalculateValue(calcModel)
-          SummaryTestDataItem.jsoupDoc.select("#saleDetails").text should include(Messages("calc.disposalDate.question"))
-        }
-
-        "include the question 'How much did you sell or give away the property for?'" in {
-          keystoreSummaryValue(sumModel)
-          keystoreCalculateValue(calcModel)
-          SummaryTestDataItem.jsoupDoc.select("#saleDetails").text should include(Messages("calc.disposalValue.question"))
-        }
-
-        "include the question 'How much did you pay in costs when you stopped being the property owner?'" in {
-          keystoreSummaryValue(sumModel)
-          keystoreCalculateValue(calcModel)
-          SummaryTestDataItem.jsoupDoc.select("#saleDetails").text should include(Messages("calc.disposalCosts.question"))
-        }
-      }
-
-      "have a 'Deductions details' section that" should {
-
-        "include the section heading 'Deductions" in {
-          keystoreSummaryValue(sumModel)
-          keystoreCalculateValue(calcModel)
-          SummaryTestDataItem.jsoupDoc.select("#deductions").text should include(Messages("calc.summary.deductions.title"))
-        }
-
-        "include the question 'Are you claiming Entrepreneurs' Relief?'" in {
-          keystoreSummaryValue(sumModel)
-          keystoreCalculateValue(calcModel)
-          SummaryTestDataItem.jsoupDoc.select("#deductions").text should include(Messages("calc.entrepreneursRelief.question"))
-        }
-
-        "include the question 'Whats the total value of your allowable losses?'" in {
-          keystoreSummaryValue(sumModel)
-          keystoreCalculateValue(calcModel)
-          SummaryTestDataItem.jsoupDoc.select("#deductions").text should include(Messages("calc.allowableLosses.question.two"))
-        }
-      }
-
-      "have a 'What to do next' section that" should {
-
-        "have the heading 'What to do next'" in {
-          keystoreSummaryValue(sumModel)
-          keystoreCalculateValue(calcModel)
-          SummaryTestDataItem.jsoupDoc.select("#whatToDoNext H2").text shouldEqual (Messages("calc.common.next.actions.heading"))
-        }
-
-        "include the text 'You need to tell HMRC about the property'" in {
-          keystoreSummaryValue(sumModel)
-          keystoreCalculateValue(calcModel)
-          SummaryTestDataItem.jsoupDoc.select("#whatToDoNext").text should
-            include(Messages("calc.summary.next.actions.text"))
-          include(Messages("calc.summary.next.actions.link"))
-        }
-      }
-
-      "have a link to 'Start again'" in {
-        keystoreSummaryValue(sumModel)
-        keystoreCalculateValue(calcModel)
-        SummaryTestDataItem.jsoupDoc.select("#startAgain").text shouldEqual Messages("calc.summary.startAgain")
+      "return a 200 with an invalid calculation result" in {
+        object SummaryTestDataItem extends fakeRequestTo("summary", TestCalculationController.summary)
+        keystoreSummaryValue(sumModelTA)
+        keystoreTACalculateValue(None)
+        status(SummaryTestDataItem.result) shouldBe 200
       }
     }
   }
