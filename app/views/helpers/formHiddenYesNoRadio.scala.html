@@ -18,7 +18,7 @@
         '_groupClass -> "inline"
         )
 
-    <div class="panel-indent" id='hidden' style="display: none">
+    <div class="panel-indent" id='hidden'>
         <div class="@hiddenClasses">
             @form.errors.filter(_.key == "").map { error => <span class="error-notification">@Messages(error.message)</span>}
             @content
