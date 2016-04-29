@@ -667,7 +667,6 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         "have the radio option `Yes` selected by default" in {
           keystoreFetchCondition[OtherPropertiesModel](Some(otherPropertiesTestModel))
           OtherPropertiesTestDataItem.jsoupDoc.body.getElementById("otherProperties-yes").parent.classNames().contains("selected") shouldBe true
-
         }
       }
     }

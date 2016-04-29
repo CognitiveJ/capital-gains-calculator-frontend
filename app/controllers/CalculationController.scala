@@ -146,7 +146,7 @@ trait CalculationController extends FrontendController {
         calcConnector.saveFormData("otherProperties", success)
         success.otherProperties match {
           case "Yes" => Redirect(routes.CalculationController.annualExemptAmount())
-          case "No" => Redirect(routes.CalculationController.acquisitionValue())
+          case "No" => Redirect(routes.CalculationController.acquisitionDate())
        }
       }
     )
