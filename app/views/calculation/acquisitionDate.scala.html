@@ -3,7 +3,7 @@
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 @import views.html.helpers._
 
-@()(implicit request: Request[_])
+@(acquisitionDateForm: Form[AcquisitionDateModel])(implicit request: Request[_])
 
 @main_template(Messages("calc.acquisitionDate.question")) {
 
@@ -11,10 +11,12 @@
 
     <h1 class="heading-large">@Messages("calc.base.pageHeading")</h1>
 
-    @hiddenYesNoRadio(
+    @formHiddenYesNoRadio(
+            acquisitionDateForm,
             "hasAcquisitionDate",
             Messages("calc.acquisitionDate.question"),
-            simpleInlineDate(
+            formInlineDateInput(
+                acquisitionDateForm,
                 "acquisitionDate",
                 ""
             )

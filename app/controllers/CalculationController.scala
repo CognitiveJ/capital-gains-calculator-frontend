@@ -35,6 +35,7 @@ import forms.ImprovementsForm._
 import forms.PersonalAllowanceForm._
 import forms.AcquisitionCostsForm._
 import forms.CurrentIncomeForm._
+import forms.AcquisitionDateForm._
 
 import models._
 import play.api.mvc.Action
@@ -172,7 +173,10 @@ trait CalculationController extends FrontendController {
 
   //################### Acquisition Date methods #######################
   val acquisitionDate = Action.async { implicit request =>
-    Future.successful(Ok(calculation.acquisitionDate()))
+    calcConnector.fetchAndGetFormData[AcquisitionDateModel]("acquisitionDate").map {
+      case Some(data) => Ok(calculation.acquisitionDate(acquisitionDateForm.fill(data)))
+      case None => Ok(calculation.acquisitionDate(acquisitionDateForm))
+    }
   }
 
 

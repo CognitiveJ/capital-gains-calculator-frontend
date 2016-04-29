@@ -862,58 +862,94 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
   //############## Acquisition Date tests ######################
   "In CalculationController calling the .acquisitionDate action " should {
 
-    object AcquisitionDateTestDataItem extends fakeRequestTo("acquisition-date", TestCalculationController.acquisitionDate)
+    "not supplied with a pre-existing model" should {
+      object AcquisitionDateTestDataItem extends fakeRequestTo("acquisition-date", TestCalculationController.acquisitionDate)
 
-    "return a 200" in {
-      status(AcquisitionDateTestDataItem.result) shouldBe 200
+      "return a 200" in {
+        keystoreFetchCondition[AcquisitionDateModel](None)
+        status(AcquisitionDateTestDataItem.result) shouldBe 200
+      }
+
+      "return some HTML that" should {
+
+        "contain some text and use the character set utf-8" in {
+          contentType(AcquisitionDateTestDataItem.result) shouldBe Some("text/html")
+          charset(AcquisitionDateTestDataItem.result) shouldBe Some("utf-8")
+        }
+
+        s"have the title '${Messages("calc.acquisitionDate.question")}'" in {
+          AcquisitionDateTestDataItem.jsoupDoc.title shouldEqual Messages("calc.acquisitionDate.question")
+        }
+
+        "have the heading Calculate your tax (non-residents) " in {
+          AcquisitionDateTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+        }
+
+        "have a 'Back' link " in {
+          AcquisitionDateTestDataItem.jsoupDoc.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+        }
+
+        s"have the question '${Messages("calc.acquisitionDate.question")}" in {
+          AcquisitionDateTestDataItem.jsoupDoc.body.getElementsByTag("legend").text should include(Messages("calc.acquisitionDate.question"))
+        }
+
+        "display the correct wording for radio option `yes`" in {
+          AcquisitionDateTestDataItem.jsoupDoc.body.getElementById("hasAcquisitionDate-yes").parent.text shouldEqual Messages("calc.base.yes")
+        }
+
+        "display the correct wording for radio option `no`" in {
+          AcquisitionDateTestDataItem.jsoupDoc.body.getElementById("hasAcquisitionDate-no").parent.text shouldEqual Messages("calc.base.no")
+        }
+
+        "contain a hidden component with an input box" in {
+          AcquisitionDateTestDataItem.jsoupDoc.body.getElementById("hidden").html should include("input")
+        }
+
+        "display three input boxes with labels Day, Month and Year respectively" in {
+          AcquisitionDateTestDataItem.jsoupDoc.select("label[for=acquisitionDate.day]").text shouldEqual Messages("calc.common.date.fields.day")
+          AcquisitionDateTestDataItem.jsoupDoc.select("label[for=acquisitionDate.month]").text shouldEqual Messages("calc.common.date.fields.month")
+          AcquisitionDateTestDataItem.jsoupDoc.select("label[for=acquisitionDate.year]").text shouldEqual Messages("calc.common.date.fields.year")
+        }
+
+        "display a 'Continue' button " in {
+          AcquisitionDateTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+        }
+      }
     }
 
+    "supplied with a model already filled with data" should {
+      object AcquisitionDateTestDataItem extends fakeRequestTo("acquisition-date", TestCalculationController.acquisitionDate)
+
+      "return a 200" in {
+        val testAcquisitionDateModel = new AcquisitionDateModel("Yes", Some(10), Some(12), Some(2016))
+        keystoreFetchCondition[AcquisitionDateModel](Some(testAcquisitionDateModel))
+        status(AcquisitionDateTestDataItem.result) shouldBe 200
+      }
+
     "return some HTML that" should {
+      val testAcquisitionDateModel = new AcquisitionDateModel("Yes", Some(10), Some(12), Some(2016))
+      keystoreFetchCondition[AcquisitionDateModel](Some(testAcquisitionDateModel))
 
-      "contain some text and use the character set utf-8" in {
-        contentType(AcquisitionDateTestDataItem.result) shouldBe Some("text/html")
-        charset(AcquisitionDateTestDataItem.result) shouldBe Some("utf-8")
+        "have the radio option `Yes` selected if `Yes` is supplied in the model" in {
+          AcquisitionDateTestDataItem.jsoupDoc.body.getElementById("hasAcquisitionDate-yes").parent.classNames().contains("selected") shouldBe true
+        }
+
+        "have the date 10, 12, 2016 pre-populated" in {
+          AcquisitionDateTestDataItem.jsoupDoc.body.getElementById("acquisitionDate.day").attr("value") shouldEqual testAcquisitionDateModel.day.get.toString
+          AcquisitionDateTestDataItem.jsoupDoc.body.getElementById("acquisitionDate.month").attr("value") shouldEqual testAcquisitionDateModel.month.get.toString
+          AcquisitionDateTestDataItem.jsoupDoc.body.getElementById("acquisitionDate.year").attr("value") shouldEqual testAcquisitionDateModel.year.get.toString
+        }
       }
 
-      s"have the title '${Messages("calc.acquisitionDate.question")}'" in {
-        AcquisitionDateTestDataItem.jsoupDoc.title shouldEqual Messages("calc.acquisitionDate.question")
-      }
-
-      "have the heading Calculate your tax (non-residents) " in {
-        AcquisitionDateTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
-      }
-
-      "have a 'Back' link " in {
-        AcquisitionDateTestDataItem.jsoupDoc.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
-      }
-
-      s"have the question '${Messages("calc.acquisitionDate.question")}" in {
-        AcquisitionDateTestDataItem.jsoupDoc.body.getElementsByTag("legend").text should include (Messages("calc.acquisitionDate.question"))
-      }
-
-      "display the correct wording for radio option `yes`" in {
-        AcquisitionDateTestDataItem.jsoupDoc.body.getElementById("hasAcquisitionDateYes").parent.text shouldEqual Messages("calc.base.yes")
-      }
-
-      "display the correct wording for radio option `no`" in {
-        AcquisitionDateTestDataItem.jsoupDoc.body.getElementById("hasAcquisitionDateNo").parent.text shouldEqual Messages("calc.base.no")
-      }
-
-      "contain a hidden component with an input box" in {
-        AcquisitionDateTestDataItem.jsoupDoc.body.getElementById("hidden").html should include ("input")
-      }
-
-      "display three input boxes with labels Day, Month and Year respectively" in {
-        AcquisitionDateTestDataItem.jsoupDoc.select("label[for=acquisitionDate.day]").text shouldEqual Messages("calc.common.date.fields.day")
-        AcquisitionDateTestDataItem.jsoupDoc.select("label[for=acquisitionDate.month]").text shouldEqual Messages("calc.common.date.fields.month")
-        AcquisitionDateTestDataItem.jsoupDoc.select("label[for=acquisitionDate.year]").text shouldEqual Messages("calc.common.date.fields.year")
-      }
-
-      "display a 'Continue' button " in {
-        AcquisitionDateTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+      "have the radio option `No` selected if `No` is supplied in the model" in {
+        object AcquisitionDateTestDataItem extends fakeRequestTo("acquisition-date", TestCalculationController.acquisitionDate)
+        val testAcquisitionDateModel = new AcquisitionDateModel("No", None, None, None)
+        keystoreFetchCondition[AcquisitionDateModel](Some(testAcquisitionDateModel))
+        AcquisitionDateTestDataItem.jsoupDoc.body.getElementById("hasAcquisitionDate-no").parent.classNames().contains("selected") shouldBe true
       }
     }
   }
+
 
   //############## Acquisition Value tests ######################
   "In CalculationController calling the .acquisitionValue action " when {
