@@ -103,6 +103,11 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       .thenReturn(Future.successful(data))
   }
 
+  def keystoreFetchValue[T](data: Option[T]): Unit = {
+    when(mockCalcConnector.fetchAndGetValue[T](Matchers.anyString())(Matchers.any(), Matchers.any()))
+      .thenReturn(data)
+  }
+
 //  def valueConditions(): Unit = {
     val sumModelFlat = SummaryModel(
       CustomerTypeModel("individual"),
@@ -2271,49 +2276,55 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(returnedCacheMap))
     }
-    "submitting a valid form with 'Yes' and an amount" should {
+    "submitting a valid form with 'Yes' and an amount with no acquisition date" should {
       object AllowableLossesTestDataItem extends fakeRequestToPost(
         "allowable-losses",
         TestCalculationController.submitAllowableLosses,
         ("isClaimingAllowableLosses", "Yes"), ("allowableLossesAmt", "1000")
       )
       val testModel = new AllowableLossesModel("Yes", Some(1000))
+      val acqDateModel = AcquisitionDateModel("No", None, None, None)
 
       "return a 303" in {
+        keystoreFetchValue(Some(acqDateModel))
         keystoreCacheCondition[AllowableLossesModel](testModel)
         status(AllowableLossesTestDataItem.result) shouldBe 303
       }
     }
 
-    "submitting a valid form with 'Yes' and an amount with two decimal places" should {
+    "submitting a valid form with 'Yes' and an amount with two decimal places with an acquisition date after the tax start date" should {
       object AllowableLossesTestDataItem extends fakeRequestToPost(
         "allowable-losses",
         TestCalculationController.submitAllowableLosses,
         ("isClaimingAllowableLosses", "Yes"), ("allowableLossesAmt", "1000.11")
       )
       val testModel = new AllowableLossesModel("Yes", Some(1000.11))
+      val acqDateModel = AcquisitionDateModel("Yes", Some(1), Some(1), Some(2016))
 
       "return a 303" in {
+        keystoreFetchValue(Some(acqDateModel))
         keystoreCacheCondition[AllowableLossesModel](testModel)
         status(AllowableLossesTestDataItem.result) shouldBe 303
       }
     }
 
-    "submitting a valid form with 'No' and a null amount" should {
+    "submitting a valid form with 'No' and a null amount with an acquisition date before the tax start date" should {
       object AllowableLossesTestDataItem extends fakeRequestToPost(
         "allowable-losses",
         TestCalculationController.submitAllowableLosses,
         ("isClaimingAllowableLosses", "No"), ("allowableLossesAmt", "")
       )
       val testModel = new AllowableLossesModel("No", None)
+      val acqDateModel = AcquisitionDateModel("Yes", Some(1), Some(1), Some(2010))
 
       "return a 303" in {
+        keystoreFetchValue(Some(acqDateModel))
         keystoreCacheCondition[AllowableLossesModel](testModel)
         status(AllowableLossesTestDataItem.result) shouldBe 303
       }
     }
 
-    "submitting a valid form with 'No' and a negative amount" should {
+    "submitting a valid form with 'No' and a negative amount with no returned acquisition date model" should {
       object AllowableLossesTestDataItem extends fakeRequestToPost(
         "allowable-losses",
         TestCalculationController.submitAllowableLosses,
@@ -2322,6 +2333,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new AllowableLossesModel("No", Some(-1000))
 
       "return a 303" in {
+        keystoreFetchValue(None)
         keystoreCacheCondition[AllowableLossesModel](testModel)
         status(AllowableLossesTestDataItem.result) shouldBe 303
       }

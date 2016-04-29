@@ -19,7 +19,7 @@ package controllers
 import java.util.concurrent.TimeUnit
 
 import connectors.CalculatorConnector
-
+import common.Dates
 import forms.OtherPropertiesForm._
 import forms.AcquisitionValueForm._
 import forms.CustomerTypeForm._
@@ -320,7 +320,16 @@ trait CalculationController extends FrontendController {
       errors => BadRequest(calculation.allowableLosses(errors)),
       success => {
         calcConnector.saveFormData("allowableLosses", success)
-        Redirect(routes.CalculationController.otherReliefs())
+        calcConnector.fetchAndGetValue[AcquisitionDateModel]("acquisitionDate") match {
+          case Some(data) if data.hasAcquisitionDate == "Yes" => {
+            Dates.dateAfterStart(data.day.get, data.month.get, data.year.get) match {
+              case true => Redirect(routes.CalculationController.otherReliefs())
+              case false => Redirect(routes.CalculationController.calculationElection())
+            }
+          }
+          case Some(data) if data.hasAcquisitionDate == "No" => Redirect(routes.CalculationController.otherReliefs())
+          case None => Redirect(routes.CalculationController.otherReliefs())
+        }
       }
     )
   }
