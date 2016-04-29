@@ -1,10 +1,32 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+@()(implicit request: Request[_])
 
-</body>
-</html>
+@import views.html.helpers._
+
+@main_template(Messages("calc.calculationElection.question"), articleLayout = false) {
+
+    <a id="back-link" class="back-link" href="#">@Messages("calc.base.back")</a>
+
+    <div class="grid-row">
+        <h1 class="heading-large">@Messages("calc.base.pageHeading")</h1>
+
+        <p id="question-information">@Messages("calc.calculationElection.message")</p>
+    </div>
+    <div class="grid-row">
+        <div class="grid-layout grid-layout--stacked">
+            @calculationElectionHelper("radio-indent-1", "time", "1000.00", Messages("calc.calculationElection.message.time"), Messages("calc.calculationElection.message.timeDate"))
+            @calculationElectionHelper("radio-indent-2", "rebase", "2000.00", Messages("calc.calculationElection.message.rebased"), Messages("calc.calculationElection.message.rebasedDate"))
+            @calculationElectionHelper("radio-indent-3", "flat", "3000.00", Messages("calc.calculationElection.message.flat"))
+        </div>
+    </div>
+
+    <div class="grid-row form-group">
+        <button class="button" type="submit" id="continue-button">@Messages("calc.base.continue")</button>
+    </div>
+
+    <details role="group">
+        <summary role="button" aria-controls="details-content-0" aria-expanded="false"><span class="summary">@Messages("calc.calculationElection.message.whyMore")</span></summary>
+        <div class="panel panel-indent" id="details-content-0" aria-hidden="true">
+            <p>@Messages("calc.calculationElection.message.whyMoreDetails")</p>
+        </div>
+    </details>
+}
