@@ -22,6 +22,7 @@ import java.util.Date
 object Dates {
 
   val sf = new SimpleDateFormat("dd/MM/yyyy")
+  val datePageFormat = new SimpleDateFormat("dd MMMM yyyy")
   val taxStartDate = sf.parse("05/04/2015")
 
   def constructDate (day: Int, month: Int, year: Int): Date = {
