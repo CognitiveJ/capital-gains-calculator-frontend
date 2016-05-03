@@ -141,7 +141,7 @@ calc.calculationElection.message.time = The percentage of your total gain you''v
 calc.calculationElection.message.timeDate = 5 April 2015
 calc.calculationElection.message.rebased = How much you''ve gained on the property since
 calc.calculationElection.message.rebasedDate = 5 April 2015
-calc.calculationElection.message.flat = How much you've gained on the property since you became the owner
+calc.calculationElection.message.flat = How much you''ve gained on the property since you became the owner
 calc.calculationElection.message.whyMore = Why would you choose higher totals?
 calc.calculationElection.message.whyMoreDetails = They sometimes qualify for larger tax reliefs. This can lower the amount you owe or even reduce it to zero.
 
