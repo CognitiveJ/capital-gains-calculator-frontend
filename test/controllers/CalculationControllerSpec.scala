@@ -146,7 +146,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     DisposalCostsModel(None),
     EntrepreneursReliefModel("No"),
     AllowableLossesModel("No", None),
-    CalculationElectionModel("time-apportioned-calculation"),
+    CalculationElectionModel("time"),
     OtherReliefsModel(None),
     OtherReliefsModel(None)
   )

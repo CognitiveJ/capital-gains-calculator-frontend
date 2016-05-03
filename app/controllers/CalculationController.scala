@@ -402,13 +402,13 @@ trait CalculationController extends FrontendController {
   def summary = Action.async { implicit request =>
     val construct = calcConnector.createSummary(hc)
     construct.calculationElectionModel.calculationType match {
-      case "flat-calculation" => {
+      case "flat" => {
         calcConnector.calculateFlat(construct).map {
           case Some(data) => Ok(calculation.summary(construct, data))
           case None => Ok(calculation.summary(construct, CalculationResultModel(0.0, 0.0, 0.0, 0, None, None)))
         }
       }
-      case "time-apportioned-calculation" => {
+      case "time" => {
         calcConnector.calculateTA(construct).map {
           case Some(data) => Ok(calculation.summary(construct, data))
           case None => Ok(calculation.summary(construct, CalculationResultModel(0.0, 0.0, 0.0, 0, None, None)))
