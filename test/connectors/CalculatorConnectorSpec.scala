@@ -44,7 +44,7 @@ class CalculatorConnectorSpec extends UnitSpec with MockitoSugar {
 
   implicit val hc: HeaderCarrier = HeaderCarrier(sessionId = Some(SessionId(sessionId.toString)))
 
-  val sumModel = SummaryModel(
+  val sumModelFlat = SummaryModel(
     CustomerTypeModel("individual"),
     None,
     Some(CurrentIncomeModel(1000)),
@@ -61,6 +61,27 @@ class CalculatorConnectorSpec extends UnitSpec with MockitoSugar {
     EntrepreneursReliefModel("No"),
     AllowableLossesModel("No", None),
     CalculationElectionModel("flat"),
+    OtherReliefsModel(None),
+    OtherReliefsModel(None)
+  )
+
+  val sumModelTA = SummaryModel(
+    CustomerTypeModel("individual"),
+    None,
+    Some(CurrentIncomeModel(1000)),
+    Some(PersonalAllowanceModel(11100)),
+    OtherPropertiesModel("No"),
+    None,
+    AcquisitionDateModel("Yes", Some(9), Some(9), Some(9)),
+    AcquisitionValueModel(100000),
+    ImprovementsModel("No", None),
+    DisposalDateModel(10, 10, 2010),
+    DisposalValueModel(150000),
+    AcquisitionCostsModel(None),
+    DisposalCostsModel(None),
+    EntrepreneursReliefModel("No"),
+    AllowableLossesModel("No", None),
+    CalculationElectionModel("time-apportioned-calculation"),
     OtherReliefsModel(None),
     OtherReliefsModel(None)
   )
@@ -85,17 +106,46 @@ class CalculatorConnectorSpec extends UnitSpec with MockitoSugar {
       lazy val result = TargetCalculatorConnector.saveFormData("customerType", testModel)
       await(result) shouldBe returnedCacheMap
     }
+
+    "fetch an option from keystore if it exists" in {
+      val testModel = CustomerTypeModel("trustee")
+      when(mockSessionCache.fetchAndGetEntry[CustomerTypeModel](Matchers.anyString())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(Option(testModel)))
+
+      lazy val result = TargetCalculatorConnector.fetchAndGetValue[CustomerTypeModel]("CustomerType")
+      await(result) shouldBe Some(testModel)
+    }
+
+    "fetch a None from keystore if it does not exist" in {
+      when(mockSessionCache.fetchAndGetEntry[CustomerTypeModel](Matchers.anyString())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(None))
+
+      lazy val result = TargetCalculatorConnector.fetchAndGetValue[CustomerTypeModel]("CustomerType")
+      await(result) shouldBe None
+    }
   }
 
-  "Calling calculate" should {
+  "Calling calculateFlat" should {
 
     val validResponse = CalculationResultModel(8000, 40000, 32000, 18, Some(8000), Some(28))
-    when(mockHttp.GET[Option[CalculationResultModel]](Matchers.any())(Matchers.any(), Matchers.any()))
+    when(mockHttp.GET[Option[CalculationResultModel]](Matchers.anyString())(Matchers.any(), Matchers.any()))
       .thenReturn(Future.successful(Some(validResponse)))
 
     "return a valid response" in {
-      val testModel: SummaryModel = sumModel
-      val result = TargetCalculatorConnector.calculate(testModel)
+      val testModel: SummaryModel = sumModelFlat
+      val result = TargetCalculatorConnector.calculateFlat(testModel)
+      await(result) shouldBe Some(validResponse)
+    }
+  }
+
+  "Calling calculateTA" should {
+    val validResponse = CalculationResultModel(8000, 40000, 32000, 18, Some(8000), Some(28))
+    when(mockHttp.GET[Option[CalculationResultModel]](Matchers.anyString())(Matchers.any(), Matchers.any()))
+      .thenReturn(Future.successful(Some(validResponse)))
+
+    "return a valid response" in {
+      val testModel: SummaryModel = sumModelTA
+      val result = TargetCalculatorConnector.calculateTA(testModel)
       await(result) shouldBe Some(validResponse)
     }
   }

@@ -37,12 +37,15 @@ GET         /allowance               controllers.CalculationController.annualExe
 POST        /allowance               controllers.CalculationController.submitAnnualExemptAmount
 
 #Acquisition Date
-
 GET         /acquisition-date        controllers.CalculationController.acquisitionDate
+POST        /acquisition-date        controllers.CalculationController.submitAcquisitionDate
 
 #Acquisition Value
 GET         /acquisition-value       controllers.CalculationController.acquisitionValue
 POST        /acquisition-value       controllers.CalculationController.submitAcquisitionValue
+
+#Rebased Value
+GET         /rebased-value           controllers.CalculationController.rebasedValue
 
 #Rebased Costs
 GET         /rebased-costs           controllers.CalculationController.rebasedCosts
