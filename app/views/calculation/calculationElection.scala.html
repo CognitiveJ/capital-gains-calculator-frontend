@@ -15,17 +15,19 @@
         <p id="question-information">@Messages("calc.calculationElection.message")</p>
     </div>
 
-    @calculationElectionHelperForm(
-        field = calculationElectionForm("calculationElection"),
-        Seq(
-            "flat"->("1000.00", Messages("calc.calculationElection.message.flat"), None),
-            "time"->("2000.00", Messages("calc.calculationElection.message.time"), Some(Messages("calc.calculationElection.message.timeDate"))),
-            "rebased"->("3000.00", Messages("calc.calculationElection.message.rebased"), Some(Messages("calc.calculationElection.message.rebasedDate")))),
-        '_labelClass -> "block-label")
+    @govHelpers.form(action = routes.CalculationController.submitCalculationElection) {
+        @calculationElectionHelperForm(
+            field = calculationElectionForm("calculationElection"),
+            Seq(
+                "flat"->("1000.00", Messages("calc.calculationElection.message.flat"), None),
+                "time"->("2000.00", Messages("calc.calculationElection.message.time"), Some(Messages("calc.calculationElection.message.timeDate"))),
+                "rebased"->("3000.00", Messages("calc.calculationElection.message.rebased"), Some(Messages("calc.calculationElection.message.rebasedDate")))),
+            '_labelClass -> "block-label")
 
-    <div class="grid-row form-group">
-        <button class="button" type="submit" id="continue-button">@Messages("calc.base.continue")</button>
-    </div>
+        <div class="grid-row form-group">
+            <button class="button" type="submit" id="continue-button">@Messages("calc.base.continue")</button>
+        </div>
+    }
 
     <details role="group">
         <summary role="button" aria-controls="details-content-0" aria-expanded="false"><span class="summary">@Messages("calc.calculationElection.message.whyMore")</span></summary>

@@ -16,6 +16,7 @@
 
 package controllers
 
+import java.lang.ProcessBuilder.Redirect
 import java.util.concurrent.TimeUnit
 
 import connectors.CalculatorConnector
@@ -38,7 +39,7 @@ import forms.CurrentIncomeForm._
 import forms.CalculationElectionForm._
 import forms.AcquisitionDateForm._
 import models._
-import play.api.mvc.Action
+import play.api.mvc.{AnyContent, Action}
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -359,6 +360,16 @@ trait CalculationController extends FrontendController {
     }
   }
 
+  val submitCalculationElection = Action { implicit request =>
+    calculationElectionForm.bindFromRequest.fold(
+      errors => BadRequest(calculation.calculationElection(errors)),
+      success => {
+        calcConnector.saveFormData("calculationElection", success)
+        Redirect(routes.CalculationController.summary())
+      }
+    )
+  }
+
   //################### Other Reliefs methods #######################
   val otherReliefs = Action.async { implicit request =>
     val construct = calcConnector.createSummary(hc)
@@ -402,7 +413,7 @@ trait CalculationController extends FrontendController {
   }
 
   //################### Summary Methods ##########################
-  def summary = Action.async { implicit request =>
+  def summary(): Action[AnyContent] = Action.async { implicit request =>
     val construct = calcConnector.createSummary(hc)
     construct.calculationElectionModel.calculationType match {
       case "flat" => {
