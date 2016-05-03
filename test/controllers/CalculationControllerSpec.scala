@@ -2809,8 +2809,8 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
   //################### Time Apportioned Other Relief tests ###################
   "In CalculationController calling the .otherReliefsTA action " should  {
-
-  object OtherReliefsTATestDataItem extends fakeRequestTo("other-reliefs-time-apportioned", TestCalculationController.otherReliefsTA)
+    keystoreFetchCondition[OtherReliefsModel](None)
+    object OtherReliefsTATestDataItem extends fakeRequestTo("other-reliefs-time-apportioned", TestCalculationController.otherReliefsTA)
 
     "return a 200" in {
       status(OtherReliefsTATestDataItem.result) shouldBe 200
@@ -2853,6 +2853,25 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
       "include helptext for 'Taxable gain'" in {
         OtherReliefsTATestDataItem.jsoupDoc.body.getElementById("taxableGain").text should include (Messages("calc.otherReliefs.taxableGain"))
+      }
+    }
+
+    "when not supplied with any previous value" should {
+      object OtherReliefsTATestDataItem extends fakeRequestTo("other-reliefs-time-apportioned", TestCalculationController.otherReliefsTA)
+
+      "contain no pre-filled data" in {
+        keystoreFetchCondition[OtherReliefsModel](None)
+        OtherReliefsTATestDataItem.jsoupDoc.body.getElementById("otherReliefs").attr("value") shouldBe ""
+      }
+    }
+
+    "when supplied with a previous value" should {
+      val testModel = OtherReliefsModel(Some(1000))
+      object OtherReliefsTATestDataItem extends fakeRequestTo("other-reliefs-time-apportioned", TestCalculationController.otherReliefsTA)
+
+      "contain the pre-supplied data" in {
+        keystoreFetchCondition[OtherReliefsModel](Some(testModel))
+        OtherReliefsTATestDataItem.jsoupDoc.body.getElementById("otherReliefs").attr("value") shouldBe "1000"
       }
     }
   }
