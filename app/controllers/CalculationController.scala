@@ -35,8 +35,8 @@ import forms.ImprovementsForm._
 import forms.PersonalAllowanceForm._
 import forms.AcquisitionCostsForm._
 import forms.CurrentIncomeForm._
+import forms.CalculationElectionForm._
 import forms.AcquisitionDateForm._
-
 import models._
 import play.api.mvc.Action
 import uk.gov.hmrc.play.frontend.controller.FrontendController
@@ -353,7 +353,10 @@ trait CalculationController extends FrontendController {
   }
   //################### Calculation Election methods #######################
   val calculationElection = Action.async { implicit request =>
-    Future.successful(Ok(calculation.calculationElection()))
+    calcConnector.fetchAndGetFormData[CalculationElectionModel]("calculationElection").map {
+      case Some(data) => Ok(calculation.calculationElection(calculationElectionForm.fill(data)))
+      case None => Ok(calculation.calculationElection(calculationElectionForm))
+    }
   }
 
   //################### Other Reliefs methods #######################
@@ -399,13 +402,13 @@ trait CalculationController extends FrontendController {
   def summary = Action.async { implicit request =>
     val construct = calcConnector.createSummary(hc)
     construct.calculationElectionModel.calculationType match {
-      case "flat-calculation" => {
+      case "flat" => {
         calcConnector.calculateFlat(construct).map {
           case Some(data) => Ok(calculation.summary(construct, data))
           case None => Ok(calculation.summary(construct, CalculationResultModel(0.0, 0.0, 0.0, 0, None, None)))
         }
       }
-      case "time-apportioned-calculation" => {
+      case "time" => {
         calcConnector.calculateTA(construct).map {
           case Some(data) => Ok(calculation.summary(construct, data))
           case None => Ok(calculation.summary(construct, CalculationResultModel(0.0, 0.0, 0.0, 0, None, None)))

@@ -60,7 +60,7 @@ class CalculatorConnectorSpec extends UnitSpec with MockitoSugar {
     DisposalCostsModel(None),
     EntrepreneursReliefModel("No"),
     AllowableLossesModel("No", None),
-    CalculationElectionModel("flat-calculation"),
+    CalculationElectionModel("flat"),
     OtherReliefsModel(None),
     OtherReliefsModel(None)
   )
