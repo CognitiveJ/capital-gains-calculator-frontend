@@ -11,17 +11,20 @@
 
     <h1 class="heading-large">@Messages("calc.base.pageHeading")</h1>
 
-    @formHiddenYesNoRadio(
-            acquisitionDateForm,
-            "hasAcquisitionDate",
-            Messages("calc.acquisitionDate.question"),
-            formInlineDateInput(
+    @govHelpers.form(action = routes.CalculationController.submitAcquisitionDate) {
+
+        @formHiddenYesNoRadio(
                 acquisitionDateForm,
-                "acquisitionDate",
-                ""
-            )
-    )
+                "hasAcquisitionDate",
+                Messages("calc.acquisitionDate.question"),
+                formInlineDateInput(
+                    acquisitionDateForm,
+                    "acquisitionDate",
+                    ""
+                )
+        )
 
-    <button class="button" type="submit" id="continue-button">@Messages("calc.base.continue")</button>
+        <button class="button" type="submit" id="continue-button">@Messages("calc.base.continue")</button>
 
+    }
 }

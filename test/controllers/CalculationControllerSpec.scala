@@ -980,6 +980,50 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
   }
 
+  "In CalculationController calling the submitAcquisitionDate action" when {
+    def keystoreCacheCondition[T](data: AcquisitionDateModel): Unit = {
+      lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+      when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(returnedCacheMap))
+    }
+
+    "submitting a valid form" should {
+      val acquisitionDateTestModel = new AcquisitionDateModel("Yes", Some(10), Some(2), Some(2015))
+      object AcquisitionDateTestDataItem extends fakeRequestToPost(
+        "acquisition-date",
+        TestCalculationController.submitAcquisitionDate,
+        ("hasAcquisitionDate", "Yes"),
+        ("acquisitionDate.day", "10"),
+        ("acquisitionDate.month", "2"),
+        ("acquisitionDate.year", "2015")
+      )
+
+      "return a 303" in {
+        keystoreCacheCondition(acquisitionDateTestModel)
+        status(AcquisitionDateTestDataItem.result) shouldBe 303
+      }
+    }
+
+    "submitting a valid form with 'No' and no date value" should {
+      val acquisitionDateTestModel = new AcquisitionDateModel("No", None, None, None)
+      object ImprovementsTestDataItem extends fakeRequestToPost(
+        "acquisitionDate",
+        TestCalculationController.submitAcquisitionDate,
+        ("hasAcquisitionDate", "No"),
+        ("acquisitionDate.day", ""),
+        ("acquisitionDate.month", ""),
+        ("acquisitionDate.year", "")
+      )
+
+      "return a 303" in {
+        keystoreCacheCondition[ImprovementsModel](acquisitionDateTestModel)
+        status(ImprovementsTestDataItem.result) shouldBe 303
+      }
+    }
+  }
+
+
+
 
   //############## Acquisition Value tests ######################
   "In CalculationController calling the .acquisitionValue action " when {

@@ -179,6 +179,15 @@ trait CalculationController extends FrontendController {
     }
   }
 
+  val submitAcquisitionDate = Action { implicit request =>
+    acquisitionDateForm.bindFromRequest.fold(
+      errors => BadRequest(calculation.acquisitionDate(errors)),
+      success => {
+        calcConnector.saveFormData("acquisitionDate", success)
+        Redirect(routes.CalculationController.acquisitionValue())
+      }
+    )
+  }
 
   //################### Acquisition Value methods #######################
   val acquisitionValue = Action.async { implicit request =>
