@@ -90,6 +90,7 @@ calc.acquisitionValue.errorDecimalPlaces = Acquisition value has too many decima
 
 ## Rebased Costs ##
 calc.rebasedCosts.question = Did you pay for the valuation?
+calc.rebasedCosts.questionTwo = How much did it cost to get the property valued?
 
 ## Improvements ##
 calc.improvements.question = Did you make any improvements to the property?

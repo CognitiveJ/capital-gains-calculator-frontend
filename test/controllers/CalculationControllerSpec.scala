@@ -1148,11 +1148,19 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       }
 
       "Have the question 'Did you pay for the valuation?" in {
-        RebasedCostsDataItem.jsoupDoc.getElementsByTag("label").text shouldBe "Did you pay for the valuation?"
+        RebasedCostsDataItem.jsoupDoc.getElementsByTag("legend").text shouldBe "Did you pay for the valuation?"
       }
 
-      "Have an input box" in {
-        RebasedCostsDataItem.jsoupDoc.getElementById("rebasedCosts").tagName() shouldBe "input"
+      "display the correct wording for radio option `yes`" in {
+        RebasedCostsDataItem.jsoupDoc.body.getElementById("rebasedCostsYes").parent.text shouldEqual Messages("calc.base.yes")
+      }
+
+      "display the correct wording for radio option `no`" in {
+        RebasedCostsDataItem.jsoupDoc.body.getElementById("rebasedCostsNo").parent.text shouldEqual Messages("calc.base.no")
+      }
+
+      "contain a hidden component with an input box" in {
+        RebasedCostsDataItem.jsoupDoc.body.getElementById("hidden").html should include ("input")
       }
 
       "Have a back link" in {
