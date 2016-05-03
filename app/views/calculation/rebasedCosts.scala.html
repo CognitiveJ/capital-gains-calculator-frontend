@@ -1,10 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+@import models.DisposalCostsModel
+@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+@import views.html.helpers._
 
-</body>
-</html>
+@()(implicit request: Request[_])
+
+@main_template(Messages("calc.disposalCosts.question")) {
+    <a id="back-link" class="back-link" href="#">Back</a>
+    <h1 class="heading-large">@Messages("calc.base.pageHeading")</h1>
+
+    @govHelpers.form(action = routes.CalculationController.rebasedCosts) {
+
+    @simpleInputMoney("rebasedCosts", Messages("calc.rebasedCosts.question"))
+
+    <button class="button" type="submit" id="continue-button">@Messages("calc.base.continue")</button>
+
+    }
+}
