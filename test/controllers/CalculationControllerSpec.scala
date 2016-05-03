@@ -1203,6 +1203,34 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         contentType(RebasedCostsDataItem.result) shouldBe Some("text/html")
         charset(RebasedCostsDataItem.result) shouldBe Some("utf-8")
       }
+
+      "Have the title 'Calculate your Capital Gains Tax" in {
+        RebasedCostsDataItem.jsoupDoc.getElementsByTag("h1").text shouldBe "Calculate your Capital Gains Tax"
+      }
+
+      "Have the question 'Did you pay for the valuation?" in {
+        RebasedCostsDataItem.jsoupDoc.getElementsByTag("legend").text shouldBe "Did you pay for the valuation?"
+      }
+
+      "display the correct wording for radio option `yes`" in {
+        RebasedCostsDataItem.jsoupDoc.body.getElementById("rebasedCostsYes").parent.text shouldEqual Messages("calc.base.yes")
+      }
+
+      "display the correct wording for radio option `no`" in {
+        RebasedCostsDataItem.jsoupDoc.body.getElementById("rebasedCostsNo").parent.text shouldEqual Messages("calc.base.no")
+      }
+
+      "contain a hidden component with an input box" in {
+        RebasedCostsDataItem.jsoupDoc.body.getElementById("hidden").html should include ("input")
+      }
+
+      "Have a back link" in {
+        RebasedCostsDataItem.jsoupDoc.getElementById("back-link").tagName() shouldBe "a"
+      }
+
+      "Have a continue button" in {
+        RebasedCostsDataItem.jsoupDoc.getElementById("continue-button").tagName() shouldBe "button"
+      }
     }
   }
 
