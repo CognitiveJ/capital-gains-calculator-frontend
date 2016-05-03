@@ -115,7 +115,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       DisposalCostsModel(None),
       EntrepreneursReliefModel("No"),
       AllowableLossesModel("No", None),
-      CalculationElectionModel("flat-calculation"),
+      CalculationElectionModel("flat"),
       OtherReliefsModel(None),
       OtherReliefsModel(None)
     )
@@ -2364,10 +2364,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
     object CalculationElectionTestDataItem extends fakeRequestTo("calculation-election", CalculationController.calculationElection)
     "return a 200" in {
+      keystoreFetchCondition(None)
       status(CalculationElectionTestDataItem.result) shouldBe 200
     }
 
     "return some HTML that" should {
+      keystoreFetchCondition(None)
 
       "contain some text and use the character set UTF-8" in {
         contentType(CalculationElectionTestDataItem.result) shouldBe Some("text/html")
@@ -2402,6 +2404,21 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       "display a concertina information box with 'They sometimes qualify for larger tax reliefs. This can lower the amount you owe or even reduce it to zero' as the content" in {
         CalculationElectionTestDataItem.jsoupDoc.select("summary span.summary").text shouldEqual Messages("calc.calculationElection.message.whyMore")
         CalculationElectionTestDataItem.jsoupDoc.select("div#details-content-0 p").text shouldEqual Messages("calc.calculationElection.message.whyMoreDetails")
+      }
+    }
+
+    "when supplied with no pre-existing data" should {
+
+      "have no pre-selected option" in {
+        CalculationElectionTestDataItem.jsoupDoc.body.getElementsByAttributeValue("value", "flat").parents().attr("class").contains("selected") shouldBe false
+      }
+    }
+
+    "when supplied with pre-existing data" should {
+      keystoreFetchCondition(Some("flat"))
+
+      "have the stored value selected" in {
+        CalculationElectionTestDataItem.jsoupDoc.body.getElementsByAttributeValue("value", "flat").parents().attr("class").contains("selected") shouldBe true
       }
     }
   }
