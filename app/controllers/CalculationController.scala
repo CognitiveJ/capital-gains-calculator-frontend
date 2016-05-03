@@ -198,6 +198,11 @@ trait CalculationController extends FrontendController {
     )
   }
 
+  //################### Rebased value methods #######################
+  val rebasedValue = Action.async {implicit request =>
+    Future.successful(Ok(calculation.rebasedValue()))
+  }
+
   //################### Rebased costs methods #######################
   val rebasedCosts = Action.async {implicit request =>
     Future.successful(Ok(calculation.rebasedCosts()))

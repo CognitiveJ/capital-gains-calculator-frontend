@@ -1128,6 +1128,23 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
   }
 
+  //################### Rebased Value Tests #######################
+  "In CalculationController calling the .rebasedValue action " should {
+    object RebasedValueDataItem extends fakeRequestTo("rebased-value", TestCalculationController.rebasedValue)
+
+    "return a 200" in {
+      status(RebasedValueDataItem.result) shouldBe 200
+    }
+
+    "return some HTML that" should {
+
+      "contain some text and use the character set utf-8" in{
+        contentType(RebasedValueDataItem.result) shouldBe Some("text/html")
+        charset(RebasedValueDataItem.result) shouldBe Some("utf-8")
+      }
+    }
+  }
+
   //################### Rebased Costs Tests #######################
   "In CalculationController calling the .rebasedCosts action " should {
     object RebasedCostsDataItem extends fakeRequestTo("rebased-costs", TestCalculationController.rebasedCosts)
@@ -1571,7 +1588,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         status(DisposalDateTestDataItem.result) shouldBe 400
       }
 
-      "should error with message 'Numeric vaue expected'" in {
+      "should error with message 'You must supply a valid date'" in {
         keystoreCacheCondition[DisposalDateModel](testModel)
         DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include ("You must supply a valid date")
       }
