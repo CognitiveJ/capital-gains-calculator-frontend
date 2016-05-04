@@ -19,9 +19,10 @@
         @calculationElectionHelperForm(
             field = calculationElectionForm("calculationElection"),
             Seq(
-                "flat"->("1000.00", Messages("calc.calculationElection.message.flat"), None),
-                "time"->("2000.00", Messages("calc.calculationElection.message.time"), Some(Messages("calc.calculationElection.message.timeDate"))),
-                "rebased"->("3000.00", Messages("calc.calculationElection.message.rebased"), Some(Messages("calc.calculationElection.message.rebasedDate")))),
+                ("flat", "1000.00", Messages("calc.calculationElection.message.flat"), None),
+                ("time", "2000.00", Messages("calc.calculationElection.message.time"), Some(Messages("calc.calculationElection.message.timeDate"))),
+                ("rebased", "3000.00", Messages("calc.calculationElection.message.rebased"), Some(Messages("calc.calculationElection.message.rebasedDate")))
+            ),
             '_labelClass -> "block-label")
 
         <div class="grid-row form-group">
