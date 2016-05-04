@@ -428,13 +428,13 @@ trait CalculationController extends FrontendController {
       case "flat" => {
         calcConnector.calculateFlat(construct).map {
           case Some(data) => Ok(calculation.summary(construct, data))
-          case None => Ok(calculation.summary(construct, CalculationResultModel(0.0, 0.0, 0.0, 0, None, None)))
+          case None => Ok(calculation.summary(construct, null))
         }
       }
       case "time" => {
         calcConnector.calculateTA(construct).map {
           case Some(data) => Ok(calculation.summary(construct, data))
-          case None => Ok(calculation.summary(construct, CalculationResultModel(0.0, 0.0, 0.0, 0, None, None)))
+          case None => Ok(calculation.summary(construct, null))
         }
       }
     }
