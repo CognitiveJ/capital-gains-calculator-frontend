@@ -1186,6 +1186,38 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         contentType(RebasedValueDataItem.result) shouldBe Some("text/html")
         charset(RebasedValueDataItem.result) shouldBe Some("utf-8")
       }
+
+      "Have the title 'Calculate your Capital Gains Tax" in {
+        RebasedValueDataItem.jsoupDoc.getElementsByTag("h1").text shouldBe "Calculate your Capital Gains Tax"
+      }
+
+      s"Have the question ${Messages("calc.rebasedValue.question")}" in {
+        RebasedValueDataItem.jsoupDoc.getElementsByTag("legend").text should include(Messages("calc.rebasedValue.question"))
+      }
+
+      "display the correct wording for radio option `yes`" in {
+        RebasedValueDataItem.jsoupDoc.body.getElementById("rebasedValueYes").parent.text shouldEqual Messages("calc.base.yes")
+      }
+
+      "display the correct wording for radio option `no`" in {
+        RebasedValueDataItem.jsoupDoc.body.getElementById("rebasedValueNo").parent.text shouldEqual Messages("calc.base.no")
+      }
+
+      "contain a hidden component with an input box" in {
+        RebasedValueDataItem.jsoupDoc.body.getElementById("hidden").html should include ("input")
+      }
+
+      s"contain a hidden component with the question ${Messages("calc.rebasedValue.questionTwo")}" in {
+        RebasedValueDataItem.jsoupDoc.getElementById("rebasedValue").parent.text should include(Messages("calc.rebasedValue.questionTwo"))
+      }
+
+      "Have a back link" in {
+        RebasedValueDataItem.jsoupDoc.getElementById("back-link").tagName() shouldBe "a"
+      }
+
+      "Have a continue button" in {
+        RebasedValueDataItem.jsoupDoc.getElementById("continue-button").tagName() shouldBe "button"
+      }
     }
   }
 
