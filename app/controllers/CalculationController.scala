@@ -362,7 +362,7 @@ trait CalculationController extends FrontendController {
     )
   }
   //################### Calculation Election methods #######################
-  val calculationElection = Action.async { implicit request =>
+  def calculationElection = Action.async { implicit request =>
     val construct = calcConnector.createSummary(hc)
     calcConnector.fetchAndGetFormData[CalculationElectionModel]("calculationElection").map {
       case Some(data) => Ok(calculation.calculationElection(calculationElectionForm.fill(data), construct))
@@ -370,7 +370,7 @@ trait CalculationController extends FrontendController {
     }
   }
 
-  val submitCalculationElection = Action { implicit request =>
+  def submitCalculationElection = Action { implicit request =>
     val construct = calcConnector.createSummary(hc)
     calculationElectionForm.bindFromRequest.fold(
       errors => BadRequest(calculation.calculationElection(errors, construct)),
@@ -382,17 +382,17 @@ trait CalculationController extends FrontendController {
   }
 
   //################### Other Reliefs methods #######################
-  val otherReliefs = Action.async { implicit request =>
+  def otherReliefs = Action.async { implicit request =>
     val construct = calcConnector.createSummary(hc)
     calcConnector.calculateFlat(construct).map {
       case Some(dataResult) => {
-        Await.result(calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefs").map {
+        Await.result(calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefsFlat").map {
           case Some(data) => Ok(calculation.otherReliefs(otherReliefsForm.fill(data), dataResult))
           case None => Ok(calculation.otherReliefs(otherReliefsForm, dataResult))
         }, Duration("5s"))
       }
       case None => {
-        Await.result(calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefs").map {
+        Await.result(calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefsFlat").map {
           case Some(data) => Ok(calculation.otherReliefs(otherReliefsForm.fill(data), CalculationResultModel(0.0, 0.0, 0.0, 0, None, None)))
           case None => Ok(calculation.otherReliefs(otherReliefsForm, CalculationResultModel(0.0, 0.0, 0.0, 0, None, None)))
         }, Duration("5s"))
@@ -400,18 +400,27 @@ trait CalculationController extends FrontendController {
     }
   }
 
-  val submitOtherReliefs = Action { implicit request =>
+  def submitOtherReliefs = Action { implicit request =>
+    val construct = calcConnector.createSummary(hc)
     otherReliefsForm.bindFromRequest.fold(
       errors => BadRequest(calculation.otherReliefs(errors, CalculationResultModel(0.0, 0.0, 0.0, 0, None, None))),
       success => {
-        calcConnector.saveFormData("otherReliefs", success)
-        Redirect(routes.CalculationController.summary())
+        calcConnector.saveFormData("otherReliefsFlat", success)
+        construct.acquisitionDateModel.hasAcquisitionDate match {
+          case "Yes" if Dates.dateAfterStart(construct.acquisitionDateModel.day.get, construct.acquisitionDateModel.month.get, construct.acquisitionDateModel.year.get) => {
+            Redirect(routes.CalculationController.summary())
+          }
+          case "Yes" if !Dates.dateAfterStart(construct.acquisitionDateModel.day.get, construct.acquisitionDateModel.month.get, construct.acquisitionDateModel.year.get) => {
+            Redirect(routes.CalculationController.calculationElection())
+          }
+          case "No" => Redirect(routes.CalculationController.summary())
+        }
       }
     )
   }
 
   //################### Time Apportioned Other Reliefs methods #######################
-  val otherReliefsTA = Action.async { implicit request =>
+  def otherReliefsTA = Action.async { implicit request =>
     val construct = calcConnector.createSummary(hc)
     calcConnector.calculateTA(construct).map {
       case Some(dataResult) => {
