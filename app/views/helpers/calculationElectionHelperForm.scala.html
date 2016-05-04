@@ -1,4 +1,4 @@
-@(field: Field, radioOptions: Seq[(String, (String, String, Option[String]))], args: (Symbol, Any)*)(implicit lang: play.api.i18n.Lang)
+@(field: Field, radioOptions: Seq[(String, (String, String, Option[String], String))], args: (Symbol, Any)*)(implicit lang: play.api.i18n.Lang)
 
 @import play.api.i18n._
 @import views.html.helper._
@@ -24,7 +24,7 @@
                 }
                 @elements.errors.map{error => <span class="error-notification">@Messages(error)</span>}
 
-                @radioOptions.map { case (value, (amount, message, dateMessage)) =>
+                @radioOptions.map { case (value, (amount, message, dateMessage, linkUrl)) =>
                     @defining(s"${elements.field.name}-${value.toLowerCase.replace(" ","_")}")  { inputId =>
                         <div class="grid-layout__column grid-layout__column--1-3">
                             <div class="form-group">
@@ -46,7 +46,7 @@
                                 </label>
 
                                 <div class="panel panel-indent additional-option-block" style="display: none;">
-                                    <a href="reliefs">@Messages("calc.calculationElection.otherRelief")</a>
+                                    <a href=@linkUrl>@Messages("calc.calculationElection.otherRelief")</a>
                                 </div>
                             </div>
                         </div>
