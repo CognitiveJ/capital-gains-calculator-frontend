@@ -3015,11 +3015,30 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
 
     "submitting a valid form with and an amount of 1000" should {
-      object OtherReliefsTestDataItem extends fakeRequestToPost("other-reliefs", TestCalculationController.submitOtherReliefs, ("otherReliefs", "1000"))
-      val otherReliefsTestModel = new OtherReliefsModel(Some(1000))
 
-      "return a 303" in {
+
+      "return a 303 with no Acquisition date" in {
+        object OtherReliefsTestDataItem extends fakeRequestToPost("other-reliefs", TestCalculationController.submitOtherReliefs, ("otherReliefs", "1000"))
+        val otherReliefsTestModel = new OtherReliefsModel(Some(1000))
         keystoreSummaryValue(sumModelFlat)
+        keystoreFlatCalculateValue(Some(calcModelTwoRates))
+        keystoreCacheCondition[OtherReliefsModel](otherReliefsTestModel)
+        status(OtherReliefsTestDataItem.result) shouldBe 303
+      }
+
+      "return a 303 with an Acquisition date before the start date" in {
+        object OtherReliefsTestDataItem extends fakeRequestToPost("other-reliefs", TestCalculationController.submitOtherReliefs, ("otherReliefs", "1000"))
+        val otherReliefsTestModel = new OtherReliefsModel(Some(1000))
+        keystoreSummaryValue(TestModels.summaryTrusteeTAWithoutAEA)
+        keystoreFlatCalculateValue(Some(calcModelTwoRates))
+        keystoreCacheCondition[OtherReliefsModel](otherReliefsTestModel)
+        status(OtherReliefsTestDataItem.result) shouldBe 303
+      }
+
+      "return a 303 with an Acquisition date after the start date" in {
+        object OtherReliefsTestDataItem extends fakeRequestToPost("other-reliefs", TestCalculationController.submitOtherReliefs, ("otherReliefs", "1000"))
+        val otherReliefsTestModel = new OtherReliefsModel(Some(1000))
+        keystoreSummaryValue(TestModels.summaryIndividualAcqDateAfter)
         keystoreFlatCalculateValue(Some(calcModelTwoRates))
         keystoreCacheCondition[OtherReliefsModel](otherReliefsTestModel)
         status(OtherReliefsTestDataItem.result) shouldBe 303

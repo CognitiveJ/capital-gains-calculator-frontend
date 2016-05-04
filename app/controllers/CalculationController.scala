@@ -429,12 +429,6 @@ trait CalculationController extends FrontendController {
           case None => Ok(calculation.otherReliefsTA(otherReliefsForm, dataResult))
         }, Duration("5s"))
       }
-      case None => {
-        Await.result(calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefsTA").map {
-          case Some(data) => Ok(calculation.otherReliefsTA(otherReliefsForm.fill(data), CalculationResultModel(0.0, 0.0, 0.0, 0, None, None)))
-          case None => Ok(calculation.otherReliefsTA(otherReliefsForm, CalculationResultModel(0.0, 0.0, 0.0, 0, None, None)))
-        }, Duration("5s"))
-      }
     }
   }
 
