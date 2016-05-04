@@ -25,12 +25,12 @@ object CalculateRequestConstructor {
       input.customerTypeModel.customerType}&priorDisposal=${
       input.otherPropertiesModel.otherProperties}${
       input.annualExemptAmountModel match {
-        case Some(data) => "&annualExemptAmount=" + Some(data.annualExemptAmount)
+        case Some(data) => "&annualExemptAmount=" + data.annualExemptAmount
         case None => ""
       }
     }${
       input.disabledTrusteeModel match {
-        case Some(data) => "&isVulnerable=" + Some(data.isVulnerable)
+        case Some(data) => "&isVulnerable=" + data.isVulnerable
         case None => ""
       }
     }${
