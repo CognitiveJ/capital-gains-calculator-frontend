@@ -3116,6 +3116,74 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
   }
 
+  "In CalculationController calling the .submitOtherReliefsTA action" when {
+    def keystoreCacheCondition[T](data: OtherReliefsModel): Unit = {
+      lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+      when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(returnedCacheMap))
+    }
+
+    "submitting a valid form with and an amount of 1000" should {
+      object OtherReliefsTATestDataItem extends fakeRequestToPost("other-reliefs-time-apportioned", TestCalculationController.submitOtherReliefsTA, ("otherReliefs", "1000"))
+      val otherReliefsTATestModel = new OtherReliefsModel(Some(1000))
+
+      "return a 303" in {
+        keystoreCacheCondition[OtherReliefsModel](otherReliefsTATestModel)
+        status(OtherReliefsTATestDataItem.result) shouldBe 303
+      }
+    }
+
+    "submitting a valid form with and an amount with two decimal places" should {
+      object OtherReliefsTATestDataItem extends fakeRequestToPost("other-reliefs-time-apportioned", TestCalculationController.submitOtherReliefsTA, ("otherReliefs", "1000.11"))
+      val otherReliefsTATestModel = new OtherReliefsModel(Some(1000.11))
+
+      "return a 303" in {
+        keystoreCacheCondition[OtherReliefsModel](otherReliefsTATestModel)
+        status(OtherReliefsTATestDataItem.result) shouldBe 303
+      }
+    }
+
+    "submitting an valid form with no value" should {
+      object OtherReliefsTATestDataItem extends fakeRequestToPost("other-reliefs-time-apportioned", TestCalculationController.submitOtherReliefsTA, ("otherReliefs", ""))
+      val otherReliefsTATestModel = new OtherReliefsModel(Some(0))
+
+      "return a 303" in {
+        keystoreCacheCondition[OtherReliefsModel](otherReliefsTATestModel)
+        status(OtherReliefsTATestDataItem.result) shouldBe 303
+      }
+    }
+
+    "submitting an invalid form with an amount with three decimal places" should {
+      object OtherReliefsTATestDataItem extends fakeRequestToPost("other-reliefs-time-apportioned", TestCalculationController.submitOtherReliefsTA, ("otherReliefs", "1000.111"))
+      val otherReliefsTATestModel = new OtherReliefsModel(Some(1000.111))
+
+      "return a 400" in {
+        keystoreCacheCondition[OtherReliefsModel](otherReliefsTATestModel)
+        status(OtherReliefsTATestDataItem.result) shouldBe 400
+      }
+    }
+
+    "submitting an invalid form with a negative value" should {
+      object OtherReliefsTATestDataItem extends fakeRequestToPost("other-reliefs-time-apportioned", TestCalculationController.submitOtherReliefsTA, ("otherReliefs", "-1000"))
+      val otherReliefsTATestModel = new OtherReliefsModel(Some(-1000))
+
+      "return a 400" in {
+        keystoreCacheCondition[OtherReliefsModel](otherReliefsTATestModel)
+        status(OtherReliefsTATestDataItem.result) shouldBe 400
+      }
+    }
+
+    "submitting an invalid form with an value of shdgsaf" should {
+      object OtherReliefsTATestDataItem extends fakeRequestToPost("other-reliefs-time-apportioned", TestCalculationController.submitOtherReliefsTA, ("otherReliefs", "shdgsaf"))
+      val otherReliefsTATestModel = new OtherReliefsModel(Some(1000))
+
+      "return a 400" in {
+        keystoreCacheCondition[OtherReliefsModel](otherReliefsTATestModel)
+        status(OtherReliefsTATestDataItem.result) shouldBe 400
+      }
+    }
+  }
+
   //################### Rebased Other Relief tests ###################
   "In CalculationController calling the .otherReliefsRebased action " should  {
 
