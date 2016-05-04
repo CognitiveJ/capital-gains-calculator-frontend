@@ -2818,7 +2818,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
       "return a 303" in {
         keystoreSummaryValue(sumModelFlat)
-        keystoreFlatCalculateValue(Some(calcModel))
+        keystoreFlatCalculateValue(Some(calcModelOneRate))
         keystoreCacheCondition[CalculationElectionModel](calculationElectionTestModel)
         status(CalculationElectionTestDataItem.result) shouldBe 303
       }
@@ -2830,7 +2830,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
       "return a 303" in {
         keystoreSummaryValue(sumModelTA)
-        keystoreFlatCalculateValue(Some(calcModel))
+        keystoreFlatCalculateValue(Some(calcModelOneRate))
         keystoreCacheCondition[CalculationElectionModel](calculationElectionTestModel)
         status(CalculationElectionTestDataItem.result) shouldBe 303
       }
@@ -2842,7 +2842,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
       "return a 400" in {
         keystoreSummaryValue(sumModelFlat)
-        keystoreFlatCalculateValue(Some(calcModel))
+        keystoreFlatCalculateValue(Some(calcModelOneRate))
         keystoreCacheCondition[CalculationElectionModel](calculationElectionTestModel)
         status(CalculationElectionTestDataItem.result) shouldBe 400
       }
