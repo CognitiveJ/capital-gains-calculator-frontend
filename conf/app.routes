@@ -87,6 +87,7 @@ GET         /other-reliefs           controllers.CalculationController.otherReli
 POST        /other-reliefs           controllers.CalculationController.submitOtherReliefs
 
 GET         /other-reliefs-time-apportioned     controllers.CalculationController.otherReliefsTA
+POST        /other-reliefs-time-apportioned     controllers.CalculationController.submitOtherReliefsTA
 
 GET         /other-reliefs-rebased              controllers.CalculationController.otherReliefsRebased
 ########################################################

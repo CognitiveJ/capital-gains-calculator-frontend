@@ -24,9 +24,9 @@ object CalculateRequestConstructor {
     s"customerType=${
       input.customerTypeModel.customerType}&priorDisposal=${
       input.otherPropertiesModel.otherProperties}${
-      input.annualExemptAmountModel match {
-        case Some(data) => "&annualExemptAmount=" + data.annualExemptAmount
-        case None => ""
+      input.otherPropertiesModel.otherProperties match {
+        case "Yes" => "&annualExemptAmount=" + input.annualExemptAmountModel.get.annualExemptAmount
+        case "No" => ""
       }
     }${
       input.disabledTrusteeModel match {

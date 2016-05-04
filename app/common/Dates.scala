@@ -22,19 +22,21 @@ import java.util.Date
 object Dates {
 
   val sf = new SimpleDateFormat("dd/MM/yyyy")
+  val datePageFormat = new SimpleDateFormat("dd MMMM yyyy")
   val taxStartDate = sf.parse("05/04/2015")
 
   def constructDate (day: Int, month: Int, year: Int): Date = {
 
-    sf.parse(s"${day match {
-      case day if day < 10 => "0" + day
-      case _ => day
-    }
-    }/${month match {
-      case month if month < 10 => "0" + month
-      case _ => month
-    }
-    }/$year")
+//    sf.parse(s"${day match {
+//      case day if day < 10 => "0" + day
+//      case _ => day
+//    }
+//    }/${month match {
+//      case month if month < 10 => "0" + month
+//      case _ => month
+//    }
+//    }/$year")
+    sf.parse(s"$day/$month/$year")
   }
 
   def dateAfterStart (day: Int, month: Int, year: Int): Boolean = {
