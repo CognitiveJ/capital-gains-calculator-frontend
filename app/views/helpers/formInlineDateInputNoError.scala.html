@@ -8,10 +8,14 @@
 
 @fieldsetClasses = @{if(formItem.hasErrors) "form-field--error" else "" }
 
+@dayErrorClass = @{if(formItem(s"${fieldName}.day").hasErrors) "error-field" else "" }
+@monthErrorClass = @{if(formItem(s"${fieldName}.month").hasErrors) "error-field" else "" }
+@yearErrorClass = @{if(formItem(s"${fieldName}.year").hasErrors) "error-field" else "" }
+
 <fieldset class="form-group form-date @fieldsetClasses" id="@fieldName-fieldset">
 
     @if(formItem.hasErrors) {
-        <span class="error-notification">@Messages("calc.common.date.error.invalidDate")</span>
+    <span class="error-notification">@Messages("calc.common.date.error.invalidDate")</span>
     }
 
     @questionText
@@ -22,7 +26,7 @@
         formItem(s"${fieldName}.day"),
         '_label -> Messages("calc.common.date.fields.day"),
         '_labelClass -> "form-group form-group-day",
-        '_inputClass -> s"input--xxsmall input--no-spinner",
+        '_inputClass -> s"input--xxsmall input--no-spinner ${dayErrorClass} ",
         '_maxlength -> "2"
     )
 
@@ -30,7 +34,7 @@
         formItem(s"${fieldName}.month"),
         '_label -> Messages("calc.common.date.fields.month"),
         '_labelClass -> "form-group form-group-month",
-        '_inputClass -> s"input--xxsmall input--no-spinner",
+        '_inputClass -> s"input--xxsmall input--no-spinner ${monthErrorClass} ",
         '_maxlength -> "2"
     )
 
@@ -38,7 +42,7 @@
         formItem(s"${fieldName}.year"),
         '_label -> Messages("calc.common.date.fields.year"),
         '_labelClass -> "form-group form-group-year",
-        '_inputClass -> s"input--small input--no-spinner",
+        '_inputClass -> s"input--small input--no-spinner ${yearErrorClass} ",
         '_maxlength -> "4"
     )
 

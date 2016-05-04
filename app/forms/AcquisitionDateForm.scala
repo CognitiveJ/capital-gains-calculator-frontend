@@ -16,10 +16,10 @@
 
 package forms
 
-import common.Validation._
-import models._
-import play.api.data.Forms._
 import play.api.data._
+import play.api.data.Forms._
+import models._
+import common.Validation._
 import play.api.i18n.Messages
 
 object AcquisitionDateForm {
@@ -30,6 +30,6 @@ object AcquisitionDateForm {
       "acquisitionDate.day" -> optional(number),
       "acquisitionDate.month" -> optional(number),
       "acquisitionDate.year" -> optional(number)
-    )(AcquisitionDateModel.apply)(AcquisitionDateModel.unapply)
-  )
+    )(AcquisitionDateModel.apply)(AcquisitionDateModel.unapply).verifying(Messages("calc.common.date.error.invalidDate"), fields =>
+      if(fields.hasAcquisitionDate == "No") true else isValidDate(fields.day.getOrElse(0), fields.month.getOrElse(0), fields.year.getOrElse(0))))
 }

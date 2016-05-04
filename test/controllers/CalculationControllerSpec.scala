@@ -999,14 +999,14 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       )
 
       "return a 303" in {
-        keystoreCacheCondition(acquisitionDateTestModel)
+        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
         status(AcquisitionDateTestDataItem.result) shouldBe 303
       }
     }
 
     "submitting a valid form with 'No' and no date value" should {
       val acquisitionDateTestModel = new AcquisitionDateModel("No", None, None, None)
-      object ImprovementsTestDataItem extends fakeRequestToPost(
+      object AcquisitionDateTestDataItem extends fakeRequestToPost(
         "acquisitionDate",
         TestCalculationController.submitAcquisitionDate,
         ("hasAcquisitionDate", "No"),
@@ -1016,14 +1016,209 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       )
 
       "return a 303" in {
-        keystoreCacheCondition[ImprovementsModel](acquisitionDateTestModel)
-        status(ImprovementsTestDataItem.result) shouldBe 303
+        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
+        status(AcquisitionDateTestDataItem.result) shouldBe 303
+      }
+    }
+
+    "submitting a valid leap year date 29/02/2016" should {
+      val acquisitionDateTestModel = new AcquisitionDateModel("Yes", Some(29), Some(2), Some(2016))
+      object AcquisitionDateTestDataItem extends fakeRequestToPost(
+        "acquisition-date",
+        TestCalculationController.submitAcquisitionDate,
+        ("hasAcquisitionDate", "Yes"),
+        ("acquisitionDate.day", "29"),
+        ("acquisitionDate.month","2"),
+        ("acquisitionDate.year","2016")
+      )
+
+      "return a 303" in {
+        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
+        status(AcquisitionDateTestDataItem.result) shouldBe 303
+      }
+
+      s"redirect to ${routes.CalculationController.acquisitionValue()}" in {
+        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
+        redirectLocation(AcquisitionDateTestDataItem.result) shouldBe Some(s"${routes.CalculationController.acquisitionValue()}")
+      }
+    }
+
+    "submitting an invalid leap year date 29/02/2017" should {
+      val acquisitionDateTestModel = new AcquisitionDateModel("Yes", Some(29), Some(2), Some(2017))
+      object AcquisitionDateTestDataItem extends fakeRequestToPost(
+        "acquisition-date",
+        TestCalculationController.submitAcquisitionDate,
+        ("hasAcquisitionDate", "Yes"),
+        ("acquisitionDate.day", "29"),
+        ("acquisitionDate.month","2"),
+        ("acquisitionDate.year","2017")
+      )
+
+      "return a 400" in {
+        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
+        status(AcquisitionDateTestDataItem.result) shouldBe 400
+      }
+
+      s"should error with message ${Messages("calc.common.date.error.invalidDate")}" in {
+        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
+        AcquisitionDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("calc.common.date.error.invalidDate"))
+      }
+    }
+
+    "submitting a day less than 1" should {
+      val acquisitionDateTestModel = new AcquisitionDateModel("Yes", Some(0), Some(2), Some(2017))
+      object AcquisitionDateTestDataItem extends fakeRequestToPost(
+        "acquisition-date",
+        TestCalculationController.submitAcquisitionDate,
+        ("hasAcquisitionDate", "Yes"),
+        ("acquisitionDate.day", "0"),
+        ("acquisitionDate.month","2"),
+        ("acquisitionDate.year","2017")
+      )
+
+      "return a 400" in {
+        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
+        status(AcquisitionDateTestDataItem.result) shouldBe 400
+      }
+
+      s"should error with message ${Messages("calc.common.date.error.lessThan1")}" in {
+        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
+        AcquisitionDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("calc.common.date.error.invalidDate"))
+      }
+    }
+
+    "submitting a day greater than 31" should {
+      val acquisitionDateTestModel = new AcquisitionDateModel("Yes", Some(32), Some(2), Some(2017))
+      object AcquisitionDateTestDataItem extends fakeRequestToPost(
+        "acquisition-date",
+        TestCalculationController.submitAcquisitionDate,
+        ("hasAcquisitionDate", "Yes"),
+        ("acquisitionDate.day", "32"),
+        ("acquisitionDate.month","2"),
+        ("acquisitionDate.year","2017")
+      )
+
+      "return a 400" in {
+        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
+        status(AcquisitionDateTestDataItem.result) shouldBe 400
+      }
+
+      s"should error with message ${Messages("calc.common.date.error.greaterThan31")}" in {
+        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
+        AcquisitionDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("calc.common.date.error.invalidDate"))
+      }
+    }
+
+    "submitting a month greater than 12" should {
+      val acquisitionDateTestModel = new AcquisitionDateModel("Yes", Some(31), Some(13), Some(2017))
+      object AcquisitionDateTestDataItem extends fakeRequestToPost(
+        "acquisition-date",
+        TestCalculationController.submitAcquisitionDate,
+        ("hasAcquisitionDate", "Yes"),
+        ("acquisitionDate.day", "31"),
+        ("acquisitionDate.month","13"),
+        ("acquisitionDate.year","2017")
+      )
+
+      "return a 400" in {
+        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
+        status(AcquisitionDateTestDataItem.result) shouldBe 400
+      }
+
+      s"should error with message ${Messages("calc.common.date.error.greaterThan12")}" in {
+        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
+        AcquisitionDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("calc.common.date.error.invalidDate"))
+      }
+    }
+
+    "submitting a month less than 1" should {
+      val acquisitionDateTestModel = new AcquisitionDateModel("Yes", Some(31), Some(0), Some(2017))
+      object AcquisitionDateTestDataItem extends fakeRequestToPost(
+        "acquisition-date",
+        TestCalculationController.submitAcquisitionDate,
+        ("hasAcquisitionDate", "Yes"),
+        ("acquisitionDate.day", "31"),
+        ("acquisitionDate.month","0"),
+        ("acquisitionDate.year","2017")
+      )
+
+      "return a 400" in {
+        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
+        status(AcquisitionDateTestDataItem.result) shouldBe 400
+      }
+
+      s"should error with message ${Messages("calc.common.date.error.lessThan1")}" in {
+        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
+        AcquisitionDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("calc.common.date.error.invalidDate"))
+      }
+    }
+
+    "submitting a day with no value" should {
+      val acquisitionDateTestModel = new AcquisitionDateModel("Yes", Some(0), Some(12), Some(2017))
+      object AcquisitionDateTestDataItem extends fakeRequestToPost(
+        "acquisition-date",
+        TestCalculationController.submitAcquisitionDate,
+        ("hasAcquisitionDate", "Yes"),
+        ("acquisitionDate.day", ""),
+        ("acquisitionDate.month","12"),
+        ("acquisitionDate.year","2017")
+      )
+
+      "return a 400" in {
+        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
+        status(AcquisitionDateTestDataItem.result) shouldBe 400
+      }
+
+      "should error with message 'You must supply a valid date'" in {
+        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
+        AcquisitionDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("You must supply a valid date"))
+      }
+    }
+
+    "submitting a month with no value" should {
+      val acquisitionDateTestModel = new AcquisitionDateModel("Yes", Some(31), Some(0), Some(2017))
+      object AcquisitionDateTestDataItem extends fakeRequestToPost(
+        "acquisition-date",
+        TestCalculationController.submitAcquisitionDate,
+        ("hasAcquisitionDate", "Yes"),
+        ("acquisitionDate.day", "31"),
+        ("acquisitionDate.month",""),
+        ("acquisitionDate.year","2017")
+      )
+
+      "return a 400" in {
+        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
+        status(AcquisitionDateTestDataItem.result) shouldBe 400
+      }
+
+      "should error with message 'You must supply a valid date'" in {
+        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
+        AcquisitionDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("You must supply a valid date"))
+      }
+    }
+
+    "submitting a year with no value" should {
+      val acquisitionDateTestModel = new AcquisitionDateModel("Yes", Some(31), Some(12), Some(0))
+      object AcquisitionDateTestDataItem extends fakeRequestToPost(
+        "acquisition-date",
+        TestCalculationController.submitAcquisitionDate,
+        ("hasAcquisitionDate", "Yes"),
+        ("acquisitionDate.day", "31"),
+        ("acquisitionDate.month","12"),
+        ("acquisitionDate.year","")
+      )
+
+      "return a 400" in {
+        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
+        status(AcquisitionDateTestDataItem.result) shouldBe 400
+      }
+
+      "should error with message 'You must supply a valid date'" in {
+        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
+        AcquisitionDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("You must supply a valid date"))
       }
     }
   }
-
-
-
 
   //############## Acquisition Value tests ######################
   "In CalculationController calling the .acquisitionValue action " when {
