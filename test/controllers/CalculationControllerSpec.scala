@@ -2854,6 +2854,10 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         keystoreCacheCondition[CalculationElectionModel](calculationElectionTestModel)
         status(CalculationElectionTestDataItem.result) shouldBe 303
       }
+
+      "redirect to the summary page" in {
+        redirectLocation(CalculationElectionTestDataItem.result) shouldBe Some(s"${routes.CalculationController.summary}")
+      }
     }
 
     "submitting a valid form with 'time' selected" should {
@@ -2868,9 +2872,33 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       }
     }
 
+    "submitting a valid form with 'rebased' selected" should {
+      object CalculationElectionTestDataItem extends fakeRequestToPost("calculation-election", TestCalculationController.submitCalculationElection, ("calculationElection", "rebased"))
+      val calculationElectionTestModel = new CalculationElectionModel("rebased")
+
+      "return a 303" in {
+        keystoreSummaryValue(sumModelTA)
+        keystoreFlatCalculateValue(Some(calcModelOneRate))
+        keystoreCacheCondition[CalculationElectionModel](calculationElectionTestModel)
+        status(CalculationElectionTestDataItem.result) shouldBe 303
+      }
+    }
+
     "submitting a form with no data" should  {
       object CalculationElectionTestDataItem extends fakeRequestToPost("calculation-election", TestCalculationController.submitCalculationElection)
       val calculationElectionTestModel = new CalculationElectionModel("")
+
+      "return a 400" in {
+        keystoreSummaryValue(sumModelFlat)
+        keystoreFlatCalculateValue(Some(calcModelOneRate))
+        keystoreCacheCondition[CalculationElectionModel](calculationElectionTestModel)
+        status(CalculationElectionTestDataItem.result) shouldBe 400
+      }
+    }
+
+    "submitting a form with completely unrelated 'ew1234qwer'" should  {
+      object CalculationElectionTestDataItem extends fakeRequestToPost("calculation-election", TestCalculationController.submitCalculationElection, ("calculationElection", "ew1234qwer"))
+      val calculationElectionTestModel = new CalculationElectionModel("ew1234qwer")
 
       "return a 400" in {
         keystoreSummaryValue(sumModelFlat)
