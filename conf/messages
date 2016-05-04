@@ -82,6 +82,7 @@ calc.annualExemptAmount.errorDecimalPlaces = Allowance has too many decimal numb
 
 ## Acquisition Date ##
 calc.acquisitionDate.question = Do you know the date you signed the contract that made you the owner?
+calc.acquisitionDate.questionTwo = What was the date you signed the contract that made you the owner?
 
 ## Acquisition Value ##
 calc.acquisitionValue.question = How much did you pay for the property?
@@ -173,3 +174,6 @@ calc.summary.deductions.title = Deductions
 calc.summary.next.actions.text = You need to
 calc.summary.next.actions.link = tell HMRC about the property
 calc.summary.startAgain = Start again
+calc.summary.calculation.details.calculationElection = How would you like to work out your tax?
+calc.summary.calculation.details.timeCalculation = The percentage of your total gain you''ve made since
+calc.summary.calculation.details.flatCalculation = How much you''ve gained on the property since you became the owner

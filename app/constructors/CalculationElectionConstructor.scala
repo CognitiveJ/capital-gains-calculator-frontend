@@ -17,6 +17,7 @@
 package constructors
 
 import common.Dates
+import connectors.CalculatorConnector
 import controllers.{routes, CalculationController}
 import models.SummaryModel
 import play.api.i18n.Messages
@@ -25,7 +26,13 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-object CalculationElectionConstructor {
+object CalculationElectionConstructor extends CalculationElectionConstructor {
+  val calcConnector = CalculatorConnector
+}
+
+trait CalculationElectionConstructor {
+
+  val calcConnector: CalculatorConnector
 
   def generateElection(summary: SummaryModel, hc: HeaderCarrier) = {
     summary.acquisitionDateModel.hasAcquisitionDate match {
@@ -46,10 +53,10 @@ object CalculationElectionConstructor {
   }
 
   def resultFlat (summary: SummaryModel, hc: HeaderCarrier) = {
-    Await.result(CalculationController.calcConnector.calculateFlat(summary)(hc), Duration("5s")).get.taxOwed.setScale(2).toString()
+    Await.result(calcConnector.calculateFlat(summary)(hc), Duration("5s")).get.taxOwed.setScale(2).toString()
   }
 
   def resultTime(summary: SummaryModel, hc: HeaderCarrier) = {
-    Await.result(CalculationController.calcConnector.calculateTA(summary)(hc), Duration("5s")).get.taxOwed.setScale(2).toString()
+    Await.result(calcConnector.calculateTA(summary)(hc), Duration("5s")).get.taxOwed.setScale(2).toString()
   }
 }

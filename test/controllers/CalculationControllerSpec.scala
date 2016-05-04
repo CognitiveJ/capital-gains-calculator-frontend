@@ -2721,6 +2721,9 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     "supplied with no pre-existing data" should {
 
       object CalculationElectionTestDataItem extends fakeRequestTo("calculation-election", TestCalculationController.calculationElection)
+      keystoreSummaryValue(TestModels.summaryTrusteeTAWithoutAEA)
+      keystoreTACalculateValue(Some(TestModels.calcModelTwoRates))
+      keystoreFlatCalculateValue(Some(TestModels.calcModelOneRate))
 
       "return a 200" in {
         keystoreFetchCondition[CalculationElectionModel](None)
@@ -2755,10 +2758,10 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           CalculationElectionTestDataItem.jsoupDoc.body.getElementById("question-information").text shouldEqual Messages("calc.calculationElection.message")
         }
 
-        "have a calculationElectionHelper for the option of a time apportioned calculation rendered on the page" in {
+        "have a calculationElectionHelper for the option of a flat calculation rendered on the page" in {
           keystoreFetchCondition[CalculationElectionModel](None)
-          CalculationElectionTestDataItem.jsoupDoc.body.getElementById("calculationElection-time").attr("value") shouldEqual "time"
-          CalculationElectionTestDataItem.jsoupDoc.body.getElementById("time-para").text shouldEqual "Based on " + Messages("calc.calculationElection.message.time") + " " + Messages("calc.calculationElection.message.timeDate")
+          CalculationElectionTestDataItem.jsoupDoc.body.getElementById("calculationElection-flat").attr("value") shouldEqual "flat"
+          CalculationElectionTestDataItem.jsoupDoc.body.getElementById("flat-para").text shouldEqual "Based on " + Messages("calc.calculationElection.message.flat")
         }
 
         "display a 'Continue' button " in {
@@ -2781,7 +2784,10 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     "supplied with pre-existing data" should {
 
       object CalculationElectionTestDataItem extends fakeRequestTo("calculation-election", TestCalculationController.calculationElection)
-      val calculationElectionTestModel = new CalculationElectionModel("time")
+      val calculationElectionTestModel = new CalculationElectionModel("flat")
+      keystoreSummaryValue(TestModels.summaryTrusteeTAWithoutAEA)
+      keystoreTACalculateValue(Some(TestModels.calcModelTwoRates))
+      keystoreFlatCalculateValue(Some(TestModels.calcModelOneRate))
 
       "return a 200" in {
         keystoreFetchCondition[CalculationElectionModel](Some(calculationElectionTestModel))
@@ -2796,9 +2802,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           charset(CalculationElectionTestDataItem.result) shouldBe Some("utf-8")
         }
 
-        "have the stored value of time selected" in {
+        "have the stored value of flat calculation selected" in {
+          keystoreSummaryValue(TestModels.summaryTrusteeTAWithoutAEA)
+          keystoreTACalculateValue(Some(TestModels.calcModelTwoRates))
+          keystoreFlatCalculateValue(Some(TestModels.calcModelOneRate))
           keystoreFetchCondition[CalculationElectionModel](Some(calculationElectionTestModel))
-          CalculationElectionTestDataItem.jsoupDoc.body.getElementById("calculationElection-time").parent.classNames().contains("selected") shouldBe true
+          CalculationElectionTestDataItem.jsoupDoc.body.getElementById("calculationElection-flat").parent.classNames().contains("selected") shouldBe true
         }
       }
     }
