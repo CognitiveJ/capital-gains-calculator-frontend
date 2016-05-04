@@ -34,20 +34,20 @@ trait CalculationElectionConstructor {
 
   val calcConnector: CalculatorConnector
 
-  def generateElection(summary: SummaryModel, hc: HeaderCarrier) = {
+  def generateElection(summary: SummaryModel, hc: HeaderCarrier): Seq[(String, String, String, Option[String], String)]= {
     summary.acquisitionDateModel.hasAcquisitionDate match {
       case "Yes" if Dates.dateAfterStart(summary.acquisitionDateModel.day.get, summary.acquisitionDateModel.month.get, summary.acquisitionDateModel.year.get) => {
-        Seq("flat"->(resultFlat(summary, hc), Messages("calc.calculationElection.message.flat"), None, routes.CalculationController.otherReliefs().toString()))
+        Seq(("flat", resultFlat(summary, hc), Messages("calc.calculationElection.message.flat"), None, routes.CalculationController.otherReliefs().toString()))
       }
       case "Yes" if !Dates.dateAfterStart(summary.acquisitionDateModel.day.get, summary.acquisitionDateModel.month.get, summary.acquisitionDateModel.year.get) => {
         Seq(
-          "flat" ->(resultFlat(summary, hc), Messages("calc.calculationElection.message.flat"),
+          ("flat", resultFlat(summary, hc), Messages("calc.calculationElection.message.flat"),
             None, routes.CalculationController.otherReliefs().toString()),
-          "time" ->(resultTime(summary, hc), Messages("calc.calculationElection.message.time"),
+          ("time", resultTime(summary, hc), Messages("calc.calculationElection.message.time"),
             Some(Messages("calc.calculationElection.message.timeDate")), routes.CalculationController.otherReliefsTA().toString()))
       }
       case "No" => {
-        Seq("flat"->(resultFlat(summary, hc), Messages("calc.calculationElection.message.flat"), None, routes.CalculationController.otherReliefs().toString()))
+        Seq(("flat", resultFlat(summary, hc), Messages("calc.calculationElection.message.flat"), None, routes.CalculationController.otherReliefs().toString()))
       }
     }
   }
