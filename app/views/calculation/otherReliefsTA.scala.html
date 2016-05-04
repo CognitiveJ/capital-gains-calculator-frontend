@@ -1,26 +1,28 @@
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 @import views.html.helpers._
 
+@(otherReliefsForm: Form[OtherReliefsModel])(implicit request: Request[_])
+
 @()(implicit request: Request[_])
 
 @main_template(Messages("calc.otherReliefs.question")) {
-<a id="back-link" class="back-link" href="@routes.CalculationController.allowableLosses">@Messages("calc.base.back")</a>
-<h1 class="heading-large">@Messages("calc.base.calculate.tax.heading")</h1>
+    <a id="back-link" class="back-link" href="@routes.CalculationController.allowableLosses">@Messages("calc.base.back")</a>
+    <h1 class="heading-large">@Messages("calc.base.calculate.tax.heading")</h1>
 
-@govHelpers.form(action = routes.CalculationController.otherReliefsTA) {
+    @govHelpers.form(action = routes.CalculationController.otherReliefsTA) {
 
-<label for="otherReliefs">@Messages("calc.otherReliefs.question")</label>
+        <label for="otherReliefs">@Messages("calc.otherReliefs.question")</label>
 
-<div class="panel-indent">
-    <ul class="list list-bullet">
-        <li id="totalGain">&pound;XXXX.pp<br><span class="font-xsmall">@Messages("calc.otherReliefs.totalGain")</span></li>
+        <div class="panel-indent">
+            <ul class="list list-bullet">
+                <li id="totalGain">&pound;XXXX.pp<br><span class="font-xsmall">@Messages("calc.otherReliefs.totalGain")</span></li>
 
-        <li id="taxableGain">&pound;XXXX.pp<br><span class="font-xsmall">@Messages("calc.otherReliefs.taxableGain")</span></li>
-    </ul>
-</div>
+                <li id="taxableGain">&pound;XXXX.pp<br><span class="font-xsmall">@Messages("calc.otherReliefs.taxableGain")</span></li>
+            </ul>
+        </div>
 
-@simpleInputMoney("otherReliefs", "")
+        @formInputMoney(otherReliefsForm, "otherReliefs", "")
 
-<button id="add-relief-button" class="button">@Messages("calc.otherReliefs.button.addRelief")</button>
-}
+        <button id="add-relief-button" class="button">@Messages("calc.otherReliefs.button.addRelief")</button>
+    }
 }

@@ -1,6 +1,9 @@
-@()(implicit request: Request[_])
-
+@import models.CalculationElectionModel
 @import views.html.helpers._
+@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+@import play.api.data._
+
+@(calculationElectionForm: Form[CalculationElectionModel])(implicit request: Request[_])
 
 @main_template(Messages("calc.calculationElection.question"), articleLayout = false) {
 
@@ -11,17 +14,20 @@
 
         <p id="question-information">@Messages("calc.calculationElection.message")</p>
     </div>
-    <div class="grid-row">
-        <div class="grid-layout grid-layout--stacked">
-            @calculationElectionHelper("radio-indent-1", "time", "1000.00", Messages("calc.calculationElection.message.time"), Messages("calc.calculationElection.message.timeDate"))
-            @calculationElectionHelper("radio-indent-2", "rebase", "2000.00", Messages("calc.calculationElection.message.rebased"), Messages("calc.calculationElection.message.rebasedDate"))
-            @calculationElectionHelper("radio-indent-3", "flat", "3000.00", Messages("calc.calculationElection.message.flat"))
-        </div>
-    </div>
 
-    <div class="grid-row form-group">
-        <button class="button" type="submit" id="continue-button">@Messages("calc.base.continue")</button>
-    </div>
+    @govHelpers.form(action = routes.CalculationController.submitCalculationElection) {
+        @calculationElectionHelperForm(
+            field = calculationElectionForm("calculationElection"),
+            Seq(
+                "flat"->("1000.00", Messages("calc.calculationElection.message.flat"), None),
+                "time"->("2000.00", Messages("calc.calculationElection.message.time"), Some(Messages("calc.calculationElection.message.timeDate"))),
+                "rebased"->("3000.00", Messages("calc.calculationElection.message.rebased"), Some(Messages("calc.calculationElection.message.rebasedDate")))),
+            '_labelClass -> "block-label")
+
+        <div class="grid-row form-group">
+            <button class="button" type="submit" id="continue-button">@Messages("calc.base.continue")</button>
+        </div>
+    }
 
     <details role="group">
         <summary role="button" aria-controls="details-content-0" aria-expanded="false"><span class="summary">@Messages("calc.calculationElection.message.whyMore")</span></summary>

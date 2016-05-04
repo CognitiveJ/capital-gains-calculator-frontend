@@ -37,7 +37,7 @@ class CalculateRequestConstructorSpec extends UnitSpec {
     DisposalCostsModel(None),
     EntrepreneursReliefModel("No"),
     AllowableLossesModel("No", None),
-    CalculationElectionModel("flat-calculation"),
+    CalculationElectionModel("flat"),
     OtherReliefsModel(None),
     OtherReliefsModel(None)
   )
@@ -66,7 +66,7 @@ class CalculateRequestConstructorSpec extends UnitSpec {
         DisposalCostsModel(None),
         EntrepreneursReliefModel("No"),
         AllowableLossesModel("No", None),
-        CalculationElectionModel("flat-calculation"),
+        CalculationElectionModel("flat"),
         OtherReliefsModel(None),
         OtherReliefsModel(None)
       )

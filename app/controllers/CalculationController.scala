@@ -16,6 +16,7 @@
 
 package controllers
 
+import java.lang.ProcessBuilder.Redirect
 import java.util.concurrent.TimeUnit
 
 import connectors.CalculatorConnector
@@ -35,10 +36,10 @@ import forms.ImprovementsForm._
 import forms.PersonalAllowanceForm._
 import forms.AcquisitionCostsForm._
 import forms.CurrentIncomeForm._
+import forms.CalculationElectionForm._
 import forms.AcquisitionDateForm._
-
 import models._
-import play.api.mvc.Action
+import play.api.mvc.{AnyContent, Action}
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -353,26 +354,39 @@ trait CalculationController extends FrontendController {
   }
   //################### Calculation Election methods #######################
   val calculationElection = Action.async { implicit request =>
-    Future.successful(Ok(calculation.calculationElection()))
+    calcConnector.fetchAndGetFormData[CalculationElectionModel]("calculationElection").map {
+      case Some(data) => Ok(calculation.calculationElection(calculationElectionForm.fill(data)))
+      case None => Ok(calculation.calculationElection(calculationElectionForm))
+    }
+  }
+
+  val submitCalculationElection = Action { implicit request =>
+    calculationElectionForm.bindFromRequest.fold(
+      errors => BadRequest(calculation.calculationElection(errors)),
+      success => {
+        calcConnector.saveFormData("calculationElection", success)
+        Redirect(routes.CalculationController.summary())
+      }
+    )
   }
 
   //################### Other Reliefs methods #######################
   val otherReliefs = Action.async { implicit request =>
     val construct = calcConnector.createSummary(hc)
     calcConnector.calculateFlat(construct).map {
-        case Some(dataResult) => {
-          Await.result(calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefs").map {
-            case Some(data) => Ok(calculation.otherReliefs(otherReliefsForm.fill(data), dataResult))
-            case None => Ok(calculation.otherReliefs(otherReliefsForm, dataResult))
-          }, Duration("5s"))
-        }
-        case None => {
-          Await.result(calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefs").map {
-            case Some(data) => Ok(calculation.otherReliefs(otherReliefsForm.fill(data), CalculationResultModel(0.0, 0.0, 0.0, 0, None, None)))
-            case None => Ok(calculation.otherReliefs(otherReliefsForm, CalculationResultModel(0.0, 0.0, 0.0, 0, None, None)))
-          }, Duration("5s"))
-        }
+      case Some(dataResult) => {
+        Await.result(calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefs").map {
+          case Some(data) => Ok(calculation.otherReliefs(otherReliefsForm.fill(data), dataResult))
+          case None => Ok(calculation.otherReliefs(otherReliefsForm, dataResult))
+        }, Duration("5s"))
       }
+      case None => {
+        Await.result(calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefs").map {
+          case Some(data) => Ok(calculation.otherReliefs(otherReliefsForm.fill(data), CalculationResultModel(0.0, 0.0, 0.0, 0, None, None)))
+          case None => Ok(calculation.otherReliefs(otherReliefsForm, CalculationResultModel(0.0, 0.0, 0.0, 0, None, None)))
+        }, Duration("5s"))
+      }
+    }
   }
 
   val submitOtherReliefs = Action { implicit request =>
@@ -387,7 +401,10 @@ trait CalculationController extends FrontendController {
 
   //################### Time Apportioned Other Reliefs methods #######################
   val otherReliefsTA = Action.async { implicit request =>
-    Future.successful(Ok(calculation.otherReliefsTA()))
+    calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefsTA").map {
+      case Some(data) => Ok(calculation.otherReliefsTA(otherReliefsForm.fill(data)))
+      case None => Ok(calculation.otherReliefsTA(otherReliefsForm))
+    }
   }
 
   //################### Rebased Other Reliefs methods #######################
@@ -396,16 +413,16 @@ trait CalculationController extends FrontendController {
   }
 
   //################### Summary Methods ##########################
-  def summary = Action.async { implicit request =>
+  def summary(): Action[AnyContent] = Action.async { implicit request =>
     val construct = calcConnector.createSummary(hc)
     construct.calculationElectionModel.calculationType match {
-      case "flat-calculation" => {
+      case "flat" => {
         calcConnector.calculateFlat(construct).map {
           case Some(data) => Ok(calculation.summary(construct, data))
           case None => Ok(calculation.summary(construct, CalculationResultModel(0.0, 0.0, 0.0, 0, None, None)))
         }
       }
-      case "time-apportioned-calculation" => {
+      case "time" => {
         calcConnector.calculateTA(construct).map {
           case Some(data) => Ok(calculation.summary(construct, data))
           case None => Ok(calculation.summary(construct, CalculationResultModel(0.0, 0.0, 0.0, 0, None, None)))

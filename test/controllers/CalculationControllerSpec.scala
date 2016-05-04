@@ -125,7 +125,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       DisposalCostsModel(None),
       EntrepreneursReliefModel("No"),
       AllowableLossesModel("No", None),
-      CalculationElectionModel("flat-calculation"),
+      CalculationElectionModel("flat"),
       OtherReliefsModel(None),
       OtherReliefsModel(None)
     )
@@ -146,7 +146,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     DisposalCostsModel(None),
     EntrepreneursReliefModel("No"),
     AllowableLossesModel("No", None),
-    CalculationElectionModel("time-apportioned-calculation"),
+    CalculationElectionModel("time"),
     OtherReliefsModel(None),
     OtherReliefsModel(None)
   )
@@ -2717,48 +2717,135 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
   //################### Calculation Election tests #########################
 
-  "In CalculationController calling the .calculationElection action" should {
+  "In CalculationController calling the .calculationElection action" when {
 
-    object CalculationElectionTestDataItem extends fakeRequestTo("calculation-election", CalculationController.calculationElection)
-    "return a 200" in {
-      status(CalculationElectionTestDataItem.result) shouldBe 200
+    "supplied with no pre-existing data" should {
+
+      object CalculationElectionTestDataItem extends fakeRequestTo("calculation-election", TestCalculationController.calculationElection)
+
+      "return a 200" in {
+        keystoreFetchCondition[CalculationElectionModel](None)
+        status(CalculationElectionTestDataItem.result) shouldBe 200
+      }
+
+      "return some HTML that" should {
+
+        "contain some text and use the character set UTF-8" in {
+          keystoreFetchCondition[CalculationElectionModel](None)
+          contentType(CalculationElectionTestDataItem.result) shouldBe Some("text/html")
+          charset(CalculationElectionTestDataItem.result) shouldBe Some("utf-8")
+        }
+
+        "have the title Which method of calculation would you like?" in {
+          keystoreFetchCondition[CalculationElectionModel](None)
+          CalculationElectionTestDataItem.jsoupDoc.title shouldEqual Messages("calc.calculationElection.question")
+        }
+
+        "have the heading Calculate your tax (non-residents) " in {
+          keystoreFetchCondition[CalculationElectionModel](None)
+          CalculationElectionTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+        }
+
+        "have a 'Back' link " in {
+          keystoreFetchCondition[CalculationElectionModel](None)
+          CalculationElectionTestDataItem.jsoupDoc.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+        }
+
+        "have the paragraph You can decide what to base your Capital Gains Tax on. It affects how much you'll pay." in {
+          keystoreFetchCondition[CalculationElectionModel](None)
+          CalculationElectionTestDataItem.jsoupDoc.body.getElementById("question-information").text shouldEqual Messages("calc.calculationElection.message")
+        }
+
+        "have a calculationElectionHelper for the option of a time apportioned calculation rendered on the page" in {
+          keystoreFetchCondition[CalculationElectionModel](None)
+          CalculationElectionTestDataItem.jsoupDoc.body.getElementById("calculationElection-time").attr("value") shouldEqual "time"
+          CalculationElectionTestDataItem.jsoupDoc.body.getElementById("time-para").text shouldEqual "Based on " + Messages("calc.calculationElection.message.time") + " " + Messages("calc.calculationElection.message.timeDate")
+        }
+
+        "display a 'Continue' button " in {
+          keystoreFetchCondition[CalculationElectionModel](None)
+          CalculationElectionTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+        }
+
+        "display a concertina information box with 'They sometimes qualify for larger tax reliefs. This can lower the amount you owe or even reduce it to zero' as the content" in {
+          keystoreFetchCondition[CalculationElectionModel](None)
+          CalculationElectionTestDataItem.jsoupDoc.select("summary span.summary").text shouldEqual Messages("calc.calculationElection.message.whyMore")
+          CalculationElectionTestDataItem.jsoupDoc.select("div#details-content-0 p").text shouldEqual Messages("calc.calculationElection.message.whyMoreDetails")
+        }
+        "have no pre-selected option" in {
+          keystoreFetchCondition[CalculationElectionModel](None)
+          CalculationElectionTestDataItem.jsoupDoc.body.getElementById("calculationElection-flat").parent.classNames().contains("selected") shouldBe false
+        }
+      }
     }
 
-    "return some HTML that" should {
+    "supplied with pre-existing data" should {
 
-      "contain some text and use the character set UTF-8" in {
-        contentType(CalculationElectionTestDataItem.result) shouldBe Some("text/html")
-        charset(CalculationElectionTestDataItem.result) shouldBe Some("utf-8")
+      object CalculationElectionTestDataItem extends fakeRequestTo("calculation-election", TestCalculationController.calculationElection)
+      val calculationElectionTestModel = new CalculationElectionModel("time")
+
+      "return a 200" in {
+        keystoreFetchCondition[CalculationElectionModel](Some(calculationElectionTestModel))
+        status(CalculationElectionTestDataItem.result) shouldBe 200
       }
 
-      "have the title Which method of calculation would you like?" in {
-        CalculationElectionTestDataItem.jsoupDoc.title shouldEqual Messages("calc.calculationElection.question")
-      }
+      "return some HTML that" should {
 
-      "have the heading Calculate your tax (non-residents) " in {
-        CalculationElectionTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
-      }
+        "contain some text and use the character set utf-8" in {
+          keystoreFetchCondition[CalculationElectionModel](Some(calculationElectionTestModel))
+          contentType(CalculationElectionTestDataItem.result) shouldBe Some("text/html")
+          charset(CalculationElectionTestDataItem.result) shouldBe Some("utf-8")
+        }
 
-      "have a 'Back' link " in {
-        CalculationElectionTestDataItem.jsoupDoc.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+        "have the stored value of time selected" in {
+          keystoreFetchCondition[CalculationElectionModel](Some(calculationElectionTestModel))
+          CalculationElectionTestDataItem.jsoupDoc.body.getElementById("calculationElection-time").parent.classNames().contains("selected") shouldBe true
+        }
       }
+    }
+  }
 
-      "have the paragraph You can decide what to base your Capital Gains Tax on. It affects how much you'll pay." in {
-        CalculationElectionTestDataItem.jsoupDoc.body.getElementById("question-information").text shouldEqual Messages("calc.calculationElection.message")
+  "In CalculationController calling the .submitCalculationElection action" when {
+
+    def keystoreCacheCondition[T](data: CalculationElectionModel): Unit = {
+      lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+      when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(returnedCacheMap))
+    }
+
+    "submitting a valid form with 'flat' selected" should {
+      object CalculationElectionTestDataItem extends fakeRequestToPost("calculation-election", TestCalculationController.submitCalculationElection, ("calculationElection", "flat"))
+      val calculationElectionTestModel = new CalculationElectionModel("flat")
+
+      "return a 303" in {
+        keystoreSummaryValue(sumModelFlat)
+        keystoreFlatCalculateValue(Some(calcModel))
+        keystoreCacheCondition[CalculationElectionModel](calculationElectionTestModel)
+        status(CalculationElectionTestDataItem.result) shouldBe 303
       }
+    }
 
-      "have a calculationElectionHelper for the option of a time apportioned calculation rendered on the page" in {
-        CalculationElectionTestDataItem.jsoupDoc.body.getElementById("radio-indent-1").attr("value") shouldEqual "time"
-        CalculationElectionTestDataItem.jsoupDoc.body.getElementById("radio-indent-1-para").text shouldEqual "Based on " + Messages("calc.calculationElection.message.time") + " " + Messages("calc.calculationElection.message.timeDate")
+    "submitting a valid form with 'time' selected" should {
+      object CalculationElectionTestDataItem extends fakeRequestToPost("calculation-election", TestCalculationController.submitCalculationElection, ("calculationElection", "time"))
+      val calculationElectionTestModel = new CalculationElectionModel("time")
+
+      "return a 303" in {
+        keystoreSummaryValue(sumModelTA)
+        keystoreFlatCalculateValue(Some(calcModel))
+        keystoreCacheCondition[CalculationElectionModel](calculationElectionTestModel)
+        status(CalculationElectionTestDataItem.result) shouldBe 303
       }
+    }
 
-      "display a 'Continue' button " in {
-        CalculationElectionTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
-      }
+    "submitting a form with no data" should  {
+      object CalculationElectionTestDataItem extends fakeRequestToPost("calculation-election", TestCalculationController.submitCalculationElection)
+      val calculationElectionTestModel = new CalculationElectionModel("")
 
-      "display a concertina information box with 'They sometimes qualify for larger tax reliefs. This can lower the amount you owe or even reduce it to zero' as the content" in {
-        CalculationElectionTestDataItem.jsoupDoc.select("summary span.summary").text shouldEqual Messages("calc.calculationElection.message.whyMore")
-        CalculationElectionTestDataItem.jsoupDoc.select("div#details-content-0 p").text shouldEqual Messages("calc.calculationElection.message.whyMoreDetails")
+      "return a 400" in {
+        keystoreSummaryValue(sumModelFlat)
+        keystoreFlatCalculateValue(Some(calcModel))
+        keystoreCacheCondition[CalculationElectionModel](calculationElectionTestModel)
+        status(CalculationElectionTestDataItem.result) shouldBe 400
       }
     }
   }
@@ -2962,8 +3049,8 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
   //################### Time Apportioned Other Relief tests ###################
   "In CalculationController calling the .otherReliefsTA action " should  {
-
-  object OtherReliefsTATestDataItem extends fakeRequestTo("other-reliefs-time-apportioned", TestCalculationController.otherReliefsTA)
+    keystoreFetchCondition[OtherReliefsModel](None)
+    object OtherReliefsTATestDataItem extends fakeRequestTo("other-reliefs-time-apportioned", TestCalculationController.otherReliefsTA)
 
     "return a 200" in {
       status(OtherReliefsTATestDataItem.result) shouldBe 200
@@ -3006,6 +3093,25 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
       "include helptext for 'Taxable gain'" in {
         OtherReliefsTATestDataItem.jsoupDoc.body.getElementById("taxableGain").text should include (Messages("calc.otherReliefs.taxableGain"))
+      }
+    }
+
+    "when not supplied with any previous value" should {
+      object OtherReliefsTATestDataItem extends fakeRequestTo("other-reliefs-time-apportioned", TestCalculationController.otherReliefsTA)
+
+      "contain no pre-filled data" in {
+        keystoreFetchCondition[OtherReliefsModel](None)
+        OtherReliefsTATestDataItem.jsoupDoc.body.getElementById("otherReliefs").attr("value") shouldBe ""
+      }
+    }
+
+    "when supplied with a previous value" should {
+      val testModel = OtherReliefsModel(Some(1000))
+      object OtherReliefsTATestDataItem extends fakeRequestTo("other-reliefs-time-apportioned", TestCalculationController.otherReliefsTA)
+
+      "contain the pre-supplied data" in {
+        keystoreFetchCondition[OtherReliefsModel](Some(testModel))
+        OtherReliefsTATestDataItem.jsoupDoc.body.getElementById("otherReliefs").attr("value") shouldBe "1000"
       }
     }
   }
