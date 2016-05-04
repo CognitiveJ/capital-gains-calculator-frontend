@@ -36,7 +36,7 @@ object TestModels {
     DisposalDateModel(10, 10, 2010),
     DisposalValueModel(150000),
     AcquisitionCostsModel(Some(300)),
-    DisposalCostsModel(None),
+    DisposalCostsModel(Some(600)),
     EntrepreneursReliefModel("No"),
     AllowableLossesModel("Yes", Some(50000)),
     CalculationElectionModel("flat"),
@@ -66,10 +66,10 @@ object TestModels {
   )
 
   val summaryTrusteeTAWithAEA = SummaryModel (
-    CustomerTypeModel("individual"),
+    CustomerTypeModel("trustee"),
+    Some(DisabledTrusteeModel("No")),
     None,
-    Some(CurrentIncomeModel(1000)),
-    Some(PersonalAllowanceModel(11100)),
+    None,
     OtherPropertiesModel("Yes"),
     Some(AnnualExemptAmountModel(1500)),
     AcquisitionDateModel("Yes", Some(9), Some(9), Some(1999)),
@@ -108,10 +108,10 @@ object TestModels {
   )
 
   val summaryDisabledTrusteeTAWithAEA = SummaryModel (
-    CustomerTypeModel("individual"),
+    CustomerTypeModel("trustee"),
+    Some(DisabledTrusteeModel("Yes")),
     None,
-    Some(CurrentIncomeModel(1000)),
-    Some(PersonalAllowanceModel(11100)),
+    None,
     OtherPropertiesModel("Yes"),
     Some(AnnualExemptAmountModel(1500)),
     AcquisitionDateModel("Yes", Some(9), Some(9), Some(1999)),
@@ -130,7 +130,7 @@ object TestModels {
 
   val summaryDisabledTrusteeTAWithoutAEA = SummaryModel (
     CustomerTypeModel("trustee"),
-    Some(DisabledTrusteeModel("No")),
+    Some(DisabledTrusteeModel("Yes")),
     None,
     None,
     OtherPropertiesModel("No"),

@@ -119,12 +119,13 @@ object SummaryConstructor {
           )
         )
 
-        case _ => Array(
+        case "personalRep" => Array(
           Map(
             "question" -> Messages("calc.customerType.question"),
-            "answer" -> WordUtils.capitalize(summary.customerTypeModel.customerType)
+            "answer" -> "Personal Representative"
           ),
           Map(
+            "question" -> Messages("calc.annualExemptAmount.question"),
             "answer" -> ("&pound;" + (summary.annualExemptAmountModel match {
               case Some(data) => data.annualExemptAmount.setScale(2).toString
               case None => "11100.00"
@@ -199,7 +200,7 @@ object SummaryConstructor {
       Array(
         Map(
           "question" -> Messages("calc.disposalDate.question"),
-          "answer" -> Dates.datePageFormat.format(Dates.constructDate(summary.disposalDateModel.year, summary.disposalDateModel.month, summary.disposalDateModel.day))
+          "answer" -> Dates.datePageFormat.format(Dates.constructDate(summary.disposalDateModel.day, summary.disposalDateModel.month, summary.disposalDateModel.year))
         ),
         Map(
           "question" -> Messages("calc.disposalValue.question"),

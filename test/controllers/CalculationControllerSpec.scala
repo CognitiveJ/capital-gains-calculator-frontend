@@ -2875,11 +2875,13 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
   }
 
   //################### Summary tests #######################
-  "In CalculationController 2 calling the .summary action" when {
+  "In CalculationController calling the .summary action" when {
 
     "individual is chosen with a flat calculation" when {
 
       "the user has provided a value for the AEA" should {
+        keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
+        keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
         object SummaryTestDataItem extends fakeRequestTo("summary", TestCalculationController.summary)
 
         "return a 200" in {
@@ -2931,7 +2933,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
             "have an election description of 'How much of your total gain you've made since 5 April 2015'" in {
               keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
               keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
-              SummaryTestDataItem.jsoupDoc.body().getElementById("calcDetails(0)").text() shouldBe Messages("calc.summary.calculation.details.flat")
+              SummaryTestDataItem.jsoupDoc.body().getElementById("calcDetails(0)").text() shouldBe Messages("calc.summary.calculation.details.flatCalculation")
             }
 
             "include 'Your total gain'" in {
@@ -2987,291 +2989,421 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
             }
 
             "include the question 'Who owned the property?'" in {
-              keystoreSummaryValue(sumModelFlat)
-              keystoreFlatCalculateValue(Some(calcModelTwoRates))
+              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
+              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.select("#personalDetails").text should include(Messages("calc.customerType.question"))
             }
 
             "have an 'individual' owner" in {
-              keystoreSummaryValue(sumModelFlat)
-              keystoreFlatCalculateValue(Some(calcModelTwoRates))
-              SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(0)").text() shouldBe "individual"
+              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
+              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(0)").text() shouldBe "Individual"
             }
 
             "include the question 'What’s your total income for this tax year?'" in {
-              keystoreSummaryValue(sumModelFlat)
-              keystoreFlatCalculateValue(Some(calcModelTwoRates))
+              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
+              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.select("#personalDetails").text should include(Messages("calc.currentIncome.question"))
             }
 
             "have an total income of £1000" in {
-              keystoreSummaryValue(sumModelFlat)
-              keystoreFlatCalculateValue(Some(calcModelTwoRates))
+              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
+              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(1)").text() shouldBe "£1000.00"
             }
 
             "include the question 'What's your Personal Allowance for this tax year?'" in {
-              keystoreSummaryValue(sumModelFlat)
-              keystoreFlatCalculateValue(Some(calcModelTwoRates))
+              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
+              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.select("#personalDetails").text should include(Messages("calc.personalAllowance.question"))
             }
 
             "have a personal allowance of £9000" in {
-              keystoreSummaryValue(sumModelFlat)
-              keystoreFlatCalculateValue(Some(calcModelTwoRates))
+              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
+              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(2)").text() shouldBe "£9000.00"
             }
 
             "include the question 'How much of your Capital Gains Tax allowance have you got left'" in {
-              keystoreSummaryValue(sumModelFlat)
-              keystoreFlatCalculateValue(Some(calcModelTwoRates))
+              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
+              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.select("#personalDetails").text should include(Messages("calc.annualExemptAmount.question"))
             }
 
-            "have a remaining CGT Allowance of £11100" in {
-              keystoreSummaryValue(sumModelFlat)
-              keystoreFlatCalculateValue(Some(calcModelTwoRates))
-              SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(3)").text() shouldBe "£11100.00"
+            "have a remaining CGT Allowance of £1500" in {
+              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
+              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(3)").text() shouldBe "£1500.00"
             }
           }
+
+          "have a 'Purchase details' section that" should {
+
+            "include the section heading 'Purchase details" in {
+              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
+              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              SummaryTestDataItem.jsoupDoc.select("#purchaseDetails").text should include(Messages("calc.summary.purchase.details.title"))
+            }
+
+            "include the question 'How much did you pay for the property?'" in {
+              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
+              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              SummaryTestDataItem.jsoupDoc.select("#purchaseDetails").text should include(Messages("calc.acquisitionValue.question"))
+            }
+
+            "have an acquisition value of £100000" in {
+              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
+              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              SummaryTestDataItem.jsoupDoc.body().getElementById("purchaseDetails(0)").text() shouldBe "£100000.00"
+            }
+
+            "include the question 'How much did you pay in costs when you became the property owner?'" in {
+              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
+              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              SummaryTestDataItem.jsoupDoc.select("#purchaseDetails").text should include(Messages("calc.acquisitionCosts.question"))
+            }
+
+            "have a acquisition costs of £0" in {
+              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
+              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              SummaryTestDataItem.jsoupDoc.body().getElementById("purchaseDetails(1)").text() shouldBe "£0.00"
+            }
+          }
+
+          "have a 'Property details' section that" should {
+
+            "include the section heading 'Property details" in {
+              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
+              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              SummaryTestDataItem.jsoupDoc.select("#propertyDetails").text should include(Messages("calc.summary.property.details.title"))
+            }
+
+            "include the question 'Did you make any improvements to the property?'" in {
+              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
+              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              SummaryTestDataItem.jsoupDoc.select("#propertyDetails").text should include(Messages("calc.improvements.question"))
+            }
+
+            "the answer to the improvements question should be No" in {
+              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
+              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              SummaryTestDataItem.jsoupDoc.body.getElementById("propertyDetails(0)").text shouldBe "No"
+            }
+          }
+
+          "have a 'Sale details' section that" should {
+
+            "include the section heading 'Sale details" in {
+              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
+              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              SummaryTestDataItem.jsoupDoc.select("#saleDetails").text should include(Messages("calc.summary.sale.details.title"))
+            }
+
+            "include the question 'When did you sign the contract that made someone else the owner?'" in {
+              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
+              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              SummaryTestDataItem.jsoupDoc.select("#saleDetails").text should include(Messages("calc.disposalDate.question"))
+            }
+
+            "the date of disposal should be '10 October 2010" in {
+              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
+              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              SummaryTestDataItem.jsoupDoc.body().getElementById("saleDetails(0)").text shouldBe "10 October 2010"
+            }
+
+            "include the question 'How much did you sell or give away the property for?'" in {
+              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
+              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              SummaryTestDataItem.jsoupDoc.select("#saleDetails").text should include(Messages("calc.disposalValue.question"))
+            }
+
+            "the value of the sale should be £150000" in {
+              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
+              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              SummaryTestDataItem.jsoupDoc.body().getElementById("saleDetails(1)").text shouldBe "£150000.00"
+            }
+
+            "include the question 'How much did you pay in costs when you stopped being the property owner?'" in {
+              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
+              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              SummaryTestDataItem.jsoupDoc.select("#saleDetails").text should include(Messages("calc.disposalCosts.question"))
+            }
+
+            "the value of the costs should be £0" in {
+              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
+              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              SummaryTestDataItem.jsoupDoc.body().getElementById("saleDetails(2)").text shouldBe "£0.00"
+            }
+          }
+
+          "have a 'Deductions details' section that" should {
+
+            "include the section heading 'Deductions" in {
+              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
+              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              SummaryTestDataItem.jsoupDoc.select("#deductions").text should include(Messages("calc.summary.deductions.title"))
+            }
+
+            "include the question 'Are you claiming Entrepreneurs' Relief?'" in {
+              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
+              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              SummaryTestDataItem.jsoupDoc.select("#deductions").text should include(Messages("calc.entrepreneursRelief.question"))
+            }
+
+            "have the answer to entrepreneurs relief question be 'No'" in {
+              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
+              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              SummaryTestDataItem.jsoupDoc.body().getElementById("deductions(0)").text shouldBe "No"
+            }
+
+            "include the question 'Whats the total value of your allowable losses?'" in {
+              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
+              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              SummaryTestDataItem.jsoupDoc.select("#deductions").text should include(Messages("calc.allowableLosses.question.two"))
+            }
+
+            "the value of allowable losses should be £0" in {
+              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
+              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              SummaryTestDataItem.jsoupDoc.body().getElementById("deductions(1)").text shouldBe "£0.00"
+            }
+
+            "include the question 'What other reliefs are you claiming?'" in {
+              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
+              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              SummaryTestDataItem.jsoupDoc.select("#deductions").text should include(Messages("calc.otherReliefs.question"))
+            }
+
+            "the value of other reliefs should be £0" in {
+              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
+              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              SummaryTestDataItem.jsoupDoc.body().getElementById("deductions(2)").text shouldBe "£0.00"
+            }
+
+          }
+
+          "have a 'What to do next' section that" should {
+
+            "have the heading 'What to do next'" in {
+              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
+              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              SummaryTestDataItem.jsoupDoc.select("#whatToDoNext H2").text shouldEqual (Messages("calc.common.next.actions.heading"))
+            }
+
+            "include the text 'You need to tell HMRC about the property'" in {
+              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
+              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              SummaryTestDataItem.jsoupDoc.select("#whatToDoNext").text should
+                include(Messages("calc.summary.next.actions.text"))
+              include(Messages("calc.summary.next.actions.link"))
+            }
+          }
+
+          "have a link to 'Start again'" in {
+            keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
+            keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+            SummaryTestDataItem.jsoupDoc.select("#startAgain").text shouldEqual Messages("calc.summary.startAgain")
+          }
         }
       }
+
+      "the user has provided no value for the AEA" should {
+        keystoreSummaryValue(TestModels.summaryIndividualFlatWithoutAEA)
+        keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+        object SummaryTestDataItem extends fakeRequestTo("summary", TestCalculationController.summary)
+
+        "have a remaining CGT Allowance of £11100" in {
+          keystoreSummaryValue(TestModels.summaryIndividualFlatWithoutAEA)
+          keystoreFlatCalculateValue(Some(TestModels.calcModelOneRate))
+          SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(3)").text() shouldBe "£11100.00"
+        }
+
+        "the answer to the improvements question should be Yes" in {
+          keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
+          keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+          SummaryTestDataItem.jsoupDoc.body.getElementById("propertyDetails(0)").text shouldBe "Yes"
+        }
+
+        "the value of the improvements should be £8000" in {
+          keystoreSummaryValue(TestModels.summaryIndividualFlatWithoutAEA)
+          keystoreFlatCalculateValue(Some(TestModels.calcModelOneRate))
+          SummaryTestDataItem.jsoupDoc.body.getElementById("propertyDetails(1)").text shouldBe "£8000.00"
+        }
+
+        "the value of the disposal costs should be £600" in {
+          keystoreSummaryValue(TestModels.summaryIndividualFlatWithoutAEA)
+          keystoreFlatCalculateValue(Some(TestModels.calcModelOneRate))
+          SummaryTestDataItem.jsoupDoc.body().getElementById("saleDetails(2)").text shouldBe "£600.00"
+        }
+
+        "have a acquisition costs of £300" in {
+          keystoreSummaryValue(TestModels.summaryIndividualFlatWithoutAEA)
+          keystoreFlatCalculateValue(Some(TestModels.calcModelOneRate))
+          SummaryTestDataItem.jsoupDoc.body().getElementById("purchaseDetails(1)").text() shouldBe "£300.00"
+        }
+
+        "the value of allowable losses should be £50000" in {
+          keystoreSummaryValue(TestModels.summaryIndividualFlatWithoutAEA)
+          keystoreFlatCalculateValue(Some(TestModels.calcModelOneRate))
+          SummaryTestDataItem.jsoupDoc.body().getElementById("deductions(1)").text shouldBe "£50000.00"
+        }
+
+        "the value of other reliefs should be £999" in {
+          keystoreSummaryValue(TestModels.summaryIndividualFlatWithoutAEA)
+          keystoreFlatCalculateValue(Some(TestModels.calcModelOneRate))
+          SummaryTestDataItem.jsoupDoc.body().getElementById("deductions(2)").text shouldBe "£999.00"
+        }
+
+        "have a base tax rate of 20%" in {
+          keystoreSummaryValue(TestModels.summaryIndividualFlatWithoutAEA)
+          keystoreFlatCalculateValue(Some(TestModels.calcModelOneRate))
+          SummaryTestDataItem.jsoupDoc.body().getElementById("calcDetails(3)").text() shouldBe "20%"
+        }
+      }
+    }
+
+    "regular trustee is chosen with a time apportioned calculation" when {
+
+      "the user has provided a value for the AEA" should {
+        keystoreSummaryValue(TestModels.summaryTrusteeTAWithAEA)
+        keystoreTACalculateValue(Some(TestModels.calcModelOneRate))
+        object SummaryTestDataItem extends fakeRequestTo("summary", TestCalculationController.summary)
+
+        "have an election description of time apportionment method" in {
+          keystoreSummaryValue(TestModels.summaryTrusteeTAWithAEA)
+          keystoreTACalculateValue(Some(TestModels.calcModelOneRate))
+          SummaryTestDataItem.jsoupDoc.body().getElementById("calcDetails(0)").text() shouldBe Messages("calc.summary.calculation.details.timeCalculation")
+        }
+
+        "have an acquisition date of '9 September 1990'" in{
+          keystoreSummaryValue(TestModels.summaryTrusteeTAWithAEA)
+          keystoreTACalculateValue(Some(TestModels.calcModelOneRate))
+          SummaryTestDataItem.jsoupDoc.body().getElementById("purchaseDetails(0)").text() shouldBe ("09 September 1999")
+        }
+
+        "have a 'trustee' owner" in {
+          keystoreSummaryValue(TestModels.summaryTrusteeTAWithAEA)
+          keystoreTACalculateValue(Some(TestModels.calcModelOneRate))
+          SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(0)").text() shouldBe "Trustee"
+        }
+
+        "have an answer of 'No to the disabled trustee question" in {
+          keystoreSummaryValue(TestModels.summaryTrusteeTAWithAEA)
+          keystoreTACalculateValue(Some(TestModels.calcModelOneRate))
+          SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(1)").text() shouldBe "No"
+        }
+
+        "have a remaining CGT Allowance of £1500" in {
+          keystoreSummaryValue(TestModels.summaryTrusteeTAWithAEA)
+          keystoreTACalculateValue(Some(TestModels.calcModelOneRate))
+          SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(2)").text() shouldBe "£1500.00"
+        }
+
+        "have a base tax rate of 20%" in {
+          keystoreSummaryValue(TestModels.summaryTrusteeTAWithAEA)
+          keystoreTACalculateValue(Some(TestModels.calcModelOneRate))
+          SummaryTestDataItem.jsoupDoc.body().getElementById("calcDetails(3)").text() shouldBe "20%"
+        }
+      }
+
+      "the user has provided no value for the AEA" should {
+        keystoreSummaryValue(TestModels.summaryTrusteeTAWithoutAEA)
+        keystoreTACalculateValue(Some(TestModels.calcModelTwoRates))
+        object SummaryTestDataItem extends fakeRequestTo("summary", TestCalculationController.summary)
+
+        "have an answer of 'No to the disabled trustee question" in {
+          keystoreSummaryValue(TestModels.summaryTrusteeTAWithoutAEA)
+          keystoreTACalculateValue(Some(TestModels.calcModelTwoRates))
+          SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(1)").text() shouldBe "No"
+        }
+
+        "have a remaining CGT Allowance of £5050" in {
+          keystoreSummaryValue(TestModels.summaryTrusteeTAWithoutAEA)
+          keystoreTACalculateValue(Some(TestModels.calcModelTwoRates))
+          SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(2)").text() shouldBe "£5050.00"
+        }
+      }
+    }
+
+    "disabled trustee is chosen with a time apportioned calculation" when {
+
+      "the user has provided a value for the AEA" should {
+        keystoreSummaryValue(TestModels.summaryDisabledTrusteeTAWithAEA)
+        keystoreTACalculateValue(Some(TestModels.calcModelTwoRates))
+        object SummaryTestDataItem extends fakeRequestTo("summary", TestCalculationController.summary)
+
+        "have an answer of 'Yes' to the disabled trustee question" in {
+          keystoreSummaryValue(TestModels.summaryDisabledTrusteeTAWithAEA)
+          keystoreTACalculateValue(Some(TestModels.calcModelTwoRates))
+          SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(1)").text() shouldBe "Yes"
+        }
+
+        "have a remaining CGT Allowance of £1500" in {
+          keystoreSummaryValue(TestModels.summaryDisabledTrusteeTAWithAEA)
+          keystoreTACalculateValue(Some(TestModels.calcModelTwoRates))
+          SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(2)").text() shouldBe "£1500.00"
+        }
+      }
+
+      "the user has provided no value for the AEA" should {
+        keystoreSummaryValue(TestModels.summaryDisabledTrusteeTAWithoutAEA)
+        keystoreTACalculateValue(Some(TestModels.calcModelTwoRates))
+        object SummaryTestDataItem extends fakeRequestTo("summary", TestCalculationController.summary)
+
+        "have an answer of 'Yes' to the disabled trustee question" in {
+          keystoreSummaryValue(TestModels.summaryDisabledTrusteeTAWithoutAEA)
+          keystoreTACalculateValue(Some(TestModels.calcModelTwoRates))
+          SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(1)").text() shouldBe "Yes"
+        }
+
+        "have a remaining CGT Allowance of £11100" in {
+          keystoreSummaryValue(TestModels.summaryDisabledTrusteeTAWithoutAEA)
+          keystoreTACalculateValue(Some(TestModels.calcModelTwoRates))
+          SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(2)").text() shouldBe "£11100.00"
+        }
+      }
+    }
+
+    "personal representative is chosen with a flat calculation" when {
+
+      "the user has provided a value for the AEA" should {
+        keystoreSummaryValue(TestModels.summaryRepresentativeFlatWithAEA)
+        keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+        object SummaryTestDataItem extends fakeRequestTo("summary", TestCalculationController.summary)
+
+        "have a 'Personal Representative' owner" in {
+          keystoreSummaryValue(TestModels.summaryRepresentativeFlatWithAEA)
+          keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+          SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(0)").text() shouldBe "Personal Representative"
+        }
+
+        "have a remaining CGT Allowance of £1500" in {
+          keystoreSummaryValue(TestModels.summaryRepresentativeFlatWithAEA)
+          keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+          SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(1)").text() shouldBe "£1500.00"
+        }
+      }
+
+      "the user has provided no value for the AEA" should {
+        keystoreSummaryValue(TestModels.summaryRepresentativeFlatWithoutAEA)
+        keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+        object SummaryTestDataItem extends fakeRequestTo("summary", TestCalculationController.summary)
+
+        "have a 'Personal Representative' owner" in {
+          keystoreSummaryValue(TestModels.summaryRepresentativeFlatWithoutAEA)
+          keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+          SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(0)").text() shouldBe "Personal Representative"
+        }
+
+        "have a remaining CGT Allowance of £11100" in {
+          keystoreSummaryValue(TestModels.summaryRepresentativeFlatWithoutAEA)
+          keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+          SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(1)").text() shouldBe "£11100.00"
+        }
+      }
+
     }
   }
-  "In CalculationController calling the .summary action " when {
-
-    "flat calculation is chosen"  {
-      object SummaryTestDataItem extends fakeRequestTo("summary", TestCalculationController.summary)
-
-      "return a 200 with a valid calculation result" in {
-        keystoreSummaryValue(sumModelFlat)
-        keystoreFlatCalculateValue(Some(calcModelTwoRates))
-        status(SummaryTestDataItem.result) shouldBe 200
-      }
-
-      "return a 200 with an invalid calculation result" in {
-        object SummaryTestDataItem extends fakeRequestTo("summary", TestCalculationController.summary)
-        keystoreSummaryValue(sumModelFlat)
-        keystoreFlatCalculateValue(None)
-        status(SummaryTestDataItem.result) shouldBe 200
-      }
-
-      "return some HTML that" should {
-
-        "contain some text and use the character set utf-8" in {
-          keystoreSummaryValue(sumModelFlat)
-          keystoreFlatCalculateValue(Some(calcModelTwoRates))
-          contentType(SummaryTestDataItem.result) shouldBe Some("text/html")
-          charset(SummaryTestDataItem.result) shouldBe Some("utf-8")
-        }
-
-        "should have the title 'Summary'" in {
-          keystoreSummaryValue(sumModelFlat)
-          keystoreFlatCalculateValue(Some(calcModelTwoRates))
-          SummaryTestDataItem.jsoupDoc.getElementsByTag("title").text shouldEqual Messages("calc.summary.title")
-        }
-
-        "have a back button" in {
-          keystoreSummaryValue(sumModelFlat)
-          keystoreFlatCalculateValue(Some(calcModelTwoRates))
-          SummaryTestDataItem.jsoupDoc.getElementById("back-link").text shouldEqual Messages("calc.base.back")
-        }
-
-        "have the correct sub-heading 'You owe'" in {
-          keystoreSummaryValue(sumModelFlat)
-          keystoreFlatCalculateValue(Some(calcModelTwoRates))
-          SummaryTestDataItem.jsoupDoc.select("h1 span").text shouldEqual Messages("calc.summary.secondaryHeading")
-        }
-
-        "have a result amount currently set to £8000.00" in {
-          keystoreSummaryValue(sumModelFlat)
-          keystoreFlatCalculateValue(Some(calcModelTwoRates))
-          SummaryTestDataItem.jsoupDoc.select("h1 b").text shouldEqual "£8000.00"
-        }
-
-        "have a 'Calculation details' section that" should {
-
-          "include the section heading 'Calculation details" in {
-            keystoreSummaryValue(sumModelFlat)
-            keystoreFlatCalculateValue(Some(calcModelTwoRates))
-            SummaryTestDataItem.jsoupDoc.select("#calcDetails").text should include(Messages("calc.summary.calculation.details.title"))
-          }
-
-          "include 'Your total gain'" in {
-            keystoreSummaryValue(sumModelFlat)
-            keystoreFlatCalculateValue(Some(calcModelTwoRates))
-            SummaryTestDataItem.jsoupDoc.select("#calcDetails").text should include(Messages("calc.summary.calculation.details.totalGain"))
-          }
-
-          "include 'Your taxable gain'" in {
-            keystoreSummaryValue(sumModelFlat)
-            keystoreFlatCalculateValue(Some(calcModelTwoRates))
-            SummaryTestDataItem.jsoupDoc.select("#calcDetails").text should include(Messages("calc.summary.calculation.details.taxableGain"))
-          }
-
-          "include 'Your tax rate'" in {
-            keystoreSummaryValue(sumModelFlat)
-            keystoreFlatCalculateValue(Some(calcModelTwoRates))
-            SummaryTestDataItem.jsoupDoc.select("#calcDetails").text should include(Messages("calc.summary.calculation.details.taxRate"))
-          }
-        }
-
-        "have a 'Personal details' section that" should {
-
-          "include the section heading 'Personal details" in {
-            keystoreSummaryValue(sumModelFlat)
-            keystoreFlatCalculateValue(Some(calcModelTwoRates))
-            SummaryTestDataItem.jsoupDoc.select("#personalDetails").text should include(Messages("calc.summary.personal.details.title"))
-          }
-
-          "include the question 'Who owned the property?'" in {
-            keystoreSummaryValue(sumModelFlat)
-            keystoreFlatCalculateValue(Some(calcModelTwoRates))
-            SummaryTestDataItem.jsoupDoc.select("#personalDetails").text should include(Messages("calc.customerType.question"))
-          }
-
-          "include the question 'How much of your Capital Gains Tax allowance have you got left'" in {
-            keystoreSummaryValue(sumModelFlat)
-            keystoreFlatCalculateValue(Some(calcModelTwoRates))
-            SummaryTestDataItem.jsoupDoc.select("#personalDetails").text should include(Messages("calc.annualExemptAmount.question"))
-          }
-        }
-
-        "have a 'Purchase details' section that" should {
-
-          "include the section heading 'Purchase details" in {
-            keystoreSummaryValue(sumModelFlat)
-            keystoreFlatCalculateValue(Some(calcModelTwoRates))
-            SummaryTestDataItem.jsoupDoc.select("#purchaseDetails").text should include(Messages("calc.summary.purchase.details.title"))
-          }
-
-          "include the question 'How much did you pay for the property?'" in {
-            keystoreSummaryValue(sumModelFlat)
-            keystoreFlatCalculateValue(Some(calcModelTwoRates))
-            SummaryTestDataItem.jsoupDoc.select("#purchaseDetails").text should include(Messages("calc.acquisitionValue.question"))
-          }
-
-          "include the question 'How much did you pay in costs when you became the property owner?'" in {
-            keystoreSummaryValue(sumModelFlat)
-            keystoreFlatCalculateValue(Some(calcModelTwoRates))
-            SummaryTestDataItem.jsoupDoc.select("#purchaseDetails").text should include(Messages("calc.acquisitionCosts.question"))
-          }
-        }
-
-        "have a 'Property details' section that" should {
-
-          "include the section heading 'Property details" in {
-            keystoreSummaryValue(sumModelFlat)
-            keystoreFlatCalculateValue(Some(calcModelTwoRates))
-            SummaryTestDataItem.jsoupDoc.select("#propertyDetails").text should include(Messages("calc.summary.property.details.title"))
-          }
-
-          "include the question 'How much did you pay for the property?'" in {
-            keystoreSummaryValue(sumModelFlat)
-            keystoreFlatCalculateValue(Some(calcModelTwoRates))
-            SummaryTestDataItem.jsoupDoc.select("#propertyDetails").text should include(Messages("calc.improvements.question"))
-          }
-        }
-
-        "have a 'Sale details' section that" should {
-
-          "include the section heading 'Sale details" in {
-            keystoreSummaryValue(sumModelFlat)
-            keystoreFlatCalculateValue(Some(calcModelTwoRates))
-            SummaryTestDataItem.jsoupDoc.select("#saleDetails").text should include(Messages("calc.summary.sale.details.title"))
-          }
-
-          "include the question 'When did you sign the contract that made someone else the owner?'" in {
-            keystoreSummaryValue(sumModelFlat)
-            keystoreFlatCalculateValue(Some(calcModelTwoRates))
-            SummaryTestDataItem.jsoupDoc.select("#saleDetails").text should include(Messages("calc.disposalDate.question"))
-          }
-
-          "include the question 'How much did you sell or give away the property for?'" in {
-            keystoreSummaryValue(sumModelFlat)
-            keystoreFlatCalculateValue(Some(calcModelTwoRates))
-            SummaryTestDataItem.jsoupDoc.select("#saleDetails").text should include(Messages("calc.disposalValue.question"))
-          }
-
-          "include the question 'How much did you pay in costs when you stopped being the property owner?'" in {
-            keystoreSummaryValue(sumModelFlat)
-            keystoreFlatCalculateValue(Some(calcModelTwoRates))
-            SummaryTestDataItem.jsoupDoc.select("#saleDetails").text should include(Messages("calc.disposalCosts.question"))
-          }
-        }
-
-        "have a 'Deductions details' section that" should {
-
-          "include the section heading 'Deductions" in {
-            keystoreSummaryValue(sumModelFlat)
-            keystoreFlatCalculateValue(Some(calcModelTwoRates))
-            SummaryTestDataItem.jsoupDoc.select("#deductions").text should include(Messages("calc.summary.deductions.title"))
-          }
-
-          "include the question 'Are you claiming Entrepreneurs' Relief?'" in {
-            keystoreSummaryValue(sumModelFlat)
-            keystoreFlatCalculateValue(Some(calcModelTwoRates))
-            SummaryTestDataItem.jsoupDoc.select("#deductions").text should include(Messages("calc.entrepreneursRelief.question"))
-          }
-
-          "include the question 'Whats the total value of your allowable losses?'" in {
-            keystoreSummaryValue(sumModelFlat)
-            keystoreFlatCalculateValue(Some(calcModelTwoRates))
-            SummaryTestDataItem.jsoupDoc.select("#deductions").text should include(Messages("calc.allowableLosses.question.two"))
-          }
-        }
-
-        "have a 'What to do next' section that" should {
-
-          "have the heading 'What to do next'" in {
-            keystoreSummaryValue(sumModelFlat)
-            keystoreFlatCalculateValue(Some(calcModelTwoRates))
-            SummaryTestDataItem.jsoupDoc.select("#whatToDoNext H2").text shouldEqual (Messages("calc.common.next.actions.heading"))
-          }
-
-          "include the text 'You need to tell HMRC about the property'" in {
-            keystoreSummaryValue(sumModelFlat)
-            keystoreFlatCalculateValue(Some(calcModelTwoRates))
-            SummaryTestDataItem.jsoupDoc.select("#whatToDoNext").text should
-              include(Messages("calc.summary.next.actions.text"))
-            include(Messages("calc.summary.next.actions.link"))
-          }
-        }
-
-        "have a link to 'Start again'" in {
-          keystoreSummaryValue(sumModelFlat)
-          keystoreFlatCalculateValue(Some(calcModelTwoRates))
-          SummaryTestDataItem.jsoupDoc.select("#startAgain").text shouldEqual Messages("calc.summary.startAgain")
-        }
-      }
-    }
-
-    "time apportioned calculation is chosen" should {
-      object SummaryTestDataItem extends fakeRequestTo("summary", TestCalculationController.summary)
-
-      "return a 200 with a valid calculation result" in {
-        keystoreSummaryValue(sumModelTA)
-        keystoreTACalculateValue(Some(calcModelOneRate))
-        status(SummaryTestDataItem.result) shouldBe 200
-      }
-
-      "return a 200 with an invalid calculation result" in {
-        object SummaryTestDataItem extends fakeRequestTo("summary", TestCalculationController.summary)
-        keystoreSummaryValue(sumModelTA)
-        keystoreTACalculateValue(Some(calcModelOneRate))
-        status(SummaryTestDataItem.result) shouldBe 200
-      }
-
-      "have an other reliefs value of 1000" in {
-        object SummaryTestDataItem extends fakeRequestTo("summary", TestCalculationController.summary)
-        keystoreSummaryValue(sumModelTA)
-        keystoreTACalculateValue(Some(calcModelOneRate))
-        SummaryTestDataItem.jsoupDoc.body().getElementById("deductions(2)").text shouldBe "£1000.00"
-      }
-    }
-  }
-
-
 
   //############## Current Income tests ######################
   "In CalculationController calling the .currentIncome action " when {
