@@ -2610,6 +2610,51 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
   }
 
+  "In CalculationController calling the .submitCalculationElection action" when {
+
+    def keystoreCacheCondition[T](data: CalculationElectionModel): Unit = {
+      lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+      when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(returnedCacheMap))
+    }
+
+    "submitting a valid form with 'flat' selected" should {
+      object CalculationElectionTestDataItem extends fakeRequestToPost("calculation-election", TestCalculationController.submitCalculationElection, ("calculationElection", "flat"))
+      val calculationElectionTestModel = new CalculationElectionModel("flat")
+
+      "return a 303" in {
+        keystoreSummaryValue(sumModelFlat)
+        keystoreFlatCalculateValue(Some(calcModel))
+        keystoreCacheCondition[CalculationElectionModel](calculationElectionTestModel)
+        status(CalculationElectionTestDataItem.result) shouldBe 303
+      }
+    }
+
+    "submitting a valid form with 'time' selected" should {
+      object CalculationElectionTestDataItem extends fakeRequestToPost("calculation-election", TestCalculationController.submitCalculationElection, ("calculationElection", "time"))
+      val calculationElectionTestModel = new CalculationElectionModel("time")
+
+      "return a 303" in {
+        keystoreSummaryValue(sumModelTA)
+        keystoreFlatCalculateValue(Some(calcModel))
+        keystoreCacheCondition[CalculationElectionModel](calculationElectionTestModel)
+        status(CalculationElectionTestDataItem.result) shouldBe 303
+      }
+    }
+
+    "submitting a form with no data" should  {
+      object CalculationElectionTestDataItem extends fakeRequestToPost("calculation-election", TestCalculationController.submitCalculationElection)
+      val calculationElectionTestModel = new CalculationElectionModel("")
+
+      "return a 400" in {
+        keystoreSummaryValue(sumModelFlat)
+        keystoreFlatCalculateValue(Some(calcModel))
+        keystoreCacheCondition[CalculationElectionModel](calculationElectionTestModel)
+        status(CalculationElectionTestDataItem.result) shouldBe 400
+      }
+    }
+  }
+
   //################### Other Reliefs tests #######################
   "In CalculationController calling the .otherReliefs action " when {
     "not supplied with a pre-existing stored model" should {

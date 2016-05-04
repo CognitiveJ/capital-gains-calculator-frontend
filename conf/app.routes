@@ -80,6 +80,7 @@ POST        /allowable-losses        controllers.CalculationController.submitAll
 
 #Calculation Election
 GET         /calculation-election    controllers.CalculationController.calculationElection
+POST        /calculation-election    controllers.CalculationController.submitCalculationElection
 
 #Other Reliefs
 GET         /other-reliefs           controllers.CalculationController.otherReliefs
