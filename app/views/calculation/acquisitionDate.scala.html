@@ -13,11 +13,11 @@
 
     @govHelpers.form(action = routes.CalculationController.submitAcquisitionDate) {
 
-        @formHiddenYesNoRadio(
+        @formHiddenYesNoRadioNoError(
                 acquisitionDateForm,
                 "hasAcquisitionDate",
                 Messages("calc.acquisitionDate.question"),
-                formInlineDateInputNoError(
+                formInlineDateInput(
                     acquisitionDateForm,
                     "acquisitionDate",
                     ""
