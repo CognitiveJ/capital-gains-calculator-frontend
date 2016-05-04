@@ -88,6 +88,10 @@ calc.acquisitionValue.question = How much did you pay for the property?
 calc.acquisitionValue.errorNegative = Acquisition value can''t be negative
 calc.acquisitionValue.errorDecimalPlaces = Acquisition value has too many decimal numbers
 
+## Rebased Value ##
+calc.rebasedValue.question = Do you know how much the property was worth on 5 April 2015?
+calc.rebasedValue.questionTwo = What was the value of the property?
+
 ## Rebased Costs ##
 calc.rebasedCosts.question = Did you pay for the valuation?
 calc.rebasedCosts.questionTwo = How much did it cost to get the property valued?
