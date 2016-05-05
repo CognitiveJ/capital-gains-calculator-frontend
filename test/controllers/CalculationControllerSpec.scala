@@ -1371,46 +1371,98 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     object RebasedValueDataItem extends fakeRequestTo("rebased-value", TestCalculationController.rebasedValue)
 
     "return a 200" in {
+      keystoreFetchCondition[RebasedValueModel](None)
       status(RebasedValueDataItem.result) shouldBe 200
     }
 
     "return some HTML that" should {
 
-      "contain some text and use the character set utf-8" in{
+      "contain some text and use the character set utf-8" in {
+        keystoreFetchCondition[RebasedValueModel](None)
         contentType(RebasedValueDataItem.result) shouldBe Some("text/html")
         charset(RebasedValueDataItem.result) shouldBe Some("utf-8")
       }
 
       "Have the title 'Calculate your Capital Gains Tax" in {
+        keystoreFetchCondition[RebasedValueModel](None)
         RebasedValueDataItem.jsoupDoc.getElementsByTag("h1").text shouldBe "Calculate your Capital Gains Tax"
       }
 
       s"Have the question ${Messages("calc.rebasedValue.question")}" in {
+        keystoreFetchCondition[RebasedValueModel](None)
         RebasedValueDataItem.jsoupDoc.getElementsByTag("legend").text should include(Messages("calc.rebasedValue.question"))
       }
 
       "display the correct wording for radio option `yes`" in {
-        RebasedValueDataItem.jsoupDoc.body.getElementById("rebasedValueYes").parent.text shouldEqual Messages("calc.base.yes")
+        keystoreFetchCondition[RebasedValueModel](None)
+        RebasedValueDataItem.jsoupDoc.body.getElementById("hasRebasedValue-yes").parent.text shouldEqual Messages("calc.base.yes")
       }
 
       "display the correct wording for radio option `no`" in {
-        RebasedValueDataItem.jsoupDoc.body.getElementById("rebasedValueNo").parent.text shouldEqual Messages("calc.base.no")
+        keystoreFetchCondition[RebasedValueModel](None)
+        RebasedValueDataItem.jsoupDoc.body.getElementById("hasRebasedValue-no").parent.text shouldEqual Messages("calc.base.no")
       }
 
       "contain a hidden component with an input box" in {
+        keystoreFetchCondition[RebasedValueModel](None)
         RebasedValueDataItem.jsoupDoc.body.getElementById("hidden").html should include ("input")
       }
 
       s"contain a hidden component with the question ${Messages("calc.rebasedValue.questionTwo")}" in {
-        RebasedValueDataItem.jsoupDoc.getElementById("rebasedValue").parent.text should include(Messages("calc.rebasedValue.questionTwo"))
+        keystoreFetchCondition[RebasedValueModel](None)
+        RebasedValueDataItem.jsoupDoc.getElementById("rebasedValueAmt").parent.text should include(Messages("calc.rebasedValue.questionTwo"))
       }
 
       "Have a back link" in {
+        keystoreFetchCondition[RebasedValueModel](None)
         RebasedValueDataItem.jsoupDoc.getElementById("back-link").tagName() shouldBe "a"
       }
 
       "Have a continue button" in {
+        keystoreFetchCondition[RebasedValueModel](None)
         RebasedValueDataItem.jsoupDoc.getElementById("continue-button").tagName() shouldBe "button"
+      }
+    }
+
+    "supplied with a pre-existing model with 'Yes' checked and value already entered" should {
+      val testRebasedValueModelYes = new RebasedValueModel("Yes", Some(10000))
+
+      "return a 200" in {
+        object RebasedValueTestDataItem extends fakeRequestTo("rebased-value", TestCalculationController.rebasedValue)
+        keystoreFetchCondition[RebasedValueModel](Some(testRebasedValueModelYes))
+        status(RebasedValueTestDataItem.result) shouldBe 200
+      }
+
+      "return some HTML that" should {
+
+        "be pre populated with Yes box selected and a value of 10000 entered" in {
+          object RebasedValueTestDataItem extends fakeRequestTo("rebased-value", TestCalculationController.rebasedValue)
+          keystoreFetchCondition[RebasedValueModel](Some(testRebasedValueModelYes))
+
+          RebasedValueTestDataItem.jsoupDoc.getElementById("hasRebasedValue-yes").attr("checked") shouldEqual "checked"
+          RebasedValueTestDataItem.jsoupDoc.getElementById("rebasedValueAmt").attr("value") shouldEqual "10000"
+        }
+      }
+    }
+
+    "supplied with a pre-existing model with 'No' checked and value not entered" should {
+      val testRebasedValueModelNo = new RebasedValueModel("No", Some(0))
+
+      "return a 200" in {
+        object RebasedValueTestDataItem extends fakeRequestTo("rebased-value", TestCalculationController.rebasedValue)
+        keystoreFetchCondition[RebasedValueModel](Some(testRebasedValueModelNo))
+        status(RebasedValueTestDataItem.result) shouldBe 200
+      }
+
+      "return some HTML that" should {
+
+        "be pre populated with No box selected and a value of 0" in {
+          object RebasedValueTestDataItem extends fakeRequestTo("rebased-value", TestCalculationController.rebasedValue)
+          keystoreFetchCondition[RebasedValueModel](Some(testRebasedValueModelNo))
+
+          RebasedValueTestDataItem.jsoupDoc.getElementById("hasRebasedValue-no").attr("checked") shouldEqual "checked"
+          RebasedValueTestDataItem.jsoupDoc.getElementById("rebasedValueAmt").attr("value") shouldEqual "0"
+        }
       }
     }
   }
