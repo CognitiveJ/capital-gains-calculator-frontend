@@ -19,12 +19,22 @@ package forms
 import models.CalculationElectionModel
 import play.api.data._
 import play.api.data.Forms._
+import play.api.i18n.Messages
 
 object CalculationElectionForm {
 
+  def validate(calculationElection: String): Option[CalculationElectionModel] = {
+    calculationElection match {
+      case "flat" => Some(CalculationElectionModel(calculationElection))
+      case "time" => Some(CalculationElectionModel(calculationElection))
+      case "rebased" => Some(CalculationElectionModel(calculationElection))
+      case _ => None
+    }
+  }
+
   val calculationElectionForm = Form(
     mapping(
-      "calculationElection" -> nonEmptyText
+      "calculationElection" -> text.verifying(Messages("calc.common.invalidError"), calculationElection => validate(calculationElection).isDefined)
     )(CalculationElectionModel.apply)(CalculationElectionModel.unapply)
   )
 

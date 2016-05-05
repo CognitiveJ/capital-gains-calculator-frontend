@@ -1362,46 +1362,132 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     object RebasedValueDataItem extends fakeRequestTo("rebased-value", TestCalculationController.rebasedValue)
 
     "return a 200" in {
+      keystoreFetchCondition[RebasedValueModel](None)
       status(RebasedValueDataItem.result) shouldBe 200
     }
 
     "return some HTML that" should {
 
-      "contain some text and use the character set utf-8" in{
+      "contain some text and use the character set utf-8" in {
+        keystoreFetchCondition[RebasedValueModel](None)
         contentType(RebasedValueDataItem.result) shouldBe Some("text/html")
         charset(RebasedValueDataItem.result) shouldBe Some("utf-8")
       }
 
       "Have the title 'Calculate your Capital Gains Tax" in {
+        keystoreFetchCondition[RebasedValueModel](None)
         RebasedValueDataItem.jsoupDoc.getElementsByTag("h1").text shouldBe "Calculate your Capital Gains Tax"
       }
 
       s"Have the question ${Messages("calc.rebasedValue.question")}" in {
+        keystoreFetchCondition[RebasedValueModel](None)
         RebasedValueDataItem.jsoupDoc.getElementsByTag("legend").text should include(Messages("calc.rebasedValue.question"))
       }
 
       "display the correct wording for radio option `yes`" in {
-        RebasedValueDataItem.jsoupDoc.body.getElementById("rebasedValueYes").parent.text shouldEqual Messages("calc.base.yes")
+        keystoreFetchCondition[RebasedValueModel](None)
+        RebasedValueDataItem.jsoupDoc.body.getElementById("hasRebasedValue-yes").parent.text shouldEqual Messages("calc.base.yes")
       }
 
       "display the correct wording for radio option `no`" in {
-        RebasedValueDataItem.jsoupDoc.body.getElementById("rebasedValueNo").parent.text shouldEqual Messages("calc.base.no")
+        keystoreFetchCondition[RebasedValueModel](None)
+        RebasedValueDataItem.jsoupDoc.body.getElementById("hasRebasedValue-no").parent.text shouldEqual Messages("calc.base.no")
       }
 
       "contain a hidden component with an input box" in {
-        RebasedValueDataItem.jsoupDoc.body.getElementById("hidden").html should include ("input")
+        keystoreFetchCondition[RebasedValueModel](None)
+        RebasedValueDataItem.jsoupDoc.body.getElementById("hidden").html should include("input")
       }
 
       s"contain a hidden component with the question ${Messages("calc.rebasedValue.questionTwo")}" in {
-        RebasedValueDataItem.jsoupDoc.getElementById("rebasedValue").parent.text should include(Messages("calc.rebasedValue.questionTwo"))
+        keystoreFetchCondition[RebasedValueModel](None)
+        RebasedValueDataItem.jsoupDoc.getElementById("rebasedValueAmt").parent.text should include(Messages("calc.rebasedValue.questionTwo"))
       }
 
       "Have a back link" in {
+        keystoreFetchCondition[RebasedValueModel](None)
         RebasedValueDataItem.jsoupDoc.getElementById("back-link").tagName() shouldBe "a"
       }
 
       "Have a continue button" in {
+        keystoreFetchCondition[RebasedValueModel](None)
         RebasedValueDataItem.jsoupDoc.getElementById("continue-button").tagName() shouldBe "button"
+      }
+    }
+
+    "supplied with a pre-existing model with 'Yes' checked and value already entered" should {
+      val testRebasedValueModelYes = new RebasedValueModel("Yes", Some(10000))
+
+      "return a 200" in {
+        object RebasedValueTestDataItem extends fakeRequestTo("rebased-value", TestCalculationController.rebasedValue)
+        keystoreFetchCondition[RebasedValueModel](Some(testRebasedValueModelYes))
+        status(RebasedValueTestDataItem.result) shouldBe 200
+      }
+
+      "return some HTML that" should {
+
+        "be pre populated with Yes box selected and a value of 10000 entered" in {
+          object RebasedValueTestDataItem extends fakeRequestTo("rebased-value", TestCalculationController.rebasedValue)
+          keystoreFetchCondition[RebasedValueModel](Some(testRebasedValueModelYes))
+
+          RebasedValueTestDataItem.jsoupDoc.getElementById("hasRebasedValue-yes").attr("checked") shouldEqual "checked"
+          RebasedValueTestDataItem.jsoupDoc.getElementById("rebasedValueAmt").attr("value") shouldEqual "10000"
+        }
+      }
+    }
+
+    "supplied with a pre-existing model with 'No' checked and value not entered" should {
+      val testRebasedValueModelNo = new RebasedValueModel("No", Some(0))
+
+      "return a 200" in {
+        object RebasedValueTestDataItem extends fakeRequestTo("rebased-value", TestCalculationController.rebasedValue)
+        keystoreFetchCondition[RebasedValueModel](Some(testRebasedValueModelNo))
+        status(RebasedValueTestDataItem.result) shouldBe 200
+      }
+
+      "return some HTML that" should {
+
+        "be pre populated with No box selected and a value of 0" in {
+          object RebasedValueTestDataItem extends fakeRequestTo("rebased-value", TestCalculationController.rebasedValue)
+          keystoreFetchCondition[RebasedValueModel](Some(testRebasedValueModelNo))
+
+          RebasedValueTestDataItem.jsoupDoc.getElementById("hasRebasedValue-no").attr("checked") shouldEqual "checked"
+          RebasedValueTestDataItem.jsoupDoc.getElementById("rebasedValueAmt").attr("value") shouldEqual "0"
+        }
+      }
+    }
+
+    "In CalculationController calling the .submitRebasedValue action " when {
+      def keystoreCacheCondition[T](data: RebasedValueModel): Unit = {
+        lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+        when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+          .thenReturn(Future.successful(returnedCacheMap))
+      }
+
+      "submitting a valid form with 'Yes' and a value of 12045" should {
+        object RebasedValueTestDataItem extends fakeRequestToPost("rebasedCost",
+          TestCalculationController.submitRebasedValue,
+          ("hasRebasedValue", "Yes"),
+          ("rebasedValueAmt", "12045"))
+        val rebasedValueTestModel = new RebasedValueModel("Yes", Some(12045))
+
+        "return a 303" in {
+          keystoreCacheCondition[RebasedValueModel](rebasedValueTestModel)
+          status(RebasedValueTestDataItem.result) shouldBe 303
+        }
+      }
+
+      "submitting a valid form with 'No' and no value" should {
+        object RebasedValueTestDataItem extends fakeRequestToPost("improvements",
+          TestCalculationController.submitRebasedValue,
+          ("hasRebasedValue", "No"),
+          ("rebasedValueAmt", ""))
+        val rebasedValueTestModel = new RebasedValueModel("No", None)
+
+        "return a 303" in {
+          keystoreCacheCondition[RebasedValueModel](rebasedValueTestModel)
+          status(RebasedValueTestDataItem.result) shouldBe 303
+        }
       }
     }
   }
@@ -1411,42 +1497,68 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     object RebasedCostsDataItem extends fakeRequestTo("rebased-costs", TestCalculationController.rebasedCosts)
 
     "return a 200" in {
+      keystoreFetchCondition[RebasedCostsModel](None)
       status(RebasedCostsDataItem.result) shouldBe 200
     }
 
-    "return some HTML that" should {
+    "when no previous value is supplied return some HTML that" should {
 
       "contain some text and use the character set utf-8" in{
+        keystoreFetchCondition[RebasedCostsModel](None)
         contentType(RebasedCostsDataItem.result) shouldBe Some("text/html")
         charset(RebasedCostsDataItem.result) shouldBe Some("utf-8")
       }
 
-      "Have the title 'Calculate your Capital Gains Tax" in {
+      "have the title 'Calculate your Capital Gains Tax" in {
+        keystoreFetchCondition[RebasedCostsModel](None)
         RebasedCostsDataItem.jsoupDoc.getElementsByTag("h1").text shouldBe "Calculate your Capital Gains Tax"
       }
 
-      "Have the question 'Did you pay for the valuation?" in {
+      "have the question 'Did you pay for the valuation?" in {
+        keystoreFetchCondition[RebasedCostsModel](None)
         RebasedCostsDataItem.jsoupDoc.getElementsByTag("legend").text shouldBe "Did you pay for the valuation?"
       }
 
       "display the correct wording for radio option `yes`" in {
-        RebasedCostsDataItem.jsoupDoc.body.getElementById("rebasedCostsYes").parent.text shouldEqual Messages("calc.base.yes")
+        keystoreFetchCondition[RebasedCostsModel](None)
+        RebasedCostsDataItem.jsoupDoc.body.getElementById("hasRebasedCosts-yes").parent.text shouldEqual Messages("calc.base.yes")
       }
 
       "display the correct wording for radio option `no`" in {
-        RebasedCostsDataItem.jsoupDoc.body.getElementById("rebasedCostsNo").parent.text shouldEqual Messages("calc.base.no")
+        keystoreFetchCondition[RebasedCostsModel](None)
+        RebasedCostsDataItem.jsoupDoc.body.getElementById("hasRebasedCosts-no").parent.text shouldEqual Messages("calc.base.no")
       }
 
       "contain a hidden component with an input box" in {
+        keystoreFetchCondition[RebasedCostsModel](None)
         RebasedCostsDataItem.jsoupDoc.body.getElementById("hidden").html should include ("input")
       }
 
-      "Have a back link" in {
+      "have a back link" in {
+        keystoreFetchCondition[RebasedCostsModel](None)
         RebasedCostsDataItem.jsoupDoc.getElementById("back-link").tagName() shouldBe "a"
       }
 
-      "Have a continue button" in {
+      "have a continue button" in {
+        keystoreFetchCondition[RebasedCostsModel](None)
         RebasedCostsDataItem.jsoupDoc.getElementById("continue-button").tagName() shouldBe "button"
+      }
+
+      "have no auto selected option and an empty input field" in {
+        keystoreFetchCondition[RebasedCostsModel](None)
+        RebasedCostsDataItem.jsoupDoc.getElementById("hasRebasedCosts-yes").parent.classNames().contains("selected") shouldBe false
+        RebasedCostsDataItem.jsoupDoc.getElementById("hasRebasedCosts-no").parent.classNames().contains("selected") shouldBe false
+        RebasedCostsDataItem.jsoupDoc.getElementById("rebasedCosts").attr("value") shouldBe ""
+      }
+    }
+
+    "when a previous value is supplied return some HTML that" should {
+      object RebasedCostsDataItem extends fakeRequestTo("rebased-costs", TestCalculationController.rebasedCosts)
+
+      "have an auto selected option and a filled input field" in {
+        keystoreFetchCondition[RebasedCostsModel](Some(RebasedCostsModel("Yes", Some(1500))))
+        RebasedCostsDataItem.jsoupDoc.getElementById("hasRebasedCosts-yes").parent.classNames().contains("selected") shouldBe true
+        RebasedCostsDataItem.jsoupDoc.getElementById("rebasedCosts").attr("value") shouldBe "1500"
       }
     }
   }
@@ -2870,6 +2982,10 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         keystoreCacheCondition[CalculationElectionModel](calculationElectionTestModel)
         status(CalculationElectionTestDataItem.result) shouldBe 303
       }
+
+      "redirect to the summary page" in {
+        redirectLocation(CalculationElectionTestDataItem.result) shouldBe Some(s"${routes.CalculationController.summary}")
+      }
     }
 
     "submitting a valid form with 'time' selected" should {
@@ -2884,6 +3000,18 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       }
     }
 
+    "submitting a valid form with 'rebased' selected" should {
+      object CalculationElectionTestDataItem extends fakeRequestToPost("calculation-election", TestCalculationController.submitCalculationElection, ("calculationElection", "rebased"))
+      val calculationElectionTestModel = new CalculationElectionModel("rebased")
+
+      "return a 303" in {
+        keystoreSummaryValue(sumModelTA)
+        keystoreFlatCalculateValue(Some(calcModelOneRate))
+        keystoreCacheCondition[CalculationElectionModel](calculationElectionTestModel)
+        status(CalculationElectionTestDataItem.result) shouldBe 303
+      }
+    }
+
     "submitting a form with no data" should  {
       object CalculationElectionTestDataItem extends fakeRequestToPost("calculation-election", TestCalculationController.submitCalculationElection)
       val calculationElectionTestModel = new CalculationElectionModel("")
@@ -2892,6 +3020,18 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         mockCreateSummary(sumModelFlat)
         mockCalculateFlatValue(Some(calcModelOneRate))
         mockCalculateTAValue(Some(TestModels.calcModelTwoRates))
+        keystoreCacheCondition[CalculationElectionModel](calculationElectionTestModel)
+        status(CalculationElectionTestDataItem.result) shouldBe 400
+      }
+    }
+
+    "submitting a form with completely unrelated 'ew1234qwer'" should  {
+      object CalculationElectionTestDataItem extends fakeRequestToPost("calculation-election", TestCalculationController.submitCalculationElection, ("calculationElection", "ew1234qwer"))
+      val calculationElectionTestModel = new CalculationElectionModel("ew1234qwer")
+
+      "return a 400" in {
+        keystoreSummaryValue(sumModelFlat)
+        keystoreFlatCalculateValue(Some(calcModelOneRate))
         keystoreCacheCondition[CalculationElectionModel](calculationElectionTestModel)
         status(CalculationElectionTestDataItem.result) shouldBe 400
       }
@@ -3265,6 +3405,38 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       "contain some text and use the character set utf-8" in {
         contentType(OtherReliefsRebasedTestDataItem.result) shouldBe Some("text/html")
         charset(OtherReliefsRebasedTestDataItem.result) shouldBe Some("utf-8")
+      }
+
+      "have the title 'How much extra tax relief are you claiming?'" in {
+        OtherReliefsRebasedTestDataItem.jsoupDoc.title shouldEqual Messages("calc.otherReliefs.question")
+      }
+
+      "have the heading Calculate your tax (non-residents) " in {
+        OtherReliefsRebasedTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+      }
+
+      "have a 'Back' link " in {
+        OtherReliefsRebasedTestDataItem.jsoupDoc.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+      }
+
+      "have the question 'How much extra tax relief are you claiming?' as the legend of the input" in {
+        OtherReliefsRebasedTestDataItem.jsoupDoc.body.getElementsByTag("label").text should include (Messages("calc.otherReliefs.question"))
+      }
+
+      "display an input box for the Other Tax Reliefs" in {
+        OtherReliefsRebasedTestDataItem.jsoupDoc.body.getElementById("otherReliefs").tagName() shouldEqual "input"
+      }
+
+      "display an 'Add relief' button " in {
+        OtherReliefsRebasedTestDataItem.jsoupDoc.body.getElementById("add-relief-button").text shouldEqual Messages("calc.otherReliefs.button.addRelief")
+      }
+
+      "include helptext for 'Total gain'" in {
+        OtherReliefsRebasedTestDataItem.jsoupDoc.body.getElementById("totalGain").text should include (Messages("calc.otherReliefs.totalGain"))
+      }
+
+      "include helptext for 'Taxable gain'" in {
+        OtherReliefsRebasedTestDataItem.jsoupDoc.body.getElementById("taxableGain").text should include (Messages("calc.otherReliefs.taxableGain"))
       }
     }
   }

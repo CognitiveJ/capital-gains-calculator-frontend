@@ -14,12 +14,19 @@
  * limitations under the License.
  */
 
-package models
+package forms
 
-import play.api.libs.json.Json
+import models._
+import play.api.data.Forms._
+import play.api.data._
 
-case class RebasedCostsModel(hasRebasedCosts: String, rebasedCosts: Option[BigDecimal])
+object RebasedCostsForm {
 
-object RebasedCostsModel {
-  implicit val format = Json.format[RebasedCostsModel]
+  val rebasedCostsForm = Form(
+    mapping(
+      "hasRebasedCosts" -> nonEmptyText,
+      "rebasedCosts" -> optional(bigDecimal)
+    )(RebasedCostsModel.apply)(RebasedCostsModel.unapply)
+  )
+
 }
