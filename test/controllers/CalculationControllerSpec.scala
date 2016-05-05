@@ -1506,7 +1506,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         val rebasedValueTestModel = new RebasedValueModel("Yes", Some(9878))
 
         "return a 400" in {
-          keystoreCacheCondition[RebasedValueModel](rebasedValueTestModel)
+          mockSaveFormData[RebasedValueModel](rebasedValueTestModel)
           status(RebasedValueTestDataItem.result) shouldBe 400
         }
 
@@ -1524,7 +1524,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         val rebasedValueTestModel = new RebasedValueModel("Yes", Some(-200))
 
         "return a 400" in {
-          keystoreCacheCondition[RebasedValueModel](rebasedValueTestModel)
+          mockSaveFormData[RebasedValueModel](rebasedValueTestModel)
           status(RebasedValueTestDataItem.result) shouldBe 400
         }
 
@@ -1542,7 +1542,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         val rebasedValueTestModel = new RebasedValueModel("Yes", Some(-200))
 
         "return a 400" in {
-          keystoreCacheCondition[RebasedValueModel](rebasedValueTestModel)
+          mockSaveFormData[RebasedValueModel](rebasedValueTestModel)
           status(RebasedValueTestDataItem.result) shouldBe 400
         }
 
@@ -1559,7 +1559,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         val rebasedValueTestModel = new RebasedValueModel("Yes", Some(1.111))
 
         "return a 400" in {
-          keystoreCacheCondition[RebasedValueModel](rebasedValueTestModel)
+          mockSaveFormData[RebasedValueModel](rebasedValueTestModel)
           status(RebasedValueTestDataItem.result) shouldBe 400
         }
 
