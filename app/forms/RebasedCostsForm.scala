@@ -16,17 +16,45 @@
 
 package forms
 
+import common.Validation._
 import models._
 import play.api.data.Forms._
 import play.api.data._
+import play.api.i18n.Messages
 
 object RebasedCostsForm {
+
+  def verifyAmountSupplied(data: RebasedCostsModel): Boolean = {
+    data.hasRebasedCosts match {
+      case "Yes" => data.rebasedCosts.isDefined
+      case "No" => true
+    }
+  }
+
+  def verifyPositive(data: RebasedCostsModel): Boolean = {
+    data.hasRebasedCosts match {
+      case "Yes" => isPositive(data.rebasedCosts.getOrElse(0))
+      case "No" => true
+    }
+  }
+
+  def verifyTwoDecimalPlaces(data: RebasedCostsModel): Boolean = {
+    data.hasRebasedCosts match {
+      case "Yes" => isMaxTwoDecimalPlaces(data.rebasedCosts.getOrElse(0))
+      case "No" => true
+    }
+  }
 
   val rebasedCostsForm = Form(
     mapping(
       "hasRebasedCosts" -> nonEmptyText,
       "rebasedCosts" -> optional(bigDecimal)
     )(RebasedCostsModel.apply)(RebasedCostsModel.unapply)
+      .verifying(Messages("calc.rebasedCosts.error.no.value.supplied"),
+        rebasedCostsForm => verifyAmountSupplied(RebasedCostsModel(rebasedCostsForm.hasRebasedCosts, rebasedCostsForm.rebasedCosts)))
+      .verifying(Messages("calc.rebasedCosts.errorNegative"),
+        rebasedCostsForm => verifyPositive(rebasedCostsForm))
+      .verifying(Messages("calc.rebasedCosts.errorDecimalPlaces"),
+        rebasedCostsForm => verifyTwoDecimalPlaces(rebasedCostsForm))
   )
-
 }

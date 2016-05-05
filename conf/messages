@@ -99,6 +99,9 @@ calc.rebasedValue.errorDecimalPlaces = The Rebased Value has too many decimal pl
 ## Rebased Costs ##
 calc.rebasedCosts.question = Did you pay for the valuation?
 calc.rebasedCosts.questionTwo = How much did it cost to get the property valued?
+calc.rebasedCosts.errorNegative = Rebased Costs can't be negative
+calc.rebasedCosts.error.no.value.supplied = Please provide a value for Rebased Costs
+calc.rebasedCosts.errorDecimalPlaces = The Rebased Costs has too many decimal places
 
 ## Improvements ##
 calc.improvements.question = Did you make any improvements to the property?
