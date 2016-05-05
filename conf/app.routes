@@ -50,6 +50,7 @@ POST        /rebased-value           controllers.CalculationController.submitReb
 
 #Rebased Costs
 GET         /rebased-costs           controllers.CalculationController.rebasedCosts
+POST        /rebased-costs           controllers.CalculationController.submitRebasedCosts
 
 #Improvements
 GET         /improvements            controllers.CalculationController.improvements

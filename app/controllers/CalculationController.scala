@@ -239,6 +239,16 @@ trait CalculationController extends FrontendController {
     }
   }
 
+  val submitRebasedCosts = Action {implicit request =>
+    rebasedCostsForm.bindFromRequest.fold(
+      errors => BadRequest(calculation.rebasedCosts(errors)),
+      success => {
+        calcConnector.saveFormData("rebasedCosts", success)
+        Redirect(routes.CalculationController.improvements())
+      }
+    )
+  }
+
   //################### Improvements methods #######################
   val improvements = Action.async { implicit request =>
     calcConnector.fetchAndGetFormData[ImprovementsModel]("improvements").map {
