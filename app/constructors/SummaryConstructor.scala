@@ -88,9 +88,9 @@ object SummaryConstructor {
           ),
           Map(
             "question" -> Messages("calc.annualExemptAmount.question"),
-            "answer" -> ("&pound;" + (summary.annualExemptAmountModel match {
-              case Some(data) => data.annualExemptAmount.setScale(2).toString
-              case None => summary.disabledTrusteeModel.get.isVulnerable match {
+            "answer" -> ("&pound;" + (summary.otherPropertiesModel.otherProperties match {
+              case "Yes" => summary.annualExemptAmountModel.get.annualExemptAmount.setScale(2).toString
+              case "No" => summary.disabledTrusteeModel.get.isVulnerable match {
                 case "Yes" => "11100.00"
                 case _ => "5050.00"
               }
@@ -112,9 +112,9 @@ object SummaryConstructor {
           ),
           Map(
             "question" -> Messages("calc.annualExemptAmount.question"),
-            "answer" -> ("&pound;" + (summary.annualExemptAmountModel match {
-              case Some(data) => data.annualExemptAmount.setScale(2).toString
-              case None => "11100.00"
+            "answer" -> ("&pound;" + (summary.otherPropertiesModel.otherProperties match {
+              case "Yes" => summary.annualExemptAmountModel.get.annualExemptAmount.setScale(2).toString
+              case "No" => "11100.00"
             }))
           )
         )
@@ -126,9 +126,9 @@ object SummaryConstructor {
           ),
           Map(
             "question" -> Messages("calc.annualExemptAmount.question"),
-            "answer" -> ("&pound;" + (summary.annualExemptAmountModel match {
-              case Some(data) => data.annualExemptAmount.setScale(2).toString
-              case None => "11100.00"
+            "answer" -> ("&pound;" + (summary.otherPropertiesModel.otherProperties match {
+              case "Yes" => summary.annualExemptAmountModel.get.annualExemptAmount.setScale(2).toString
+              case "No" => "11100.00"
             }))
           )
         )

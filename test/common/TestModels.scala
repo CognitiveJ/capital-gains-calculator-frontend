@@ -214,4 +214,25 @@ object TestModels {
     OtherReliefsModel(None),
     OtherReliefsModel(None)
   )
+
+  val summaryIndividualAcqDateAfter = SummaryModel (
+    CustomerTypeModel("individual"),
+    None,
+    Some(CurrentIncomeModel(1000)),
+    Some(PersonalAllowanceModel(9000)),
+    OtherPropertiesModel("No"),
+    None,
+    AcquisitionDateModel("Yes", Some(6), Some(6), Some(2016)),
+    AcquisitionValueModel(100000),
+    ImprovementsModel("Yes", Some(8000)),
+    DisposalDateModel(10, 10, 2010),
+    DisposalValueModel(150000),
+    AcquisitionCostsModel(Some(300)),
+    DisposalCostsModel(Some(600)),
+    EntrepreneursReliefModel("No"),
+    AllowableLossesModel("Yes", Some(50000)),
+    CalculationElectionModel("flat"),
+    OtherReliefsModel(Some(999)),
+    OtherReliefsModel(Some(888))
+  )
 }

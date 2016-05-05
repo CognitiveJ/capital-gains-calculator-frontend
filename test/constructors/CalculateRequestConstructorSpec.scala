@@ -76,7 +76,7 @@ class CalculateRequestConstructorSpec extends UnitSpec {
         OtherReliefsModel(None),
         OtherReliefsModel(None)
       )
-      CalculateRequestConstructor.baseCalcUrl(sumModelTrustee) shouldEqual "customerType=trustee&priorDisposal=Yes&annualExemptAmount=Some(5000)&isVulnerable=Some(No)" +
+      CalculateRequestConstructor.baseCalcUrl(sumModelTrustee) shouldEqual "customerType=trustee&priorDisposal=Yes&annualExemptAmount=5000&isVulnerable=No" +
         "&disposalValue=150000&disposalCosts=0&acquisitionValueAmt=100000" +
         "&acquisitionCostsAmt=0&reliefs=0&allowableLossesAmt=0&entReliefClaimed=No"
     }
