@@ -60,7 +60,23 @@ object CalculateRequestConstructor {
 
   def flatCalcUrlExtra(input: SummaryModel): String = {
     s"&improvementsAmt=${
-      input.improvementsModel.improvementsAmt.getOrElse(0)
+      input.improvementsModel.isClaimingImprovements match {
+        case "Yes" => input.improvementsModel.improvementsAmt.get
+        case "No" => 0
+      }
+    }&improvementsAmtAfter=${
+      input.improvementsModel.isClaimingImprovements match {
+        case "Yes" => {
+          input.rebasedValueModel match {
+            case Some(data) => data.hasRebasedValue match {
+              case "Yes" => input.improvementsModel.improvementsAmtAfter.getOrElse(0)
+              case "No" => 0
+            }
+            case None => 0
+          }
+        }
+        case "No" => 0
+      }
     }&reliefs=${
       input.otherReliefsModelFlat.otherReliefs.getOrElse(0)
     }"
@@ -68,7 +84,23 @@ object CalculateRequestConstructor {
 
   def taCalcUrlExtra(input: SummaryModel): String = {
     s"&improvementsAmt=${
-      input.improvementsModel.improvementsAmt.getOrElse(0)
+      input.improvementsModel.isClaimingImprovements match {
+        case "Yes" => input.improvementsModel.improvementsAmt.get
+        case "No" => 0
+      }
+    }&improvementsAmtAfter=${
+      input.improvementsModel.isClaimingImprovements match {
+        case "Yes" => {
+          input.rebasedValueModel match {
+            case Some(data) => data.hasRebasedValue match {
+              case "Yes" => input.improvementsModel.improvementsAmtAfter.getOrElse(0)
+              case "No" => 0
+            }
+            case None => 0
+          }
+        }
+        case "No" => 0
+      }
     }&disposalDate=${
       input.disposalDateModel.year}-${input.disposalDateModel.month}-${input.disposalDateModel.day
     }&acquisitionDate=${
