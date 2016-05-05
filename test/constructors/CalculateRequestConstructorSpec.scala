@@ -49,7 +49,7 @@ class CalculateRequestConstructorSpec extends UnitSpec {
     "return a string from the baseCalcUrl as an individual with no prior disposal" in {
       CalculateRequestConstructor.baseCalcUrl(sumModel) shouldEqual "customerType=individual&priorDisposal=No&currentIncome=1000" +
         "&personalAllowanceAmt=11100&disposalValue=150000&disposalCosts=0&acquisitionValueAmt=100000" +
-        "&acquisitionCostsAmt=0&reliefs=0&allowableLossesAmt=0&entReliefClaimed=No"
+        "&acquisitionCostsAmt=0&allowableLossesAmt=0&entReliefClaimed=No"
     }
 
     "return a string from the baseCalcUrl as a trustee with a prior disposal" in {
@@ -78,16 +78,16 @@ class CalculateRequestConstructorSpec extends UnitSpec {
       )
       CalculateRequestConstructor.baseCalcUrl(sumModelTrustee) shouldEqual "customerType=trustee&priorDisposal=Yes&annualExemptAmount=5000&isVulnerable=No" +
         "&disposalValue=150000&disposalCosts=0&acquisitionValueAmt=100000" +
-        "&acquisitionCostsAmt=0&reliefs=0&allowableLossesAmt=0&entReliefClaimed=No"
+        "&acquisitionCostsAmt=0&allowableLossesAmt=0&entReliefClaimed=No"
     }
 
     "return a string from the flatCalcUrlExtra" in {
-      CalculateRequestConstructor.flatCalcUrlExtra(sumModel) shouldEqual "&improvementsAmt=0"
+      CalculateRequestConstructor.flatCalcUrlExtra(sumModel) shouldEqual "&improvementsAmt=0&reliefs=0"
     }
 
     "return a string from the taCalcUrlExtra" in {
       CalculateRequestConstructor.taCalcUrlExtra(sumModel) shouldEqual "&improvementsAmt=0&disposalDate=2010-10-10" +
-        "&acquisitionDate=1990-9-9"
+        "&acquisitionDate=1990-9-9&reliefs=0"
     }
   }
 

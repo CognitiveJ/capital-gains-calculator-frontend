@@ -51,8 +51,6 @@ object CalculateRequestConstructor {
       input.acquisitionValueModel.acquisitionValueAmt
     }&acquisitionCostsAmt=${
       input.acquisitionCostsModel.acquisitionCostsAmt.getOrElse(0)
-    }&reliefs=${
-      input.otherReliefsModelFlat.otherReliefs.getOrElse(0)
     }&allowableLossesAmt=${
       input.allowableLossesModel.allowableLossesAmt.getOrElse(0)
     }&entReliefClaimed=${
@@ -63,6 +61,8 @@ object CalculateRequestConstructor {
   def flatCalcUrlExtra(input: SummaryModel): String = {
     s"&improvementsAmt=${
       input.improvementsModel.improvementsAmt.getOrElse(0)
+    }&reliefs=${
+      input.otherReliefsModelFlat.otherReliefs.getOrElse(0)
     }"
   }
 
@@ -73,6 +73,8 @@ object CalculateRequestConstructor {
       input.disposalDateModel.year}-${input.disposalDateModel.month}-${input.disposalDateModel.day
     }&acquisitionDate=${
       input.acquisitionDateModel.year.get}-${input.acquisitionDateModel.month.get}-${input.acquisitionDateModel.day.get
+    }&reliefs=${
+      input.otherReliefsModelTA.otherReliefs.getOrElse(0)
     }"
   }
 }

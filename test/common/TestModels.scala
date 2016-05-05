@@ -224,6 +224,8 @@ object TestModels {
     None,
     AcquisitionDateModel("Yes", Some(6), Some(6), Some(2016)),
     AcquisitionValueModel(100000),
+    Some(RebasedValueModel("No", None)),
+    None,
     ImprovementsModel("Yes", Some(8000)),
     DisposalDateModel(10, 10, 2010),
     DisposalValueModel(150000),
@@ -233,6 +235,7 @@ object TestModels {
     AllowableLossesModel("Yes", Some(50000)),
     CalculationElectionModel("flat"),
     OtherReliefsModel(Some(999)),
-    OtherReliefsModel(Some(888))
+    OtherReliefsModel(Some(888)),
+    OtherReliefsModel(Some(777))
   )
 }
