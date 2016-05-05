@@ -1472,42 +1472,68 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     object RebasedCostsDataItem extends fakeRequestTo("rebased-costs", TestCalculationController.rebasedCosts)
 
     "return a 200" in {
+      keystoreFetchCondition[RebasedCostsModel](None)
       status(RebasedCostsDataItem.result) shouldBe 200
     }
 
-    "return some HTML that" should {
+    "when no previous value is supplied return some HTML that" should {
 
       "contain some text and use the character set utf-8" in{
+        keystoreFetchCondition[RebasedCostsModel](None)
         contentType(RebasedCostsDataItem.result) shouldBe Some("text/html")
         charset(RebasedCostsDataItem.result) shouldBe Some("utf-8")
       }
 
-      "Have the title 'Calculate your Capital Gains Tax" in {
+      "have the title 'Calculate your Capital Gains Tax" in {
+        keystoreFetchCondition[RebasedCostsModel](None)
         RebasedCostsDataItem.jsoupDoc.getElementsByTag("h1").text shouldBe "Calculate your Capital Gains Tax"
       }
 
-      "Have the question 'Did you pay for the valuation?" in {
+      "have the question 'Did you pay for the valuation?" in {
+        keystoreFetchCondition[RebasedCostsModel](None)
         RebasedCostsDataItem.jsoupDoc.getElementsByTag("legend").text shouldBe "Did you pay for the valuation?"
       }
 
       "display the correct wording for radio option `yes`" in {
-        RebasedCostsDataItem.jsoupDoc.body.getElementById("rebasedCostsYes").parent.text shouldEqual Messages("calc.base.yes")
+        keystoreFetchCondition[RebasedCostsModel](None)
+        RebasedCostsDataItem.jsoupDoc.body.getElementById("hasRebasedCosts-yes").parent.text shouldEqual Messages("calc.base.yes")
       }
 
       "display the correct wording for radio option `no`" in {
-        RebasedCostsDataItem.jsoupDoc.body.getElementById("rebasedCostsNo").parent.text shouldEqual Messages("calc.base.no")
+        keystoreFetchCondition[RebasedCostsModel](None)
+        RebasedCostsDataItem.jsoupDoc.body.getElementById("hasRebasedCosts-no").parent.text shouldEqual Messages("calc.base.no")
       }
 
       "contain a hidden component with an input box" in {
+        keystoreFetchCondition[RebasedCostsModel](None)
         RebasedCostsDataItem.jsoupDoc.body.getElementById("hidden").html should include ("input")
       }
 
-      "Have a back link" in {
+      "have a back link" in {
+        keystoreFetchCondition[RebasedCostsModel](None)
         RebasedCostsDataItem.jsoupDoc.getElementById("back-link").tagName() shouldBe "a"
       }
 
-      "Have a continue button" in {
+      "have a continue button" in {
+        keystoreFetchCondition[RebasedCostsModel](None)
         RebasedCostsDataItem.jsoupDoc.getElementById("continue-button").tagName() shouldBe "button"
+      }
+
+      "have no auto selected option and an empty input field" in {
+        keystoreFetchCondition[RebasedCostsModel](None)
+        RebasedCostsDataItem.jsoupDoc.getElementById("hasRebasedCosts-yes").parent.classNames().contains("selected") shouldBe false
+        RebasedCostsDataItem.jsoupDoc.getElementById("hasRebasedCosts-no").parent.classNames().contains("selected") shouldBe false
+        RebasedCostsDataItem.jsoupDoc.getElementById("rebasedCosts").attr("value") shouldBe ""
+      }
+    }
+
+    "when a previous value is supplied return some HTML that" should {
+      object RebasedCostsDataItem extends fakeRequestTo("rebased-costs", TestCalculationController.rebasedCosts)
+
+      "have an auto selected option and a filled input field" in {
+        keystoreFetchCondition[RebasedCostsModel](Some(RebasedCostsModel("Yes", Some(1500))))
+        RebasedCostsDataItem.jsoupDoc.getElementById("hasRebasedCosts-yes").parent.classNames().contains("selected") shouldBe true
+        RebasedCostsDataItem.jsoupDoc.getElementById("rebasedCosts").attr("value") shouldBe "1500"
       }
     }
   }
