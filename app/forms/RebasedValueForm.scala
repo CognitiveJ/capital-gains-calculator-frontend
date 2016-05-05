@@ -24,10 +24,37 @@ import play.api.i18n.Messages
 
 object RebasedValueForm {
 
+  def verifyAmountSupplied(data: RebasedValueModel): Boolean = {
+    data.hasRebasedValue match {
+      case "Yes" => data.rebasedValueAmt.isDefined
+      case "No" => true
+    }
+  }
+
+  def verifyPositive(data: RebasedValueModel): Boolean = {
+    data.hasRebasedValue match {
+      case "Yes" => isPositive(data.rebasedValueAmt.getOrElse(0))
+      case "No" => true
+    }
+  }
+
+  def verifyTwoDecimalPlaces(data: RebasedValueModel): Boolean = {
+    data.hasRebasedValue match {
+      case "Yes" => isMaxTwoDecimalPlaces(data.rebasedValueAmt.getOrElse(0))
+      case "No" => true
+    }
+  }
+
   val rebasedValueForm = Form(
     mapping(
       "hasRebasedValue" -> text,
       "rebasedValueAmt" -> optional(bigDecimal)
     )(RebasedValueModel.apply)(RebasedValueModel.unapply)
+      .verifying(Messages("calc.rebasedValue.error.no.value.supplied"),
+        rebasedValueForm => verifyAmountSupplied(RebasedValueModel(rebasedValueForm.hasRebasedValue, rebasedValueForm.rebasedValueAmt)))
+      .verifying(Messages("calc.rebasedValue.errorNegative"),
+        rebasedValueForm => verifyPositive(rebasedValueForm))
+      .verifying(Messages("calc.rebasedValue.errorDecimalPlaces"),
+        rebasedValueForm => verifyTwoDecimalPlaces(rebasedValueForm))
   )
 }
