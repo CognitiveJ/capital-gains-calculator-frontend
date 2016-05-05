@@ -16,39 +16,48 @@
 
 package forms
 
+import com.sun.org.apache.xpath.internal.operations.And
 import play.api.data._
 import play.api.data.Forms._
 import models._
 import play.api.i18n.Messages
 import common.Validation._
 
+
 object ImprovementsForm {
 
   def verifyAmountSupplied(data: ImprovementsModel): Boolean = {
     data.isClaimingImprovements match {
-      case "Yes" => data.improvementsAmt.isDefined
+      case "Yes" => data.improvementsAmt.isDefined || data.improvementsAmtAfter.isDefined
       case "No" => true
     }
   }
 
   def verifyPositive(data: ImprovementsModel): Boolean = {
-    data.isClaimingImprovements match {
+    (data.isClaimingImprovements match {
       case "Yes" => isPositive(data.improvementsAmt.getOrElse(0))
       case "No" => true
-    }
+    }) && (data.isClaimingImprovements match {
+      case "Yes" => isPositive(data.improvementsAmtAfter.getOrElse(0))
+      case "No" => true
+    })
   }
 
   def verifyTwoDecimalPlaces(data: ImprovementsModel): Boolean = {
-    data.isClaimingImprovements match {
+    (data.isClaimingImprovements match {
       case "Yes" => isMaxTwoDecimalPlaces(data.improvementsAmt.getOrElse(0))
       case "No" => true
-    }
+    }) && (data.isClaimingImprovements match {
+      case "Yes" => isMaxTwoDecimalPlaces(data.improvementsAmtAfter.getOrElse(0))
+      case "No" => true
+    })
   }
 
   val improvementsForm = Form(
     mapping(
       "isClaimingImprovements" -> text,
-      "improvementsAmt" -> optional(bigDecimal)
+      "improvementsAmt" -> optional(bigDecimal),
+      "improvementsAmtAfter" -> optional(bigDecimal)
     )(ImprovementsModel.apply)(ImprovementsModel.unapply)
       .verifying(Messages("calc.improvements.error.no.value.supplied"),
         improvementsForm => verifyAmountSupplied(ImprovementsModel(improvementsForm.isClaimingImprovements, improvementsForm.improvementsAmt)))
