@@ -217,6 +217,19 @@ trait CalculationController extends FrontendController {
     }
   }
 
+  val submitRebasedValue = Action { implicit request =>
+    rebasedValueForm.bindFromRequest.fold(
+      errors => BadRequest(calculation.rebasedValue(errors)),
+      success => {
+        calcConnector.saveFormData("rebasedValue", success)
+        success.hasRebasedValue match {
+          case "Yes" => Redirect(routes.CalculationController.rebasedCosts())
+          case "No" => Redirect(routes.CalculationController.improvements())
+        }
+      }
+    )
+  }
+
   //################### Rebased costs methods #######################
   val rebasedCosts = Action.async {implicit request =>
     Future.successful(Ok(calculation.rebasedCosts()))

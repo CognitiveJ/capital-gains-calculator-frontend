@@ -1405,7 +1405,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
       "contain a hidden component with an input box" in {
         keystoreFetchCondition[RebasedValueModel](None)
-        RebasedValueDataItem.jsoupDoc.body.getElementById("hidden").html should include ("input")
+        RebasedValueDataItem.jsoupDoc.body.getElementById("hidden").html should include("input")
       }
 
       s"contain a hidden component with the question ${Messages("calc.rebasedValue.questionTwo")}" in {
@@ -1462,6 +1462,40 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
           RebasedValueTestDataItem.jsoupDoc.getElementById("hasRebasedValue-no").attr("checked") shouldEqual "checked"
           RebasedValueTestDataItem.jsoupDoc.getElementById("rebasedValueAmt").attr("value") shouldEqual "0"
+        }
+      }
+    }
+
+    "In CalculationController calling the .submitRebasedValue action " when {
+      def keystoreCacheCondition[T](data: RebasedValueModel): Unit = {
+        lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+        when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+          .thenReturn(Future.successful(returnedCacheMap))
+      }
+
+      "submitting a valid form with 'Yes' and a value of 12045" should {
+        object RebasedValueTestDataItem extends fakeRequestToPost("rebasedCost",
+          TestCalculationController.submitRebasedValue,
+          ("hasRebasedValue", "Yes"),
+          ("rebasedValueAmt", "12045"))
+        val rebasedValueTestModel = new RebasedValueModel("Yes", Some(12045))
+
+        "return a 303" in {
+          keystoreCacheCondition[RebasedValueModel](rebasedValueTestModel)
+          status(RebasedValueTestDataItem.result) shouldBe 303
+        }
+      }
+
+      "submitting a valid form with 'No' and no value" should {
+        object RebasedValueTestDataItem extends fakeRequestToPost("improvements",
+          TestCalculationController.submitRebasedValue,
+          ("hasRebasedValue", "No"),
+          ("rebasedValueAmt", ""))
+        val rebasedValueTestModel = new RebasedValueModel("No", None)
+
+        "return a 303" in {
+          keystoreCacheCondition[RebasedValueModel](rebasedValueTestModel)
+          status(RebasedValueTestDataItem.result) shouldBe 303
         }
       }
     }
