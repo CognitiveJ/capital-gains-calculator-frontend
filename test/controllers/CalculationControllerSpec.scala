@@ -1572,6 +1572,38 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
   }
 
+  "In CalculationController calling the .submitRebasedCosts action " when {
+    def keystoreCacheCondition[T](data: RebasedCostsModel): Unit = {
+      lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+      when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(returnedCacheMap))
+    }
+
+    "submitting a valid form with no costs" should {
+      object RebasedCostsDataItem extends fakeRequestToPost("rebased-costs", TestCalculationController.submitRebasedCosts,
+        ("hasRebasedCosts", "No"),
+        ("rebasedCosts", ""))
+      val rebasedCostsTestModel = RebasedCostsModel("No", None)
+
+      "return a 303" in {
+        keystoreCacheCondition(rebasedCostsTestModel)
+        status(RebasedCostsDataItem.result) shouldBe 303
+      }
+    }
+
+    "submitting a valid form with costs" should {
+      object RebasedCostsDataItem extends fakeRequestToPost("rebased-costs", TestCalculationController.submitRebasedCosts,
+        ("hasRebasedCosts", "Yes"),
+        ("rebasedCosts", "1000"))
+      val rebasedCostsTestModel = RebasedCostsModel("Yes", Some(1000))
+
+      "return a 303" in {
+        keystoreCacheCondition(rebasedCostsTestModel)
+        status(RebasedCostsDataItem.result) shouldBe 303
+      }
+    }
+  }
+
   //################### Improvements tests #######################
   "In CalculationController calling the .improvements action " when {
     "not supplied with a pre-existing stored model" should {
