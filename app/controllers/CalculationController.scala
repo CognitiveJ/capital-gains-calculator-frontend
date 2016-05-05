@@ -39,6 +39,7 @@ import forms.CurrentIncomeForm._
 import forms.CalculationElectionForm._
 import forms.AcquisitionDateForm._
 import forms.RebasedValueForm._
+import forms.RebasedCostsForm._
 import models._
 import play.api.mvc.{AnyContent, Action}
 import uk.gov.hmrc.play.frontend.controller.FrontendController
@@ -232,7 +233,10 @@ trait CalculationController extends FrontendController {
 
   //################### Rebased costs methods #######################
   val rebasedCosts = Action.async {implicit request =>
-    Future.successful(Ok(calculation.rebasedCosts()))
+    calcConnector.fetchAndGetFormData[RebasedCostsModel]("rebasedCosts").map {
+      case Some(data) => Ok(calculation.rebasedCosts(rebasedCostsForm.fill(data)))
+      case None => Ok(calculation.rebasedCosts(rebasedCostsForm))
+    }
   }
 
   //################### Improvements methods #######################
