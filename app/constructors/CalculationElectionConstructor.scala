@@ -35,6 +35,7 @@ trait CalculationElectionConstructor {
   val calcConnector: CalculatorConnector
 
   def generateElection(summary: SummaryModel, hc: HeaderCarrier): Seq[(String, String, String, Option[String], String)]= {
+    println(s"****${routes.CalculationController.otherReliefs().toString()}****")
     summary.acquisitionDateModel.hasAcquisitionDate match {
       case "Yes" if Dates.dateAfterStart(summary.acquisitionDateModel.day.get, summary.acquisitionDateModel.month.get, summary.acquisitionDateModel.year.get) => {
         Seq(("flat", resultFlat(summary, hc), Messages("calc.calculationElection.message.flat"), None, routes.CalculationController.otherReliefs().toString()))

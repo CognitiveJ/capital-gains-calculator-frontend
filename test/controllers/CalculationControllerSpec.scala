@@ -18,6 +18,7 @@ package controllers
 
 import java.util.UUID
 import common.TestModels
+import constructors.CalculationElectionConstructor
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.cache.client.CacheMap
 import scala.collection.JavaConversions._
@@ -44,8 +45,10 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
   val s = "Action(parser=BodyParser(anyContent))"
   val sessionId = UUID.randomUUID.toString
   val mockCalcConnector = mock[CalculatorConnector]
+  val mockCalcElectionConstructor = mock[CalculationElectionConstructor]
   val TestCalculationController = new CalculationController {
     override val calcConnector: CalculatorConnector = mockCalcConnector
+    override val calcElectionConstructor: CalculationElectionConstructor = mockCalcElectionConstructor
 
 //    override def createSummary(implicit hc: HeaderCarrier) = {
 //      new SummaryModel(
@@ -102,6 +105,15 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
   def keystoreTACalculateValue(data: Option[CalculationResultModel]): Unit = {
     when(mockCalcConnector.calculateTA(Matchers.any())(Matchers.any()))
       .thenReturn(Future.successful(data))
+  }
+
+  def mockGenerateElection = {
+    when(mockCalcElectionConstructor.generateElection(Matchers.any(), Matchers.any()))
+      .thenReturn(Seq(
+        ("flat", "8000.00", Messages("calc.calculationElection.message.flat"),
+          None, routes.CalculationController.otherReliefs().toString()),
+        ("time", "8000.00", Messages("calc.calculationElection.message.time"),
+          Some(Messages("calc.calculationElection.message.timeDate")), routes.CalculationController.otherReliefsTA().toString())))
   }
 
   def keystoreFetchValue[T](data: Option[T]): Unit = {
@@ -2751,13 +2763,13 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
   "In CalculationController calling the .calculationElection action" when {
 
     "supplied with no pre-existing data" should {
-
-      object CalculationElectionTestDataItem extends fakeRequestTo("calculation-election", TestCalculationController.calculationElection)
       keystoreSummaryValue(TestModels.summaryTrusteeTAWithoutAEA)
-      keystoreTACalculateValue(Some(TestModels.calcModelTwoRates))
-      keystoreFlatCalculateValue(Some(TestModels.calcModelOneRate))
+      mockGenerateElection
+      object CalculationElectionTestDataItem extends fakeRequestTo("calculation-election", TestCalculationController.calculationElection)
 
       "return a 200" in {
+        keystoreSummaryValue(TestModels.summaryTrusteeTAWithoutAEA)
+        mockGenerateElection
         keystoreFetchCondition[CalculationElectionModel](None)
         status(CalculationElectionTestDataItem.result) shouldBe 200
       }
@@ -2765,48 +2777,66 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       "return some HTML that" should {
 
         "contain some text and use the character set UTF-8" in {
+          keystoreSummaryValue(TestModels.summaryTrusteeTAWithoutAEA)
+          mockGenerateElection
           keystoreFetchCondition[CalculationElectionModel](None)
           contentType(CalculationElectionTestDataItem.result) shouldBe Some("text/html")
           charset(CalculationElectionTestDataItem.result) shouldBe Some("utf-8")
         }
 
         "have the title Which method of calculation would you like?" in {
+          keystoreSummaryValue(TestModels.summaryTrusteeTAWithoutAEA)
+          mockGenerateElection
           keystoreFetchCondition[CalculationElectionModel](None)
           CalculationElectionTestDataItem.jsoupDoc.title shouldEqual Messages("calc.calculationElection.question")
         }
 
         "have the heading Calculate your tax (non-residents) " in {
+          keystoreSummaryValue(TestModels.summaryTrusteeTAWithoutAEA)
+          mockGenerateElection
           keystoreFetchCondition[CalculationElectionModel](None)
           CalculationElectionTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
         }
 
         "have a 'Back' link " in {
+          keystoreSummaryValue(TestModels.summaryTrusteeTAWithoutAEA)
+          mockGenerateElection
           keystoreFetchCondition[CalculationElectionModel](None)
           CalculationElectionTestDataItem.jsoupDoc.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
         }
 
         "have the paragraph You can decide what to base your Capital Gains Tax on. It affects how much you'll pay." in {
+          keystoreSummaryValue(TestModels.summaryTrusteeTAWithoutAEA)
+          mockGenerateElection
           keystoreFetchCondition[CalculationElectionModel](None)
           CalculationElectionTestDataItem.jsoupDoc.body.getElementById("question-information").text shouldEqual Messages("calc.calculationElection.message")
         }
 
         "have a calculationElectionHelper for the option of a flat calculation rendered on the page" in {
+          keystoreSummaryValue(TestModels.summaryTrusteeTAWithoutAEA)
+          mockGenerateElection
           keystoreFetchCondition[CalculationElectionModel](None)
           CalculationElectionTestDataItem.jsoupDoc.body.getElementById("calculationElection-flat").attr("value") shouldEqual "flat"
           CalculationElectionTestDataItem.jsoupDoc.body.getElementById("flat-para").text shouldEqual "Based on " + Messages("calc.calculationElection.message.flat")
         }
 
         "display a 'Continue' button " in {
+          keystoreSummaryValue(TestModels.summaryTrusteeTAWithoutAEA)
+          mockGenerateElection
           keystoreFetchCondition[CalculationElectionModel](None)
           CalculationElectionTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
         }
 
         "display a concertina information box with 'They sometimes qualify for larger tax reliefs. This can lower the amount you owe or even reduce it to zero' as the content" in {
+          keystoreSummaryValue(TestModels.summaryTrusteeTAWithoutAEA)
+          mockGenerateElection
           keystoreFetchCondition[CalculationElectionModel](None)
           CalculationElectionTestDataItem.jsoupDoc.select("summary span.summary").text shouldEqual Messages("calc.calculationElection.message.whyMore")
           CalculationElectionTestDataItem.jsoupDoc.select("div#details-content-0 p").text shouldEqual Messages("calc.calculationElection.message.whyMoreDetails")
         }
         "have no pre-selected option" in {
+          keystoreSummaryValue(TestModels.summaryTrusteeTAWithoutAEA)
+          mockGenerateElection
           keystoreFetchCondition[CalculationElectionModel](None)
           CalculationElectionTestDataItem.jsoupDoc.body.getElementById("calculationElection-flat").parent.classNames().contains("selected") shouldBe false
         }
@@ -2818,8 +2848,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       object CalculationElectionTestDataItem extends fakeRequestTo("calculation-election", TestCalculationController.calculationElection)
       val calculationElectionTestModel = new CalculationElectionModel("flat")
       keystoreSummaryValue(TestModels.summaryTrusteeTAWithoutAEA)
-      keystoreTACalculateValue(Some(TestModels.calcModelTwoRates))
-      keystoreFlatCalculateValue(Some(TestModels.calcModelOneRate))
+      mockGenerateElection
 
       "return a 200" in {
         keystoreFetchCondition[CalculationElectionModel](Some(calculationElectionTestModel))
@@ -2836,8 +2865,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
         "have the stored value of flat calculation selected" in {
           keystoreSummaryValue(TestModels.summaryTrusteeTAWithoutAEA)
-          keystoreTACalculateValue(Some(TestModels.calcModelTwoRates))
-          keystoreFlatCalculateValue(Some(TestModels.calcModelOneRate))
+          mockGenerateElection
           keystoreFetchCondition[CalculationElectionModel](Some(calculationElectionTestModel))
           CalculationElectionTestDataItem.jsoupDoc.body.getElementById("calculationElection-flat").parent.classNames().contains("selected") shouldBe true
         }
@@ -2858,7 +2886,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val calculationElectionTestModel = new CalculationElectionModel("flat")
 
       "return a 303" in {
-        keystoreSummaryValue(sumModelFlat)
+        keystoreSummaryValue(TestModels.summaryTrusteeTAWithoutAEA)
         keystoreFlatCalculateValue(Some(calcModelOneRate))
         keystoreCacheCondition[CalculationElectionModel](calculationElectionTestModel)
         status(CalculationElectionTestDataItem.result) shouldBe 303
@@ -2870,7 +2898,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val calculationElectionTestModel = new CalculationElectionModel("time")
 
       "return a 303" in {
-        keystoreSummaryValue(sumModelTA)
+        keystoreSummaryValue(TestModels.summaryTrusteeTAWithoutAEA)
         keystoreFlatCalculateValue(Some(calcModelOneRate))
         keystoreCacheCondition[CalculationElectionModel](calculationElectionTestModel)
         status(CalculationElectionTestDataItem.result) shouldBe 303
@@ -2884,6 +2912,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       "return a 400" in {
         keystoreSummaryValue(sumModelFlat)
         keystoreFlatCalculateValue(Some(calcModelOneRate))
+        keystoreTACalculateValue(Some(TestModels.calcModelTwoRates))
         keystoreCacheCondition[CalculationElectionModel](calculationElectionTestModel)
         status(CalculationElectionTestDataItem.result) shouldBe 400
       }

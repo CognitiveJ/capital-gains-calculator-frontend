@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit
 
 import connectors.CalculatorConnector
 import common.Dates
+import constructors.CalculationElectionConstructor
 import forms.OtherPropertiesForm._
 import forms.AcquisitionValueForm._
 import forms.CustomerTypeForm._
@@ -50,11 +51,13 @@ import scala.concurrent.duration.Duration
 
 object CalculationController extends CalculationController {
   val calcConnector = CalculatorConnector
+  val calcElectionConstructor = CalculationElectionConstructor
 }
 
 trait CalculationController extends FrontendController {
 
   val calcConnector: CalculatorConnector
+  val calcElectionConstructor: CalculationElectionConstructor
 
   //################### Customer Type methods #######################
   val customerType = Action.async { implicit request =>
@@ -364,16 +367,18 @@ trait CalculationController extends FrontendController {
   //################### Calculation Election methods #######################
   def calculationElection = Action.async { implicit request =>
     val construct = calcConnector.createSummary(hc)
+    val content = calcElectionConstructor.generateElection(construct, hc)
     calcConnector.fetchAndGetFormData[CalculationElectionModel]("calculationElection").map {
-      case Some(data) => Ok(calculation.calculationElection(calculationElectionForm.fill(data), construct))
-      case None => Ok(calculation.calculationElection(calculationElectionForm, construct))
+      case Some(data) => Ok(calculation.calculationElection(calculationElectionForm.fill(data), construct, content))
+      case None => Ok(calculation.calculationElection(calculationElectionForm, construct, content))
     }
   }
 
   def submitCalculationElection = Action { implicit request =>
     val construct = calcConnector.createSummary(hc)
+    val content = calcElectionConstructor.generateElection(construct, hc)
     calculationElectionForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.calculationElection(errors, construct)),
+      errors => BadRequest(calculation.calculationElection(errors, construct, content)),
       success => {
         calcConnector.saveFormData("calculationElection", success)
         Redirect(routes.CalculationController.summary())
