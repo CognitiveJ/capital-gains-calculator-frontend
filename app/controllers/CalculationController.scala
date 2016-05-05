@@ -343,20 +343,19 @@ trait CalculationController extends FrontendController {
       success => {
         calcConnector.saveFormData("allowableLosses", success)
         calcConnector.fetchAndGetValue[AcquisitionDateModel]("acquisitionDate") match {
-          case Some(data) if data.hasAcquisitionDate == "Yes" => {
-            Dates.dateAfterStart(data.day.get, data.month.get, data.year.get) match {
-              case true => {
+          case Some(data) => data.hasAcquisitionDate match {
+            case "Yes" =>
+              if (Dates.dateAfterStart(data.day.get, data.month.get, data.year.get)) {
                 calcConnector.saveFormData("calculationElection", CalculationElectionModel("flat"))
                 Redirect(routes.CalculationController.otherReliefs())
               }
-              case false => Redirect(routes.CalculationController.calculationElection())
+              else Redirect(routes.CalculationController.calculationElection())
+            case "No" => {
+              calcConnector.saveFormData("calculationElection", CalculationElectionModel("flat"))
+              Redirect(routes.CalculationController.otherReliefs())
             }
           }
-          case Some(data) if data.hasAcquisitionDate == "No" => {
-            calcConnector.saveFormData("calculationElection", CalculationElectionModel("flat"))
-            Redirect(routes.CalculationController.otherReliefs())
-          }
-          case None => {
+          case _ => {
             calcConnector.saveFormData("calculationElection", CalculationElectionModel("flat"))
             Redirect(routes.CalculationController.otherReliefs())
           }
