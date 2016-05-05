@@ -63,7 +63,10 @@ object CalculateRequestConstructor {
 
   def flatCalcUrlExtra(input: SummaryModel): String = {
     s"&improvementsAmt=${
-      input.improvementsModel.improvementsAmt.getOrElse(0)
+      input.improvementsModel.isClaimingImprovements match {
+        case "Yes" => input.improvementsModel.improvementsAmt.get
+        case "No" => 0
+      }
     }&reliefs=${
       input.otherReliefsModelFlat.otherReliefs.getOrElse(0)
     }"
