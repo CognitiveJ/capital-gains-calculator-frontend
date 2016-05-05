@@ -3370,6 +3370,38 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         contentType(OtherReliefsRebasedTestDataItem.result) shouldBe Some("text/html")
         charset(OtherReliefsRebasedTestDataItem.result) shouldBe Some("utf-8")
       }
+
+      "have the title 'How much extra tax relief are you claiming?'" in {
+        OtherReliefsRebasedTestDataItem.jsoupDoc.title shouldEqual Messages("calc.otherReliefs.question")
+      }
+
+      "have the heading Calculate your tax (non-residents) " in {
+        OtherReliefsRebasedTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+      }
+
+      "have a 'Back' link " in {
+        OtherReliefsRebasedTestDataItem.jsoupDoc.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+      }
+
+      "have the question 'How much extra tax relief are you claiming?' as the legend of the input" in {
+        OtherReliefsRebasedTestDataItem.jsoupDoc.body.getElementsByTag("label").text should include (Messages("calc.otherReliefs.question"))
+      }
+
+      "display an input box for the Other Tax Reliefs" in {
+        OtherReliefsRebasedTestDataItem.jsoupDoc.body.getElementById("otherReliefs").tagName() shouldEqual "input"
+      }
+
+      "display an 'Add relief' button " in {
+        OtherReliefsRebasedTestDataItem.jsoupDoc.body.getElementById("add-relief-button").text shouldEqual Messages("calc.otherReliefs.button.addRelief")
+      }
+
+      "include helptext for 'Total gain'" in {
+        OtherReliefsRebasedTestDataItem.jsoupDoc.body.getElementById("totalGain").text should include (Messages("calc.otherReliefs.totalGain"))
+      }
+
+      "include helptext for 'Taxable gain'" in {
+        OtherReliefsRebasedTestDataItem.jsoupDoc.body.getElementById("taxableGain").text should include (Messages("calc.otherReliefs.taxableGain"))
+      }
     }
   }
 
