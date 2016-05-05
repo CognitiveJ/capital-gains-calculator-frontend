@@ -118,6 +118,8 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       None,
       AcquisitionDateModel("No", None, None, None),
       AcquisitionValueModel(100000),
+      Some(RebasedValueModel("No", None)),
+      None,
       ImprovementsModel("No", None),
       DisposalDateModel(10, 10, 2010),
       DisposalValueModel(150000),
@@ -126,6 +128,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       EntrepreneursReliefModel("No"),
       AllowableLossesModel("No", None),
       CalculationElectionModel("flat"),
+      OtherReliefsModel(None),
       OtherReliefsModel(None),
       OtherReliefsModel(None)
     )
@@ -139,6 +142,8 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     Some(AnnualExemptAmountModel(9000)),
     AcquisitionDateModel("Yes", Some(9), Some(9), Some(9)),
     AcquisitionValueModel(100000),
+    Some(RebasedValueModel("No", None)),
+    None,
     ImprovementsModel("Yes", Some(500)),
     DisposalDateModel(10, 10, 2010),
     DisposalValueModel(150000),
@@ -148,7 +153,8 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     AllowableLossesModel("No", None),
     CalculationElectionModel("time"),
     OtherReliefsModel(Some(2000)),
-    OtherReliefsModel(Some(1000))
+    OtherReliefsModel(Some(1000)),
+    OtherReliefsModel(Some(500))
   )
 
   val calcModelTwoRates = CalculationResultModel(8000, 40000, 32000, 18, Some(8000), Some(28))

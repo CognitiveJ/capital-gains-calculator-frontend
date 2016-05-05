@@ -82,6 +82,8 @@ trait CalculatorConnector {
       fetchAndGetValue[AnnualExemptAmountModel]("annualExemptAmount"),
       fetchAndGetValue[AcquisitionDateModel]("acquisitionDate").getOrElse(AcquisitionDateModel("No", None, None, None)),
       fetchAndGetValue[AcquisitionValueModel]("acquisitionValue").getOrElse(AcquisitionValueModel(0)),
+      fetchAndGetValue[RebasedValueModel]("rebasedValue"),
+      fetchAndGetValue[RebasedCostsModel]("rebasedCosts"),
       fetchAndGetValue[ImprovementsModel]("improvements").getOrElse(ImprovementsModel("No", None)),
       fetchAndGetValue[DisposalDateModel]("disposalDate").getOrElse(DisposalDateModel(1, 1, 1900)),
       fetchAndGetValue[DisposalValueModel]("disposalValue").getOrElse(DisposalValueModel(0)),
@@ -91,7 +93,8 @@ trait CalculatorConnector {
       fetchAndGetValue[AllowableLossesModel]("allowableLosses").getOrElse(AllowableLossesModel("No", None)),
       fetchAndGetValue[CalculationElectionModel]("calculationElection").getOrElse(CalculationElectionModel("null")),
       fetchAndGetValue[OtherReliefsModel]("otherReliefsFlat").getOrElse(OtherReliefsModel(None)),
-      fetchAndGetValue[OtherReliefsModel]("otherReliefsTA").getOrElse(OtherReliefsModel(None))
+      fetchAndGetValue[OtherReliefsModel]("otherReliefsTA").getOrElse(OtherReliefsModel(None)),
+      fetchAndGetValue[OtherReliefsModel]("otherReliefsRebased").getOrElse(OtherReliefsModel(None))
     )
   }
   // $COVERAGE-ON$
