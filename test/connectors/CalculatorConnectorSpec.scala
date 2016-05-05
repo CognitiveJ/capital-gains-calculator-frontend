@@ -53,6 +53,8 @@ class CalculatorConnectorSpec extends UnitSpec with MockitoSugar {
     None,
     AcquisitionDateModel("No", None, None, None),
     AcquisitionValueModel(100000),
+    Some(RebasedValueModel("No", None)),
+    None,
     ImprovementsModel("No", None),
     DisposalDateModel(10, 10, 2010),
     DisposalValueModel(150000),
@@ -61,6 +63,7 @@ class CalculatorConnectorSpec extends UnitSpec with MockitoSugar {
     EntrepreneursReliefModel("No"),
     AllowableLossesModel("No", None),
     CalculationElectionModel("flat"),
+    OtherReliefsModel(None),
     OtherReliefsModel(None),
     OtherReliefsModel(None)
   )
@@ -74,6 +77,8 @@ class CalculatorConnectorSpec extends UnitSpec with MockitoSugar {
     None,
     AcquisitionDateModel("Yes", Some(9), Some(9), Some(9)),
     AcquisitionValueModel(100000),
+    Some(RebasedValueModel("No", None)),
+    None,
     ImprovementsModel("No", None),
     DisposalDateModel(10, 10, 2010),
     DisposalValueModel(150000),
@@ -82,6 +87,7 @@ class CalculatorConnectorSpec extends UnitSpec with MockitoSugar {
     EntrepreneursReliefModel("No"),
     AllowableLossesModel("No", None),
     CalculationElectionModel("time-apportioned-calculation"),
+    OtherReliefsModel(None),
     OtherReliefsModel(None),
     OtherReliefsModel(None)
   )
