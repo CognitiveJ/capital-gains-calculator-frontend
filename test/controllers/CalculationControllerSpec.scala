@@ -1744,7 +1744,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       }
     }
   }
-/*
+
   //################### Improvements tests #######################
   "In CalculationController calling the .improvements action " when {
     "not supplied with a pre-existing stored model" should {
@@ -4307,5 +4307,5 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         CurrentIncomeTestDataItem.jsoupDoc.getElementsByClass("error-notification").text should include (Messages("calc.currentIncome.errorDecimalPlaces"))
       }
     }
-  }*/
+  }
 }
