@@ -254,15 +254,17 @@ trait CalculationController extends FrontendController {
 
   //################### Improvements methods #######################
   val improvements = Action.async { implicit request =>
+    val hasRebasedValue = calcConnector.fetchAndGetValue[RebasedValueModel]("rebasedValue").getOrElse(RebasedValueModel("No", None)).hasRebasedValue
     calcConnector.fetchAndGetFormData[ImprovementsModel]("improvements").map {
-      case Some(data) => Ok(calculation.improvements(improvementsForm.fill(data)))
-      case None => Ok(calculation.improvements(improvementsForm))
+      case Some(data) => Ok(calculation.improvements(improvementsForm.fill(data), hasRebasedValue))
+      case None => Ok(calculation.improvements(improvementsForm, hasRebasedValue))
     }
   }
 
   val submitImprovements = Action { implicit request =>
+    val hasRebasedValue = calcConnector.fetchAndGetValue[RebasedValueModel]("rebasedValue").getOrElse(RebasedValueModel("No", None)).hasRebasedValue
     improvementsForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.improvements(errors)),
+      errors => BadRequest(calculation.improvements(errors, hasRebasedValue)),
       success => {
         calcConnector.saveFormData("improvements", success)
         Redirect(routes.CalculationController.disposalDate())

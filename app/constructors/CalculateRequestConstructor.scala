@@ -67,6 +67,7 @@ object CalculateRequestConstructor {
         case "Yes" => input.improvementsModel.improvementsAmt.get
         case "No" => 0
       }
+    }${improvementsAfter(input)
     }&reliefs=${
       input.otherReliefsModelFlat.otherReliefs.getOrElse(0)
     }"
@@ -78,6 +79,7 @@ object CalculateRequestConstructor {
         case "Yes" => input.improvementsModel.improvementsAmt.get
         case "No" => 0
       }
+    }${improvementsAfter(input)
     }&disposalDate=${
       input.disposalDateModel.year}-${input.disposalDateModel.month}-${input.disposalDateModel.day
     }&acquisitionDate=${
@@ -86,4 +88,19 @@ object CalculateRequestConstructor {
       input.otherReliefsModelTA.otherReliefs.getOrElse(0)
     }"
   }
+
+  def improvementsAfter (input: SummaryModel) = s"&improvementsAmtAfter=${
+    input.improvementsModel.isClaimingImprovements match {
+      case "Yes" => {
+        input.rebasedValueModel match {
+          case Some(data) => data.hasRebasedValue match {
+            case "Yes" => input.improvementsModel.improvementsAmtAfter.getOrElse(0)
+            case "No" => 0
+          }
+          case None => 0
+        }
+      }
+      case "No" => 0
+    }
+  }"
 }

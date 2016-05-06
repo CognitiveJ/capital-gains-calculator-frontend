@@ -1751,6 +1751,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       object ImprovementsTestDataItem extends fakeRequestTo("improvements", TestCalculationController.improvements)
 
       "return a 200" in {
+        mockfetchAndGetValue[RebasedValueModel](Some(RebasedValueModel("No", None)))
         mockfetchAndGetFormData[ImprovementsModel](None)
         status(ImprovementsTestDataItem.result) shouldBe 200
       }
@@ -1758,32 +1759,39 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       "return some HTML that" should {
 
         "contain some text and use the character set utf-8" in {
+          mockfetchAndGetValue[RebasedValueModel](Some(RebasedValueModel("No", None)))
           contentType(ImprovementsTestDataItem.result) shouldBe Some("text/html")
           charset(ImprovementsTestDataItem.result) shouldBe Some("utf-8")
         }
 
         "have the title 'Who owned the property?'" in {
+          mockfetchAndGetValue[RebasedValueModel](Some(RebasedValueModel("No", None)))
           ImprovementsTestDataItem.jsoupDoc.title shouldEqual Messages("calc.improvements.question")
         }
 
         "have the heading Calculate your tax (non-residents)" in {
+          mockfetchAndGetValue[RebasedValueModel](Some(RebasedValueModel("No", None)))
           ImprovementsTestDataItem.jsoupDoc.body.getElementsByTag("H1").text shouldEqual Messages("calc.base.pageHeading")
         }
 
         "display the correct wording for radio option `yes`" in {
+          mockfetchAndGetValue[RebasedValueModel](Some(RebasedValueModel("No", None)))
           ImprovementsTestDataItem.jsoupDoc.body.getElementById("isClaimingImprovements-yes").parent.text shouldEqual Messages("calc.base.yes")
         }
 
         "display the correct wording for radio option `no`" in {
+          mockfetchAndGetValue[RebasedValueModel](Some(RebasedValueModel("No", None)))
           ImprovementsTestDataItem.jsoupDoc.body.getElementById("isClaimingImprovements-no").parent.text shouldEqual Messages("calc.base.no")
         }
 
         "contain a hidden component with an input box" in {
+          mockfetchAndGetValue[RebasedValueModel](Some(RebasedValueModel("No", None)))
           ImprovementsTestDataItem.jsoupDoc.body.getElementById("hidden").html should include ("input")
         }
       }
     }
     "supplied with a pre-existing model with 'Yes' checked and value already entered" should {
+      mockfetchAndGetValue[RebasedValueModel](Some(RebasedValueModel("No", None)))
       val testImprovementsModelYes = new ImprovementsModel("Yes", Some(10000))
 
       "return a 200" in {
@@ -1795,9 +1803,9 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       "return some HTML that" should {
 
         "be pre populated with Yes box selected and a value of 10000 entered" in {
+          mockfetchAndGetValue[RebasedValueModel](Some(RebasedValueModel("No", None)))
           object ImprovementsTestDataItem extends fakeRequestTo("improvements", TestCalculationController.improvements)
           mockfetchAndGetFormData[ImprovementsModel](Some(testImprovementsModelYes))
-
           ImprovementsTestDataItem.jsoupDoc.getElementById("isClaimingImprovements-yes").attr("checked") shouldEqual "checked"
           ImprovementsTestDataItem.jsoupDoc.getElementById("improvementsAmt").attr("value") shouldEqual "10000"
         }
@@ -1807,6 +1815,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testImprovementsModelNo = new ImprovementsModel("No", Some(0))
 
       "return a 200" in {
+        mockfetchAndGetValue[RebasedValueModel](Some(RebasedValueModel("No", None)))
         object ImprovementsTestDataItem extends fakeRequestTo("improvements", TestCalculationController.improvements)
         mockfetchAndGetFormData[ImprovementsModel](Some(testImprovementsModelNo))
         status(ImprovementsTestDataItem.result) shouldBe 200
@@ -1815,12 +1824,33 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       "return some HTML that" should {
 
         "be pre populated with No box selected and a value of 0" in {
+          mockfetchAndGetValue[RebasedValueModel](Some(RebasedValueModel("No", None)))
           object ImprovementsTestDataItem extends fakeRequestTo("improvements", TestCalculationController.improvements)
           mockfetchAndGetFormData[ImprovementsModel](Some(testImprovementsModelNo))
-
           ImprovementsTestDataItem.jsoupDoc.getElementById("isClaimingImprovements-no").attr("checked") shouldEqual "checked"
           ImprovementsTestDataItem.jsoupDoc.getElementById("improvementsAmt").attr("value") shouldEqual "0"
         }
+      }
+    }
+
+    "not supplied with a pre-existing stored model but with a rebased value" should {
+      object ImprovementsTestDataItem extends fakeRequestTo("improvements", TestCalculationController.improvements)
+
+      "contain a two hidden input boxes for improvements" in {
+        mockfetchAndGetValue[RebasedValueModel](Some(RebasedValueModel("Yes", Some(1000))))
+        ImprovementsTestDataItem.jsoupDoc.body.getElementById("hidden").getElementsByTag("input").first().id() shouldBe "improvementsAmt"
+        ImprovementsTestDataItem.jsoupDoc.body.getElementById("hidden").getElementsByTag("input").last().id() shouldBe "improvementsAmtAfter"
+      }
+    }
+
+    "not supplied with a pre-existing stored model and with no rebased value model" should {
+      object ImprovementsTestDataItem extends fakeRequestTo("improvements", TestCalculationController.improvements)
+
+      "contain a two hidden input boxes for improvements" in {
+        mockfetchAndGetValue[RebasedValueModel](None)
+        ImprovementsTestDataItem.jsoupDoc.body.getElementById("hidden").html should include("input")
+        ImprovementsTestDataItem.jsoupDoc.body.getElementById("hidden").getElementsByTag("input").first().id() shouldBe "improvementsAmt"
+        ImprovementsTestDataItem.jsoupDoc.body.getElementById("hidden").getElementsByTag("input").last().id() shouldBe "improvementsAmt"
       }
     }
   }
@@ -1859,6 +1889,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val improvementsTestModel = new ImprovementsModel("Yes", Some(9878))
 
       "return a 400" in {
+        mockfetchAndGetValue[RebasedValueModel](Some(RebasedValueModel("No", None)))
         mockSaveFormData[ImprovementsModel](improvementsTestModel)
         status(ImprovementsTestDataItem.result) shouldBe 400
       }
@@ -1874,6 +1905,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val improvementsTestModel = new ImprovementsModel("Yes", Some(-100))
 
       "return a 400" in {
+        mockfetchAndGetValue[RebasedValueModel](Some(RebasedValueModel("No", None)))
         mockSaveFormData[ImprovementsModel](improvementsTestModel)
         status(ImprovementsTestDataItem.result) shouldBe 400
       }
@@ -1890,6 +1922,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val improvementsTestModel = new ImprovementsModel("Yes", Some(-100))
 
       "return a 400" in {
+        mockfetchAndGetValue[RebasedValueModel](Some(RebasedValueModel("No", None)))
         mockSaveFormData[ImprovementsModel](improvementsTestModel)
         status(ImprovementsTestDataItem.result) shouldBe 400
       }
@@ -1907,6 +1940,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val improvementsTestModel = new ImprovementsModel("Yes", Some(1.111))
 
       "return a 400" in {
+        mockfetchAndGetValue[RebasedValueModel](Some(RebasedValueModel("No", None)))
         mockSaveFormData[ImprovementsModel](improvementsTestModel)
         status(ImprovementsTestDataItem.result) shouldBe 400
       }

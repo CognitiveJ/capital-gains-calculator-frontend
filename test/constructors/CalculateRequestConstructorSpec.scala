@@ -16,6 +16,7 @@
 
 package constructors
 
+import common.TestModels
 import models._
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -81,13 +82,40 @@ class CalculateRequestConstructorSpec extends UnitSpec {
         "&acquisitionCostsAmt=0&allowableLossesAmt=0&entReliefClaimed=No"
     }
 
-    "return a string from the flatCalcUrlExtra" in {
-      CalculateRequestConstructor.flatCalcUrlExtra(sumModel) shouldEqual "&improvementsAmt=0&reliefs=0"
+    "return a string from the flatCalcUrlExtra with no improvements" in {
+      CalculateRequestConstructor.flatCalcUrlExtra(sumModel) shouldEqual "&improvementsAmt=0&improvementsAmtAfter=0&reliefs=0"
     }
 
-    "return a string from the taCalcUrlExtra" in {
-      CalculateRequestConstructor.taCalcUrlExtra(sumModel) shouldEqual "&improvementsAmt=0&disposalDate=2010-10-10" +
+    "return a string from the flatCalcUrlExtra with improvements and no rebased value model" in {
+      CalculateRequestConstructor.flatCalcUrlExtra(TestModels.summaryIndividualImprovementsNoRebasedModel) shouldEqual "&improvementsAmt=8000&improvementsAmtAfter=0&reliefs=999"
+    }
+
+    "return a string from the flatCalcUrlExtra with improvements and a rebased value model with no improvements after" in {
+      CalculateRequestConstructor.flatCalcUrlExtra(TestModels.summaryIndividualFlatWithoutAEA) shouldEqual "&improvementsAmt=8000&improvementsAmtAfter=0&reliefs=999"
+    }
+
+    "return a string from the flatCalcUrlExtra with improvements and a rebased value model with improvements after" in {
+      CalculateRequestConstructor.flatCalcUrlExtra(TestModels.summaryIndividualImprovementsWithRebasedModel) shouldEqual "&improvementsAmt=8000&improvementsAmtAfter=1000&reliefs=999"
+    }
+
+    "return a string from the taCalcUrlExtra with no improvements" in {
+      CalculateRequestConstructor.taCalcUrlExtra(sumModel) shouldEqual "&improvementsAmt=0&improvementsAmtAfter=0&disposalDate=2010-10-10" +
         "&acquisitionDate=1990-9-9&reliefs=0"
+    }
+
+    "return a string from the taCalcUrlExtra with improvements and no rebased value model" in {
+      CalculateRequestConstructor.taCalcUrlExtra(TestModels.summaryIndividualImprovementsNoRebasedModel) shouldEqual "&improvementsAmt=8000&improvementsAmtAfter=0&disposalDate=2010-10-10" +
+        "&acquisitionDate=1999-9-9&reliefs=888"
+    }
+
+    "return a string from the taCalcUrlExtra with improvements and a rebased value model with no improvements after" in {
+      CalculateRequestConstructor.taCalcUrlExtra(TestModels.summaryTrusteeTAWithoutAEA) shouldEqual "&improvementsAmt=8000&improvementsAmtAfter=0&disposalDate=2010-10-10" +
+        "&acquisitionDate=1999-9-9&reliefs=888"
+    }
+
+    "return a string from the taCalcUrlExtra with improvements and a rebased value model with improvements after" in {
+      CalculateRequestConstructor.taCalcUrlExtra(TestModels.summaryIndividualImprovementsWithRebasedModel) shouldEqual "&improvementsAmt=8000&improvementsAmtAfter=1000&disposalDate=2010-10-10" +
+        "&acquisitionDate=1999-9-9&reliefs=888"
     }
   }
 
