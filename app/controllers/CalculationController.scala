@@ -85,7 +85,7 @@ trait CalculationController extends FrontendController {
 
   //################### Disabled Trustee methods #######################
   val disabledTrustee = Action.async { implicit request =>
-    calcConnector.fetchAndGetFormData[DisabledTrusteeModel]("isVulnerable").map {
+    calcConnector.fetchAndGetFormData[DisabledTrusteeModel]("disabledTrustee").map {
       case Some(data) => Ok(calculation.disabledTrustee(disabledTrusteeForm.fill(data)))
       case None => Ok(calculation.disabledTrustee(disabledTrusteeForm))
     }
@@ -95,7 +95,7 @@ trait CalculationController extends FrontendController {
     disabledTrusteeForm.bindFromRequest.fold(
       errors => BadRequest(calculation.disabledTrustee(errors)),
       success => {
-        calcConnector.saveFormData("isVulnerable",success)
+        calcConnector.saveFormData("disabledTrustee",success)
         Redirect(routes.CalculationController.otherProperties())
       }
     )

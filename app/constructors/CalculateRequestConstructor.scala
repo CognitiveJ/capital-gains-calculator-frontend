@@ -52,7 +52,10 @@ object CalculateRequestConstructor {
     }&acquisitionCostsAmt=${
       input.acquisitionCostsModel.acquisitionCostsAmt.getOrElse(0)
     }&allowableLossesAmt=${
-      input.allowableLossesModel.allowableLossesAmt.getOrElse(0)
+      input.allowableLossesModel.isClaimingAllowableLosses match {
+        case "Yes" => input.allowableLossesModel.allowableLossesAmt.get
+        case "No" => 0
+      }
     }&entReliefClaimed=${
       input.entrepreneursReliefModel.entReliefClaimed
     }"
@@ -60,7 +63,10 @@ object CalculateRequestConstructor {
 
   def flatCalcUrlExtra(input: SummaryModel): String = {
     s"&improvementsAmt=${
-      input.improvementsModel.improvementsAmt.getOrElse(0)
+      input.improvementsModel.isClaimingImprovements match {
+        case "Yes" => input.improvementsModel.improvementsAmt.get
+        case "No" => 0
+      }
     }&reliefs=${
       input.otherReliefsModelFlat.otherReliefs.getOrElse(0)
     }"
@@ -68,7 +74,10 @@ object CalculateRequestConstructor {
 
   def taCalcUrlExtra(input: SummaryModel): String = {
     s"&improvementsAmt=${
-      input.improvementsModel.improvementsAmt.getOrElse(0)
+      input.improvementsModel.isClaimingImprovements match {
+        case "Yes" => input.improvementsModel.improvementsAmt.get
+        case "No" => 0
+      }
     }&disposalDate=${
       input.disposalDateModel.year}-${input.disposalDateModel.month}-${input.disposalDateModel.day
     }&acquisitionDate=${
