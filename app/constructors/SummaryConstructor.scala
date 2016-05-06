@@ -175,8 +175,8 @@ object SummaryConstructor {
 
   def propertyDetails(result: CalculationResultModel, summary: SummaryModel) = {
     summaryPageSection("propertyDetails", Messages("calc.summary.property.details.title"),
-      summary.improvementsModel.improvementsAmt match {
-        case Some(data) => Array(
+      summary.improvementsModel.isClaimingImprovements match {
+        case "Yes" => Array(
           Map(
             "question" -> Messages("calc.improvements.question"),
             "answer" -> summary.improvementsModel.isClaimingImprovements
@@ -186,7 +186,7 @@ object SummaryConstructor {
             "answer" -> ("&pound;" + summary.improvementsModel.improvementsAmt.get.setScale(2))
           )
         )
-        case None => Array(
+        case "No" => Array(
           Map(
             "question" -> Messages("calc.improvements.question"),
             "answer" -> summary.improvementsModel.isClaimingImprovements)
@@ -227,9 +227,9 @@ object SummaryConstructor {
           ),
           Map(
             "question" -> Messages("calc.allowableLosses.question.two"),
-            "answer" -> ("&pound;" + (summary.allowableLossesModel.allowableLossesAmt match {
-              case Some(data) => data.setScale(2).toString
-              case None => "0.00"
+            "answer" -> ("&pound;" + (summary.allowableLossesModel.isClaimingAllowableLosses match {
+              case "Yes" => summary.allowableLossesModel.allowableLossesAmt.get.setScale(2).toString
+              case "No" => "0.00"
             }))
           ),
           Map(
@@ -247,9 +247,9 @@ object SummaryConstructor {
           ),
           Map(
             "question" -> Messages("calc.allowableLosses.question.two"),
-            "answer" -> ("&pound;" + (summary.allowableLossesModel.allowableLossesAmt match {
-              case Some(data) => data.setScale(2).toString
-              case None => "0.00"
+            "answer" -> ("&pound;" + (summary.allowableLossesModel.isClaimingAllowableLosses match {
+              case "Yes" => summary.allowableLossesModel.allowableLossesAmt.get.setScale(2).toString
+              case "No" => "0.00"
             }))
           ),
           Map(
