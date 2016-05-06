@@ -3503,7 +3503,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
   //################### Rebased Other Relief tests ###################
   "In CalculationController calling the .otherReliefsRebased action " should  {
-
+    mockfetchAndGetFormData[OtherReliefsModel](None)
     object OtherReliefsRebasedTestDataItem extends fakeRequestTo("other-reliefs-rebased", TestCalculationController.otherReliefsRebased)
 
     "return a 200" in {
@@ -3547,6 +3547,25 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
       "include helptext for 'Taxable gain'" in {
         OtherReliefsRebasedTestDataItem.jsoupDoc.body.getElementById("taxableGain").text should include (Messages("calc.otherReliefs.taxableGain"))
+      }
+    }
+
+    "when not supplied with any previous value" should {
+      object OtherReliefsRebasedTestDataItem extends fakeRequestTo("other-reliefs-rebased", TestCalculationController.otherReliefsRebased)
+
+      "contain no pre-filled data" in {
+        mockfetchAndGetFormData[OtherReliefsModel](None)
+        OtherReliefsRebasedTestDataItem.jsoupDoc.body.getElementById("otherReliefs").attr("value") shouldBe ""
+      }
+    }
+
+    "when supplied with a previous value" should {
+      val testotherReliefsRebasedModel = OtherReliefsModel(Some(1000))
+      object OtherReliefsRebasedTestDataItem extends fakeRequestTo("other-reliefs-rebased", TestCalculationController.otherReliefsRebased)
+
+      "contain the pre-supplied data" in {
+        mockfetchAndGetFormData[OtherReliefsModel](Some(testotherReliefsRebasedModel))
+        OtherReliefsRebasedTestDataItem.jsoupDoc.body.getElementById("otherReliefs").attr("value") shouldBe "1000"
       }
     }
   }

@@ -478,8 +478,11 @@ trait CalculationController extends FrontendController {
   }
 
   //################### Rebased Other Reliefs methods #######################
-  val otherReliefsRebased = Action.async {implicit request =>
-    Future.successful(Ok(calculation.otherReliefsRebased()))
+  val otherReliefsRebased = Action.async { implicit request =>
+    calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefsRebased").map {
+      case Some(data) => Ok(calculation.otherReliefsRebased(otherReliefsForm.fill(data)))
+      case None => Ok(calculation.otherReliefsRebased(otherReliefsForm))
+    }
   }
 
   //################### Summary Methods ##########################
