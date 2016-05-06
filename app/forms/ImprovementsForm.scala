@@ -60,7 +60,7 @@ object ImprovementsForm {
       "improvementsAmtAfter" -> optional(bigDecimal)
     )(ImprovementsModel.apply)(ImprovementsModel.unapply)
       .verifying(Messages("calc.improvements.error.no.value.supplied"),
-        improvementsForm => verifyAmountSupplied(ImprovementsModel(improvementsForm.isClaimingImprovements, improvementsForm.improvementsAmt, improvementsForm.improvementsAmtAfter)))
+        improvementsForm => verifyAmountSupplied(improvementsForm))
       .verifying(Messages("calc.improvements.errorNegative"),
         improvementsForm => verifyPositive(improvementsForm))
       .verifying(Messages("calc.improvements.errorDecimalPlaces"),
