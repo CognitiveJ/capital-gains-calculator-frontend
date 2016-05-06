@@ -92,6 +92,30 @@ class CalculatorConnectorSpec extends UnitSpec with MockitoSugar {
     OtherReliefsModel(None)
   )
 
+  val sumModelRebased = SummaryModel(
+    CustomerTypeModel("individual"),
+    None,
+    Some(CurrentIncomeModel(1000)),
+    Some(PersonalAllowanceModel(11100)),
+    OtherPropertiesModel("No"),
+    None,
+    AcquisitionDateModel("Yes", Some(9), Some(9), Some(9)),
+    AcquisitionValueModel(100000),
+    Some(RebasedValueModel("No", None)),
+    None,
+    ImprovementsModel("No", None),
+    DisposalDateModel(10, 10, 2010),
+    DisposalValueModel(150000),
+    AcquisitionCostsModel(None),
+    DisposalCostsModel(None),
+    EntrepreneursReliefModel("No"),
+    AllowableLossesModel("No", None),
+    CalculationElectionModel("rebased"),
+    OtherReliefsModel(None),
+    OtherReliefsModel(None),
+    OtherReliefsModel(None)
+  )
+
   "Calculator Connector" should {
 
     "fetch and get from keystore" in {
@@ -152,6 +176,18 @@ class CalculatorConnectorSpec extends UnitSpec with MockitoSugar {
     "return a valid response" in {
       val testModel: SummaryModel = sumModelTA
       val result = TargetCalculatorConnector.calculateTA(testModel)
+      await(result) shouldBe Some(validResponse)
+    }
+  }
+
+  "Calling calculateRebased" should {
+    val validResponse = CalculationResultModel(8000, 40000, 32000, 18, Some(8000), Some(28))
+    when(mockHttp.GET[Option[CalculationResultModel]](Matchers.anyString())(Matchers.any(), Matchers.any()))
+      .thenReturn(Future.successful(Some(validResponse)))
+
+    "return a valid response" in {
+      val testModel: SummaryModel = sumModelTA
+      val result = TargetCalculatorConnector.calculateRebased(testModel)
       await(result) shouldBe Some(validResponse)
     }
   }

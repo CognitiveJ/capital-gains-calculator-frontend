@@ -71,9 +71,8 @@ trait CalculatorConnector {
       CalculateRequestConstructor.taCalcUrlExtra(input)}")
   }
 
-  def calculateRebased(input: SummaryModel)(implicit hc: HeaderCarrier): Future[Option[CalculationResultModel]] = {
-    Future.successful(Some(CalculationResultModel(8000, 8000, 100, 10, None, None)))
-  }
+  def calculateRebased(input: SummaryModel)(implicit hc: HeaderCarrier): Future[Option[CalculationResultModel]] = calculateFlat(input)
+
 
   // $COVERAGE-OFF$
   def createSummary(implicit hc: HeaderCarrier): SummaryModel = {
