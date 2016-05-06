@@ -51,7 +51,7 @@ object RebasedValueForm {
       "rebasedValueAmt" -> optional(bigDecimal)
     )(RebasedValueModel.apply)(RebasedValueModel.unapply)
       .verifying(Messages("calc.rebasedValue.error.no.value.supplied"),
-        rebasedValueForm => verifyAmountSupplied(RebasedValueModel(rebasedValueForm.hasRebasedValue, rebasedValueForm.rebasedValueAmt)))
+        rebasedValueForm => verifyAmountSupplied(rebasedValueForm))
       .verifying(Messages("calc.rebasedValue.errorNegative"),
         rebasedValueForm => verifyPositive(rebasedValueForm))
       .verifying(Messages("calc.rebasedValue.errorDecimalPlaces"),

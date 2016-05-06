@@ -23,8 +23,8 @@ import views.html.helpers._
 
 object ImprovementsConstructor {
 
-  def generateImprovements(improvementsForm: Form[ImprovementsModel], rebasedValueModel: RebasedValueModel) = {
-    rebasedValueModel.hasRebasedValue match {
+  def generateImprovements(improvementsForm: Form[ImprovementsModel], hasRebasedValue: String) = {
+    hasRebasedValue match {
       case "Yes" => formHiddenYesNoRadio(
         improvementsForm,
         "isClaimingImprovements",
@@ -32,12 +32,8 @@ object ImprovementsConstructor {
         formMultipleInputMoney(
           improvementsForm,
           Seq(
-            ("improvementsAmt",
-            Messages("calc.improvements.questionThree"),
-            None),
-            ("improvementsAmtAfter",
-              Messages("calc.improvements.questionFour"),
-            None)
+            ("improvementsAmt", Messages("calc.improvements.questionThree"), None),
+            ("improvementsAmtAfter", Messages("calc.improvements.questionFour"), None)
           )
         ), Some(Messages("calc.improvements.help"))
       )
@@ -45,11 +41,7 @@ object ImprovementsConstructor {
         improvementsForm,
         "isClaimingImprovements",
         Messages("calc.improvements.question"),
-        formInputMoney(
-          improvementsForm,
-          "improvementsAmt",
-          Messages("calc.improvements.questionTwo")
-        ),
+        formInputMoney(improvementsForm, "improvementsAmt", Messages("calc.improvements.questionTwo")),
         Some(Messages("calc.improvements.help"))
       )
     }

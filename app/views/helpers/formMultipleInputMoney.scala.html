@@ -4,18 +4,14 @@
 
 @(inputForm: Form[_], inputDetails: Seq[(String, String, Option[String])])(implicit lang: play.api.i18n.Lang)
 
-<style>
-
-</style>
-
 <div class="form-group">
 
     @inputDetails.map(index => {
                 formInputMoney(
                     inputForm,
-                    index._1,
-                    index._2,
-                    index._3
+                    index._1, //fieldName
+                    index._2, //questionText
+                    index._3  //helpText
                 )
     })
 
