@@ -54,9 +54,4 @@ object ImprovementsConstructor {
       )
     }
   }
-
-  def test (seqResult: Seq[(String, String)]) = {
-    seqResult.map( value1 => println(value1._1))
-  }
-
 }

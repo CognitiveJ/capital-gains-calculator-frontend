@@ -238,4 +238,52 @@ object TestModels {
     OtherReliefsModel(Some(888)),
     OtherReliefsModel(Some(777))
   )
+
+  val summaryIndividualImprovementsNoRebasedModel = SummaryModel (
+    CustomerTypeModel("individual"),
+    None,
+    Some(CurrentIncomeModel(1000)),
+    Some(PersonalAllowanceModel(9000)),
+    OtherPropertiesModel("No"),
+    None,
+    AcquisitionDateModel("Yes", Some(9), Some(9), Some(1999)),
+    AcquisitionValueModel(100000),
+    None,
+    None,
+    ImprovementsModel("Yes", Some(8000)),
+    DisposalDateModel(10, 10, 2010),
+    DisposalValueModel(150000),
+    AcquisitionCostsModel(Some(300)),
+    DisposalCostsModel(Some(600)),
+    EntrepreneursReliefModel("No"),
+    AllowableLossesModel("Yes", Some(50000)),
+    CalculationElectionModel("flat"),
+    OtherReliefsModel(Some(999)),
+    OtherReliefsModel(Some(888)),
+    OtherReliefsModel(Some(777))
+  )
+
+  val summaryIndividualImprovementsWithRebasedModel = SummaryModel (
+    CustomerTypeModel("individual"),
+    None,
+    Some(CurrentIncomeModel(1000)),
+    Some(PersonalAllowanceModel(9000)),
+    OtherPropertiesModel("No"),
+    None,
+    AcquisitionDateModel("Yes", Some(9), Some(9), Some(1999)),
+    AcquisitionValueModel(100000),
+    Some(RebasedValueModel("Yes", Some(1000))),
+    None,
+    ImprovementsModel("Yes", Some(8000), Some(1000)),
+    DisposalDateModel(10, 10, 2010),
+    DisposalValueModel(150000),
+    AcquisitionCostsModel(Some(300)),
+    DisposalCostsModel(Some(600)),
+    EntrepreneursReliefModel("No"),
+    AllowableLossesModel("Yes", Some(50000)),
+    CalculationElectionModel("flat"),
+    OtherReliefsModel(Some(999)),
+    OtherReliefsModel(Some(888)),
+    OtherReliefsModel(Some(777))
+  )
 }
