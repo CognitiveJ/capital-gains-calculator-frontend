@@ -86,6 +86,11 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       .thenReturn(Future.successful(data))
   }
 
+  def mockCalculateRebasedValue(data: Option[CalculationResultModel]): Unit = {
+    when(mockCalcConnector.calculateRebased(Matchers.any())(Matchers.any()))
+      .thenReturn(Future.successful(data))
+  }
+
   def mockGenerateElection = {
     when(mockCalcElectionConstructor.generateElection(Matchers.any(), Matchers.any()))
       .thenReturn(Seq(
@@ -143,6 +148,30 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     EntrepreneursReliefModel("No"),
     AllowableLossesModel("No", None),
     CalculationElectionModel("time"),
+    OtherReliefsModel(Some(2000)),
+    OtherReliefsModel(Some(1000)),
+    OtherReliefsModel(Some(500))
+  )
+
+  val sumModelRebased = SummaryModel(
+    CustomerTypeModel("individual"),
+    None,
+    Some(CurrentIncomeModel(1000)),
+    Some(PersonalAllowanceModel(11100)),
+    OtherPropertiesModel("Yes"),
+    Some(AnnualExemptAmountModel(9000)),
+    AcquisitionDateModel("Yes", Some(9), Some(9), Some(9)),
+    AcquisitionValueModel(100000),
+    Some(RebasedValueModel("No", None)),
+    None,
+    ImprovementsModel("Yes", Some(500)),
+    DisposalDateModel(10, 10, 2010),
+    DisposalValueModel(150000),
+    AcquisitionCostsModel(Some(650)),
+    DisposalCostsModel(Some(850)),
+    EntrepreneursReliefModel("No"),
+    AllowableLossesModel("No", None),
+    CalculationElectionModel("rebased"),
     OtherReliefsModel(Some(2000)),
     OtherReliefsModel(Some(1000)),
     OtherReliefsModel(Some(500))
@@ -3504,6 +3533,8 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
   //################### Rebased Other Relief tests ###################
   "In CalculationController calling the .otherReliefsRebased action " should  {
     mockfetchAndGetFormData[OtherReliefsModel](None)
+    mockCreateSummary(sumModelRebased)
+    mockCalculateRebasedValue(Some(calcModelTwoRates))
     object OtherReliefsRebasedTestDataItem extends fakeRequestTo("other-reliefs-rebased", TestCalculationController.otherReliefsRebased)
 
     "return a 200" in {
