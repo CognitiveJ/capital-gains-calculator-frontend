@@ -16,7 +16,7 @@
 
 package constructors
 
-import models.{SummaryModel, CalculationResultModel}
+import models.{RebasedValueModel, SummaryModel, CalculationResultModel}
 import org.apache.commons.lang3.text.WordUtils
 import play.api.i18n.Messages
 import views.html.helpers._
@@ -32,6 +32,7 @@ object SummaryConstructor {
           "answer" -> (summary.calculationElectionModel.calculationType match {
             case "flat" => Messages("calc.summary.calculation.details.flatCalculation")
             case "time" => Messages("calc.summary.calculation.details.timeCalculation")
+            case "rebased" => Messages("calc.summary.calculation.details.rebasedCalculation")
           })
         ),
         Map(
@@ -57,6 +58,7 @@ object SummaryConstructor {
           "answer" -> (summary.calculationElectionModel.calculationType match {
             case "flat" => Messages("calc.summary.calculation.details.flatCalculation")
             case "time" => Messages("calc.summary.calculation.details.timeCalculation")
+            case "rebased" => Messages("calc.summary.calculation.details.rebasedCalculation")
           })
         ),
         Map(
@@ -138,54 +140,108 @@ object SummaryConstructor {
 
   def acquisitionDetails(result: CalculationResultModel, summary: SummaryModel) = {
     summaryPageSection("purchaseDetails", Messages("calc.summary.purchase.details.title"),
-      summary.acquisitionDateModel.hasAcquisitionDate match {
-        case "Yes" => Array(
-          Map(
-            "question" -> Messages("calc.acquisitionDate.questionTwo"),
-            "answer" -> Dates.datePageFormat.format(Dates.constructDate(summary.acquisitionDateModel.day.get, summary.acquisitionDateModel.month.get, summary.acquisitionDateModel.year.get))
-          ),
-          Map(
-            "question" -> Messages("calc.acquisitionValue.question"),
-            "answer" -> ("&pound;" + summary.acquisitionValueModel.acquisitionValueAmt.setScale(2).toString)
-          ),
-          Map(
-            "question" -> Messages("calc.acquisitionCosts.question"),
-            "answer" -> ("&pound;" + (summary.acquisitionCostsModel.acquisitionCostsAmt match {
-              case Some(data) => data.setScale(2).toString
-              case None => "0.00"
-            }))
+      summary.calculationElectionModel.calculationType match {
+        case "rebased" => {summary.acquisitionDateModel.hasAcquisitionDate match {
+          case "Yes" => Array(
+            Map(
+              "question" -> Messages("calc.acquisitionDate.questionTwo"),
+              "answer" -> Dates.datePageFormat.format(Dates.constructDate(summary.acquisitionDateModel.day.get, summary.acquisitionDateModel.month.get, summary.acquisitionDateModel.year.get))
+            ),
+            Map(
+              "question" -> Messages("calc.rebasedValue.questionTwo"),
+              "answer" -> ("&pound;" + summary.rebasedValueModel.get.rebasedValueAmt.get.setScale(2).toString)
+            ),
+            Map(
+              "question" -> Messages("calc.rebasedCosts.questionTwo"),
+              "answer" -> ("&pound;" + (summary.rebasedCostsModel.get.hasRebasedCosts match {
+                case "Yes" => summary.rebasedCostsModel.get.rebasedCosts.get.setScale(2).toString
+                case "No" => "0.00"
+              }))
+            )
           )
-        )
-        case "No" => Array(
-          Map(
-            "question" -> Messages("calc.acquisitionValue.question"),
-            "answer" -> ("&pound;" + summary.acquisitionValueModel.acquisitionValueAmt.setScale(2).toString)
-          ),
-          Map(
-            "question" -> Messages("calc.acquisitionCosts.question"),
-            "answer" -> ("&pound;" + (summary.acquisitionCostsModel.acquisitionCostsAmt match {
-              case Some(data) => data.setScale(2).toString
-              case None => "0.00"
-            }))
+          case "No" => Array(
+            Map(
+              "question" -> Messages("calc.rebasedValue.questionTwo"),
+              "answer" -> ("&pound;" + summary.rebasedValueModel.get.rebasedValueAmt.get.setScale(2).toString)
+            ),
+            Map(
+              "question" -> Messages("calc.rebasedCosts.questionTwo"),
+              "answer" -> ("&pound;" + (summary.rebasedCostsModel.get.hasRebasedCosts match {
+                case "Yes" => summary.rebasedCostsModel.get.rebasedCosts.get.setScale(2).toString
+                case "No" => "0.00"
+              }))
+            )
           )
-        )
+        }}
+        case _ => {summary.acquisitionDateModel.hasAcquisitionDate match {
+          case "Yes" => Array(
+            Map(
+              "question" -> Messages("calc.acquisitionDate.questionTwo"),
+              "answer" -> Dates.datePageFormat.format(Dates.constructDate(summary.acquisitionDateModel.day.get, summary.acquisitionDateModel.month.get, summary.acquisitionDateModel.year.get))
+            ),
+            Map(
+              "question" -> Messages("calc.acquisitionValue.question"),
+              "answer" -> ("&pound;" + summary.acquisitionValueModel.acquisitionValueAmt.setScale(2).toString)
+            ),
+            Map(
+              "question" -> Messages("calc.acquisitionCosts.question"),
+              "answer" -> ("&pound;" + (summary.acquisitionCostsModel.acquisitionCostsAmt match {
+                case Some(data) => data.setScale(2).toString
+                case None => "0.00"
+              }))
+            )
+          )
+          case "No" => Array(
+            Map(
+              "question" -> Messages("calc.acquisitionValue.question"),
+              "answer" -> ("&pound;" + summary.acquisitionValueModel.acquisitionValueAmt.setScale(2).toString)
+            ),
+            Map(
+              "question" -> Messages("calc.acquisitionCosts.question"),
+              "answer" -> ("&pound;" + (summary.acquisitionCostsModel.acquisitionCostsAmt match {
+                case Some(data) => data.setScale(2).toString
+                case None => "0.00"
+              }))
+            )
+          )
+        }}
       }
+
     )
   }
 
   def propertyDetails(result: CalculationResultModel, summary: SummaryModel) = {
     summaryPageSection("propertyDetails", Messages("calc.summary.property.details.title"),
       summary.improvementsModel.isClaimingImprovements match {
-        case "Yes" => Array(
-          Map(
-            "question" -> Messages("calc.improvements.question"),
-            "answer" -> summary.improvementsModel.isClaimingImprovements
-          ),
-          Map(
-            "question" -> Messages("calc.improvements.questionTwo"),
-            "answer" -> ("&pound;" + summary.improvementsModel.improvementsAmt.get.setScale(2))
+        case "Yes" => summary.calculationElectionModel.calculationType match {
+          case "rebased" => Array(
+            Map(
+              "question" -> Messages("calc.improvements.question"),
+              "answer" -> summary.improvementsModel.isClaimingImprovements
+            ),
+            Map(
+              "question" -> Messages("calc.improvements.questionThree"),
+              "answer" -> ("&pound;" + summary.improvementsModel.improvementsAmt.get.setScale(2))
+            ),
+            Map(
+              "question" -> Messages("calc.improvements.questionFour"),
+              "answer" -> ("&pound;" + summary.improvementsModel.improvementsAmtAfter.get.setScale(2))
+            )
           )
-        )
+          case _ => Array(
+            Map(
+              "question" -> Messages("calc.improvements.question"),
+              "answer" -> summary.improvementsModel.isClaimingImprovements
+            ),
+            Map(
+              "question" -> Messages("calc.improvements.questionTwo"),
+              "answer" -> ("&pound;" + {summary.improvementsModel.improvementsAmt.getOrElse(BigDecimal(0))
+                .+(summary.improvementsModel.improvementsAmtAfter.getOrElse(BigDecimal(0))).setScale(2)
+              })
+            )
+          )
+        }
+
         case "No" => Array(
           Map(
             "question" -> Messages("calc.improvements.question"),
@@ -260,8 +316,27 @@ object SummaryConstructor {
             }))
           )
         )
+        case "rebased" => Array(
+          Map(
+            "question" -> Messages("calc.entrepreneursRelief.question"),
+            "answer" -> summary.entrepreneursReliefModel.entReliefClaimed
+          ),
+          Map(
+            "question" -> Messages("calc.allowableLosses.question.two"),
+            "answer" -> ("&pound;" + (summary.allowableLossesModel.isClaimingAllowableLosses match {
+              case "Yes" => summary.allowableLossesModel.allowableLossesAmt.get.setScale(2).toString
+              case "No" => "0.00"
+            }))
+          ),
+          Map(
+            "question" -> Messages("calc.otherReliefs.question"),
+            "answer" -> ("&pound;" + (summary.otherReliefsModelRebased.otherReliefs match {
+              case Some(data) => data.setScale(2).toString
+              case None => "0.00"
+            }))
+          )
+        )
       }
     )
   }
-
 }

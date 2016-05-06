@@ -86,6 +86,11 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       .thenReturn(Future.successful(data))
   }
 
+  def mockCalculateRebased(data: Option[CalculationResultModel]): Unit = {
+    when(mockCalcConnector.calculateRebased(Matchers.any())(Matchers.any()))
+      .thenReturn(Future.successful(data))
+  }
+
   def mockGenerateElection = {
     when(mockCalcElectionConstructor.generateElection(Matchers.any(), Matchers.any()))
       .thenReturn(Seq(
@@ -4183,6 +4188,123 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         }
       }
 
+    }
+    "individual is chosen with a rebased calculation" when {
+
+      "user provides no acquisition date and has two tax rates" should {
+        mockCreateSummary(TestModels.summaryIndividualRebased)
+        mockCalculateRebased(Some(TestModels.calcModelTwoRates))
+        object SummaryTestDataItem extends fakeRequestTo("summary", TestCalculationController.summary)
+
+        "have an election description of 'How much of your total gain you've made since 5 April 2015'" in {
+          mockCreateSummary(TestModels.summaryIndividualRebased)
+          mockCalculateRebased(Some(TestModels.calcModelTwoRates))
+          SummaryTestDataItem.jsoupDoc.body().getElementById("calcDetails(0)").text() shouldBe Messages("calc.summary.calculation.details.rebasedCalculation")
+        }
+
+        "include the question for the rebased value" in {
+          mockCreateSummary(TestModels.summaryIndividualRebased)
+          mockCalculateRebased(Some(TestModels.calcModelTwoRates))
+          SummaryTestDataItem.jsoupDoc.select("#purchaseDetails").text should include(Messages("calc.rebasedValue.questionTwo"))
+        }
+
+        "have a value for the rebased value" in {
+          mockCreateSummary(TestModels.summaryIndividualRebased)
+          mockCalculateRebased(Some(TestModels.calcModelTwoRates))
+          SummaryTestDataItem.jsoupDoc.body.getElementById("purchaseDetails(1)").text() shouldBe "£150000.00"
+        }
+
+        "include the question for the rebased costs" in {
+          mockCreateSummary(TestModels.summaryIndividualRebased)
+          mockCalculateRebased(Some(TestModels.calcModelTwoRates))
+          SummaryTestDataItem.jsoupDoc.select("#purchaseDetails").text should include(Messages("calc.rebasedCosts.questionTwo"))
+        }
+
+        "have a value for the rebased costs" in {
+          mockCreateSummary(TestModels.summaryIndividualRebased)
+          mockCalculateRebased(Some(TestModels.calcModelTwoRates))
+          SummaryTestDataItem.jsoupDoc.body.getElementById("purchaseDetails(2)").text() shouldBe "£1000.00"
+        }
+
+        "include the question for the improvements before" in {
+          mockCreateSummary(TestModels.summaryIndividualRebased)
+          mockCalculateRebased(Some(TestModels.calcModelTwoRates))
+          SummaryTestDataItem.jsoupDoc.select("#propertyDetails").text should include(Messages("calc.improvements.questionThree"))
+        }
+
+        "have a value for the improvements before" in {
+          mockCreateSummary(TestModels.summaryIndividualRebased)
+          mockCalculateRebased(Some(TestModels.calcModelTwoRates))
+          SummaryTestDataItem.jsoupDoc.body.getElementById("propertyDetails(1)").text() shouldBe "£2000.00"
+        }
+
+        "include the question for the improvements after" in {
+          mockCreateSummary(TestModels.summaryIndividualRebased)
+          mockCalculateRebased(Some(TestModels.calcModelTwoRates))
+          SummaryTestDataItem.jsoupDoc.select("#propertyDetails").text should include(Messages("calc.improvements.questionFour"))
+        }
+
+        "have a value for the improvements after" in {
+          mockCreateSummary(TestModels.summaryIndividualRebased)
+          mockCalculateRebased(Some(TestModels.calcModelTwoRates))
+          SummaryTestDataItem.jsoupDoc.body.getElementById("propertyDetails(2)").text() shouldBe "£3000.00"
+        }
+
+        "have a value for the other reliefs rebased" in {
+          mockCreateSummary(TestModels.summaryIndividualRebased)
+          mockCalculateRebased(Some(TestModels.calcModelTwoRates))
+          SummaryTestDataItem.jsoupDoc.body.getElementById("deductions(2)").text() shouldBe "£777.00"
+        }
+
+      }
+
+      "user provides no acquisition date and has one tax rate" should {
+        mockCreateSummary(TestModels.summaryIndividualRebasedNoAcqDate)
+        mockCalculateRebased(Some(TestModels.calcModelOneRate))
+        object SummaryTestDataItem extends fakeRequestTo("summary", TestCalculationController.summary)
+
+        "have an election description of 'How much of your total gain you've made since 5 April 2015'" in {
+          mockCreateSummary(TestModels.summaryIndividualRebasedNoAcqDate)
+          mockCalculateRebased(Some(TestModels.calcModelOneRate))
+          SummaryTestDataItem.jsoupDoc.body().getElementById("calcDetails(0)").text() shouldBe Messages("calc.summary.calculation.details.rebasedCalculation")
+        }
+
+        "the value of allowable losses should be £0" in {
+          mockCreateSummary(TestModels.summaryIndividualRebasedNoAcqDate)
+          mockCalculateRebased(Some(TestModels.calcModelOneRate))
+          SummaryTestDataItem.jsoupDoc.body().getElementById("deductions(1)").text shouldBe "£0.00"
+        }
+
+        "the value of other reliefs should be £0" in {
+          mockCreateSummary(TestModels.summaryIndividualRebasedNoAcqDate)
+          mockCalculateRebased(Some(TestModels.calcModelOneRate))
+          SummaryTestDataItem.jsoupDoc.body().getElementById("deductions(2)").text shouldBe "£0.00"
+        }
+      }
+
+      "user provides acquisition date and no rebased costs" should {
+        mockCreateSummary(TestModels.summaryIndividualRebasedNoRebasedCosts)
+        mockCalculateRebased(Some(TestModels.calcModelOneRate))
+        object SummaryTestDataItem extends fakeRequestTo("summary", TestCalculationController.summary)
+
+        "have no value for the rebased costs" in {
+          mockCreateSummary(TestModels.summaryIndividualRebasedNoRebasedCosts)
+          mockCalculateRebased(Some(TestModels.calcModelOneRate))
+          SummaryTestDataItem.jsoupDoc.body.getElementById("purchaseDetails(2)").text() shouldBe "£0.00"
+        }
+      }
+
+      "user provides no acquisition date and no rebased costs" should {
+        mockCreateSummary(TestModels.summaryIndividualRebasedNoAcqDateOrRebasedCosts)
+        mockCalculateRebased(Some(TestModels.calcModelOneRate))
+        object SummaryTestDataItem extends fakeRequestTo("summary", TestCalculationController.summary)
+
+        "have no value for the rebased costs" in {
+          mockCreateSummary(TestModels.summaryIndividualRebasedNoAcqDateOrRebasedCosts)
+          mockCalculateRebased(Some(TestModels.calcModelOneRate))
+          SummaryTestDataItem.jsoupDoc.body.getElementById("purchaseDetails(1)").text() shouldBe "£0.00"
+        }
+      }
     }
   }
 
