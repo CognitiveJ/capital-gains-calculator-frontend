@@ -497,16 +497,19 @@ trait CalculationController extends FrontendController {
     val construct = calcConnector.createSummary(hc)
     construct.calculationElectionModel.calculationType match {
       case "flat" => {
-        calcConnector.calculateFlat(construct).map {
-          case Some(data) => Ok(calculation.summary(construct, data))
-          case None => Ok(calculation.summary(construct, null))
-        }
+        calcConnector.calculateFlat(construct).map ( result =>
+          Ok(calculation.summary(construct, result.get))
+        )
       }
       case "time" => {
-        calcConnector.calculateTA(construct).map {
-          case Some(data) => Ok(calculation.summary(construct, data))
-          case None => Ok(calculation.summary(construct, null))
-        }
+        calcConnector.calculateTA(construct).map ( result =>
+          Ok(calculation.summary(construct, result.get))
+        )
+      }
+      case "rebased" => {
+        calcConnector.calculateRebased(construct).map ( result =>
+          Ok(calculation.summary(construct, result.get))
+        )
       }
     }
   }
