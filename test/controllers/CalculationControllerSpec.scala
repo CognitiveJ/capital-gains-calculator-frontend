@@ -1471,7 +1471,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       }
 
       "submitting a valid form with 'Yes' and a value of 12045" should {
-        object RebasedValueTestDataItem extends fakeRequestToPost("rebasedCost",
+        object RebasedValueTestDataItem extends fakeRequestToPost("rebased-value",
           TestCalculationController.submitRebasedValue,
           ("hasRebasedValue", "Yes"),
           ("rebasedValueAmt", "12045"))
@@ -1484,7 +1484,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       }
 
       "submitting a valid form with 'No' and no value" should {
-        object RebasedValueTestDataItem extends fakeRequestToPost("improvements",
+        object RebasedValueTestDataItem extends fakeRequestToPost("rebased-value",
           TestCalculationController.submitRebasedValue,
           ("hasRebasedValue", "No"),
           ("rebasedValueAmt", ""))
@@ -1493,6 +1493,78 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         "return a 303" in {
           mockSaveFormData[RebasedValueModel](rebasedValueTestModel)
           status(RebasedValueTestDataItem.result) shouldBe 303
+        }
+      }
+
+      "submitting an invalid form with 'Yes' and a value of 'fhu39awd8'" should {
+        object RebasedValueTestDataItem extends fakeRequestToPost("rebased-value",
+          TestCalculationController.submitRebasedValue,
+          ("hasRebasedValue", "Yes"),
+          ("rebasedValueAmt", "fhu39awd8"))
+
+        //This model actually has no bearing on the test but the cachemap it produces is required - also cannot parse String into BigDecimal
+        val rebasedValueTestModel = new RebasedValueModel("Yes", Some(9878))
+
+        "return a 400" in {
+          mockSaveFormData[RebasedValueModel](rebasedValueTestModel)
+          status(RebasedValueTestDataItem.result) shouldBe 400
+        }
+
+        "return HTML that displays the error message " in {
+          RebasedValueTestDataItem.jsoupDoc.select("div#hidden span.error-notification").text shouldEqual "Real number value expected"
+        }
+      }
+
+      "submitting an invalid form with 'Yes' and a value of '-200'" should {
+        object RebasedValueTestDataItem extends fakeRequestToPost("rebased-value",
+          TestCalculationController.submitRebasedValue,
+          ("hasRebasedValue", "Yes"),
+          ("rebasedValueAmt", "-200"))
+
+        val rebasedValueTestModel = new RebasedValueModel("Yes", Some(-200))
+
+        "return a 400" in {
+          mockSaveFormData[RebasedValueModel](rebasedValueTestModel)
+          status(RebasedValueTestDataItem.result) shouldBe 400
+        }
+
+        "return HTML that displays the error message " in {
+          RebasedValueTestDataItem.jsoupDoc.select("div#hidden span.error-notification").text shouldEqual Messages("calc.rebasedValue.errorNegative")
+        }
+      }
+
+      "submitting an invalid form with 'Yes' and an empty value" should {
+        object RebasedValueTestDataItem extends fakeRequestToPost("rebased-value",
+          TestCalculationController.submitRebasedValue,
+          ("hasRebasedValue", "Yes"),
+          ("rebasedValueAmt", ""))
+        //This model actually has no bearing on the test but the cachemap it produces is required.
+        val rebasedValueTestModel = new RebasedValueModel("Yes", Some(-200))
+
+        "return a 400" in {
+          mockSaveFormData[RebasedValueModel](rebasedValueTestModel)
+          status(RebasedValueTestDataItem.result) shouldBe 400
+        }
+
+        "return HTML that displays the error message " in {
+          RebasedValueTestDataItem.jsoupDoc.select("div#hidden span.error-notification").text shouldEqual Messages("calc.rebasedValue.error.no.value.supplied")
+        }
+      }
+
+      "submitting an invalid form with 'Yes' and a value of 1.111" should {
+        object RebasedValueTestDataItem extends fakeRequestToPost("rebased-value",
+          TestCalculationController.submitRebasedValue,
+          ("hasRebasedValue", "Yes"),
+          ("rebasedValueAmt", "1.111"))
+        val rebasedValueTestModel = new RebasedValueModel("Yes", Some(1.111))
+
+        "return a 400" in {
+          mockSaveFormData[RebasedValueModel](rebasedValueTestModel)
+          status(RebasedValueTestDataItem.result) shouldBe 400
+        }
+
+        "return HTML that displays the error message " in {
+          RebasedValueTestDataItem.jsoupDoc.select("div#hidden span.error-notification").text shouldEqual Messages("calc.rebasedValue.errorDecimalPlaces")
         }
       }
     }
@@ -1570,7 +1642,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
   }
 
   "In CalculationController calling the .submitRebasedCosts action " when {
-    def keystoreCacheCondition[T](data: RebasedCostsModel): Unit = {
+    def mockSaveFormData[T](data: RebasedCostsModel): Unit = {
       lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
       when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(returnedCacheMap))
@@ -1583,7 +1655,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val rebasedCostsTestModel = RebasedCostsModel("No", None)
 
       "return a 303" in {
-        keystoreCacheCondition(rebasedCostsTestModel)
+        mockSaveFormData[RebasedCostsModel](rebasedCostsTestModel)
         status(RebasedCostsDataItem.result) shouldBe 303
       }
     }
@@ -1595,8 +1667,80 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val rebasedCostsTestModel = RebasedCostsModel("Yes", Some(1000))
 
       "return a 303" in {
-        keystoreCacheCondition(rebasedCostsTestModel)
+        mockSaveFormData[RebasedCostsModel](rebasedCostsTestModel)
         status(RebasedCostsDataItem.result) shouldBe 303
+      }
+    }
+
+    "submitting an invalid form with 'Yes' and a value of 'fhu39awd8'" should {
+      object RebasedCostsDataItem extends fakeRequestToPost("rebased-costs",
+        TestCalculationController.submitRebasedCosts,
+        ("hasRebasedCosts", "Yes"),
+        ("rebasedCosts", "fhu39awd8"))
+
+      //This model actually has no bearing on the test but the cachemap it produces is required - also cannot parse String into BigDecimal
+      val rebasedCostsTestModel = new RebasedCostsModel("Yes", Some(9878))
+
+      "return a 400" in {
+        mockSaveFormData[RebasedCostsModel](rebasedCostsTestModel)
+        status(RebasedCostsDataItem.result) shouldBe 400
+      }
+
+      "return HTML that displays the error message " in {
+        RebasedCostsDataItem.jsoupDoc.select("div#hidden span.error-notification").text shouldEqual "Real number value expected"
+      }
+    }
+
+    "submitting an invalid form with 'Yes' and a value of '-200'" should {
+      object RebasedCostsDataItem extends fakeRequestToPost("rebased-costs",
+        TestCalculationController.submitRebasedCosts,
+        ("hasRebasedCosts", "Yes"),
+        ("rebasedCosts", "-200"))
+
+      val rebasedCostsTestModel = new RebasedCostsModel("Yes", Some(-200))
+
+      "return a 400" in {
+        mockSaveFormData[RebasedCostsModel](rebasedCostsTestModel)
+        status(RebasedCostsDataItem.result) shouldBe 400
+      }
+
+      "return HTML that displays the error message " in {
+        RebasedCostsDataItem.jsoupDoc.select("div#hidden span.error-notification").text shouldEqual Messages("calc.rebasedCosts.errorNegative")
+      }
+    }
+
+    "submitting an invalid form with 'Yes' and an empty value" should {
+      object RebasedCostsDataItem extends fakeRequestToPost("rebased-costs",
+        TestCalculationController.submitRebasedCosts,
+        ("hasRebasedCosts", "Yes"),
+        ("rebasedCosts", ""))
+      //This model actually has no bearing on the test but the cachemap it produces is required.
+      val rebasedCostsTestModel = new RebasedCostsModel("Yes", Some(-200))
+
+      "return a 400" in {
+        mockSaveFormData[RebasedCostsModel](rebasedCostsTestModel)
+        status(RebasedCostsDataItem.result) shouldBe 400
+      }
+
+      "return HTML that displays the error message " in {
+        RebasedCostsDataItem.jsoupDoc.select("div#hidden span.error-notification").text shouldEqual Messages("calc.rebasedCosts.error.no.value.supplied")
+      }
+    }
+
+    "submitting an invalid form with 'Yes' and a value of 1.111" should {
+      object RebasedCostsDataItem extends fakeRequestToPost("rebased-costs",
+        TestCalculationController.submitRebasedCosts,
+        ("hasRebasedCosts", "Yes"),
+        ("rebasedCosts", "1.111"))
+      val rebasedCostsTestModel = new RebasedCostsModel("Yes", Some(1.111))
+
+      "return a 400" in {
+        mockSaveFormData[RebasedCostsModel](rebasedCostsTestModel)
+        status(RebasedCostsDataItem.result) shouldBe 400
+      }
+
+      "return HTML that displays the error message " in {
+        RebasedCostsDataItem.jsoupDoc.select("div#hidden span.error-notification").text shouldEqual Messages("calc.rebasedCosts.errorDecimalPlaces")
       }
     }
   }
@@ -1805,8 +1949,6 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         ImprovementsTestDataItem.jsoupDoc.select("div#hidden span.error-notification").text shouldEqual Messages("calc.improvements.errorDecimalPlaces")
       }
     }
-
-
   }
 
   //################### Disposal Date tests #######################

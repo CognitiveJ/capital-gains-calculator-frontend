@@ -52,7 +52,10 @@ object CalculateRequestConstructor {
     }&acquisitionCostsAmt=${
       input.acquisitionCostsModel.acquisitionCostsAmt.getOrElse(0)
     }&allowableLossesAmt=${
-      input.allowableLossesModel.allowableLossesAmt.getOrElse(0)
+      input.allowableLossesModel.isClaimingAllowableLosses match {
+        case "Yes" => input.allowableLossesModel.allowableLossesAmt.get
+        case "No" => 0
+      }
     }&entReliefClaimed=${
       input.entrepreneursReliefModel.entReliefClaimed
     }"

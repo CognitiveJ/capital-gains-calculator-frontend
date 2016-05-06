@@ -92,10 +92,16 @@ calc.acquisitionValue.errorDecimalPlaces = Acquisition value has too many decima
 ## Rebased Value ##
 calc.rebasedValue.question = Do you know how much the property was worth on 5 April 2015?
 calc.rebasedValue.questionTwo = What was the value of the property?
+calc.rebasedValue.errorNegative = Rebased Value can't be negative
+calc.rebasedValue.error.no.value.supplied = Please provide a value for Rebased Value
+calc.rebasedValue.errorDecimalPlaces = The Rebased Value has too many decimal places
 
 ## Rebased Costs ##
 calc.rebasedCosts.question = Did you pay for the valuation?
 calc.rebasedCosts.questionTwo = How much did it cost to get the property valued?
+calc.rebasedCosts.errorNegative = Rebased costs can't be negative
+calc.rebasedCosts.error.no.value.supplied = Please provide a value for Rebased Costs
+calc.rebasedCosts.errorDecimalPlaces = The rebased costs has too many decimal places
 
 ## Improvements ##
 calc.improvements.question = Did you make any improvements to the property?
