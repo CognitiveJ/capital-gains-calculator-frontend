@@ -19,8 +19,7 @@ package constructors
 import models.{RebasedValueModel, ImprovementsModel}
 import play.api.data.Form
 import play.api.i18n.Messages
-import play.twirl.api.Html
-import views.html.helpers.{formInputMoney, formHiddenYesNoRadio}
+import views.html.helpers._
 
 object ImprovementsConstructor {
 
@@ -30,12 +29,17 @@ object ImprovementsConstructor {
         improvementsForm,
         "isClaimingImprovements",
         Messages("calc.improvements.question"),
-        formInputMoney(
+        formMultipleInputMoney(
           improvementsForm,
-          "improvementsAmt",
-          Messages("calc.improvements.questionTwo")
-        ),
-        Some(Messages("calc.improvements.help"))
+          Seq(
+            ("improvementsAmt",
+            Messages("calc.improvements.questionThree"),
+            None),
+            ("improvementsAmtAfter",
+              Messages("calc.improvements.questionFour"),
+            None)
+          )
+        ), Some(Messages("calc.improvements.help"))
       )
       case "No" => formHiddenYesNoRadio(
         improvementsForm,
@@ -49,6 +53,10 @@ object ImprovementsConstructor {
         Some(Messages("calc.improvements.help"))
       )
     }
+  }
+
+  def test (seqResult: Seq[(String, String)]) = {
+    seqResult.map( value1 => println(value1._1))
   }
 
 }

@@ -3,7 +3,7 @@
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 @import views.html.helpers._
 
-@(improvementsForm: Form[ImprovementsModel])(implicit request: Request[_])
+@(improvementsForm: Form[ImprovementsModel], rebasedValueModel: RebasedValueModel)(implicit request: Request[_])
 
 @main_template(Messages("calc.improvements.question")) {
 
@@ -13,7 +13,7 @@
 
     @govHelpers.form(action = routes.CalculationController.submitImprovements) {
 
-        @ImprovementsConstructor.generateImprovements(improvementsForm, RebasedValueModel("No", None))
+        @ImprovementsConstructor.generateImprovements(improvementsForm, rebasedValueModel)
 
         <button class="button" type="submit" id="continue-button">@Messages("calc.base.continue")</button>
     }
