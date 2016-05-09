@@ -69,6 +69,7 @@ calc.personalAllowance.linkOne = Income Tax rates and Personal Allowances
 calc.personalAllowance.linkTwo = Tax on your UK income if you live abroad
 calc.personalAllowance.errorNegative = Your Personal Allowance can''t be negative
 calc.personalAllowance.errorDecimalPlaces = Your Personal Allowance has too many decimal numbers
+calc.personalAllowance.errorMaxLimit = This can''t be more than £
 
 ## Other Properties ##
 calc.otherProperties.question = In the tax year when you stopped owning the property, did you sell or give away anything else that''s covered by Capital Gains Tax?
