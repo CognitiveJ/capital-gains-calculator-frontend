@@ -492,6 +492,16 @@ trait CalculationController extends FrontendController {
     }
   }
 
+  val submitOtherReliefsRebased = Action { implicit request =>
+    otherReliefsForm.bindFromRequest.fold(
+      errors => BadRequest(calculation.otherReliefsRebased(errors, CalculationResultModel(0.0, 0.0, 0.0, 0, None, None))),
+      success => {
+        calcConnector.saveFormData("otherReliefsRebased", success)
+        Redirect(routes.CalculationController.calculationElection())
+      }
+    )
+  }
+
   //################### Summary Methods ##########################
   def summary(): Action[AnyContent] = Action.async { implicit request =>
     val construct = calcConnector.createSummary(hc)
