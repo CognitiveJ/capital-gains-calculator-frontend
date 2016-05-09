@@ -82,8 +82,8 @@ object CalculateRequestConstructor {
       case "Yes" => input.improvementsModel.improvementsAmtAfter.get
       case "No" => 0
     }
-    }&rebasedValueAmt=${input.rebasedValueModel.get.rebasedValueAmt.get
-    }&rebasedCostsAmt=${input.rebasedCostsModel.get.hasRebasedCosts match {
+    }&rebasedValue=${input.rebasedValueModel.get.rebasedValueAmt.get
+    }&revaluationCost=${input.rebasedCostsModel.get.hasRebasedCosts match {
       case "Yes" => input.rebasedCostsModel.get.rebasedCosts.get
       case "No" => 0
     }

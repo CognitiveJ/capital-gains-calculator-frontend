@@ -46,7 +46,7 @@ class CalculateRequestConstructorSpec extends UnitSpec {
     OtherReliefsModel(None)
   )
 
-  "CalculateRequest Controller" should {
+  "CalculateRequest Constructor" should {
     "return a string from the baseCalcUrl as an individual with no prior disposal" in {
       CalculateRequestConstructor.baseCalcUrl(sumModel) shouldEqual "customerType=individual&priorDisposal=No&currentIncome=1000" +
         "&personalAllowanceAmt=11100&disposalValue=150000&disposalCosts=0&allowableLossesAmt=0&entReliefClaimed=No"
@@ -117,11 +117,11 @@ class CalculateRequestConstructorSpec extends UnitSpec {
     }
 
     "return a string from the rebasedCalcUrlExtra with no improvements or rebased costs" in {
-      CalculateRequestConstructor.rebasedCalcUrlExtra(TestModels.summaryIndividualRebasedNoImprovements) shouldEqual "&improvementsAmt=0&rebasedValueAmt=150000&rebasedCostsAmt=0&reliefs=0"
+      CalculateRequestConstructor.rebasedCalcUrlExtra(TestModels.summaryIndividualRebasedNoImprovements) shouldEqual "&improvementsAmt=0&rebasedValue=150000&revaluationCost=0&reliefs=0"
     }
 
     "return a string from the rebasedCalcUrlExtra with improvements and rebased costs" in {
-      CalculateRequestConstructor.rebasedCalcUrlExtra(TestModels.summaryIndividualRebased) shouldEqual "&improvementsAmt=3000&rebasedValueAmt=150000&rebasedCostsAmt=1000&reliefs=777"
+      CalculateRequestConstructor.rebasedCalcUrlExtra(TestModels.summaryIndividualRebased) shouldEqual "&improvementsAmt=3000&rebasedValue=150000&revaluationCost=1000&reliefs=777"
     }
 
     "return a string from the improvements with a rebased value and claiming improvements with an empty field" in {
