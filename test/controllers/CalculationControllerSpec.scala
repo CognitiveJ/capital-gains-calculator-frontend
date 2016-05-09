@@ -112,7 +112,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       None,
       Some(CurrentIncomeModel(1000)),
       Some(PersonalAllowanceModel(11100)),
-      OtherPropertiesModel("No"),
+      OtherPropertiesModel("No", None),
       None,
       AcquisitionDateModel("No", None, None, None),
       AcquisitionValueModel(100000),
@@ -136,7 +136,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     None,
     Some(CurrentIncomeModel(1000)),
     Some(PersonalAllowanceModel(11100)),
-    OtherPropertiesModel("Yes"),
+    OtherPropertiesModel("Yes", Some(2100)),
     Some(AnnualExemptAmountModel(9000)),
     AcquisitionDateModel("Yes", Some(9), Some(9), Some(9)),
     AcquisitionValueModel(100000),
@@ -160,7 +160,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     None,
     Some(CurrentIncomeModel(1000)),
     Some(PersonalAllowanceModel(11100)),
-    OtherPropertiesModel("Yes"),
+    OtherPropertiesModel("Yes", Some(2100)),
     Some(AnnualExemptAmountModel(9000)),
     AcquisitionDateModel("Yes", Some(9), Some(9), Some(9)),
     AcquisitionValueModel(100000),
@@ -678,7 +678,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     "supplied with a model that already contains data" should {
 
       object OtherPropertiesTestDataItem extends fakeRequestTo("other-properties", TestCalculationController.otherProperties)
-      val otherPropertiesTestModel = new OtherPropertiesModel("Yes")
+      val otherPropertiesTestModel = new OtherPropertiesModel("Yes", Some(2100))
 
       "return a 200" in {
         mockfetchAndGetFormData[OtherPropertiesModel](Some(otherPropertiesTestModel))
@@ -694,6 +694,11 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         "have the radio option `Yes` selected by default" in {
           mockfetchAndGetFormData[OtherPropertiesModel](Some(otherPropertiesTestModel))
           OtherPropertiesTestDataItem.jsoupDoc.body.getElementById("otherProperties-yes").parent.classNames().contains("selected") shouldBe true
+        }
+
+        "have the value 2100 auto filled" in {
+          mockfetchAndGetFormData[OtherPropertiesModel](Some(otherPropertiesTestModel))
+          OtherPropertiesTestDataItem.jsoupDoc.body().getElementById("otherPropertiesAmt").attr("value") shouldBe "2100"
         }
       }
     }
@@ -711,7 +716,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         TestCalculationController.submitOtherProperties,
         ("otherProperties", "Yes")
       )
-      val testModel = new OtherPropertiesModel("Yes")
+      val testModel = new OtherPropertiesModel("Yes", Some(2100))
 
       "return a 303" in {
         mockSaveFormData[OtherPropertiesModel](testModel)
@@ -725,7 +730,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         TestCalculationController.submitOtherProperties,
         ("otherProperties", "No")
       )
-      val testModel = new OtherPropertiesModel("No")
+      val testModel = new OtherPropertiesModel("No", None)
 
       "return a 303" in {
         mockSaveFormData[OtherPropertiesModel](testModel)
@@ -739,7 +744,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         TestCalculationController.submitOtherProperties,
         ("otherProperties", "")
       )
-      val testModel = new OtherPropertiesModel("")
+      val testModel = new OtherPropertiesModel("", None)
 
       "return a 400" in {
         mockSaveFormData[OtherPropertiesModel](testModel)

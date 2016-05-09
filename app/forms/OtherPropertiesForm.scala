@@ -23,7 +23,8 @@ import play.api.data._
 object OtherPropertiesForm {
   val otherPropertiesForm = Form (
     mapping(
-      "otherProperties" -> nonEmptyText
+      "otherProperties" -> nonEmptyText,
+      "otherPropertiesAmt" -> optional(bigDecimal)
     )(OtherPropertiesModel.apply)(OtherPropertiesModel.unapply)
   )
 }
