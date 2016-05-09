@@ -18,7 +18,7 @@ package models
 
 import play.api.libs.json.Json
 
-case class RebasedCostsModel(rebasedCosts: Option[BigDecimal])
+case class RebasedCostsModel(hasRebasedCosts: String, rebasedCosts: Option[BigDecimal])
 
 object RebasedCostsModel {
   implicit val format = Json.format[RebasedCostsModel]

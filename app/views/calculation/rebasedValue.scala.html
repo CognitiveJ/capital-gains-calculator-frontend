@@ -2,18 +2,21 @@
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 @import views.html.helpers._
 
-@()(implicit request: Request[_])
+@(rebasedValueForm: Form[RebasedValueModel])(implicit request: Request[_])
 
 @main_template(Messages("calc.rebasedValue.question")) {
     <a id="back-link" class="back-link" href="#">Back</a>
     <h1 class="heading-large">@Messages("calc.base.pageHeading")</h1>
 
-        @govHelpers.form(action = routes.CalculationController.rebasedValue) {
+        @govHelpers.form(action = routes.CalculationController.submitRebasedValue) {
 
-        @hiddenYesNoRadio("rebasedValue",
+        @formHiddenYesNoRadio(
+                rebasedValueForm,
+                "hasRebasedValue",
                 Messages("calc.rebasedValue.question"),
-                simpleInputMoney(
-                        "rebasedValue",
+                formInputMoney(
+                        rebasedValueForm,
+                        "rebasedValueAmt",
                         Messages("calc.rebasedValue.questionTwo")
                 )
         )

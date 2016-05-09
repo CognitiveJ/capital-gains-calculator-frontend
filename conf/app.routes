@@ -46,9 +46,11 @@ POST        /acquisition-value       controllers.CalculationController.submitAcq
 
 #Rebased Value
 GET         /rebased-value           controllers.CalculationController.rebasedValue
+POST        /rebased-value           controllers.CalculationController.submitRebasedValue
 
 #Rebased Costs
 GET         /rebased-costs           controllers.CalculationController.rebasedCosts
+POST        /rebased-costs           controllers.CalculationController.submitRebasedCosts
 
 #Improvements
 GET         /improvements            controllers.CalculationController.improvements

@@ -5,7 +5,7 @@
 @import play.api.data._
 @import uk.gov.hmrc.play.http.HeaderCarrier
 
-@(calculationElectionForm: Form[CalculationElectionModel], summaryModel: SummaryModel)(implicit request: Request[_], hc: HeaderCarrier)
+@(calculationElectionForm: Form[CalculationElectionModel], summaryModel: SummaryModel, content: Seq[(String, String, String, Option[String], String)])(implicit request: Request[_], hc: HeaderCarrier)
 
 @main_template(Messages("calc.calculationElection.question"), articleLayout = false) {
 
@@ -20,7 +20,7 @@
     @govHelpers.form(action = routes.CalculationController.submitCalculationElection) {
         @calculationElectionHelperForm(
             field = calculationElectionForm("calculationElection"),
-            CalculationElectionConstructor.generateElection(summaryModel, hc),
+            content,
             '_labelClass -> "block-label")
 
         <div class="grid-row form-group">

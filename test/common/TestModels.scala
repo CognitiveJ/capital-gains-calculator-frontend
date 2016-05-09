@@ -32,6 +32,8 @@ object TestModels {
     None,
     AcquisitionDateModel("No", None, None, None),
     AcquisitionValueModel(100000),
+    Some(RebasedValueModel("No", None)),
+    None,
     ImprovementsModel("Yes", Some(8000)),
     DisposalDateModel(10, 10, 2010),
     DisposalValueModel(150000),
@@ -41,7 +43,8 @@ object TestModels {
     AllowableLossesModel("Yes", Some(50000)),
     CalculationElectionModel("flat"),
     OtherReliefsModel(Some(999)),
-    OtherReliefsModel(Some(888))
+    OtherReliefsModel(Some(888)),
+    OtherReliefsModel(Some(777))
   )
 
   val summaryIndividualFlatWithAEA = SummaryModel (
@@ -53,6 +56,8 @@ object TestModels {
     Some(AnnualExemptAmountModel(1500)),
     AcquisitionDateModel("No", None, None, None),
     AcquisitionValueModel(100000),
+    Some(RebasedValueModel("No", None)),
+    None,
     ImprovementsModel("No", None),
     DisposalDateModel(10, 10, 2010),
     DisposalValueModel(150000),
@@ -61,6 +66,7 @@ object TestModels {
     EntrepreneursReliefModel("No"),
     AllowableLossesModel("No", None),
     CalculationElectionModel("flat"),
+    OtherReliefsModel(None),
     OtherReliefsModel(None),
     OtherReliefsModel(None)
   )
@@ -74,6 +80,8 @@ object TestModels {
     Some(AnnualExemptAmountModel(1500)),
     AcquisitionDateModel("Yes", Some(9), Some(9), Some(1999)),
     AcquisitionValueModel(100000),
+    Some(RebasedValueModel("No", None)),
+    None,
     ImprovementsModel("No", None),
     DisposalDateModel(10, 10, 2010),
     DisposalValueModel(150000),
@@ -82,6 +90,7 @@ object TestModels {
     EntrepreneursReliefModel("No"),
     AllowableLossesModel("No", None),
     CalculationElectionModel("time"),
+    OtherReliefsModel(None),
     OtherReliefsModel(None),
     OtherReliefsModel(None)
   )
@@ -95,6 +104,8 @@ object TestModels {
     None,
     AcquisitionDateModel("Yes", Some(9), Some(9), Some(1999)),
     AcquisitionValueModel(100000),
+    Some(RebasedValueModel("No", None)),
+    None,
     ImprovementsModel("Yes", Some(8000)),
     DisposalDateModel(10, 10, 2010),
     DisposalValueModel(150000),
@@ -104,7 +115,8 @@ object TestModels {
     AllowableLossesModel("Yes", Some(50000)),
     CalculationElectionModel("time"),
     OtherReliefsModel(Some(999)),
-    OtherReliefsModel(Some(888))
+    OtherReliefsModel(Some(888)),
+    OtherReliefsModel(Some(777))
   )
 
   val summaryDisabledTrusteeTAWithAEA = SummaryModel (
@@ -116,6 +128,8 @@ object TestModels {
     Some(AnnualExemptAmountModel(1500)),
     AcquisitionDateModel("Yes", Some(9), Some(9), Some(1999)),
     AcquisitionValueModel(100000),
+    Some(RebasedValueModel("No", None)),
+    None,
     ImprovementsModel("No", None),
     DisposalDateModel(10, 10, 2010),
     DisposalValueModel(150000),
@@ -124,6 +138,7 @@ object TestModels {
     EntrepreneursReliefModel("No"),
     AllowableLossesModel("No", None),
     CalculationElectionModel("time"),
+    OtherReliefsModel(None),
     OtherReliefsModel(None),
     OtherReliefsModel(None)
   )
@@ -137,6 +152,8 @@ object TestModels {
     None,
     AcquisitionDateModel("Yes", Some(9), Some(9), Some(1999)),
     AcquisitionValueModel(100000),
+    Some(RebasedValueModel("No", None)),
+    None,
     ImprovementsModel("Yes", Some(8000)),
     DisposalDateModel(10, 10, 2010),
     DisposalValueModel(150000),
@@ -146,7 +163,8 @@ object TestModels {
     AllowableLossesModel("Yes", Some(50000)),
     CalculationElectionModel("time"),
     OtherReliefsModel(Some(999)),
-    OtherReliefsModel(Some(888))
+    OtherReliefsModel(Some(888)),
+    OtherReliefsModel(Some(777))
   )
 
   val summaryRepresentativeFlatWithoutAEA = SummaryModel (
@@ -158,6 +176,8 @@ object TestModels {
     None,
     AcquisitionDateModel("No", None, None, None),
     AcquisitionValueModel(100000),
+    Some(RebasedValueModel("No", None)),
+    None,
     ImprovementsModel("Yes", Some(8000)),
     DisposalDateModel(10, 10, 2010),
     DisposalValueModel(150000),
@@ -167,7 +187,8 @@ object TestModels {
     AllowableLossesModel("Yes", Some(50000)),
     CalculationElectionModel("flat"),
     OtherReliefsModel(Some(999)),
-    OtherReliefsModel(Some(888))
+    OtherReliefsModel(Some(888)),
+    OtherReliefsModel(Some(777))
   )
 
   val summaryRepresentativeFlatWithAEA = SummaryModel (
@@ -179,6 +200,8 @@ object TestModels {
     Some(AnnualExemptAmountModel(1500)),
     AcquisitionDateModel("No", None, None, None),
     AcquisitionValueModel(100000),
+    Some(RebasedValueModel("No", None)),
+    None,
     ImprovementsModel("No", None),
     DisposalDateModel(10, 10, 2010),
     DisposalValueModel(150000),
@@ -187,6 +210,7 @@ object TestModels {
     EntrepreneursReliefModel("No"),
     AllowableLossesModel("No", None),
     CalculationElectionModel("flat"),
+    OtherReliefsModel(None),
     OtherReliefsModel(None),
     OtherReliefsModel(None)
   )
@@ -200,6 +224,8 @@ object TestModels {
     None,
     AcquisitionDateModel("Yes", Some(6), Some(6), Some(2016)),
     AcquisitionValueModel(100000),
+    Some(RebasedValueModel("No", None)),
+    None,
     ImprovementsModel("Yes", Some(8000)),
     DisposalDateModel(10, 10, 2010),
     DisposalValueModel(150000),
@@ -209,6 +235,152 @@ object TestModels {
     AllowableLossesModel("Yes", Some(50000)),
     CalculationElectionModel("flat"),
     OtherReliefsModel(Some(999)),
-    OtherReliefsModel(Some(888))
+    OtherReliefsModel(Some(888)),
+    OtherReliefsModel(Some(777))
   )
+
+  val summaryIndividualImprovementsNoRebasedModel = SummaryModel (
+    CustomerTypeModel("individual"),
+    None,
+    Some(CurrentIncomeModel(1000)),
+    Some(PersonalAllowanceModel(9000)),
+    OtherPropertiesModel("No"),
+    None,
+    AcquisitionDateModel("Yes", Some(9), Some(9), Some(1999)),
+    AcquisitionValueModel(100000),
+    None,
+    None,
+    ImprovementsModel("Yes", Some(8000)),
+    DisposalDateModel(10, 10, 2010),
+    DisposalValueModel(150000),
+    AcquisitionCostsModel(Some(300)),
+    DisposalCostsModel(Some(600)),
+    EntrepreneursReliefModel("No"),
+    AllowableLossesModel("Yes", Some(50000)),
+    CalculationElectionModel("flat"),
+    OtherReliefsModel(Some(999)),
+    OtherReliefsModel(Some(888)),
+    OtherReliefsModel(Some(777))
+  )
+
+  val summaryIndividualImprovementsWithRebasedModel = SummaryModel (
+    CustomerTypeModel("individual"),
+    None,
+    Some(CurrentIncomeModel(1000)),
+    Some(PersonalAllowanceModel(9000)),
+    OtherPropertiesModel("No"),
+    None,
+    AcquisitionDateModel("Yes", Some(9), Some(9), Some(1999)),
+    AcquisitionValueModel(100000),
+    Some(RebasedValueModel("Yes", Some(1000))),
+    None,
+    ImprovementsModel("Yes", Some(8000), Some(1000)),
+    DisposalDateModel(10, 10, 2010),
+    DisposalValueModel(150000),
+    AcquisitionCostsModel(Some(300)),
+    DisposalCostsModel(Some(600)),
+    EntrepreneursReliefModel("No"),
+    AllowableLossesModel("Yes", Some(50000)),
+    CalculationElectionModel("flat"),
+    OtherReliefsModel(Some(999)),
+    OtherReliefsModel(Some(888)),
+    OtherReliefsModel(Some(777))
+  )
+
+  val summaryIndividualRebased = SummaryModel (
+    CustomerTypeModel("individual"),
+    None,
+    Some(CurrentIncomeModel(1000)),
+    Some(PersonalAllowanceModel(9000)),
+    OtherPropertiesModel("No"),
+    None,
+    AcquisitionDateModel("Yes", Some(9), Some(9), Some(1999)),
+    AcquisitionValueModel(100000),
+    Some(RebasedValueModel("Yes", Some(150000))),
+    Some(RebasedCostsModel("Yes", Some(1000))),
+    ImprovementsModel("Yes", Some(2000), Some(3000)),
+    DisposalDateModel(10, 10, 2010),
+    DisposalValueModel(150000),
+    AcquisitionCostsModel(Some(300)),
+    DisposalCostsModel(Some(600)),
+    EntrepreneursReliefModel("No"),
+    AllowableLossesModel("Yes", Some(50000)),
+    CalculationElectionModel("rebased"),
+    OtherReliefsModel(Some(999)),
+    OtherReliefsModel(Some(888)),
+    OtherReliefsModel(Some(777))
+  )
+
+  val summaryIndividualRebasedNoAcqDate = SummaryModel (
+    CustomerTypeModel("individual"),
+    None,
+    Some(CurrentIncomeModel(1000)),
+    Some(PersonalAllowanceModel(9000)),
+    OtherPropertiesModel("No"),
+    None,
+    AcquisitionDateModel("No", None, None, None),
+    AcquisitionValueModel(100000),
+    Some(RebasedValueModel("Yes", Some(150000))),
+    Some(RebasedCostsModel("Yes", Some(1000))),
+    ImprovementsModel("Yes", Some(2000), Some(3000)),
+    DisposalDateModel(10, 10, 2010),
+    DisposalValueModel(150000),
+    AcquisitionCostsModel(Some(300)),
+    DisposalCostsModel(Some(600)),
+    EntrepreneursReliefModel("No"),
+    AllowableLossesModel("No", None),
+    CalculationElectionModel("rebased"),
+    OtherReliefsModel(None),
+    OtherReliefsModel(None),
+    OtherReliefsModel(None)
+  )
+
+  val summaryIndividualRebasedNoRebasedCosts = SummaryModel (
+    CustomerTypeModel("individual"),
+    None,
+    Some(CurrentIncomeModel(1000)),
+    Some(PersonalAllowanceModel(9000)),
+    OtherPropertiesModel("No"),
+    None,
+    AcquisitionDateModel("Yes", Some(9), Some(9), Some(1999)),
+    AcquisitionValueModel(100000),
+    Some(RebasedValueModel("Yes", Some(150000))),
+    Some(RebasedCostsModel("No", None)),
+    ImprovementsModel("Yes", Some(2000), Some(3000)),
+    DisposalDateModel(10, 10, 2010),
+    DisposalValueModel(150000),
+    AcquisitionCostsModel(Some(300)),
+    DisposalCostsModel(Some(600)),
+    EntrepreneursReliefModel("No"),
+    AllowableLossesModel("Yes", Some(50000)),
+    CalculationElectionModel("rebased"),
+    OtherReliefsModel(Some(999)),
+    OtherReliefsModel(Some(888)),
+    OtherReliefsModel(Some(777))
+  )
+
+  val summaryIndividualRebasedNoAcqDateOrRebasedCosts = SummaryModel (
+    CustomerTypeModel("individual"),
+    None,
+    Some(CurrentIncomeModel(1000)),
+    Some(PersonalAllowanceModel(9000)),
+    OtherPropertiesModel("No"),
+    None,
+    AcquisitionDateModel("No", None, None, None),
+    AcquisitionValueModel(100000),
+    Some(RebasedValueModel("Yes", Some(150000))),
+    Some(RebasedCostsModel("No", None)),
+    ImprovementsModel("Yes", Some(2000), Some(3000)),
+    DisposalDateModel(10, 10, 2010),
+    DisposalValueModel(150000),
+    AcquisitionCostsModel(Some(300)),
+    DisposalCostsModel(Some(600)),
+    EntrepreneursReliefModel("No"),
+    AllowableLossesModel("No", None),
+    CalculationElectionModel("rebased"),
+    OtherReliefsModel(None),
+    OtherReliefsModel(None),
+    OtherReliefsModel(None)
+  )
+
 }

@@ -18,6 +18,7 @@ package controllers
 
 import java.util.UUID
 import common.TestModels
+import constructors.CalculationElectionConstructor
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.cache.client.CacheMap
 import scala.collection.JavaConversions._
@@ -37,35 +38,17 @@ import org.jsoup._
 import org.scalatest.mock.MockitoSugar
 import scala.concurrent.Future
 
-
 //noinspection ScalaStyle
 class CalculationControllerSpec extends UnitSpec with WithFakeApplication with MockitoSugar with BeforeAndAfterEach {
 
   val s = "Action(parser=BodyParser(anyContent))"
   val sessionId = UUID.randomUUID.toString
   val mockCalcConnector = mock[CalculatorConnector]
+  val mockCalcElectionConstructor = mock[CalculationElectionConstructor]
   val TestCalculationController = new CalculationController {
     override val calcConnector: CalculatorConnector = mockCalcConnector
+    override val calcElectionConstructor: CalculationElectionConstructor = mockCalcElectionConstructor
 
-//    override def createSummary(implicit hc: HeaderCarrier) = {
-//      new SummaryModel(
-//        CustomerTypeModel("individual"),
-//        None,
-//        Some(CurrentIncomeModel(1000)),
-//        Some(PersonalAllowanceModel(11100)),
-//        OtherPropertiesModel("No"),
-//        None,
-//        AcquisitionValueModel(100000),
-//        ImprovementsModel("No", None),
-//        DisposalDateModel(10, 10, 2010),
-//        DisposalValueModel(150000),
-//        AcquisitionCostsModel(None),
-//        DisposalCostsModel(None),
-//        EntrepreneursReliefModel("No"),
-//        AllowableLossesModel("No", None),
-//        OtherReliefsModel(None)
-//      )
-//    }
   }
 
   implicit val hc = new HeaderCarrier()
@@ -84,27 +67,42 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     val jsoupDoc = Jsoup.parse(bodyOf(result))
   }
 
-  def keystoreFetchCondition[T](data: Option[T]): Unit = {
+  def mockfetchAndGetFormData[T](data: Option[T]): Unit = {
     when(mockCalcConnector.fetchAndGetFormData[T](Matchers.anyString())(Matchers.any(), Matchers.any()))
       .thenReturn(Future.successful(data))
   }
 
-  def keystoreSummaryValue(data: SummaryModel): Unit = {
+  def mockCreateSummary(data: SummaryModel): Unit = {
     when(mockCalcConnector.createSummary(Matchers.any()))
       .thenReturn(data)
   }
 
-  def keystoreFlatCalculateValue(data: Option[CalculationResultModel]): Unit = {
+  def mockCalculateFlatValue(data: Option[CalculationResultModel]): Unit = {
     when(mockCalcConnector.calculateFlat(Matchers.any())(Matchers.any()))
       .thenReturn(Future.successful(data))
   }
 
-  def keystoreTACalculateValue(data: Option[CalculationResultModel]): Unit = {
+  def mockCalculateTAValue(data: Option[CalculationResultModel]): Unit = {
     when(mockCalcConnector.calculateTA(Matchers.any())(Matchers.any()))
       .thenReturn(Future.successful(data))
   }
 
-  def keystoreFetchValue[T](data: Option[T]): Unit = {
+
+  def mockCalculateRebasedValue(data: Option[CalculationResultModel]): Unit = {
+    when(mockCalcConnector.calculateRebased(Matchers.any())(Matchers.any()))
+      .thenReturn(Future.successful(data))
+  }
+
+  def mockGenerateElection = {
+    when(mockCalcElectionConstructor.generateElection(Matchers.any(), Matchers.any()))
+      .thenReturn(Seq(
+        ("flat", "8000.00", Messages("calc.calculationElection.message.flat"),
+          None, routes.CalculationController.otherReliefs().toString()),
+        ("time", "8000.00", Messages("calc.calculationElection.message.time"),
+          Some(Messages("calc.calculationElection.message.timeDate")), routes.CalculationController.otherReliefsTA().toString())))
+  }
+
+  def mockfetchAndGetValue[T](data: Option[T]): Unit = {
     when(mockCalcConnector.fetchAndGetValue[T](Matchers.anyString())(Matchers.any(), Matchers.any()))
       .thenReturn(data)
   }
@@ -118,6 +116,8 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       None,
       AcquisitionDateModel("No", None, None, None),
       AcquisitionValueModel(100000),
+      Some(RebasedValueModel("No", None)),
+      None,
       ImprovementsModel("No", None),
       DisposalDateModel(10, 10, 2010),
       DisposalValueModel(150000),
@@ -126,6 +126,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       EntrepreneursReliefModel("No"),
       AllowableLossesModel("No", None),
       CalculationElectionModel("flat"),
+      OtherReliefsModel(None),
       OtherReliefsModel(None),
       OtherReliefsModel(None)
     )
@@ -139,6 +140,8 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     Some(AnnualExemptAmountModel(9000)),
     AcquisitionDateModel("Yes", Some(9), Some(9), Some(9)),
     AcquisitionValueModel(100000),
+    Some(RebasedValueModel("No", None)),
+    None,
     ImprovementsModel("Yes", Some(500)),
     DisposalDateModel(10, 10, 2010),
     DisposalValueModel(150000),
@@ -148,7 +151,32 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     AllowableLossesModel("No", None),
     CalculationElectionModel("time"),
     OtherReliefsModel(Some(2000)),
-    OtherReliefsModel(Some(1000))
+    OtherReliefsModel(Some(1000)),
+    OtherReliefsModel(Some(500))
+  )
+
+  val sumModelRebased = SummaryModel(
+    CustomerTypeModel("individual"),
+    None,
+    Some(CurrentIncomeModel(1000)),
+    Some(PersonalAllowanceModel(11100)),
+    OtherPropertiesModel("Yes"),
+    Some(AnnualExemptAmountModel(9000)),
+    AcquisitionDateModel("Yes", Some(9), Some(9), Some(9)),
+    AcquisitionValueModel(100000),
+    Some(RebasedValueModel("No", None)),
+    None,
+    ImprovementsModel("Yes", Some(500)),
+    DisposalDateModel(10, 10, 2010),
+    DisposalValueModel(150000),
+    AcquisitionCostsModel(Some(650)),
+    DisposalCostsModel(Some(850)),
+    EntrepreneursReliefModel("No"),
+    AllowableLossesModel("No", None),
+    CalculationElectionModel("rebased"),
+    OtherReliefsModel(Some(2000)),
+    OtherReliefsModel(Some(1000)),
+    OtherReliefsModel(Some(500))
   )
 
   val calcModelTwoRates = CalculationResultModel(8000, 40000, 32000, 18, Some(8000), Some(28))
@@ -160,60 +188,60 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       object CustomerTypeTestDataItem extends fakeRequestTo("customer-type", TestCalculationController.customerType)
 
       "return a 200" in {
-        keystoreFetchCondition[CustomerTypeModel](None)
+        mockfetchAndGetFormData[CustomerTypeModel](None)
         status(CustomerTypeTestDataItem.result) shouldBe 200
       }
 
       "return some HTML that" should {
 
         "contain some text and use the character set utf-8" in {
-          keystoreFetchCondition[CustomerTypeModel](None)
+          mockfetchAndGetFormData[CustomerTypeModel](None)
           contentType(CustomerTypeTestDataItem.result) shouldBe Some("text/html")
           charset(CustomerTypeTestDataItem.result) shouldBe Some("utf-8")
         }
 
         "have the title 'Who owned the property?'" in {
-          keystoreFetchCondition[CustomerTypeModel](None)
+          mockfetchAndGetFormData[CustomerTypeModel](None)
           CustomerTypeTestDataItem.jsoupDoc.title shouldEqual Messages("calc.customerType.question")
         }
 
         "have the heading Calculate your tax (non-residents) " in {
-          keystoreFetchCondition[CustomerTypeModel](None)
+          mockfetchAndGetFormData[CustomerTypeModel](None)
           CustomerTypeTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
         }
 
         "have a 'Back' link " in {
-          keystoreFetchCondition[CustomerTypeModel](None)
+          mockfetchAndGetFormData[CustomerTypeModel](None)
           CustomerTypeTestDataItem.jsoupDoc.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
         }
 
         "have the question 'Who owned the property?' as the legend of the input" in {
-          keystoreFetchCondition[CustomerTypeModel](None)
+          mockfetchAndGetFormData[CustomerTypeModel](None)
           CustomerTypeTestDataItem.jsoupDoc.body.getElementsByTag("legend").text shouldEqual Messages("calc.customerType.question")
         }
 
         "display a radio button with the option `individual`" in {
-          keystoreFetchCondition[CustomerTypeModel](None)
+          mockfetchAndGetFormData[CustomerTypeModel](None)
           CustomerTypeTestDataItem.jsoupDoc.body.getElementById("customerType-individual").parent.text shouldEqual Messages("calc.customerType.individual")
         }
 
         "have the radio option `individual` not selected by default" in {
-          keystoreFetchCondition[CustomerTypeModel](None)
+          mockfetchAndGetFormData[CustomerTypeModel](None)
           CustomerTypeTestDataItem.jsoupDoc.body.getElementById("customerType-individual").parent.classNames().contains("selected") shouldBe false
         }
 
         "display a radio button with the option `trustee`" in {
-          keystoreFetchCondition[CustomerTypeModel](None)
+          mockfetchAndGetFormData[CustomerTypeModel](None)
           CustomerTypeTestDataItem.jsoupDoc.body.getElementById("customerType-trustee").parent.text shouldEqual Messages("calc.customerType.trustee")
         }
 
         "display a radio button with the option `personal representative`" in {
-          keystoreFetchCondition[CustomerTypeModel](None)
+          mockfetchAndGetFormData[CustomerTypeModel](None)
           CustomerTypeTestDataItem.jsoupDoc.body.getElementById("customerType-personalrep").parent.text shouldEqual Messages("calc.customerType.personalRep")
         }
 
         "display a 'Continue' button " in {
-          keystoreFetchCondition[CustomerTypeModel](None)
+          mockfetchAndGetFormData[CustomerTypeModel](None)
           CustomerTypeTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
         }
       }
@@ -222,20 +250,20 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       object CustomerTypeTestDataItem extends fakeRequestTo("customer-type", TestCalculationController.customerType)
       val testModel = new CustomerTypeModel("individual")
       "return a 200" in {
-        keystoreFetchCondition[CustomerTypeModel](Some(testModel))
+        mockfetchAndGetFormData[CustomerTypeModel](Some(testModel))
         status(CustomerTypeTestDataItem.result) shouldBe 200
       }
 
       "return some HTML that" should {
 
         "contain some text and use the character set utf-8" in {
-          keystoreFetchCondition[CustomerTypeModel](Some(testModel))
+          mockfetchAndGetFormData[CustomerTypeModel](Some(testModel))
           contentType(CustomerTypeTestDataItem.result) shouldBe Some("text/html")
           charset(CustomerTypeTestDataItem.result) shouldBe Some("utf-8")
         }
 
         "have the radio option `individual` selected by default" in {
-          keystoreFetchCondition[CustomerTypeModel](Some(testModel))
+          mockfetchAndGetFormData[CustomerTypeModel](Some(testModel))
           CustomerTypeTestDataItem.jsoupDoc.body.getElementById("customerType-individual").parent.classNames().contains("selected") shouldBe true
         }
       }
@@ -243,7 +271,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
   }
 
   "In CalculationController calling the .submitCustomerType action" when {
-    def keystoreCacheCondition[T](data: CustomerTypeModel): Unit = {
+    def mockSaveFormData[T](data: CustomerTypeModel): Unit = {
       lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
       when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(returnedCacheMap))
@@ -257,7 +285,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new CustomerTypeModel("individual")
 
       "return a 303" in {
-        keystoreCacheCondition[CustomerTypeModel](testModel)
+        mockSaveFormData[CustomerTypeModel](testModel)
         status(CustomerTypeTestDataItem.result) shouldBe 303
       }
     }
@@ -271,7 +299,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new CustomerTypeModel("trustee")
 
       "return a 303" in {
-        keystoreCacheCondition[CustomerTypeModel](testModel)
+        mockSaveFormData[CustomerTypeModel](testModel)
         status(CustomerTypeTestDataItem.result) shouldBe 303
       }
     }
@@ -285,7 +313,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new CustomerTypeModel("personalRep")
 
       "return a 303" in {
-        keystoreCacheCondition[CustomerTypeModel](testModel)
+        mockSaveFormData[CustomerTypeModel](testModel)
         status(CustomerTypeTestDataItem.result) shouldBe 303
       }
     }
@@ -299,7 +327,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new CustomerTypeModel("")
 
       "return a 400" in {
-        keystoreCacheCondition[CustomerTypeModel](testModel)
+        mockSaveFormData[CustomerTypeModel](testModel)
         status(CustomerTypeTestDataItem.result) shouldBe 400
       }
     }
@@ -313,7 +341,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new CustomerTypeModel("invalid-user")
 
       "return a 400" in {
-        keystoreCacheCondition[CustomerTypeModel](testModel)
+        mockSaveFormData[CustomerTypeModel](testModel)
         status(CustomerTypeTestDataItem.result) shouldBe 400
       }
     }
@@ -327,48 +355,48 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       object DisabledTrusteeTestDataItem extends fakeRequestTo("disabled-trustee", TestCalculationController.disabledTrustee)
 
       "return a 200" in {
-        keystoreFetchCondition[DisabledTrusteeModel](None)
+        mockfetchAndGetFormData[DisabledTrusteeModel](None)
         status(DisabledTrusteeTestDataItem.result) shouldBe 200
       }
 
       "return some HTML that" should {
         "contain some text and use the character set utf-8" in {
-          keystoreFetchCondition[DisabledTrusteeModel](None)
+          mockfetchAndGetFormData[DisabledTrusteeModel](None)
           contentType(DisabledTrusteeTestDataItem.result) shouldBe Some("text/html")
           charset(DisabledTrusteeTestDataItem.result) shouldBe Some("utf-8")
         }
 
         "have the title Are you a trustee for someone who’s vulnerable?" in {
-          keystoreFetchCondition[DisabledTrusteeModel](None)
+          mockfetchAndGetFormData[DisabledTrusteeModel](None)
           DisabledTrusteeTestDataItem.jsoupDoc.title shouldEqual Messages("calc.disabledTrustee.question")
         }
 
         "have the heading Calculate your tax (non-residents) " in {
-          keystoreFetchCondition[DisabledTrusteeModel](None)
+          mockfetchAndGetFormData[DisabledTrusteeModel](None)
           DisabledTrusteeTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
         }
 
         "have a 'Back' link " in {
-          keystoreFetchCondition[DisabledTrusteeModel](None)
+          mockfetchAndGetFormData[DisabledTrusteeModel](None)
           DisabledTrusteeTestDataItem.jsoupDoc.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
         }
 
         "have the question 'When did you sign the contract that made someone else the owner?' as the legend of the input" in {
-          keystoreFetchCondition[DisabledTrusteeModel](None)
+          mockfetchAndGetFormData[DisabledTrusteeModel](None)
           DisabledTrusteeTestDataItem.jsoupDoc.body.getElementsByTag("legend").text shouldEqual Messages("calc.disabledTrustee.question")
         }
 
         "display a radio button with the option 'Yes'" in {
-          keystoreFetchCondition[DisabledTrusteeModel](None)
+          mockfetchAndGetFormData[DisabledTrusteeModel](None)
           DisabledTrusteeTestDataItem.jsoupDoc.body.getElementById("isVulnerable-yes").parent.text shouldEqual Messages("calc.base.yes")
         }
         "display a radio button with the option 'No'" in {
-          keystoreFetchCondition[DisabledTrusteeModel](None)
+          mockfetchAndGetFormData[DisabledTrusteeModel](None)
           DisabledTrusteeTestDataItem.jsoupDoc.body.getElementById("isVulnerable-no").parent.text shouldEqual Messages("calc.base.no")
         }
 
         "display a 'Continue' button " in {
-          keystoreFetchCondition[DisabledTrusteeModel](None)
+          mockfetchAndGetFormData[DisabledTrusteeModel](None)
           DisabledTrusteeTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
         }
       }
@@ -380,13 +408,13 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
         "have the radio option `Yes` selected if `Yes` is supplied in the model" in {
           object DisabledTrusteeTestDataItem extends fakeRequestTo("disabled-trustee", TestCalculationController.disabledTrustee)
-          keystoreFetchCondition[DisabledTrusteeModel](Some(DisabledTrusteeModel("Yes")))
+          mockfetchAndGetFormData[DisabledTrusteeModel](Some(DisabledTrusteeModel("Yes")))
           DisabledTrusteeTestDataItem.jsoupDoc.body.getElementById("isVulnerable-yes").parent.classNames().contains("selected") shouldBe true
         }
 
         "have the radio option `No` selected if `No` is supplied in the model" in {
           object DisabledTrusteeTestDataItem extends fakeRequestTo("disabled-trustee", TestCalculationController.disabledTrustee)
-          keystoreFetchCondition[DisabledTrusteeModel](Some(DisabledTrusteeModel("No")))
+          mockfetchAndGetFormData[DisabledTrusteeModel](Some(DisabledTrusteeModel("No")))
           DisabledTrusteeTestDataItem.jsoupDoc.body.getElementById("isVulnerable-no").parent.classNames().contains("selected") shouldBe true
         }
       }
@@ -395,7 +423,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
   "In CalculationController calling the .submitDisabledTrustee action " should {
 
-    def keystoreCacheCondition[T](data: DisabledTrusteeModel): Unit = {
+    def mockSaveFormData[T](data: DisabledTrusteeModel): Unit = {
       lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
       when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(returnedCacheMap))
@@ -448,55 +476,55 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       object PersonalAllowanceTestDataItem extends fakeRequestTo("personal-allowance", TestCalculationController.personalAllowance)
 
       "return a 200" in {
-        keystoreFetchCondition[PersonalAllowanceModel](None)
+        mockfetchAndGetFormData[PersonalAllowanceModel](None)
         status(PersonalAllowanceTestDataItem.result) shouldBe 200
       }
 
       "return some HTML that" should {
 
         "contain some text and use the character set utf-8" in {
-          keystoreFetchCondition[PersonalAllowanceModel](None)
+          mockfetchAndGetFormData[PersonalAllowanceModel](None)
           contentType(PersonalAllowanceTestDataItem.result) shouldBe Some("text/html")
           charset(PersonalAllowanceTestDataItem.result) shouldBe Some("utf-8")
         }
 
         "have the title In the tax year when you stopped owning the property, what was your UK Personal Allowance?" in {
-          keystoreFetchCondition[PersonalAllowanceModel](None)
+          mockfetchAndGetFormData[PersonalAllowanceModel](None)
           PersonalAllowanceTestDataItem.jsoupDoc.title shouldEqual Messages("calc.personalAllowance.question")
         }
 
         "have the heading Calculate your tax (non-residents) " in {
-          keystoreFetchCondition[PersonalAllowanceModel](None)
+          mockfetchAndGetFormData[PersonalAllowanceModel](None)
           PersonalAllowanceTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
         }
 
         "have a 'Back' link " in {
-          keystoreFetchCondition[PersonalAllowanceModel](None)
+          mockfetchAndGetFormData[PersonalAllowanceModel](None)
           PersonalAllowanceTestDataItem.jsoupDoc.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
         }
 
         "have the question 'In the tax year when you stopped owning the property, what was your UK Personal Allowance?' as the label of the input" in {
-          keystoreFetchCondition[PersonalAllowanceModel](None)
+          mockfetchAndGetFormData[PersonalAllowanceModel](None)
           PersonalAllowanceTestDataItem.jsoupDoc.body.getElementsByTag("label").text should include (Messages("calc.personalAllowance.question"))
         }
 
         "display an input box for the Personal Allowance" in {
-          keystoreFetchCondition[PersonalAllowanceModel](None)
+          mockfetchAndGetFormData[PersonalAllowanceModel](None)
           PersonalAllowanceTestDataItem.jsoupDoc.body.getElementById("personalAllowance").tagName() shouldEqual "input"
         }
 
         "have no value auto-filled into the input box" in {
-          keystoreFetchCondition[PersonalAllowanceModel](None)
+          mockfetchAndGetFormData[PersonalAllowanceModel](None)
           PersonalAllowanceTestDataItem.jsoupDoc.getElementById("personalAllowance").attr("value") shouldBe empty
         }
 
         "display a 'Continue' button " in {
-          keystoreFetchCondition[PersonalAllowanceModel](None)
+          mockfetchAndGetFormData[PersonalAllowanceModel](None)
           PersonalAllowanceTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
         }
 
         "should contain a Read more sidebar with a link to personal allowances and taxation abroad" in {
-          keystoreFetchCondition[PersonalAllowanceModel](None)
+          mockfetchAndGetFormData[PersonalAllowanceModel](None)
           PersonalAllowanceTestDataItem.jsoupDoc.select("aside h2").text shouldBe Messages("calc.common.readMore")
           PersonalAllowanceTestDataItem.jsoupDoc.select("aside a").first().attr("href") shouldBe "https://www.gov.uk/income-tax-rates/current-rates-and-allowances"
           PersonalAllowanceTestDataItem.jsoupDoc.select("aside a").last().attr("href") shouldBe "https://www.gov.uk/tax-uk-income-live-abroad/personal-allowance"
@@ -509,14 +537,14 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new PersonalAllowanceModel(1000)
 
       "return a 200" in {
-        keystoreFetchCondition[PersonalAllowanceModel](Some(testModel))
+        mockfetchAndGetFormData[PersonalAllowanceModel](Some(testModel))
         status(PersonalAllowanceTestDataItem.result) shouldBe 200
       }
 
       "return some HTML that" should {
 
         "have the value 1000 auto-filled into the input box" in {
-          keystoreFetchCondition[PersonalAllowanceModel](Some(testModel))
+          mockfetchAndGetFormData[PersonalAllowanceModel](Some(testModel))
           PersonalAllowanceTestDataItem.jsoupDoc.getElementById("personalAllowance").attr("value") shouldEqual ("1000")
         }
       }
@@ -524,7 +552,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
   }
 
   "In CalculationController calling the .submitPersonalAllowance action" when {
-    def keystoreCacheCondition[T](data: PersonalAllowanceModel): Unit = {
+    def mockSaveFormData[T](data: PersonalAllowanceModel): Unit = {
       lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
       when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(returnedCacheMap))
@@ -539,12 +567,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new PersonalAllowanceModel(1000)
 
       "return a 303" in {
-        keystoreCacheCondition[PersonalAllowanceModel](testModel)
+        mockSaveFormData[PersonalAllowanceModel](testModel)
         status(PersonalAllowanceTestDataItem.result) shouldBe 303
       }
 
       s"redirect to ${routes.CalculationController.otherProperties()}" in {
-        keystoreCacheCondition[PersonalAllowanceModel](testModel)
+        mockSaveFormData[PersonalAllowanceModel](testModel)
         redirectLocation(PersonalAllowanceTestDataItem.result) shouldBe Some(s"${routes.CalculationController.otherProperties()}")
       }
     }
@@ -558,7 +586,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new PersonalAllowanceModel(0)
 
       "return a 400" in {
-        keystoreCacheCondition[PersonalAllowanceModel](testModel)
+        mockSaveFormData[PersonalAllowanceModel](testModel)
         status(PersonalAllowanceTestDataItem.result) shouldBe 400
       }
     }
@@ -572,7 +600,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new PersonalAllowanceModel(-342)
 
       "return a 400" in {
-        keystoreCacheCondition[PersonalAllowanceModel](testModel)
+        mockSaveFormData[PersonalAllowanceModel](testModel)
         status(PersonalAllowanceTestDataItem.result) shouldBe 400
       }
     }
@@ -586,12 +614,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new PersonalAllowanceModel(1.111)
 
       "return a 400" in {
-        keystoreCacheCondition[PersonalAllowanceModel](testModel)
+        mockSaveFormData[PersonalAllowanceModel](testModel)
         status(PersonalAllowanceTestDataItem.result) shouldBe 400
       }
 
       s"fail with message ${Messages("calc.personalAllowance.errorDecimalPlaces")}" in {
-        keystoreCacheCondition(testModel)
+        mockSaveFormData(testModel)
         PersonalAllowanceTestDataItem.jsoupDoc.getElementsByClass("error-notification").text should include (Messages("calc.personalAllowance.errorDecimalPlaces"))
       }
     }
@@ -606,7 +634,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       object OtherPropertiesTestDataItem extends fakeRequestTo("other-properties", TestCalculationController.otherProperties)
 
       "return a 200" in {
-        keystoreFetchCondition[OtherPropertiesModel](None)
+        mockfetchAndGetFormData[OtherPropertiesModel](None)
         status(OtherPropertiesTestDataItem.result) shouldBe 200
       }
 
@@ -653,7 +681,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val otherPropertiesTestModel = new OtherPropertiesModel("Yes")
 
       "return a 200" in {
-        keystoreFetchCondition[OtherPropertiesModel](Some(otherPropertiesTestModel))
+        mockfetchAndGetFormData[OtherPropertiesModel](Some(otherPropertiesTestModel))
         status(OtherPropertiesTestDataItem.result) shouldBe 200
       }
 
@@ -664,7 +692,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         }
 
         "have the radio option `Yes` selected by default" in {
-          keystoreFetchCondition[OtherPropertiesModel](Some(otherPropertiesTestModel))
+          mockfetchAndGetFormData[OtherPropertiesModel](Some(otherPropertiesTestModel))
           OtherPropertiesTestDataItem.jsoupDoc.body.getElementById("otherProperties-yes").parent.classNames().contains("selected") shouldBe true
         }
       }
@@ -672,7 +700,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
   }
 
   "In CalculationController calling the .submitOtherProperties action" when {
-    def keystoreCacheCondition[T](data: OtherPropertiesModel): Unit = {
+    def mockSaveFormData[T](data: OtherPropertiesModel): Unit = {
       lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
       when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(returnedCacheMap))
@@ -686,7 +714,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new OtherPropertiesModel("Yes")
 
       "return a 303" in {
-        keystoreCacheCondition[OtherPropertiesModel](testModel)
+        mockSaveFormData[OtherPropertiesModel](testModel)
         status(OtherPropertiesTestDataItem.result) shouldBe 303
       }
     }
@@ -700,7 +728,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new OtherPropertiesModel("No")
 
       "return a 303" in {
-        keystoreCacheCondition[OtherPropertiesModel](testModel)
+        mockSaveFormData[OtherPropertiesModel](testModel)
         status(OtherPropertiesTestDataItem.result) shouldBe 303
       }
     }
@@ -714,7 +742,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new OtherPropertiesModel("")
 
       "return a 400" in {
-        keystoreCacheCondition[OtherPropertiesModel](testModel)
+        mockSaveFormData[OtherPropertiesModel](testModel)
         status(OtherPropertiesTestDataItem.result) shouldBe 400
       }
     }
@@ -726,55 +754,55 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       object AnnualExemptAmountTestDataItem extends fakeRequestTo("allowance", TestCalculationController.annualExemptAmount)
 
       "return a 200" in {
-        keystoreFetchCondition[AnnualExemptAmountModel](None)
+        mockfetchAndGetFormData[AnnualExemptAmountModel](None)
         status(AnnualExemptAmountTestDataItem.result) shouldBe 200
       }
 
       "return some HTML that" should {
 
         "contain some text and use the character set utf-8" in {
-          keystoreFetchCondition[AnnualExemptAmountModel](None)
+          mockfetchAndGetFormData[AnnualExemptAmountModel](None)
           contentType(AnnualExemptAmountTestDataItem.result) shouldBe Some("text/html")
           charset(AnnualExemptAmountTestDataItem.result) shouldBe Some("utf-8")
         }
 
         "have the title 'How much of your Capital Gains Tax allowance have you got left?'" in {
-          keystoreFetchCondition[AnnualExemptAmountModel](None)
+          mockfetchAndGetFormData[AnnualExemptAmountModel](None)
           AnnualExemptAmountTestDataItem.jsoupDoc.title shouldEqual Messages("calc.annualExemptAmount.question")
         }
 
         "have the heading Calculate your tax (non-residents) " in {
-          keystoreFetchCondition[AnnualExemptAmountModel](None)
+          mockfetchAndGetFormData[AnnualExemptAmountModel](None)
           AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
         }
 
         "have a 'Back' link " in {
-          keystoreFetchCondition[AnnualExemptAmountModel](None)
+          mockfetchAndGetFormData[AnnualExemptAmountModel](None)
           AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
         }
 
         "have the question 'How much of your Capital Gains Tax allowance have you got left?' as the legend of the input" in {
-          keystoreFetchCondition[AnnualExemptAmountModel](None)
+          mockfetchAndGetFormData[AnnualExemptAmountModel](None)
           AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementsByTag("label").text should include (Messages("calc.annualExemptAmount.question"))
         }
 
         "display an input box for the Annual Exempt Amount" in {
-          keystoreFetchCondition[AnnualExemptAmountModel](None)
+          mockfetchAndGetFormData[AnnualExemptAmountModel](None)
           AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementById("annualExemptAmount").tagName() shouldEqual "input"
         }
 
         "have no value auto-filled into the input box" in {
-          keystoreFetchCondition[AnnualExemptAmountModel](None)
+          mockfetchAndGetFormData[AnnualExemptAmountModel](None)
           AnnualExemptAmountTestDataItem.jsoupDoc.getElementById("annualExemptAmount").attr("value") shouldBe empty
         }
 
         "display a 'Continue' button " in {
-          keystoreFetchCondition[AnnualExemptAmountModel](None)
+          mockfetchAndGetFormData[AnnualExemptAmountModel](None)
           AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
         }
 
         "should contain a Read more sidebar with a link to CGT allowances" in {
-          keystoreFetchCondition[AnnualExemptAmountModel](None)
+          mockfetchAndGetFormData[AnnualExemptAmountModel](None)
           AnnualExemptAmountTestDataItem.jsoupDoc.select("aside h2").text shouldBe Messages("calc.common.readMore")
           AnnualExemptAmountTestDataItem.jsoupDoc.select("aside a").text shouldBe Messages("calc.annualExemptAmount.link.one")
         }
@@ -787,27 +815,27 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     val testModel = new AnnualExemptAmountModel(1000)
 
     "return a 200" in {
-      keystoreFetchCondition[AnnualExemptAmountModel](Some(testModel))
+      mockfetchAndGetFormData[AnnualExemptAmountModel](Some(testModel))
       status(AnnualExemptAmountTestDataItem.result) shouldBe 200
     }
 
     "return some HTML that" should {
 
       "contain some text and use the character set utf-8" in {
-        keystoreFetchCondition[AnnualExemptAmountModel](Some(testModel))
+        mockfetchAndGetFormData[AnnualExemptAmountModel](Some(testModel))
         contentType(AnnualExemptAmountTestDataItem.result) shouldBe Some("text/html")
         charset(AnnualExemptAmountTestDataItem.result) shouldBe Some("utf-8")
       }
 
       "have the value 1000 auto-filled into the input box" in {
-        keystoreFetchCondition[AnnualExemptAmountModel](Some(testModel))
+        mockfetchAndGetFormData[AnnualExemptAmountModel](Some(testModel))
         AnnualExemptAmountTestDataItem.jsoupDoc.getElementById("annualExemptAmount").attr("value") shouldEqual ("1000")
       }
     }
   }
 
   "In CalculationController calling the .submitAnnualExemptAmount action" when {
-    def keystoreCacheCondition[T](data: AnnualExemptAmountModel): Unit = {
+    def mockSaveFormData[T](data: AnnualExemptAmountModel): Unit = {
       lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
       when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(returnedCacheMap))
@@ -821,7 +849,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new AnnualExemptAmountModel(1000)
 
       "return a 303" in {
-        keystoreCacheCondition[AnnualExemptAmountModel](testModel)
+        mockSaveFormData[AnnualExemptAmountModel](testModel)
         status(AnnualExemptAmountTestDataItem.result) shouldBe 303
       }
     }
@@ -835,7 +863,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new AnnualExemptAmountModel(0)
 
       "return a 400" in {
-        keystoreCacheCondition[AnnualExemptAmountModel](testModel)
+        mockSaveFormData[AnnualExemptAmountModel](testModel)
         status(AnnualExemptAmountTestDataItem.result) shouldBe 400
       }
     }
@@ -849,7 +877,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new AnnualExemptAmountModel(15000)
 
       "return a 400" in {
-        keystoreCacheCondition[AnnualExemptAmountModel](testModel)
+        mockSaveFormData[AnnualExemptAmountModel](testModel)
         status(AnnualExemptAmountTestDataItem.result) shouldBe 400
       }
     }
@@ -863,7 +891,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new AnnualExemptAmountModel(-1000)
 
       "return a 400" in {
-        keystoreCacheCondition[AnnualExemptAmountModel](testModel)
+        mockSaveFormData[AnnualExemptAmountModel](testModel)
         status(AnnualExemptAmountTestDataItem.result) shouldBe 400
       }
     }
@@ -877,12 +905,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new AnnualExemptAmountModel(-1000)
 
       "return a 400" in {
-        keystoreCacheCondition[AnnualExemptAmountModel](testModel)
+        mockSaveFormData[AnnualExemptAmountModel](testModel)
         status(AnnualExemptAmountTestDataItem.result) shouldBe 400
       }
 
       s"fail with message ${Messages("calc.annualExemptAmount.errorDecimalPlaces")}" in {
-        keystoreCacheCondition(testModel)
+        mockSaveFormData(testModel)
         AnnualExemptAmountTestDataItem.jsoupDoc.getElementsByClass("error-notification").text should include (Messages("calc.annualExemptAmount.errorDecimalPlaces"))
       }
     }
@@ -895,7 +923,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       object AcquisitionDateTestDataItem extends fakeRequestTo("acquisition-date", TestCalculationController.acquisitionDate)
 
       "return a 200" in {
-        keystoreFetchCondition[AcquisitionDateModel](None)
+        mockfetchAndGetFormData[AcquisitionDateModel](None)
         status(AcquisitionDateTestDataItem.result) shouldBe 200
       }
 
@@ -951,13 +979,13 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
       "return a 200" in {
         val testAcquisitionDateModel = new AcquisitionDateModel("Yes", Some(10), Some(12), Some(2016))
-        keystoreFetchCondition[AcquisitionDateModel](Some(testAcquisitionDateModel))
+        mockfetchAndGetFormData[AcquisitionDateModel](Some(testAcquisitionDateModel))
         status(AcquisitionDateTestDataItem.result) shouldBe 200
       }
 
     "return some HTML that" should {
       val testAcquisitionDateModel = new AcquisitionDateModel("Yes", Some(10), Some(12), Some(2016))
-      keystoreFetchCondition[AcquisitionDateModel](Some(testAcquisitionDateModel))
+      mockfetchAndGetFormData[AcquisitionDateModel](Some(testAcquisitionDateModel))
 
         "have the radio option `Yes` selected if `Yes` is supplied in the model" in {
           AcquisitionDateTestDataItem.jsoupDoc.body.getElementById("hasAcquisitionDate-yes").parent.classNames().contains("selected") shouldBe true
@@ -973,14 +1001,14 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       "have the radio option `No` selected if `No` is supplied in the model" in {
         object AcquisitionDateTestDataItem extends fakeRequestTo("acquisition-date", TestCalculationController.acquisitionDate)
         val testAcquisitionDateModel = new AcquisitionDateModel("No", None, None, None)
-        keystoreFetchCondition[AcquisitionDateModel](Some(testAcquisitionDateModel))
+        mockfetchAndGetFormData[AcquisitionDateModel](Some(testAcquisitionDateModel))
         AcquisitionDateTestDataItem.jsoupDoc.body.getElementById("hasAcquisitionDate-no").parent.classNames().contains("selected") shouldBe true
       }
     }
   }
 
   "In CalculationController calling the submitAcquisitionDate action" when {
-    def keystoreCacheCondition[T](data: AcquisitionDateModel): Unit = {
+    def mockSaveFormData[T](data: AcquisitionDateModel): Unit = {
       lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
       when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(returnedCacheMap))
@@ -998,7 +1026,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       )
 
       "return a 303" in {
-        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
+        mockSaveFormData[AcquisitionDateModel](acquisitionDateTestModel)
         status(AcquisitionDateTestDataItem.result) shouldBe 303
       }
     }
@@ -1015,7 +1043,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       )
 
       "return a 303" in {
-        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
+        mockSaveFormData[AcquisitionDateModel](acquisitionDateTestModel)
         status(AcquisitionDateTestDataItem.result) shouldBe 303
       }
     }
@@ -1032,12 +1060,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       )
 
       "return a 303" in {
-        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
+        mockSaveFormData[AcquisitionDateModel](acquisitionDateTestModel)
         status(AcquisitionDateTestDataItem.result) shouldBe 303
       }
 
       s"redirect to ${routes.CalculationController.acquisitionValue()}" in {
-        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
+        mockSaveFormData[AcquisitionDateModel](acquisitionDateTestModel)
         redirectLocation(AcquisitionDateTestDataItem.result) shouldBe Some(s"${routes.CalculationController.acquisitionValue()}")
       }
     }
@@ -1054,12 +1082,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       )
 
       "return a 400" in {
-        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
+        mockSaveFormData[AcquisitionDateModel](acquisitionDateTestModel)
         status(AcquisitionDateTestDataItem.result) shouldBe 400
       }
 
       s"should error with message ${Messages("calc.common.date.error.invalidDate")}" in {
-        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
+        mockSaveFormData[AcquisitionDateModel](acquisitionDateTestModel)
         AcquisitionDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("calc.common.date.error.invalidDate"))
       }
     }
@@ -1076,12 +1104,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       )
 
       "return a 400" in {
-        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
+        mockSaveFormData[AcquisitionDateModel](acquisitionDateTestModel)
         status(AcquisitionDateTestDataItem.result) shouldBe 400
       }
 
       s"should error with message ${Messages("calc.common.date.error.lessThan1")}" in {
-        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
+        mockSaveFormData[AcquisitionDateModel](acquisitionDateTestModel)
         AcquisitionDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("calc.common.date.error.invalidDate"))
       }
     }
@@ -1098,12 +1126,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       )
 
       "return a 400" in {
-        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
+        mockSaveFormData[AcquisitionDateModel](acquisitionDateTestModel)
         status(AcquisitionDateTestDataItem.result) shouldBe 400
       }
 
       s"should error with message ${Messages("calc.common.date.error.greaterThan31")}" in {
-        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
+        mockSaveFormData[AcquisitionDateModel](acquisitionDateTestModel)
         AcquisitionDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("calc.common.date.error.invalidDate"))
       }
     }
@@ -1120,12 +1148,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       )
 
       "return a 400" in {
-        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
+        mockSaveFormData[AcquisitionDateModel](acquisitionDateTestModel)
         status(AcquisitionDateTestDataItem.result) shouldBe 400
       }
 
       s"should error with message ${Messages("calc.common.date.error.greaterThan12")}" in {
-        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
+        mockSaveFormData[AcquisitionDateModel](acquisitionDateTestModel)
         AcquisitionDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("calc.common.date.error.invalidDate"))
       }
     }
@@ -1142,12 +1170,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       )
 
       "return a 400" in {
-        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
+        mockSaveFormData[AcquisitionDateModel](acquisitionDateTestModel)
         status(AcquisitionDateTestDataItem.result) shouldBe 400
       }
 
       s"should error with message ${Messages("calc.common.date.error.lessThan1")}" in {
-        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
+        mockSaveFormData[AcquisitionDateModel](acquisitionDateTestModel)
         AcquisitionDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("calc.common.date.error.invalidDate"))
       }
     }
@@ -1164,12 +1192,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       )
 
       "return a 400" in {
-        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
+        mockSaveFormData[AcquisitionDateModel](acquisitionDateTestModel)
         status(AcquisitionDateTestDataItem.result) shouldBe 400
       }
 
       "should error with message 'You must supply a valid date'" in {
-        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
+        mockSaveFormData[AcquisitionDateModel](acquisitionDateTestModel)
         AcquisitionDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("You must supply a valid date"))
       }
     }
@@ -1186,12 +1214,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       )
 
       "return a 400" in {
-        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
+        mockSaveFormData[AcquisitionDateModel](acquisitionDateTestModel)
         status(AcquisitionDateTestDataItem.result) shouldBe 400
       }
 
       "should error with message 'You must supply a valid date'" in {
-        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
+        mockSaveFormData[AcquisitionDateModel](acquisitionDateTestModel)
         AcquisitionDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("You must supply a valid date"))
       }
     }
@@ -1208,12 +1236,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       )
 
       "return a 400" in {
-        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
+        mockSaveFormData[AcquisitionDateModel](acquisitionDateTestModel)
         status(AcquisitionDateTestDataItem.result) shouldBe 400
       }
 
       "should error with message 'You must supply a valid date'" in {
-        keystoreCacheCondition[AcquisitionDateModel](acquisitionDateTestModel)
+        mockSaveFormData[AcquisitionDateModel](acquisitionDateTestModel)
         AcquisitionDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("You must supply a valid date"))
       }
     }
@@ -1225,48 +1253,48 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       object AcquisitionValueTestDataItem extends fakeRequestTo("acquisition-value", TestCalculationController.acquisitionValue)
 
       "return a 200" in {
-        keystoreFetchCondition[AcquisitionValueModel](None)
+        mockfetchAndGetFormData[AcquisitionValueModel](None)
         status(AcquisitionValueTestDataItem.result) shouldBe 200
       }
 
       "return some HTML that" should {
 
         "contain some text and use the character set utf-8" in {
-          keystoreFetchCondition[AcquisitionValueModel](None)
+          mockfetchAndGetFormData[AcquisitionValueModel](None)
           contentType(AcquisitionValueTestDataItem.result) shouldBe Some("text/html")
           charset(AcquisitionValueTestDataItem.result) shouldBe Some("utf-8")
         }
 
         "have the title 'How much did you pay for the property?'" in {
-          keystoreFetchCondition[AcquisitionValueModel](None)
+          mockfetchAndGetFormData[AcquisitionValueModel](None)
           AcquisitionValueTestDataItem.jsoupDoc.title shouldEqual Messages("calc.acquisitionValue.question")
         }
 
         "have the heading Calculate your tax (non-residents) " in {
-          keystoreFetchCondition[AcquisitionValueModel](None)
+          mockfetchAndGetFormData[AcquisitionValueModel](None)
           AcquisitionValueTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
         }
 
         "have a 'Back' link " in {
-          keystoreFetchCondition[AcquisitionValueModel](None)
+          mockfetchAndGetFormData[AcquisitionValueModel](None)
           AcquisitionValueTestDataItem.jsoupDoc.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
         }
 
         "have the question 'How much did you pay for the property?'" in {
-          keystoreFetchCondition[AcquisitionValueModel](None)
+          mockfetchAndGetFormData[AcquisitionValueModel](None)
           AcquisitionValueTestDataItem.jsoupDoc.body.getElementsByTag("label").text should include (Messages("calc.acquisitionValue.question"))
         }
 
         "display an input box for the Acquisition Value" in {
-          keystoreFetchCondition[AcquisitionValueModel](None)
+          mockfetchAndGetFormData[AcquisitionValueModel](None)
           AcquisitionValueTestDataItem.jsoupDoc.body.getElementById("acquisitionValue").tagName shouldEqual "input"
         }
         "have no value auto-filled into the input box" in {
-          keystoreFetchCondition[AcquisitionValueModel](None)
+          mockfetchAndGetFormData[AcquisitionValueModel](None)
           AcquisitionValueTestDataItem.jsoupDoc.getElementById("acquisitionValue").attr("value") shouldEqual ""
         }
         "display a 'Continue' button " in {
-          keystoreFetchCondition[AcquisitionValueModel](None)
+          mockfetchAndGetFormData[AcquisitionValueModel](None)
           AcquisitionValueTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
         }
       }
@@ -1277,20 +1305,20 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       object AcquisitionValueTestDataItem extends fakeRequestTo("acquisition-value", TestCalculationController.acquisitionValue)
 
       "return a 200" in {
-        keystoreFetchCondition[AcquisitionValueModel](Some(testModel))
+        mockfetchAndGetFormData[AcquisitionValueModel](Some(testModel))
         status(AcquisitionValueTestDataItem.result) shouldBe 200
       }
 
       "return some HTML that" should {
 
         "contain some text and use the character set utf-8" in {
-          keystoreFetchCondition[AcquisitionValueModel](Some(testModel))
+          mockfetchAndGetFormData[AcquisitionValueModel](Some(testModel))
           contentType(AcquisitionValueTestDataItem.result) shouldBe Some("text/html")
           charset(AcquisitionValueTestDataItem.result) shouldBe Some("utf-8")
         }
 
         "have the value 1000 auto-filled into the input box" in {
-          keystoreFetchCondition[AcquisitionValueModel](Some(testModel))
+          mockfetchAndGetFormData[AcquisitionValueModel](Some(testModel))
           AcquisitionValueTestDataItem.jsoupDoc.getElementById("acquisitionValue").attr("value") shouldEqual "1000"
         }
       }
@@ -1298,7 +1326,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
   }
 
   "In CalculationController calling the .submitAcquisitionValue action" when {
-    def keystoreCacheCondition[T](data: AcquisitionValueModel): Unit = {
+    def mockSaveFormData[T](data: AcquisitionValueModel): Unit = {
       lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
       when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(returnedCacheMap))
@@ -1313,7 +1341,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       )
 
       "return a 303" in {
-        keystoreCacheCondition(testModel)
+        mockSaveFormData(testModel)
         status(AcquisitionValueTestDataItem.result) shouldBe 303
       }
     }
@@ -1327,7 +1355,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       )
 
       "return a 400" in {
-        keystoreCacheCondition(testModel)
+        mockSaveFormData(testModel)
         status(AcquisitionValueTestDataItem.result) shouldBe 400
       }
     }
@@ -1341,7 +1369,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       )
 
       "return a 400" in {
-        keystoreCacheCondition(testModel)
+        mockSaveFormData(testModel)
         status(AcquisitionValueTestDataItem.result) shouldBe 400
       }
     }
@@ -1355,12 +1383,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       )
 
       "return a 400" in {
-        keystoreCacheCondition(testModel)
+        mockSaveFormData(testModel)
         status(AcquisitionValueTestDataItem.result) shouldBe 400
       }
 
       s"fail with message ${Messages("calc.acquisitionValue.errorDecimalPlaces")}" in {
-        keystoreCacheCondition(testModel)
+        mockSaveFormData(testModel)
         AcquisitionValueTestDataItem.jsoupDoc.getElementsByClass("error-notification").text should include (Messages("calc.acquisitionValue.errorDecimalPlaces"))
       }
     }
@@ -1371,46 +1399,204 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     object RebasedValueDataItem extends fakeRequestTo("rebased-value", TestCalculationController.rebasedValue)
 
     "return a 200" in {
+      mockfetchAndGetFormData[RebasedValueModel](None)
       status(RebasedValueDataItem.result) shouldBe 200
     }
 
     "return some HTML that" should {
 
-      "contain some text and use the character set utf-8" in{
+      "contain some text and use the character set utf-8" in {
+        mockfetchAndGetFormData[RebasedValueModel](None)
         contentType(RebasedValueDataItem.result) shouldBe Some("text/html")
         charset(RebasedValueDataItem.result) shouldBe Some("utf-8")
       }
 
       "Have the title 'Calculate your Capital Gains Tax" in {
+        mockfetchAndGetFormData[RebasedValueModel](None)
         RebasedValueDataItem.jsoupDoc.getElementsByTag("h1").text shouldBe "Calculate your Capital Gains Tax"
       }
 
       s"Have the question ${Messages("calc.rebasedValue.question")}" in {
+        mockfetchAndGetFormData[RebasedValueModel](None)
         RebasedValueDataItem.jsoupDoc.getElementsByTag("legend").text should include(Messages("calc.rebasedValue.question"))
       }
 
       "display the correct wording for radio option `yes`" in {
-        RebasedValueDataItem.jsoupDoc.body.getElementById("rebasedValueYes").parent.text shouldEqual Messages("calc.base.yes")
+        mockfetchAndGetFormData[RebasedValueModel](None)
+        RebasedValueDataItem.jsoupDoc.body.getElementById("hasRebasedValue-yes").parent.text shouldEqual Messages("calc.base.yes")
       }
 
       "display the correct wording for radio option `no`" in {
-        RebasedValueDataItem.jsoupDoc.body.getElementById("rebasedValueNo").parent.text shouldEqual Messages("calc.base.no")
+        mockfetchAndGetFormData[RebasedValueModel](None)
+        RebasedValueDataItem.jsoupDoc.body.getElementById("hasRebasedValue-no").parent.text shouldEqual Messages("calc.base.no")
       }
 
       "contain a hidden component with an input box" in {
-        RebasedValueDataItem.jsoupDoc.body.getElementById("hidden").html should include ("input")
+        mockfetchAndGetFormData[RebasedValueModel](None)
+        RebasedValueDataItem.jsoupDoc.body.getElementById("hidden").html should include("input")
       }
 
       s"contain a hidden component with the question ${Messages("calc.rebasedValue.questionTwo")}" in {
-        RebasedValueDataItem.jsoupDoc.getElementById("rebasedValue").parent.text should include(Messages("calc.rebasedValue.questionTwo"))
+        mockfetchAndGetFormData[RebasedValueModel](None)
+        RebasedValueDataItem.jsoupDoc.getElementById("rebasedValueAmt").parent.text should include(Messages("calc.rebasedValue.questionTwo"))
       }
 
       "Have a back link" in {
+        mockfetchAndGetFormData[RebasedValueModel](None)
         RebasedValueDataItem.jsoupDoc.getElementById("back-link").tagName() shouldBe "a"
       }
 
       "Have a continue button" in {
+        mockfetchAndGetFormData[RebasedValueModel](None)
         RebasedValueDataItem.jsoupDoc.getElementById("continue-button").tagName() shouldBe "button"
+      }
+    }
+
+    "supplied with a pre-existing model with 'Yes' checked and value already entered" should {
+      val testRebasedValueModelYes = new RebasedValueModel("Yes", Some(10000))
+
+      "return a 200" in {
+        object RebasedValueTestDataItem extends fakeRequestTo("rebased-value", TestCalculationController.rebasedValue)
+        mockfetchAndGetFormData[RebasedValueModel](Some(testRebasedValueModelYes))
+        status(RebasedValueTestDataItem.result) shouldBe 200
+      }
+
+      "return some HTML that" should {
+
+        "be pre populated with Yes box selected and a value of 10000 entered" in {
+          object RebasedValueTestDataItem extends fakeRequestTo("rebased-value", TestCalculationController.rebasedValue)
+          mockfetchAndGetFormData[RebasedValueModel](Some(testRebasedValueModelYes))
+
+          RebasedValueTestDataItem.jsoupDoc.getElementById("hasRebasedValue-yes").attr("checked") shouldEqual "checked"
+          RebasedValueTestDataItem.jsoupDoc.getElementById("rebasedValueAmt").attr("value") shouldEqual "10000"
+        }
+      }
+    }
+
+    "supplied with a pre-existing model with 'No' checked and value not entered" should {
+      val testRebasedValueModelNo = new RebasedValueModel("No", Some(0))
+
+      "return a 200" in {
+        object RebasedValueTestDataItem extends fakeRequestTo("rebased-value", TestCalculationController.rebasedValue)
+        mockfetchAndGetFormData[RebasedValueModel](Some(testRebasedValueModelNo))
+        status(RebasedValueTestDataItem.result) shouldBe 200
+      }
+
+      "return some HTML that" should {
+
+        "be pre populated with No box selected and a value of 0" in {
+          object RebasedValueTestDataItem extends fakeRequestTo("rebased-value", TestCalculationController.rebasedValue)
+          mockfetchAndGetFormData[RebasedValueModel](Some(testRebasedValueModelNo))
+
+          RebasedValueTestDataItem.jsoupDoc.getElementById("hasRebasedValue-no").attr("checked") shouldEqual "checked"
+          RebasedValueTestDataItem.jsoupDoc.getElementById("rebasedValueAmt").attr("value") shouldEqual "0"
+        }
+      }
+    }
+
+    "In CalculationController calling the .submitRebasedValue action " when {
+      def mockSaveFormData[T](data: RebasedValueModel): Unit = {
+        lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+        when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+          .thenReturn(Future.successful(returnedCacheMap))
+      }
+
+      "submitting a valid form with 'Yes' and a value of 12045" should {
+        object RebasedValueTestDataItem extends fakeRequestToPost("rebased-value",
+          TestCalculationController.submitRebasedValue,
+          ("hasRebasedValue", "Yes"),
+          ("rebasedValueAmt", "12045"))
+        val rebasedValueTestModel = new RebasedValueModel("Yes", Some(12045))
+
+        "return a 303" in {
+          mockSaveFormData[RebasedValueModel](rebasedValueTestModel)
+          status(RebasedValueTestDataItem.result) shouldBe 303
+        }
+      }
+
+      "submitting a valid form with 'No' and no value" should {
+        object RebasedValueTestDataItem extends fakeRequestToPost("rebased-value",
+          TestCalculationController.submitRebasedValue,
+          ("hasRebasedValue", "No"),
+          ("rebasedValueAmt", ""))
+        val rebasedValueTestModel = new RebasedValueModel("No", None)
+
+        "return a 303" in {
+          mockSaveFormData[RebasedValueModel](rebasedValueTestModel)
+          status(RebasedValueTestDataItem.result) shouldBe 303
+        }
+      }
+
+      "submitting an invalid form with 'Yes' and a value of 'fhu39awd8'" should {
+        object RebasedValueTestDataItem extends fakeRequestToPost("rebased-value",
+          TestCalculationController.submitRebasedValue,
+          ("hasRebasedValue", "Yes"),
+          ("rebasedValueAmt", "fhu39awd8"))
+
+        //This model actually has no bearing on the test but the cachemap it produces is required - also cannot parse String into BigDecimal
+        val rebasedValueTestModel = new RebasedValueModel("Yes", Some(9878))
+
+        "return a 400" in {
+          mockSaveFormData[RebasedValueModel](rebasedValueTestModel)
+          status(RebasedValueTestDataItem.result) shouldBe 400
+        }
+
+        "return HTML that displays the error message " in {
+          RebasedValueTestDataItem.jsoupDoc.select("div#hidden span.error-notification").text shouldEqual "Real number value expected"
+        }
+      }
+
+      "submitting an invalid form with 'Yes' and a value of '-200'" should {
+        object RebasedValueTestDataItem extends fakeRequestToPost("rebased-value",
+          TestCalculationController.submitRebasedValue,
+          ("hasRebasedValue", "Yes"),
+          ("rebasedValueAmt", "-200"))
+
+        val rebasedValueTestModel = new RebasedValueModel("Yes", Some(-200))
+
+        "return a 400" in {
+          mockSaveFormData[RebasedValueModel](rebasedValueTestModel)
+          status(RebasedValueTestDataItem.result) shouldBe 400
+        }
+
+        "return HTML that displays the error message " in {
+          RebasedValueTestDataItem.jsoupDoc.select("div#hidden span.error-notification").text shouldEqual Messages("calc.rebasedValue.errorNegative")
+        }
+      }
+
+      "submitting an invalid form with 'Yes' and an empty value" should {
+        object RebasedValueTestDataItem extends fakeRequestToPost("rebased-value",
+          TestCalculationController.submitRebasedValue,
+          ("hasRebasedValue", "Yes"),
+          ("rebasedValueAmt", ""))
+        //This model actually has no bearing on the test but the cachemap it produces is required.
+        val rebasedValueTestModel = new RebasedValueModel("Yes", Some(-200))
+
+        "return a 400" in {
+          mockSaveFormData[RebasedValueModel](rebasedValueTestModel)
+          status(RebasedValueTestDataItem.result) shouldBe 400
+        }
+
+        "return HTML that displays the error message " in {
+          RebasedValueTestDataItem.jsoupDoc.select("div#hidden span.error-notification").text shouldEqual Messages("calc.rebasedValue.error.no.value.supplied")
+        }
+      }
+
+      "submitting an invalid form with 'Yes' and a value of 1.111" should {
+        object RebasedValueTestDataItem extends fakeRequestToPost("rebased-value",
+          TestCalculationController.submitRebasedValue,
+          ("hasRebasedValue", "Yes"),
+          ("rebasedValueAmt", "1.111"))
+        val rebasedValueTestModel = new RebasedValueModel("Yes", Some(1.111))
+
+        "return a 400" in {
+          mockSaveFormData[RebasedValueModel](rebasedValueTestModel)
+          status(RebasedValueTestDataItem.result) shouldBe 400
+        }
+
+        "return HTML that displays the error message " in {
+          RebasedValueTestDataItem.jsoupDoc.select("div#hidden span.error-notification").text shouldEqual Messages("calc.rebasedValue.errorDecimalPlaces")
+        }
       }
     }
   }
@@ -1420,42 +1606,172 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     object RebasedCostsDataItem extends fakeRequestTo("rebased-costs", TestCalculationController.rebasedCosts)
 
     "return a 200" in {
+      mockfetchAndGetFormData[RebasedCostsModel](None)
       status(RebasedCostsDataItem.result) shouldBe 200
     }
 
-    "return some HTML that" should {
+    "when no previous value is supplied return some HTML that" should {
 
       "contain some text and use the character set utf-8" in{
+        mockfetchAndGetFormData[RebasedCostsModel](None)
         contentType(RebasedCostsDataItem.result) shouldBe Some("text/html")
         charset(RebasedCostsDataItem.result) shouldBe Some("utf-8")
       }
 
-      "Have the title 'Calculate your Capital Gains Tax" in {
+      "have the title 'Calculate your Capital Gains Tax" in {
+        mockfetchAndGetFormData[RebasedCostsModel](None)
         RebasedCostsDataItem.jsoupDoc.getElementsByTag("h1").text shouldBe "Calculate your Capital Gains Tax"
       }
 
-      "Have the question 'Did you pay for the valuation?" in {
+      "have the question 'Did you pay for the valuation?" in {
+        mockfetchAndGetFormData[RebasedCostsModel](None)
         RebasedCostsDataItem.jsoupDoc.getElementsByTag("legend").text shouldBe "Did you pay for the valuation?"
       }
 
       "display the correct wording for radio option `yes`" in {
-        RebasedCostsDataItem.jsoupDoc.body.getElementById("rebasedCostsYes").parent.text shouldEqual Messages("calc.base.yes")
+        mockfetchAndGetFormData[RebasedCostsModel](None)
+        RebasedCostsDataItem.jsoupDoc.body.getElementById("hasRebasedCosts-yes").parent.text shouldEqual Messages("calc.base.yes")
       }
 
       "display the correct wording for radio option `no`" in {
-        RebasedCostsDataItem.jsoupDoc.body.getElementById("rebasedCostsNo").parent.text shouldEqual Messages("calc.base.no")
+        mockfetchAndGetFormData[RebasedCostsModel](None)
+        RebasedCostsDataItem.jsoupDoc.body.getElementById("hasRebasedCosts-no").parent.text shouldEqual Messages("calc.base.no")
       }
 
       "contain a hidden component with an input box" in {
+        mockfetchAndGetFormData[RebasedCostsModel](None)
         RebasedCostsDataItem.jsoupDoc.body.getElementById("hidden").html should include ("input")
       }
 
-      "Have a back link" in {
+      "have a back link" in {
+        mockfetchAndGetFormData[RebasedCostsModel](None)
         RebasedCostsDataItem.jsoupDoc.getElementById("back-link").tagName() shouldBe "a"
       }
 
-      "Have a continue button" in {
+      "have a continue button" in {
+        mockfetchAndGetFormData[RebasedCostsModel](None)
         RebasedCostsDataItem.jsoupDoc.getElementById("continue-button").tagName() shouldBe "button"
+      }
+
+      "have no auto selected option and an empty input field" in {
+        mockfetchAndGetFormData[RebasedCostsModel](None)
+        RebasedCostsDataItem.jsoupDoc.getElementById("hasRebasedCosts-yes").parent.classNames().contains("selected") shouldBe false
+        RebasedCostsDataItem.jsoupDoc.getElementById("hasRebasedCosts-no").parent.classNames().contains("selected") shouldBe false
+        RebasedCostsDataItem.jsoupDoc.getElementById("rebasedCosts").attr("value") shouldBe ""
+      }
+    }
+
+    "when a previous value is supplied return some HTML that" should {
+      object RebasedCostsDataItem extends fakeRequestTo("rebased-costs", TestCalculationController.rebasedCosts)
+
+      "have an auto selected option and a filled input field" in {
+        mockfetchAndGetFormData[RebasedCostsModel](Some(RebasedCostsModel("Yes", Some(1500))))
+        RebasedCostsDataItem.jsoupDoc.getElementById("hasRebasedCosts-yes").parent.classNames().contains("selected") shouldBe true
+        RebasedCostsDataItem.jsoupDoc.getElementById("rebasedCosts").attr("value") shouldBe "1500"
+      }
+    }
+  }
+
+  "In CalculationController calling the .submitRebasedCosts action " when {
+    def mockSaveFormData[T](data: RebasedCostsModel): Unit = {
+      lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+      when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(returnedCacheMap))
+    }
+
+    "submitting a valid form with no costs" should {
+      object RebasedCostsDataItem extends fakeRequestToPost("rebased-costs", TestCalculationController.submitRebasedCosts,
+        ("hasRebasedCosts", "No"),
+        ("rebasedCosts", ""))
+      val rebasedCostsTestModel = RebasedCostsModel("No", None)
+
+      "return a 303" in {
+        mockSaveFormData[RebasedCostsModel](rebasedCostsTestModel)
+        status(RebasedCostsDataItem.result) shouldBe 303
+      }
+    }
+
+    "submitting a valid form with costs" should {
+      object RebasedCostsDataItem extends fakeRequestToPost("rebased-costs", TestCalculationController.submitRebasedCosts,
+        ("hasRebasedCosts", "Yes"),
+        ("rebasedCosts", "1000"))
+      val rebasedCostsTestModel = RebasedCostsModel("Yes", Some(1000))
+
+      "return a 303" in {
+        mockSaveFormData[RebasedCostsModel](rebasedCostsTestModel)
+        status(RebasedCostsDataItem.result) shouldBe 303
+      }
+    }
+
+    "submitting an invalid form with 'Yes' and a value of 'fhu39awd8'" should {
+      object RebasedCostsDataItem extends fakeRequestToPost("rebased-costs",
+        TestCalculationController.submitRebasedCosts,
+        ("hasRebasedCosts", "Yes"),
+        ("rebasedCosts", "fhu39awd8"))
+
+      //This model actually has no bearing on the test but the cachemap it produces is required - also cannot parse String into BigDecimal
+      val rebasedCostsTestModel = new RebasedCostsModel("Yes", Some(9878))
+
+      "return a 400" in {
+        mockSaveFormData[RebasedCostsModel](rebasedCostsTestModel)
+        status(RebasedCostsDataItem.result) shouldBe 400
+      }
+
+      "return HTML that displays the error message " in {
+        RebasedCostsDataItem.jsoupDoc.select("div#hidden span.error-notification").text shouldEqual "Real number value expected"
+      }
+    }
+
+    "submitting an invalid form with 'Yes' and a value of '-200'" should {
+      object RebasedCostsDataItem extends fakeRequestToPost("rebased-costs",
+        TestCalculationController.submitRebasedCosts,
+        ("hasRebasedCosts", "Yes"),
+        ("rebasedCosts", "-200"))
+
+      val rebasedCostsTestModel = new RebasedCostsModel("Yes", Some(-200))
+
+      "return a 400" in {
+        mockSaveFormData[RebasedCostsModel](rebasedCostsTestModel)
+        status(RebasedCostsDataItem.result) shouldBe 400
+      }
+
+      "return HTML that displays the error message " in {
+        RebasedCostsDataItem.jsoupDoc.select("div#hidden span.error-notification").text shouldEqual Messages("calc.rebasedCosts.errorNegative")
+      }
+    }
+
+    "submitting an invalid form with 'Yes' and an empty value" should {
+      object RebasedCostsDataItem extends fakeRequestToPost("rebased-costs",
+        TestCalculationController.submitRebasedCosts,
+        ("hasRebasedCosts", "Yes"),
+        ("rebasedCosts", ""))
+      //This model actually has no bearing on the test but the cachemap it produces is required.
+      val rebasedCostsTestModel = new RebasedCostsModel("Yes", Some(-200))
+
+      "return a 400" in {
+        mockSaveFormData[RebasedCostsModel](rebasedCostsTestModel)
+        status(RebasedCostsDataItem.result) shouldBe 400
+      }
+
+      "return HTML that displays the error message " in {
+        RebasedCostsDataItem.jsoupDoc.select("div#hidden span.error-notification").text shouldEqual Messages("calc.rebasedCosts.error.no.value.supplied")
+      }
+    }
+
+    "submitting an invalid form with 'Yes' and a value of 1.111" should {
+      object RebasedCostsDataItem extends fakeRequestToPost("rebased-costs",
+        TestCalculationController.submitRebasedCosts,
+        ("hasRebasedCosts", "Yes"),
+        ("rebasedCosts", "1.111"))
+      val rebasedCostsTestModel = new RebasedCostsModel("Yes", Some(1.111))
+
+      "return a 400" in {
+        mockSaveFormData[RebasedCostsModel](rebasedCostsTestModel)
+        status(RebasedCostsDataItem.result) shouldBe 400
+      }
+
+      "return HTML that displays the error message " in {
+        RebasedCostsDataItem.jsoupDoc.select("div#hidden span.error-notification").text shouldEqual Messages("calc.rebasedCosts.errorDecimalPlaces")
       }
     }
   }
@@ -1466,53 +1782,61 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       object ImprovementsTestDataItem extends fakeRequestTo("improvements", TestCalculationController.improvements)
 
       "return a 200" in {
-        keystoreFetchCondition[ImprovementsModel](None)
+        mockfetchAndGetValue[RebasedValueModel](Some(RebasedValueModel("No", None)))
+        mockfetchAndGetFormData[ImprovementsModel](None)
         status(ImprovementsTestDataItem.result) shouldBe 200
       }
 
       "return some HTML that" should {
 
         "contain some text and use the character set utf-8" in {
+          mockfetchAndGetValue[RebasedValueModel](Some(RebasedValueModel("No", None)))
           contentType(ImprovementsTestDataItem.result) shouldBe Some("text/html")
           charset(ImprovementsTestDataItem.result) shouldBe Some("utf-8")
         }
 
         "have the title 'Who owned the property?'" in {
+          mockfetchAndGetValue[RebasedValueModel](Some(RebasedValueModel("No", None)))
           ImprovementsTestDataItem.jsoupDoc.title shouldEqual Messages("calc.improvements.question")
         }
 
         "have the heading Calculate your tax (non-residents)" in {
+          mockfetchAndGetValue[RebasedValueModel](Some(RebasedValueModel("No", None)))
           ImprovementsTestDataItem.jsoupDoc.body.getElementsByTag("H1").text shouldEqual Messages("calc.base.pageHeading")
         }
 
         "display the correct wording for radio option `yes`" in {
+          mockfetchAndGetValue[RebasedValueModel](Some(RebasedValueModel("No", None)))
           ImprovementsTestDataItem.jsoupDoc.body.getElementById("isClaimingImprovements-yes").parent.text shouldEqual Messages("calc.base.yes")
         }
 
         "display the correct wording for radio option `no`" in {
+          mockfetchAndGetValue[RebasedValueModel](Some(RebasedValueModel("No", None)))
           ImprovementsTestDataItem.jsoupDoc.body.getElementById("isClaimingImprovements-no").parent.text shouldEqual Messages("calc.base.no")
         }
 
         "contain a hidden component with an input box" in {
+          mockfetchAndGetValue[RebasedValueModel](Some(RebasedValueModel("No", None)))
           ImprovementsTestDataItem.jsoupDoc.body.getElementById("hidden").html should include ("input")
         }
       }
     }
     "supplied with a pre-existing model with 'Yes' checked and value already entered" should {
+      mockfetchAndGetValue[RebasedValueModel](Some(RebasedValueModel("No", None)))
       val testImprovementsModelYes = new ImprovementsModel("Yes", Some(10000))
 
       "return a 200" in {
         object ImprovementsTestDataItem extends fakeRequestTo("improvements", TestCalculationController.improvements)
-        keystoreFetchCondition[ImprovementsModel](Some(testImprovementsModelYes))
+        mockfetchAndGetFormData[ImprovementsModel](Some(testImprovementsModelYes))
         status(ImprovementsTestDataItem.result) shouldBe 200
       }
 
       "return some HTML that" should {
 
         "be pre populated with Yes box selected and a value of 10000 entered" in {
+          mockfetchAndGetValue[RebasedValueModel](Some(RebasedValueModel("No", None)))
           object ImprovementsTestDataItem extends fakeRequestTo("improvements", TestCalculationController.improvements)
-          keystoreFetchCondition[ImprovementsModel](Some(testImprovementsModelYes))
-
+          mockfetchAndGetFormData[ImprovementsModel](Some(testImprovementsModelYes))
           ImprovementsTestDataItem.jsoupDoc.getElementById("isClaimingImprovements-yes").attr("checked") shouldEqual "checked"
           ImprovementsTestDataItem.jsoupDoc.getElementById("improvementsAmt").attr("value") shouldEqual "10000"
         }
@@ -1522,26 +1846,48 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testImprovementsModelNo = new ImprovementsModel("No", Some(0))
 
       "return a 200" in {
+        mockfetchAndGetValue[RebasedValueModel](Some(RebasedValueModel("No", None)))
         object ImprovementsTestDataItem extends fakeRequestTo("improvements", TestCalculationController.improvements)
-        keystoreFetchCondition[ImprovementsModel](Some(testImprovementsModelNo))
+        mockfetchAndGetFormData[ImprovementsModel](Some(testImprovementsModelNo))
         status(ImprovementsTestDataItem.result) shouldBe 200
       }
 
       "return some HTML that" should {
 
         "be pre populated with No box selected and a value of 0" in {
+          mockfetchAndGetValue[RebasedValueModel](Some(RebasedValueModel("No", None)))
           object ImprovementsTestDataItem extends fakeRequestTo("improvements", TestCalculationController.improvements)
-          keystoreFetchCondition[ImprovementsModel](Some(testImprovementsModelNo))
-
+          mockfetchAndGetFormData[ImprovementsModel](Some(testImprovementsModelNo))
           ImprovementsTestDataItem.jsoupDoc.getElementById("isClaimingImprovements-no").attr("checked") shouldEqual "checked"
           ImprovementsTestDataItem.jsoupDoc.getElementById("improvementsAmt").attr("value") shouldEqual "0"
         }
       }
     }
+
+    "not supplied with a pre-existing stored model but with a rebased value" should {
+      object ImprovementsTestDataItem extends fakeRequestTo("improvements", TestCalculationController.improvements)
+
+      "contain a two hidden input boxes for improvements" in {
+        mockfetchAndGetValue[RebasedValueModel](Some(RebasedValueModel("Yes", Some(1000))))
+        ImprovementsTestDataItem.jsoupDoc.body.getElementById("hidden").getElementsByTag("input").first().id() shouldBe "improvementsAmt"
+        ImprovementsTestDataItem.jsoupDoc.body.getElementById("hidden").getElementsByTag("input").last().id() shouldBe "improvementsAmtAfter"
+      }
+    }
+
+    "not supplied with a pre-existing stored model and with no rebased value model" should {
+      object ImprovementsTestDataItem extends fakeRequestTo("improvements", TestCalculationController.improvements)
+
+      "contain a two hidden input boxes for improvements" in {
+        mockfetchAndGetValue[RebasedValueModel](None)
+        ImprovementsTestDataItem.jsoupDoc.body.getElementById("hidden").html should include("input")
+        ImprovementsTestDataItem.jsoupDoc.body.getElementById("hidden").getElementsByTag("input").first().id() shouldBe "improvementsAmt"
+        ImprovementsTestDataItem.jsoupDoc.body.getElementById("hidden").getElementsByTag("input").last().id() shouldBe "improvementsAmt"
+      }
+    }
   }
 
   "In CalculationController calling the .submitImprovements action " when {
-    def keystoreCacheCondition[T](data: ImprovementsModel): Unit = {
+    def mockSaveFormData[T](data: ImprovementsModel): Unit = {
       lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
       when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(returnedCacheMap))
@@ -1552,7 +1898,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val improvementsTestModel = new ImprovementsModel("Yes", Some(12045))
 
       "return a 303" in {
-        keystoreCacheCondition[ImprovementsModel](improvementsTestModel)
+        mockSaveFormData[ImprovementsModel](improvementsTestModel)
         status(ImprovementsTestDataItem.result) shouldBe 303
       }
     }
@@ -1563,7 +1909,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val improvementsTestModel = new ImprovementsModel("No", None)
 
       "return a 303" in {
-        keystoreCacheCondition[ImprovementsModel](improvementsTestModel)
+        mockSaveFormData[ImprovementsModel](improvementsTestModel)
         status(ImprovementsTestDataItem.result) shouldBe 303
       }
     }
@@ -1574,7 +1920,8 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val improvementsTestModel = new ImprovementsModel("Yes", Some(9878))
 
       "return a 400" in {
-        keystoreCacheCondition[ImprovementsModel](improvementsTestModel)
+        mockfetchAndGetValue[RebasedValueModel](Some(RebasedValueModel("No", None)))
+        mockSaveFormData[ImprovementsModel](improvementsTestModel)
         status(ImprovementsTestDataItem.result) shouldBe 400
       }
 
@@ -1589,7 +1936,8 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val improvementsTestModel = new ImprovementsModel("Yes", Some(-100))
 
       "return a 400" in {
-        keystoreCacheCondition[ImprovementsModel](improvementsTestModel)
+        mockfetchAndGetValue[RebasedValueModel](Some(RebasedValueModel("No", None)))
+        mockSaveFormData[ImprovementsModel](improvementsTestModel)
         status(ImprovementsTestDataItem.result) shouldBe 400
       }
 
@@ -1605,7 +1953,8 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val improvementsTestModel = new ImprovementsModel("Yes", Some(-100))
 
       "return a 400" in {
-        keystoreCacheCondition[ImprovementsModel](improvementsTestModel)
+        mockfetchAndGetValue[RebasedValueModel](Some(RebasedValueModel("No", None)))
+        mockSaveFormData[ImprovementsModel](improvementsTestModel)
         status(ImprovementsTestDataItem.result) shouldBe 400
       }
 
@@ -1622,7 +1971,8 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val improvementsTestModel = new ImprovementsModel("Yes", Some(1.111))
 
       "return a 400" in {
-        keystoreCacheCondition[ImprovementsModel](improvementsTestModel)
+        mockfetchAndGetValue[RebasedValueModel](Some(RebasedValueModel("No", None)))
+        mockSaveFormData[ImprovementsModel](improvementsTestModel)
         status(ImprovementsTestDataItem.result) shouldBe 400
       }
 
@@ -1630,8 +1980,6 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         ImprovementsTestDataItem.jsoupDoc.select("div#hidden span.error-notification").text shouldEqual Messages("calc.improvements.errorDecimalPlaces")
       }
     }
-
-
   }
 
   //################### Disposal Date tests #######################
@@ -1641,7 +1989,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       object DisposalDateTestDataItem extends fakeRequestTo("disposal-date", TestCalculationController.disposalDate)
 
       "return a 200" in {
-        keystoreFetchCondition[DisposalDateModel](None)
+        mockfetchAndGetFormData[DisposalDateModel](None)
         status(DisposalDateTestDataItem.result) shouldBe 200
       }
 
@@ -1685,7 +2033,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testDisposalDateModel = new DisposalDateModel(10, 12, 2016)
 
       "return a 200" in {
-        keystoreFetchCondition[DisposalDateModel](Some(testDisposalDateModel))
+        mockfetchAndGetFormData[DisposalDateModel](Some(testDisposalDateModel))
         status(DisposalDateTestDataItem.result) shouldBe 200
       }
 
@@ -1696,7 +2044,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         }
 
         "be pre-populated with the date 10, 12, 2016" in {
-          keystoreFetchCondition[DisposalDateModel](Some(testDisposalDateModel))
+          mockfetchAndGetFormData[DisposalDateModel](Some(testDisposalDateModel))
           DisposalDateTestDataItem.jsoupDoc.body.getElementById("disposalDate.day").attr("value") shouldEqual testDisposalDateModel.day.toString
           DisposalDateTestDataItem.jsoupDoc.body.getElementById("disposalDate.month").attr("value") shouldEqual testDisposalDateModel.month.toString
           DisposalDateTestDataItem.jsoupDoc.body.getElementById("disposalDate.year").attr("value") shouldEqual testDisposalDateModel.year.toString
@@ -1706,7 +2054,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
   }
 
   "In CalculationController calling the .submitDisposalDate action" when {
-    def keystoreCacheCondition[T](data: DisposalDateModel): Unit = {
+    def mockSaveFormData[T](data: DisposalDateModel): Unit = {
       lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
       when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(returnedCacheMap))
@@ -1720,12 +2068,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new DisposalDateModel(31,1,2016)
 
       "return a 303" in {
-        keystoreCacheCondition[DisposalDateModel](testModel)
+        mockSaveFormData[DisposalDateModel](testModel)
         status(DisposalDateTestDataItem.result) shouldBe 303
       }
 
       s"redirect to ${routes.CalculationController.disposalValue()}" in {
-        keystoreCacheCondition[DisposalDateModel](testModel)
+        mockSaveFormData[DisposalDateModel](testModel)
         redirectLocation(DisposalDateTestDataItem.result) shouldBe Some(s"${routes.CalculationController.disposalValue()}")
       }
     }
@@ -1738,12 +2086,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new DisposalDateModel(29,2,2016)
 
       "return a 303" in {
-        keystoreCacheCondition[DisposalDateModel](testModel)
+        mockSaveFormData[DisposalDateModel](testModel)
         status(DisposalDateTestDataItem.result) shouldBe 303
       }
 
       s"redirect to ${routes.CalculationController.disposalValue()}" in {
-        keystoreCacheCondition[DisposalDateModel](testModel)
+        mockSaveFormData[DisposalDateModel](testModel)
         redirectLocation(DisposalDateTestDataItem.result) shouldBe Some(s"${routes.CalculationController.disposalValue()}")
       }
     }
@@ -1756,12 +2104,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new DisposalDateModel(29,2,2017)
 
       "return a 400" in {
-        keystoreCacheCondition[DisposalDateModel](testModel)
+        mockSaveFormData[DisposalDateModel](testModel)
         status(DisposalDateTestDataItem.result) shouldBe 400
       }
 
       s"should error with message '${Messages("calc.common.date.error.invalidDate")}'" in {
-        keystoreCacheCondition[DisposalDateModel](testModel)
+        mockSaveFormData[DisposalDateModel](testModel)
         DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("calc.common.date.error.invalidDate"))
       }
     }
@@ -1774,12 +2122,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new DisposalDateModel(0,2,2017)
 
       "return a 400" in {
-        keystoreCacheCondition[DisposalDateModel](testModel)
+        mockSaveFormData[DisposalDateModel](testModel)
         status(DisposalDateTestDataItem.result) shouldBe 400
       }
 
       s"should error with message '${Messages("calc.common.date.error.day.lessThan1")}'" in {
-        keystoreCacheCondition[DisposalDateModel](testModel)
+        mockSaveFormData[DisposalDateModel](testModel)
         DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("calc.common.date.error.invalidDate"))
       }
     }
@@ -1792,12 +2140,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new DisposalDateModel(32,2,2017)
 
       "return a 400" in {
-        keystoreCacheCondition[DisposalDateModel](testModel)
+        mockSaveFormData[DisposalDateModel](testModel)
         status(DisposalDateTestDataItem.result) shouldBe 400
       }
 
       s"should error with message '${Messages("calc.common.date.error.day.greaterThan31")}'" in {
-        keystoreCacheCondition[DisposalDateModel](testModel)
+        mockSaveFormData[DisposalDateModel](testModel)
         DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("calc.common.date.error.invalidDate"))
       }
     }
@@ -1810,12 +2158,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new DisposalDateModel(31,13,2017)
 
       "return a 400" in {
-        keystoreCacheCondition[DisposalDateModel](testModel)
+        mockSaveFormData[DisposalDateModel](testModel)
         status(DisposalDateTestDataItem.result) shouldBe 400
       }
 
       s"should error with message '${Messages("calc.common.date.error.month.greaterThan12")}'" in {
-        keystoreCacheCondition[DisposalDateModel](testModel)
+        mockSaveFormData[DisposalDateModel](testModel)
         DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("calc.common.date.error.invalidDate"))
       }
     }
@@ -1828,12 +2176,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new DisposalDateModel(31,0,2017)
 
       "return a 400" in {
-        keystoreCacheCondition[DisposalDateModel](testModel)
+        mockSaveFormData[DisposalDateModel](testModel)
         status(DisposalDateTestDataItem.result) shouldBe 400
       }
 
       s"should error with message '${Messages("calc.common.date.error.month.lessThan1")}'" in {
-        keystoreCacheCondition[DisposalDateModel](testModel)
+        mockSaveFormData[DisposalDateModel](testModel)
         DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("calc.common.date.error.invalidDate"))
       }
     }
@@ -1846,12 +2194,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new DisposalDateModel(0,12,2017)
 
       "return a 400" in {
-        keystoreCacheCondition[DisposalDateModel](testModel)
+        mockSaveFormData[DisposalDateModel](testModel)
         status(DisposalDateTestDataItem.result) shouldBe 400
       }
 
       "should error with message 'Numeric vaue expected'" in {
-        keystoreCacheCondition[DisposalDateModel](testModel)
+        mockSaveFormData[DisposalDateModel](testModel)
         DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include ("You must supply a valid date")
       }
     }
@@ -1864,12 +2212,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new DisposalDateModel(31,0,2017)
 
       "return a 400" in {
-        keystoreCacheCondition[DisposalDateModel](testModel)
+        mockSaveFormData[DisposalDateModel](testModel)
         status(DisposalDateTestDataItem.result) shouldBe 400
       }
 
       "should error with message 'Numeric vaue expected'" in {
-        keystoreCacheCondition[DisposalDateModel](testModel)
+        mockSaveFormData[DisposalDateModel](testModel)
         DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include ("You must supply a valid date")
       }
     }
@@ -1882,12 +2230,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new DisposalDateModel(31,12,0)
 
       "return a 400" in {
-        keystoreCacheCondition[DisposalDateModel](testModel)
+        mockSaveFormData[DisposalDateModel](testModel)
         status(DisposalDateTestDataItem.result) shouldBe 400
       }
 
       "should error with message 'You must supply a valid date'" in {
-        keystoreCacheCondition[DisposalDateModel](testModel)
+        mockSaveFormData[DisposalDateModel](testModel)
         DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include ("You must supply a valid date")
       }
     }
@@ -1899,45 +2247,45 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       object DisposalValueTestDataItem extends fakeRequestTo("disposal-value", TestCalculationController.disposalValue)
 
       "return a 200" in {
-        keystoreFetchCondition[DisposalValueModel](None)
+        mockfetchAndGetFormData[DisposalValueModel](None)
         status(DisposalValueTestDataItem.result) shouldBe 200
       }
 
       "return some HTML that" should {
 
         "contain some text and use the character set utf-8" in {
-          keystoreFetchCondition[DisposalValueModel](None)
+          mockfetchAndGetFormData[DisposalValueModel](None)
           contentType(DisposalValueTestDataItem.result) shouldBe Some("text/html")
           charset(DisposalValueTestDataItem.result) shouldBe Some("utf-8")
         }
 
         "have the title 'How much did you sell or give away the property for?'" in {
-          keystoreFetchCondition[DisposalValueModel](None)
+          mockfetchAndGetFormData[DisposalValueModel](None)
           DisposalValueTestDataItem.jsoupDoc.title shouldEqual Messages("calc.disposalValue.question")
         }
 
         "have the heading Calculate your tax (non-residents) " in {
-          keystoreFetchCondition[DisposalValueModel](None)
+          mockfetchAndGetFormData[DisposalValueModel](None)
           DisposalValueTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
         }
 
         "have a 'Back' link " in {
-          keystoreFetchCondition[DisposalValueModel](None)
+          mockfetchAndGetFormData[DisposalValueModel](None)
           DisposalValueTestDataItem.jsoupDoc.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
         }
 
         "have the question 'How much did you sell or give away the property for?' as the legend of the input" in {
-          keystoreFetchCondition[DisposalValueModel](None)
+          mockfetchAndGetFormData[DisposalValueModel](None)
           DisposalValueTestDataItem.jsoupDoc.body.getElementsByTag("label").text should include (Messages("calc.disposalValue.question"))
         }
 
         "display an input box for the Annual Exempt Amount" in {
-          keystoreFetchCondition[DisposalValueModel](None)
+          mockfetchAndGetFormData[DisposalValueModel](None)
           DisposalValueTestDataItem.jsoupDoc.body.getElementById("disposalValue").tagName() shouldEqual "input"
         }
 
         "display a 'Continue' button " in {
-          keystoreFetchCondition[DisposalValueModel](None)
+          mockfetchAndGetFormData[DisposalValueModel](None)
           DisposalValueTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
         }
       }
@@ -1946,20 +2294,20 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       object DisposalValueTestDataItem extends fakeRequestTo("disposal-value", TestCalculationController.disposalValue)
       val testModel = new DisposalValueModel(1000)
       "return a 200" in {
-        keystoreFetchCondition[DisposalValueModel](Some(testModel))
+        mockfetchAndGetFormData[DisposalValueModel](Some(testModel))
         status(DisposalValueTestDataItem.result) shouldBe 200
       }
 
       "return some HTML that" should {
 
         "contain some text and use the character set utf-8" in {
-          keystoreFetchCondition[DisposalValueModel](Some(testModel))
+          mockfetchAndGetFormData[DisposalValueModel](Some(testModel))
           contentType(DisposalValueTestDataItem.result) shouldBe Some("text/html")
           charset(DisposalValueTestDataItem.result) shouldBe Some("utf-8")
         }
 
         "have the value 1000 auto-filled into the input box" in {
-          keystoreFetchCondition[DisposalValueModel](Some(testModel))
+          mockfetchAndGetFormData[DisposalValueModel](Some(testModel))
           DisposalValueTestDataItem.jsoupDoc.getElementById("disposalValue").attr("value") shouldEqual ("1000")
         }
       }
@@ -1967,7 +2315,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
   }
 
   "In CalculationController calling the .submitDisposalValue action" when {
-    def keystoreCacheCondition[T](data: DisposalValueModel): Unit = {
+    def mockSaveFormData[T](data: DisposalValueModel): Unit = {
       lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
       when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(returnedCacheMap))
@@ -1982,7 +2330,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       )
 
       "return a 303" in {
-        keystoreCacheCondition(testModel)
+        mockSaveFormData(testModel)
         status(DisposalValueTestDataItem.result) shouldBe 303
       }
     }
@@ -1996,7 +2344,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       )
 
       "return a 400" in {
-        keystoreCacheCondition(testModel)
+        mockSaveFormData(testModel)
         status(DisposalValueTestDataItem.result) shouldBe 400
       }
     }
@@ -2010,7 +2358,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       )
 
       "return a 400" in {
-        keystoreCacheCondition(testModel)
+        mockSaveFormData(testModel)
         status(DisposalValueTestDataItem.result) shouldBe 400
       }
     }
@@ -2024,12 +2372,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       )
 
       "return a 400" in {
-        keystoreCacheCondition(testModel)
+        mockSaveFormData(testModel)
         status(DisposalValueTestDataItem.result) shouldBe 400
       }
 
       s"fail with message ${Messages("calc.disposalValue.errorDecimalPlaces")}" in {
-        keystoreCacheCondition(testModel)
+        mockSaveFormData(testModel)
         DisposalValueTestDataItem.jsoupDoc.getElementsByClass("error-notification").text should include (Messages("calc.disposalValue.errorDecimalPlaces"))
       }
     }
@@ -2041,47 +2389,47 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       object AcquisitionCostsTestDataItem extends fakeRequestTo("acquisition-costs", TestCalculationController.acquisitionCosts)
 
       "return a 200" in {
-        keystoreFetchCondition[AcquisitionCostsModel](None)
+        mockfetchAndGetFormData[AcquisitionCostsModel](None)
         status(AcquisitionCostsTestDataItem.result) shouldBe 200
       }
 
       "return some HTML that" should {
 
         "contain some text and use the character set utf-8" in {
-          keystoreFetchCondition[AcquisitionCostsModel](None)
+          mockfetchAndGetFormData[AcquisitionCostsModel](None)
           contentType(AcquisitionCostsTestDataItem.result) shouldBe Some("text/html")
           charset(AcquisitionCostsTestDataItem.result) shouldBe Some("utf-8")
         }
 
         "have the title 'How much did you pay in costs when you became the property owner'" in {
-          keystoreFetchCondition[AcquisitionCostsModel](None)
+          mockfetchAndGetFormData[AcquisitionCostsModel](None)
           AcquisitionCostsTestDataItem.jsoupDoc.getElementsByTag("title").text shouldEqual Messages("calc.acquisitionCosts.question")
         }
 
         "have a back link" in {
-          keystoreFetchCondition[AcquisitionCostsModel](None)
+          mockfetchAndGetFormData[AcquisitionCostsModel](None)
           AcquisitionCostsTestDataItem.jsoupDoc.getElementById("back-link").text shouldEqual Messages("calc.base.back")
         }
 
         "have the page heading 'Calculate your tax (non-residents)'" in {
-          keystoreFetchCondition[AcquisitionCostsModel](None)
+          mockfetchAndGetFormData[AcquisitionCostsModel](None)
           AcquisitionCostsTestDataItem.jsoupDoc.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
         }
 
         "have a monetary field that" should {
 
           "have the title 'How much did you pay in costs when you became the property owner?'" in {
-            keystoreFetchCondition[AcquisitionCostsModel](None)
+            mockfetchAndGetFormData[AcquisitionCostsModel](None)
             AcquisitionCostsTestDataItem.jsoupDoc.select("label[for=acquisitionCosts]").text should include (Messages("calc.acquisitionCosts.question"))
           }
 
           "have the help text 'Costs include agent fees, legal fees and surveys'" in {
-            keystoreFetchCondition[AcquisitionCostsModel](None)
+            mockfetchAndGetFormData[AcquisitionCostsModel](None)
             AcquisitionCostsTestDataItem.jsoupDoc.select("span.form-hint").text shouldEqual Messages("calc.acquisitionCosts.helpText")
           }
 
           "have an input box for the acquisition costs" in {
-            keystoreFetchCondition[AcquisitionCostsModel](None)
+            mockfetchAndGetFormData[AcquisitionCostsModel](None)
             AcquisitionCostsTestDataItem.jsoupDoc.getElementById("acquisitionCosts").tagName shouldBe "input"
           }
         }
@@ -2089,12 +2437,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         "have a continue button that" should {
 
           "be a button element" in {
-            keystoreFetchCondition[AcquisitionCostsModel](None)
+            mockfetchAndGetFormData[AcquisitionCostsModel](None)
             AcquisitionCostsTestDataItem.jsoupDoc.getElementById("continue-button").tagName shouldBe "button"
           }
 
           "have the text 'Continue'" in {
-            keystoreFetchCondition[AcquisitionCostsModel](None)
+            mockfetchAndGetFormData[AcquisitionCostsModel](None)
             AcquisitionCostsTestDataItem.jsoupDoc.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
           }
         }
@@ -2106,13 +2454,13 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new AcquisitionCostsModel(Some(1000))
 
       "return a 200" in {
-        keystoreFetchCondition[AcquisitionCostsModel](Some(testModel))
+        mockfetchAndGetFormData[AcquisitionCostsModel](Some(testModel))
         status(AcquisitionCostsTestDataItem.result) shouldBe 200
       }
 
       "return some HTML that" should {
         "have the value 1000 auto-filled into the input box" in {
-          keystoreFetchCondition[AcquisitionCostsModel](Some(testModel))
+          mockfetchAndGetFormData[AcquisitionCostsModel](Some(testModel))
           AcquisitionCostsTestDataItem.jsoupDoc.getElementById("acquisitionCosts").attr("value") shouldEqual ("1000")
         }
       }
@@ -2120,7 +2468,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
   }
 
   "In CalculationController calling the .submitAcquisitionCosts action" when {
-    def keystoreCacheCondition[T](data: AcquisitionCostsModel): Unit = {
+    def mockSaveFormData[T](data: AcquisitionCostsModel): Unit = {
       lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
       when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(returnedCacheMap))
@@ -2137,12 +2485,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         )
 
         "return a 303" in {
-          keystoreCacheCondition(testModel)
+          mockSaveFormData(testModel)
           status(AcquisitionCostsTestDataItem.result) shouldBe 303
         }
 
         s"redirect to ${routes.CalculationController.disposalCosts()}" in {
-          keystoreCacheCondition[AcquisitionCostsModel](testModel)
+          mockSaveFormData[AcquisitionCostsModel](testModel)
           redirectLocation(AcquisitionCostsTestDataItem.result) shouldBe Some(s"${routes.CalculationController.disposalCosts()}")
         }
       }
@@ -2156,12 +2504,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         )
 
         "return a 303" in {
-          keystoreCacheCondition(testModel)
+          mockSaveFormData(testModel)
           status(AcquisitionCostsTestDataItem.result) shouldBe 303
         }
 
         s"redirect to ${routes.CalculationController.disposalCosts()}" in {
-          keystoreCacheCondition[AcquisitionCostsModel](testModel)
+          mockSaveFormData[AcquisitionCostsModel](testModel)
           redirectLocation(AcquisitionCostsTestDataItem.result) shouldBe Some(s"${routes.CalculationController.disposalCosts()}")
         }
       }
@@ -2179,12 +2527,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         )
 
         "return a 400" in {
-          keystoreCacheCondition(testModel)
+          mockSaveFormData(testModel)
           status(AcquisitionCostsTestDataItem.result) shouldBe 400
         }
 
         s"fail with message ${Messages("calc.acquisitionCosts.errorNegative")}" in {
-          keystoreCacheCondition(testModel)
+          mockSaveFormData(testModel)
           AcquisitionCostsTestDataItem.jsoupDoc.getElementsByClass("error-notification").text should include (Messages("calc.acquisitionCosts.errorNegative"))
         }
       }
@@ -2198,12 +2546,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         )
 
         "return a 400" in {
-          keystoreCacheCondition(testModel)
+          mockSaveFormData(testModel)
           status(AcquisitionCostsTestDataItem.result) shouldBe 400
         }
 
         s"fail with message ${Messages("calc.acquisitionCosts.errorDecimalPlaces")}" in {
-          keystoreCacheCondition(testModel)
+          mockSaveFormData(testModel)
           AcquisitionCostsTestDataItem.jsoupDoc.getElementsByClass("error-notification").text should include(Messages("calc.acquisitionCosts.errorDecimalPlaces"))
         }
       }
@@ -2216,7 +2564,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       object DisposalCostsTestDataItem extends fakeRequestTo("disposal-costs", TestCalculationController.disposalCosts)
 
       "return a 200" in {
-        keystoreFetchCondition[DisposalCostsModel](None)
+        mockfetchAndGetFormData[DisposalCostsModel](None)
         status(DisposalCostsTestDataItem.result) shouldBe 200
       }
 
@@ -2267,27 +2615,27 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val disposalCostsTestModel = new DisposalCostsModel(Some(1000))
 
       "return a 200" in {
-        keystoreFetchCondition[DisposalCostsModel](Some(disposalCostsTestModel))
+        mockfetchAndGetFormData[DisposalCostsModel](Some(disposalCostsTestModel))
         status(DisposalCostsTestDataItem.result) shouldBe 200
       }
 
       "return some HTML that" should {
 
         "contain some text and use the character set utf-8" in {
-          keystoreFetchCondition[DisposalCostsModel](Some(disposalCostsTestModel))
+          mockfetchAndGetFormData[DisposalCostsModel](Some(disposalCostsTestModel))
           contentType(DisposalCostsTestDataItem.result) shouldBe Some("text/html")
           charset(DisposalCostsTestDataItem.result) shouldBe Some("utf-8")
         }
 
         "have the value 1000 auto-filled into the input box" in {
-          keystoreFetchCondition[DisposalCostsModel](Some(disposalCostsTestModel))
+          mockfetchAndGetFormData[DisposalCostsModel](Some(disposalCostsTestModel))
           DisposalCostsTestDataItem.jsoupDoc.getElementById("disposalCosts").attr("value") shouldEqual ("1000")
         }
       }
     }
 
     "In CalculationController calling the .submitDisposalCosts action" when {
-      def keystoreCacheCondition[T](data: DisposalCostsModel): Unit = {
+      def mockSaveFormData[T](data: DisposalCostsModel): Unit = {
         lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
         when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
           .thenReturn(Future.successful(returnedCacheMap))
@@ -2302,12 +2650,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         )
 
         "return a 303" in {
-          keystoreCacheCondition(disposalCostsTestModel)
+          mockSaveFormData(disposalCostsTestModel)
           status(DisposalCostsTestDataItem.result) shouldBe 303
         }
 
         s"redirect to ${routes.CalculationController.entrepreneursRelief()}" in {
-          keystoreCacheCondition[DisposalCostsModel](disposalCostsTestModel)
+          mockSaveFormData[DisposalCostsModel](disposalCostsTestModel)
           redirectLocation(DisposalCostsTestDataItem.result) shouldBe Some(s"${routes.CalculationController.entrepreneursRelief()}")
         }
       }
@@ -2321,7 +2669,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         )
 
         "return a 303" in {
-          keystoreCacheCondition(disposalCostsTestModel)
+          mockSaveFormData(disposalCostsTestModel)
           status(DisposalCostsTestDataItem.result) shouldBe 303
         }
       }
@@ -2334,12 +2682,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         )
 
         "return a 400" in {
-          keystoreCacheCondition(disposalCostsTestModel)
+          mockSaveFormData(disposalCostsTestModel)
           status(DisposalCostsTestDataItem.result) shouldBe 400
         }
 
         "display the error message 'Disposal costs can't be negative'" in {
-          keystoreFetchCondition[DisposalCostsModel](None)
+          mockfetchAndGetFormData[DisposalCostsModel](None)
           DisposalCostsTestDataItem.jsoupDoc.select("div label span.error-notification").text shouldEqual Messages("calc.disposalCosts.errorNegativeNumber")
         }
       }
@@ -2353,12 +2701,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         )
 
         "return a 400" in {
-          keystoreCacheCondition(disposalCostsTestModel)
+          mockSaveFormData(disposalCostsTestModel)
           status(DisposalCostsTestDataItem.result) shouldBe 400
         }
 
         "display the error message 'The costs have too many decimal places'" in {
-          keystoreFetchCondition[DisposalCostsModel](None)
+          mockfetchAndGetFormData[DisposalCostsModel](None)
           DisposalCostsTestDataItem.jsoupDoc.select("div label span.error-notification").text shouldEqual Messages("calc.disposalCosts.errorDecimalPlaces")
         }
       }
@@ -2372,12 +2720,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         )
 
         "return a 400" in {
-          keystoreCacheCondition(disposalCostsTestModel)
+          mockSaveFormData(disposalCostsTestModel)
           status(DisposalCostsTestDataItem.result) shouldBe 400
         }
 
         "display the error message 'Disposal costs cannot be negative' and 'The costs have too many decimal places'" in {
-          keystoreFetchCondition[DisposalCostsModel](None)
+          mockfetchAndGetFormData[DisposalCostsModel](None)
           DisposalCostsTestDataItem.jsoupDoc.select("div label span.error-notification").text shouldEqual (Messages("calc.disposalCosts.errorNegativeNumber") + " " + Messages("calc.disposalCosts.errorDecimalPlaces"))
         }
       }
@@ -2391,45 +2739,45 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       object EntrepreneursReliefTestDataItem extends fakeRequestTo("entrepreneurs-relief", TestCalculationController.entrepreneursRelief)
 
       "return a 200" in {
-        keystoreFetchCondition[EntrepreneursReliefModel](None)
+        mockfetchAndGetFormData[EntrepreneursReliefModel](None)
         status(EntrepreneursReliefTestDataItem.result) shouldBe 200
       }
 
       "return some HTML that" should {
 
         "contain some text and use the character set utf-8" in {
-          keystoreFetchCondition[EntrepreneursReliefModel](None)
+          mockfetchAndGetFormData[EntrepreneursReliefModel](None)
           contentType(EntrepreneursReliefTestDataItem.result) shouldBe Some("text/html")
           charset(EntrepreneursReliefTestDataItem.result) shouldBe Some("utf-8")
         }
 
         "have the title 'Are you claiming Entrepreneurs Relief?'" in {
-          keystoreFetchCondition[EntrepreneursReliefModel](None)
+          mockfetchAndGetFormData[EntrepreneursReliefModel](None)
           EntrepreneursReliefTestDataItem.jsoupDoc.title shouldEqual Messages("calc.entrepreneursRelief.question")
         }
 
         "have the heading Calculate your tax (non-residents) " in {
-          keystoreFetchCondition[EntrepreneursReliefModel](None)
+          mockfetchAndGetFormData[EntrepreneursReliefModel](None)
           EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
         }
 
         "have a 'Back' link " in {
-          keystoreFetchCondition[EntrepreneursReliefModel](None)
+          mockfetchAndGetFormData[EntrepreneursReliefModel](None)
           EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
         }
 
         "have the question 'Are you claiming Entrepreneurs Relief?' as the legend of the input" in {
-          keystoreFetchCondition[EntrepreneursReliefModel](None)
+          mockfetchAndGetFormData[EntrepreneursReliefModel](None)
           EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementsByTag("legend").text shouldEqual Messages("calc.entrepreneursRelief.question")
         }
 
         "display a 'Continue' button " in {
-          keystoreFetchCondition[EntrepreneursReliefModel](None)
+          mockfetchAndGetFormData[EntrepreneursReliefModel](None)
           EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
         }
 
         "have a sidebar with additional links" in {
-          keystoreFetchCondition[EntrepreneursReliefModel](None)
+          mockfetchAndGetFormData[EntrepreneursReliefModel](None)
           EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementsByClass("sidebar")
         }
       }
@@ -2439,7 +2787,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
       "return a 200" in {
         object EntrepreneursReliefTestDataItem extends fakeRequestTo("entrepreneurs-relief", TestCalculationController.entrepreneursRelief)
-        keystoreFetchCondition[EntrepreneursReliefModel](Some(EntrepreneursReliefModel("Yes")))
+        mockfetchAndGetFormData[EntrepreneursReliefModel](Some(EntrepreneursReliefModel("Yes")))
         status(EntrepreneursReliefTestDataItem.result) shouldBe 200
       }
 
@@ -2447,13 +2795,13 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
         "have the radio option `Yes` selected if `Yes` is supplied in the model" in {
           object EntrepreneursReliefTestDataItem extends fakeRequestTo("entrepreneurs-relief", TestCalculationController.entrepreneursRelief)
-          keystoreFetchCondition[EntrepreneursReliefModel](Some(EntrepreneursReliefModel("Yes")))
+          mockfetchAndGetFormData[EntrepreneursReliefModel](Some(EntrepreneursReliefModel("Yes")))
           EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementById("entrepreneursRelief-yes").parent.classNames().contains("selected") shouldBe true
         }
 
         "have the radio option `No` selected if `No` is supplied in the model" in {
           object EntrepreneursReliefTestDataItem extends fakeRequestTo("entrepreneurs-relief", TestCalculationController.entrepreneursRelief)
-          keystoreFetchCondition[EntrepreneursReliefModel](Some(EntrepreneursReliefModel("No")))
+          mockfetchAndGetFormData[EntrepreneursReliefModel](Some(EntrepreneursReliefModel("No")))
           EntrepreneursReliefTestDataItem.jsoupDoc.body.getElementById("entrepreneursRelief-no").parent.classNames().contains("selected") shouldBe true
         }
       }
@@ -2461,7 +2809,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
   }
 
   "In CalculationController calling the .submitEntrepreneursRelief action" when {
-    def keystoreCacheCondition[T](data: EntrepreneursReliefModel): Unit = {
+    def mockSaveFormData[T](data: EntrepreneursReliefModel): Unit = {
       lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
       when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(returnedCacheMap))
@@ -2475,12 +2823,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new EntrepreneursReliefModel("Yes")
 
       "return a 303" in {
-        keystoreCacheCondition[EntrepreneursReliefModel](testModel)
+        mockSaveFormData[EntrepreneursReliefModel](testModel)
         status(EntrepreneursReliefTestDataItem.result) shouldBe 303
       }
 
       s"redirect to ${routes.CalculationController.allowableLosses()}" in {
-        keystoreCacheCondition[EntrepreneursReliefModel](testModel)
+        mockSaveFormData[EntrepreneursReliefModel](testModel)
         redirectLocation(EntrepreneursReliefTestDataItem.result) shouldBe Some(s"${routes.CalculationController.allowableLosses()}")
       }
     }
@@ -2494,12 +2842,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new EntrepreneursReliefModel("no")
 
       "return a 303" in {
-        keystoreCacheCondition[EntrepreneursReliefModel](testModel)
+        mockSaveFormData[EntrepreneursReliefModel](testModel)
         status(EntrepreneursReliefTestDataItem.result) shouldBe 303
       }
 
       s"redirect to ${routes.CalculationController.allowableLosses()}" in {
-        keystoreCacheCondition[EntrepreneursReliefModel](testModel)
+        mockSaveFormData[EntrepreneursReliefModel](testModel)
         redirectLocation(EntrepreneursReliefTestDataItem.result) shouldBe Some(s"${routes.CalculationController.allowableLosses()}")
       }
     }
@@ -2513,7 +2861,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new EntrepreneursReliefModel("")
 
       "return a 400" in {
-        keystoreCacheCondition[EntrepreneursReliefModel](testModel)
+        mockSaveFormData[EntrepreneursReliefModel](testModel)
         status(EntrepreneursReliefTestDataItem.result) shouldBe 400
       }
     }
@@ -2528,53 +2876,53 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       object AllowableLossesTestDataItem extends fakeRequestTo("allowable-losses", TestCalculationController.allowableLosses)
 
       "return a 200" in {
-        keystoreFetchCondition[AllowableLossesModel](None)
+        mockfetchAndGetFormData[AllowableLossesModel](None)
         status(AllowableLossesTestDataItem.result) shouldBe 200
       }
 
       "return some HTML that" should {
 
         "contain some text and use the character set utf-8" in {
-          keystoreFetchCondition[AllowableLossesModel](None)
+          mockfetchAndGetFormData[AllowableLossesModel](None)
           contentType(AllowableLossesTestDataItem.result) shouldBe Some("text/html")
           charset(AllowableLossesTestDataItem.result) shouldBe Some("utf-8")
         }
 
         "have a back button" in {
-          keystoreFetchCondition[AllowableLossesModel](None)
+          mockfetchAndGetFormData[AllowableLossesModel](None)
           AllowableLossesTestDataItem.jsoupDoc.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
         }
 
         "have the title 'Are you claiming any allowable losses?'" in {
-          keystoreFetchCondition[AllowableLossesModel](None)
+          mockfetchAndGetFormData[AllowableLossesModel](None)
           AllowableLossesTestDataItem.jsoupDoc.title shouldEqual Messages("calc.allowableLosses.question.one")
         }
 
         "have the heading 'Calculate your tax (non-residents)'" in {
-          keystoreFetchCondition[AllowableLossesModel](None)
+          mockfetchAndGetFormData[AllowableLossesModel](None)
           AllowableLossesTestDataItem.jsoupDoc.body.getElementsByTag("H1").text shouldEqual Messages("calc.base.pageHeading")
         }
 
         "have a yes no helper with hidden content and question 'Are you claiming any allowable losses?'" in {
-          keystoreFetchCondition[AllowableLossesModel](None)
+          mockfetchAndGetFormData[AllowableLossesModel](None)
           AllowableLossesTestDataItem.jsoupDoc.body.getElementById("isClaimingAllowableLosses-yes").parent.text shouldBe Messages("calc.base.yes")
           AllowableLossesTestDataItem.jsoupDoc.body.getElementById("isClaimingAllowableLosses-no").parent.text shouldBe Messages("calc.base.no")
           AllowableLossesTestDataItem.jsoupDoc.body.getElementsByTag("legend").text shouldBe Messages("calc.allowableLosses.question.one")
         }
 
         "have a hidden monetary input with question 'Whats the total value of your allowable losses?'" in {
-          keystoreFetchCondition[AllowableLossesModel](None)
+          mockfetchAndGetFormData[AllowableLossesModel](None)
           AllowableLossesTestDataItem.jsoupDoc.body.getElementById("allowableLossesAmt").tagName shouldEqual "input"
           AllowableLossesTestDataItem.jsoupDoc.select("label[for=allowableLossesAmt]").text should include (Messages("calc.allowableLosses.question.two"))
         }
 
         "have no value auto-filled into the input box" in {
-          keystoreFetchCondition[AcquisitionValueModel](None)
+          mockfetchAndGetFormData[AcquisitionValueModel](None)
           AllowableLossesTestDataItem.jsoupDoc.getElementById("allowableLossesAmt").attr("value") shouldBe empty
         }
 
         "have a hidden help text section with summary 'What are allowable losses?' and correct content" in {
-          keystoreFetchCondition[AllowableLossesModel](None)
+          mockfetchAndGetFormData[AllowableLossesModel](None)
           AllowableLossesTestDataItem.jsoupDoc.select("div#allowableLossesHiddenHelp").text should
             include(Messages("calc.allowableLosses.helpText.title"))
             include(Messages("calc.allowableLosses.helpText.paragraph.one"))
@@ -2584,7 +2932,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         }
 
         "has a Continue button" in {
-          keystoreFetchCondition[AllowableLossesModel](None)
+          mockfetchAndGetFormData[AllowableLossesModel](None)
           AllowableLossesTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
         }
       }
@@ -2595,25 +2943,25 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new AllowableLossesModel("Yes", Some(9999.54))
 
       "return a 200" in {
-        keystoreFetchCondition[AllowableLossesModel](Some(testModel))
+        mockfetchAndGetFormData[AllowableLossesModel](Some(testModel))
         status(AllowableLossesTestDataItem.result) shouldBe 200
       }
 
       "return some HTML that" should {
 
         "contain some text and use the character set utf-8" in {
-          keystoreFetchCondition[AllowableLossesModel](Some(testModel))
+          mockfetchAndGetFormData[AllowableLossesModel](Some(testModel))
           contentType(AllowableLossesTestDataItem.result) shouldBe Some("text/html")
           charset(AllowableLossesTestDataItem.result) shouldBe Some("utf-8")
         }
 
         "have the 'Yes' Radio option selected" in {
-          keystoreFetchCondition[AllowableLossesModel](Some(testModel))
+          mockfetchAndGetFormData[AllowableLossesModel](Some(testModel))
           AllowableLossesTestDataItem.jsoupDoc.getElementById("isClaimingAllowableLosses-yes").parent.classNames().contains("selected") shouldBe true
         }
 
         "have the value 9999.54 auto-filled into the input box" in {
-          keystoreFetchCondition[AllowableLossesModel](Some(testModel))
+          mockfetchAndGetFormData[AllowableLossesModel](Some(testModel))
           AllowableLossesTestDataItem.jsoupDoc.getElementById("allowableLossesAmt").attr("value") shouldEqual ("9999.54")
         }
       }
@@ -2621,7 +2969,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
   }
 
   "In CalculationController calling the .submitAllowableLosses action" when {
-    def keystoreCacheCondition[T](data: AllowableLossesModel): Unit = {
+    def mockSaveFormData[T](data: AllowableLossesModel): Unit = {
       lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
       when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(returnedCacheMap))
@@ -2636,8 +2984,8 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val acqDateModel = AcquisitionDateModel("No", None, None, None)
 
       "return a 303" in {
-        keystoreFetchValue(Some(acqDateModel))
-        keystoreCacheCondition[AllowableLossesModel](testModel)
+        mockfetchAndGetValue(Some(acqDateModel))
+        mockSaveFormData[AllowableLossesModel](testModel)
         status(AllowableLossesTestDataItem.result) shouldBe 303
       }
     }
@@ -2652,8 +3000,8 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val acqDateModel = AcquisitionDateModel("Yes", Some(1), Some(1), Some(2016))
 
       "return a 303" in {
-        keystoreFetchValue(Some(acqDateModel))
-        keystoreCacheCondition[AllowableLossesModel](testModel)
+        mockfetchAndGetValue(Some(acqDateModel))
+        mockSaveFormData[AllowableLossesModel](testModel)
         status(AllowableLossesTestDataItem.result) shouldBe 303
       }
     }
@@ -2668,8 +3016,8 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val acqDateModel = AcquisitionDateModel("Yes", Some(1), Some(1), Some(2010))
 
       "return a 303" in {
-        keystoreFetchValue(Some(acqDateModel))
-        keystoreCacheCondition[AllowableLossesModel](testModel)
+        mockfetchAndGetValue(Some(acqDateModel))
+        mockSaveFormData[AllowableLossesModel](testModel)
         status(AllowableLossesTestDataItem.result) shouldBe 303
       }
     }
@@ -2683,8 +3031,8 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new AllowableLossesModel("No", Some(-1000))
 
       "return a 303" in {
-        keystoreFetchValue(None)
-        keystoreCacheCondition[AllowableLossesModel](testModel)
+        mockfetchAndGetValue(None)
+        mockSaveFormData[AllowableLossesModel](testModel)
         status(AllowableLossesTestDataItem.result) shouldBe 303
       }
     }
@@ -2698,7 +3046,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new AllowableLossesModel("Yes", Some(1000))
 
       "return a 400" in {
-        keystoreCacheCondition[AllowableLossesModel](testModel)
+        mockSaveFormData[AllowableLossesModel](testModel)
         status(AllowableLossesTestDataItem.result) shouldBe 400
       }
     }
@@ -2712,7 +3060,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new AllowableLossesModel("Yes", None)
 
       "return a 400" in {
-        keystoreCacheCondition[AllowableLossesModel](testModel)
+        mockSaveFormData[AllowableLossesModel](testModel)
         status(AllowableLossesTestDataItem.result) shouldBe 400
       }
     }
@@ -2726,7 +3074,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new AllowableLossesModel("Yes", Some(1000.111))
 
       "return a 400" in {
-        keystoreCacheCondition[AllowableLossesModel](testModel)
+        mockSaveFormData[AllowableLossesModel](testModel)
         status(AllowableLossesTestDataItem.result) shouldBe 400
       }
     }
@@ -2740,7 +3088,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new AllowableLossesModel("Yes", Some(-1000))
 
       "return a 400" in {
-        keystoreCacheCondition[AllowableLossesModel](testModel)
+        mockSaveFormData[AllowableLossesModel](testModel)
         status(AllowableLossesTestDataItem.result) shouldBe 400
       }
     }
@@ -2751,64 +3099,81 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
   "In CalculationController calling the .calculationElection action" when {
 
     "supplied with no pre-existing data" should {
-
+      mockCreateSummary(TestModels.summaryTrusteeTAWithoutAEA)
+      mockGenerateElection
       object CalculationElectionTestDataItem extends fakeRequestTo("calculation-election", TestCalculationController.calculationElection)
-      keystoreTACalculateValue(Some(TestModels.calcModelTwoRates))
-      //keystoreFlatCalculateValue(Some(TestModels.calcModelOneRate))
 
       "return a 200" in {
-        keystoreSummaryValue(sumModelFlat)
-        keystoreFlatCalculateValue(Some(calcModelOneRate))
-        keystoreFetchCondition[CalculationElectionModel](None)
+        mockCreateSummary(TestModels.summaryTrusteeTAWithoutAEA)
+        mockGenerateElection
+        mockfetchAndGetFormData[CalculationElectionModel](None)
         status(CalculationElectionTestDataItem.result) shouldBe 200
       }
 
       "return some HTML that" should {
 
         "contain some text and use the character set UTF-8" in {
-          keystoreFetchCondition[CalculationElectionModel](None)
+          mockCreateSummary(TestModels.summaryTrusteeTAWithoutAEA)
+          mockGenerateElection
+          mockfetchAndGetFormData[CalculationElectionModel](None)
           contentType(CalculationElectionTestDataItem.result) shouldBe Some("text/html")
           charset(CalculationElectionTestDataItem.result) shouldBe Some("utf-8")
         }
 
         "have the title Which method of calculation would you like?" in {
-          keystoreFetchCondition[CalculationElectionModel](None)
+          mockCreateSummary(TestModels.summaryTrusteeTAWithoutAEA)
+          mockGenerateElection
+          mockfetchAndGetFormData[CalculationElectionModel](None)
           CalculationElectionTestDataItem.jsoupDoc.title shouldEqual Messages("calc.calculationElection.question")
         }
 
         "have the heading Calculate your tax (non-residents) " in {
-          keystoreFetchCondition[CalculationElectionModel](None)
+          mockCreateSummary(TestModels.summaryTrusteeTAWithoutAEA)
+          mockGenerateElection
+          mockfetchAndGetFormData[CalculationElectionModel](None)
           CalculationElectionTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
         }
 
         "have a 'Back' link " in {
-          keystoreFetchCondition[CalculationElectionModel](None)
+          mockCreateSummary(TestModels.summaryTrusteeTAWithoutAEA)
+          mockGenerateElection
+          mockfetchAndGetFormData[CalculationElectionModel](None)
           CalculationElectionTestDataItem.jsoupDoc.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
         }
 
         "have the paragraph You can decide what to base your Capital Gains Tax on. It affects how much you'll pay." in {
-          keystoreFetchCondition[CalculationElectionModel](None)
+          mockCreateSummary(TestModels.summaryTrusteeTAWithoutAEA)
+          mockGenerateElection
+          mockfetchAndGetFormData[CalculationElectionModel](None)
           CalculationElectionTestDataItem.jsoupDoc.body.getElementById("question-information").text shouldEqual Messages("calc.calculationElection.message")
         }
 
         "have a calculationElectionHelper for the option of a flat calculation rendered on the page" in {
-          keystoreFetchCondition[CalculationElectionModel](None)
+          mockCreateSummary(TestModels.summaryTrusteeTAWithoutAEA)
+          mockGenerateElection
+          mockfetchAndGetFormData[CalculationElectionModel](None)
           CalculationElectionTestDataItem.jsoupDoc.body.getElementById("calculationElection-flat").attr("value") shouldEqual "flat"
           CalculationElectionTestDataItem.jsoupDoc.body.getElementById("flat-para").text shouldEqual "Based on " + Messages("calc.calculationElection.message.flat")
         }
 
         "display a 'Continue' button " in {
-          keystoreFetchCondition[CalculationElectionModel](None)
+          mockCreateSummary(TestModels.summaryTrusteeTAWithoutAEA)
+          mockGenerateElection
+          mockfetchAndGetFormData[CalculationElectionModel](None)
           CalculationElectionTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
         }
 
         "display a concertina information box with 'They sometimes qualify for larger tax reliefs. This can lower the amount you owe or even reduce it to zero' as the content" in {
-          keystoreFetchCondition[CalculationElectionModel](None)
+          mockCreateSummary(TestModels.summaryTrusteeTAWithoutAEA)
+          mockGenerateElection
+          mockfetchAndGetFormData[CalculationElectionModel](None)
           CalculationElectionTestDataItem.jsoupDoc.select("summary span.summary").text shouldEqual Messages("calc.calculationElection.message.whyMore")
           CalculationElectionTestDataItem.jsoupDoc.select("div#details-content-0 p").text shouldEqual Messages("calc.calculationElection.message.whyMoreDetails")
         }
         "have no pre-selected option" in {
-          keystoreFetchCondition[CalculationElectionModel](None)
+          mockCreateSummary(TestModels.summaryTrusteeTAWithoutAEA)
+          mockGenerateElection
+          mockfetchAndGetFormData[CalculationElectionModel](None)
           CalculationElectionTestDataItem.jsoupDoc.body.getElementById("calculationElection-flat").parent.classNames().contains("selected") shouldBe false
         }
       }
@@ -2818,28 +3183,26 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
       object CalculationElectionTestDataItem extends fakeRequestTo("calculation-election", TestCalculationController.calculationElection)
       val calculationElectionTestModel = new CalculationElectionModel("flat")
-      keystoreSummaryValue(TestModels.summaryTrusteeTAWithoutAEA)
-      keystoreTACalculateValue(Some(TestModels.calcModelTwoRates))
-      keystoreFlatCalculateValue(Some(TestModels.calcModelOneRate))
+      mockCreateSummary(TestModels.summaryTrusteeTAWithoutAEA)
+      mockGenerateElection
 
       "return a 200" in {
-        keystoreFetchCondition[CalculationElectionModel](Some(calculationElectionTestModel))
+        mockfetchAndGetFormData[CalculationElectionModel](Some(calculationElectionTestModel))
         status(CalculationElectionTestDataItem.result) shouldBe 200
       }
 
       "return some HTML that" should {
 
         "contain some text and use the character set utf-8" in {
-          keystoreFetchCondition[CalculationElectionModel](Some(calculationElectionTestModel))
+          mockfetchAndGetFormData[CalculationElectionModel](Some(calculationElectionTestModel))
           contentType(CalculationElectionTestDataItem.result) shouldBe Some("text/html")
           charset(CalculationElectionTestDataItem.result) shouldBe Some("utf-8")
         }
 
         "have the stored value of flat calculation selected" in {
-          keystoreSummaryValue(TestModels.summaryTrusteeTAWithoutAEA)
-          keystoreTACalculateValue(Some(TestModels.calcModelTwoRates))
-          keystoreFlatCalculateValue(Some(TestModels.calcModelOneRate))
-          keystoreFetchCondition[CalculationElectionModel](Some(calculationElectionTestModel))
+          mockCreateSummary(TestModels.summaryTrusteeTAWithoutAEA)
+          mockGenerateElection
+          mockfetchAndGetFormData[CalculationElectionModel](Some(calculationElectionTestModel))
           CalculationElectionTestDataItem.jsoupDoc.body.getElementById("calculationElection-flat").parent.classNames().contains("selected") shouldBe true
         }
       }
@@ -2848,7 +3211,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
   "In CalculationController calling the .submitCalculationElection action" when {
 
-    def keystoreCacheCondition[T](data: CalculationElectionModel): Unit = {
+    def mockSaveFormData[T](data: CalculationElectionModel): Unit = {
       lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
       when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(returnedCacheMap))
@@ -2859,10 +3222,14 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val calculationElectionTestModel = new CalculationElectionModel("flat")
 
       "return a 303" in {
-        keystoreSummaryValue(sumModelFlat)
-        keystoreFlatCalculateValue(Some(calcModelOneRate))
-        keystoreCacheCondition[CalculationElectionModel](calculationElectionTestModel)
+        mockCreateSummary(TestModels.summaryTrusteeTAWithoutAEA)
+        mockCalculateFlatValue(Some(calcModelOneRate))
+        mockSaveFormData[CalculationElectionModel](calculationElectionTestModel)
         status(CalculationElectionTestDataItem.result) shouldBe 303
+      }
+
+      "redirect to the summary page" in {
+        redirectLocation(CalculationElectionTestDataItem.result) shouldBe Some(s"${routes.CalculationController.summary}")
       }
     }
 
@@ -2871,9 +3238,21 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val calculationElectionTestModel = new CalculationElectionModel("time")
 
       "return a 303" in {
-        keystoreSummaryValue(sumModelTA)
-        keystoreFlatCalculateValue(Some(calcModelOneRate))
-        keystoreCacheCondition[CalculationElectionModel](calculationElectionTestModel)
+        mockCreateSummary(TestModels.summaryTrusteeTAWithoutAEA)
+        mockCalculateFlatValue(Some(calcModelOneRate))
+        mockSaveFormData[CalculationElectionModel](calculationElectionTestModel)
+        status(CalculationElectionTestDataItem.result) shouldBe 303
+      }
+    }
+
+    "submitting a valid form with 'rebased' selected" should {
+      object CalculationElectionTestDataItem extends fakeRequestToPost("calculation-election", TestCalculationController.submitCalculationElection, ("calculationElection", "rebased"))
+      val calculationElectionTestModel = new CalculationElectionModel("rebased")
+
+      "return a 303" in {
+        mockCreateSummary(sumModelTA)
+        mockCalculateFlatValue(Some(calcModelOneRate))
+        mockSaveFormData[CalculationElectionModel](calculationElectionTestModel)
         status(CalculationElectionTestDataItem.result) shouldBe 303
       }
     }
@@ -2883,9 +3262,22 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val calculationElectionTestModel = new CalculationElectionModel("")
 
       "return a 400" in {
-        keystoreSummaryValue(sumModelFlat)
-        keystoreFlatCalculateValue(Some(calcModelOneRate))
-        keystoreCacheCondition[CalculationElectionModel](calculationElectionTestModel)
+        mockCreateSummary(sumModelFlat)
+        mockCalculateFlatValue(Some(calcModelOneRate))
+        mockCalculateTAValue(Some(TestModels.calcModelTwoRates))
+        mockSaveFormData[CalculationElectionModel](calculationElectionTestModel)
+        status(CalculationElectionTestDataItem.result) shouldBe 400
+      }
+    }
+
+    "submitting a form with completely unrelated 'ew1234qwer'" should  {
+      object CalculationElectionTestDataItem extends fakeRequestToPost("calculation-election", TestCalculationController.submitCalculationElection, ("calculationElection", "ew1234qwer"))
+      val calculationElectionTestModel = new CalculationElectionModel("ew1234qwer")
+
+      "return a 400" in {
+        mockCreateSummary(sumModelFlat)
+        mockCalculateFlatValue(Some(calcModelOneRate))
+        mockSaveFormData[CalculationElectionModel](calculationElectionTestModel)
         status(CalculationElectionTestDataItem.result) shouldBe 400
       }
     }
@@ -2897,73 +3289,73 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       object OtherReliefsTestDataItem extends fakeRequestTo("other-reliefs", TestCalculationController.otherReliefs)
 
       "return a 200 with a valid calculation result" in {
-        keystoreSummaryValue(sumModelFlat)
-        keystoreFlatCalculateValue(Some(calcModelTwoRates))
-        keystoreFetchCondition[OtherReliefsModel](None)
+        mockCreateSummary(sumModelFlat)
+        mockCalculateFlatValue(Some(calcModelTwoRates))
+        mockfetchAndGetFormData[OtherReliefsModel](None)
         status(OtherReliefsTestDataItem.result) shouldBe 200
       }
 
       "return a 200 with an invalid calculation result" in {
         object OtherReliefsTestDataItem extends fakeRequestTo("other-reliefs", TestCalculationController.otherReliefs)
-        keystoreSummaryValue(sumModelFlat)
-        keystoreFlatCalculateValue(None)
-        keystoreFetchCondition[OtherReliefsModel](None)
+        mockCreateSummary(sumModelFlat)
+        mockCalculateFlatValue(None)
+        mockfetchAndGetFormData[OtherReliefsModel](None)
         status(OtherReliefsTestDataItem.result) shouldBe 200
       }
 
       "return some HTML that" should {
 
         "contain some text and use the character set utf-8" in {
-          keystoreSummaryValue(sumModelFlat)
-          keystoreFlatCalculateValue(Some(calcModelTwoRates))
+          mockCreateSummary(sumModelFlat)
+          mockCalculateFlatValue(Some(calcModelTwoRates))
           contentType(OtherReliefsTestDataItem.result) shouldBe Some("text/html")
           charset(OtherReliefsTestDataItem.result) shouldBe Some("utf-8")
         }
         "have the title 'How much extra tax relief are you claiming?'" in {
-          keystoreSummaryValue(sumModelFlat)
-          keystoreFlatCalculateValue(Some(calcModelTwoRates))
+          mockCreateSummary(sumModelFlat)
+          mockCalculateFlatValue(Some(calcModelTwoRates))
           OtherReliefsTestDataItem.jsoupDoc.title shouldEqual Messages("calc.otherReliefs.question")
         }
 
         "have the heading Calculate your tax (non-residents) " in {
-          keystoreSummaryValue(sumModelFlat)
-          keystoreFlatCalculateValue(Some(calcModelTwoRates))
+          mockCreateSummary(sumModelFlat)
+          mockCalculateFlatValue(Some(calcModelTwoRates))
           OtherReliefsTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
         }
 
         "have a 'Back' link " in {
-          keystoreSummaryValue(sumModelFlat)
-          keystoreFlatCalculateValue(Some(calcModelTwoRates))
+          mockCreateSummary(sumModelFlat)
+          mockCalculateFlatValue(Some(calcModelTwoRates))
           OtherReliefsTestDataItem.jsoupDoc.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
         }
 
         "have the question 'How much extra tax relief are you claiming?' as the legend of the input" in {
-          keystoreSummaryValue(sumModelFlat)
-          keystoreFlatCalculateValue(Some(calcModelTwoRates))
+          mockCreateSummary(sumModelFlat)
+          mockCalculateFlatValue(Some(calcModelTwoRates))
           OtherReliefsTestDataItem.jsoupDoc.body.getElementsByTag("label").text should include (Messages("calc.otherReliefs.question"))
         }
 
         "display an input box for the Other Tax Reliefs" in {
-          keystoreSummaryValue(sumModelFlat)
-          keystoreFlatCalculateValue(Some(calcModelTwoRates))
+          mockCreateSummary(sumModelFlat)
+          mockCalculateFlatValue(Some(calcModelTwoRates))
           OtherReliefsTestDataItem.jsoupDoc.body.getElementById("otherReliefs").tagName() shouldEqual "input"
         }
 
         "display an 'Add relief' button " in {
-          keystoreSummaryValue(sumModelFlat)
-          keystoreFlatCalculateValue(Some(calcModelTwoRates))
+          mockCreateSummary(sumModelFlat)
+          mockCalculateFlatValue(Some(calcModelTwoRates))
           OtherReliefsTestDataItem.jsoupDoc.body.getElementById("add-relief-button").text shouldEqual Messages("calc.otherReliefs.button.addRelief")
         }
 
         "include helptext for 'Total gain'" in {
-          keystoreSummaryValue(sumModelFlat)
-          keystoreFlatCalculateValue(Some(calcModelTwoRates))
+          mockCreateSummary(sumModelFlat)
+          mockCalculateFlatValue(Some(calcModelTwoRates))
           OtherReliefsTestDataItem.jsoupDoc.body.getElementById("totalGain").text should include (Messages("calc.otherReliefs.totalGain"))
         }
 
         "include helptext for 'Taxable gain'" in {
-          keystoreSummaryValue(sumModelFlat)
-          keystoreFlatCalculateValue(Some(calcModelTwoRates))
+          mockCreateSummary(sumModelFlat)
+          mockCalculateFlatValue(Some(calcModelTwoRates))
           OtherReliefsTestDataItem.jsoupDoc.body.getElementById("taxableGain").text should include (Messages("calc.otherReliefs.taxableGain"))
         }
       }
@@ -2973,33 +3365,33 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testOtherReliefsModel = new OtherReliefsModel(Some(5000))
 
       "return a 200 with a valid calculation call" in {
-        keystoreSummaryValue(sumModelFlat)
-        keystoreFlatCalculateValue(Some(calcModelTwoRates))
-        keystoreFetchCondition[OtherReliefsModel](Some(testOtherReliefsModel))
+        mockCreateSummary(sumModelFlat)
+        mockCalculateFlatValue(Some(calcModelTwoRates))
+        mockfetchAndGetFormData[OtherReliefsModel](Some(testOtherReliefsModel))
         status(OtherReliefsTestDataItem.result) shouldBe 200
       }
 
       "return a 200 with an invalid calculation call" in {
         object OtherReliefsTestDataItem extends fakeRequestTo("other-reliefs", TestCalculationController.otherReliefs)
-        keystoreSummaryValue(sumModelFlat)
-        keystoreFlatCalculateValue(None)
-        keystoreFetchCondition[OtherReliefsModel](Some(testOtherReliefsModel))
+        mockCreateSummary(sumModelFlat)
+        mockCalculateFlatValue(None)
+        mockfetchAndGetFormData[OtherReliefsModel](Some(testOtherReliefsModel))
         status(OtherReliefsTestDataItem.result) shouldBe 200
       }
 
       "return some HTML that" should {
 
         "contain some text and use the character set utf-8" in {
-          keystoreSummaryValue(sumModelFlat)
-          keystoreFlatCalculateValue(Some(calcModelTwoRates))
+          mockCreateSummary(sumModelFlat)
+          mockCalculateFlatValue(Some(calcModelTwoRates))
           contentType(OtherReliefsTestDataItem.result) shouldBe Some("text/html")
           charset(OtherReliefsTestDataItem.result) shouldBe Some("utf-8")
         }
 
         "have the value 5000 auto-filled into the input box" in {
-          keystoreSummaryValue(sumModelFlat)
-          keystoreFlatCalculateValue(Some(calcModelTwoRates))
-          keystoreFetchCondition[OtherReliefsModel](Some(testOtherReliefsModel))
+          mockCreateSummary(sumModelFlat)
+          mockCalculateFlatValue(Some(calcModelTwoRates))
+          mockfetchAndGetFormData[OtherReliefsModel](Some(testOtherReliefsModel))
           OtherReliefsTestDataItem.jsoupDoc.getElementById("otherReliefs").attr("value") shouldEqual "5000"
         }
 
@@ -3009,7 +3401,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
   }
 
   "In CalculationController calling the .submitOtherReliefs action" when {
-    def keystoreCacheCondition[T](data: OtherReliefsModel): Unit = {
+    def mockSaveFormData[T](data: OtherReliefsModel): Unit = {
       lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
       when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(returnedCacheMap))
@@ -3021,27 +3413,27 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       "return a 303 with no Acquisition date" in {
         object OtherReliefsTestDataItem extends fakeRequestToPost("other-reliefs", TestCalculationController.submitOtherReliefs, ("otherReliefs", "1000"))
         val otherReliefsTestModel = new OtherReliefsModel(Some(1000))
-        keystoreSummaryValue(sumModelFlat)
-        keystoreFlatCalculateValue(Some(calcModelTwoRates))
-        keystoreCacheCondition[OtherReliefsModel](otherReliefsTestModel)
+        mockCreateSummary(sumModelFlat)
+        mockCalculateFlatValue(Some(calcModelTwoRates))
+        mockSaveFormData[OtherReliefsModel](otherReliefsTestModel)
         status(OtherReliefsTestDataItem.result) shouldBe 303
       }
 
       "return a 303 with an Acquisition date before the start date" in {
         object OtherReliefsTestDataItem extends fakeRequestToPost("other-reliefs", TestCalculationController.submitOtherReliefs, ("otherReliefs", "1000"))
         val otherReliefsTestModel = new OtherReliefsModel(Some(1000))
-        keystoreSummaryValue(TestModels.summaryTrusteeTAWithoutAEA)
-        keystoreFlatCalculateValue(Some(calcModelTwoRates))
-        keystoreCacheCondition[OtherReliefsModel](otherReliefsTestModel)
+        mockCreateSummary(TestModels.summaryTrusteeTAWithoutAEA)
+        mockCalculateFlatValue(Some(calcModelTwoRates))
+        mockSaveFormData[OtherReliefsModel](otherReliefsTestModel)
         status(OtherReliefsTestDataItem.result) shouldBe 303
       }
 
       "return a 303 with an Acquisition date after the start date" in {
         object OtherReliefsTestDataItem extends fakeRequestToPost("other-reliefs", TestCalculationController.submitOtherReliefs, ("otherReliefs", "1000"))
         val otherReliefsTestModel = new OtherReliefsModel(Some(1000))
-        keystoreSummaryValue(TestModels.summaryIndividualAcqDateAfter)
-        keystoreFlatCalculateValue(Some(calcModelTwoRates))
-        keystoreCacheCondition[OtherReliefsModel](otherReliefsTestModel)
+        mockCreateSummary(TestModels.summaryIndividualAcqDateAfter)
+        mockCalculateFlatValue(Some(calcModelTwoRates))
+        mockSaveFormData[OtherReliefsModel](otherReliefsTestModel)
         status(OtherReliefsTestDataItem.result) shouldBe 303
       }
     }
@@ -3051,9 +3443,9 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val otherReliefsTestModel = new OtherReliefsModel(Some(1000.11))
 
       "return a 303" in {
-        keystoreSummaryValue(sumModelFlat)
-        keystoreFlatCalculateValue(Some(calcModelTwoRates))
-        keystoreCacheCondition[OtherReliefsModel](otherReliefsTestModel)
+        mockCreateSummary(sumModelFlat)
+        mockCalculateFlatValue(Some(calcModelTwoRates))
+        mockSaveFormData[OtherReliefsModel](otherReliefsTestModel)
         status(OtherReliefsTestDataItem.result) shouldBe 303
       }
     }
@@ -3063,9 +3455,9 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val otherReliefsTestModel = new OtherReliefsModel(Some(0))
 
       "return a 303" in {
-        keystoreSummaryValue(sumModelFlat)
-        keystoreFlatCalculateValue(Some(calcModelTwoRates))
-        keystoreCacheCondition[OtherReliefsModel](otherReliefsTestModel)
+        mockCreateSummary(sumModelFlat)
+        mockCalculateFlatValue(Some(calcModelTwoRates))
+        mockSaveFormData[OtherReliefsModel](otherReliefsTestModel)
         status(OtherReliefsTestDataItem.result) shouldBe 303
       }
     }
@@ -3075,9 +3467,9 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val otherReliefsTestModel = new OtherReliefsModel(Some(1000.111))
 
       "return a 400" in {
-        keystoreSummaryValue(sumModelFlat)
-        keystoreFlatCalculateValue(Some(calcModelTwoRates))
-        keystoreCacheCondition[OtherReliefsModel](otherReliefsTestModel)
+        mockCreateSummary(sumModelFlat)
+        mockCalculateFlatValue(Some(calcModelTwoRates))
+        mockSaveFormData[OtherReliefsModel](otherReliefsTestModel)
         status(OtherReliefsTestDataItem.result) shouldBe 400
       }
     }
@@ -3087,9 +3479,9 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val otherReliefsTestModel = new OtherReliefsModel(Some(-1000))
 
       "return a 400" in {
-        keystoreSummaryValue(sumModelFlat)
-        keystoreFlatCalculateValue(Some(calcModelTwoRates))
-        keystoreCacheCondition[OtherReliefsModel](otherReliefsTestModel)
+        mockCreateSummary(sumModelFlat)
+        mockCalculateFlatValue(Some(calcModelTwoRates))
+        mockSaveFormData[OtherReliefsModel](otherReliefsTestModel)
         status(OtherReliefsTestDataItem.result) shouldBe 400
       }
     }
@@ -3099,9 +3491,9 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val otherReliefsTestModel = new OtherReliefsModel(Some(1000))
 
       "return a 400" in {
-        keystoreSummaryValue(sumModelFlat)
-        keystoreFlatCalculateValue(Some(calcModelTwoRates))
-        keystoreCacheCondition[OtherReliefsModel](otherReliefsTestModel)
+        mockCreateSummary(sumModelFlat)
+        mockCalculateFlatValue(Some(calcModelTwoRates))
+        mockSaveFormData[OtherReliefsModel](otherReliefsTestModel)
         status(OtherReliefsTestDataItem.result) shouldBe 400
       }
     }
@@ -3109,7 +3501,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
   //################### Time Apportioned Other Relief tests ###################
   "In CalculationController calling the .otherReliefsTA action " should  {
-    keystoreFetchCondition[OtherReliefsModel](None)
+    mockfetchAndGetFormData[OtherReliefsModel](None)
     object OtherReliefsTATestDataItem extends fakeRequestTo("other-reliefs-time-apportioned", TestCalculationController.otherReliefsTA)
 
     "return a 200" in {
@@ -3160,7 +3552,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       object OtherReliefsTATestDataItem extends fakeRequestTo("other-reliefs-time-apportioned", TestCalculationController.otherReliefsTA)
 
       "contain no pre-filled data" in {
-        keystoreFetchCondition[OtherReliefsModel](None)
+        mockfetchAndGetFormData[OtherReliefsModel](None)
         OtherReliefsTATestDataItem.jsoupDoc.body.getElementById("otherReliefs").attr("value") shouldBe ""
       }
     }
@@ -3170,14 +3562,14 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       object OtherReliefsTATestDataItem extends fakeRequestTo("other-reliefs-time-apportioned", TestCalculationController.otherReliefsTA)
 
       "contain the pre-supplied data" in {
-        keystoreFetchCondition[OtherReliefsModel](Some(testModel))
+        mockfetchAndGetFormData[OtherReliefsModel](Some(testModel))
         OtherReliefsTATestDataItem.jsoupDoc.body.getElementById("otherReliefs").attr("value") shouldBe "1000"
       }
     }
   }
 
   "In CalculationController calling the .submitOtherReliefsTA action" when {
-    def keystoreCacheCondition[T](data: OtherReliefsModel): Unit = {
+    def mockSaveFormData[T](data: OtherReliefsModel): Unit = {
       lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
       when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(returnedCacheMap))
@@ -3188,7 +3580,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val otherReliefsTATestModel = new OtherReliefsModel(Some(1000))
 
       "return a 303" in {
-        keystoreCacheCondition[OtherReliefsModel](otherReliefsTATestModel)
+        mockSaveFormData[OtherReliefsModel](otherReliefsTATestModel)
         status(OtherReliefsTATestDataItem.result) shouldBe 303
       }
     }
@@ -3198,7 +3590,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val otherReliefsTATestModel = new OtherReliefsModel(Some(1000.11))
 
       "return a 303" in {
-        keystoreCacheCondition[OtherReliefsModel](otherReliefsTATestModel)
+        mockSaveFormData[OtherReliefsModel](otherReliefsTATestModel)
         status(OtherReliefsTATestDataItem.result) shouldBe 303
       }
     }
@@ -3208,7 +3600,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val otherReliefsTATestModel = new OtherReliefsModel(Some(0))
 
       "return a 303" in {
-        keystoreCacheCondition[OtherReliefsModel](otherReliefsTATestModel)
+        mockSaveFormData[OtherReliefsModel](otherReliefsTATestModel)
         status(OtherReliefsTATestDataItem.result) shouldBe 303
       }
     }
@@ -3218,7 +3610,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val otherReliefsTATestModel = new OtherReliefsModel(Some(1000.111))
 
       "return a 400" in {
-        keystoreCacheCondition[OtherReliefsModel](otherReliefsTATestModel)
+        mockSaveFormData[OtherReliefsModel](otherReliefsTATestModel)
         status(OtherReliefsTATestDataItem.result) shouldBe 400
       }
     }
@@ -3228,7 +3620,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val otherReliefsTATestModel = new OtherReliefsModel(Some(-1000))
 
       "return a 400" in {
-        keystoreCacheCondition[OtherReliefsModel](otherReliefsTATestModel)
+        mockSaveFormData[OtherReliefsModel](otherReliefsTATestModel)
         status(OtherReliefsTATestDataItem.result) shouldBe 400
       }
     }
@@ -3238,7 +3630,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val otherReliefsTATestModel = new OtherReliefsModel(Some(1000))
 
       "return a 400" in {
-        keystoreCacheCondition[OtherReliefsModel](otherReliefsTATestModel)
+        mockSaveFormData[OtherReliefsModel](otherReliefsTATestModel)
         status(OtherReliefsTATestDataItem.result) shouldBe 400
       }
     }
@@ -3246,7 +3638,9 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
   //################### Rebased Other Relief tests ###################
   "In CalculationController calling the .otherReliefsRebased action " should  {
-
+    mockfetchAndGetFormData[OtherReliefsModel](None)
+    mockCreateSummary(sumModelRebased)
+    mockCalculateRebasedValue(Some(calcModelTwoRates))
     object OtherReliefsRebasedTestDataItem extends fakeRequestTo("other-reliefs-rebased", TestCalculationController.otherReliefsRebased)
 
     "return a 200" in {
@@ -3259,6 +3653,57 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         contentType(OtherReliefsRebasedTestDataItem.result) shouldBe Some("text/html")
         charset(OtherReliefsRebasedTestDataItem.result) shouldBe Some("utf-8")
       }
+
+      "have the title 'How much extra tax relief are you claiming?'" in {
+        OtherReliefsRebasedTestDataItem.jsoupDoc.title shouldEqual Messages("calc.otherReliefs.question")
+      }
+
+      "have the heading Calculate your tax (non-residents) " in {
+        OtherReliefsRebasedTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+      }
+
+      "have a 'Back' link " in {
+        OtherReliefsRebasedTestDataItem.jsoupDoc.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+      }
+
+      "have the question 'How much extra tax relief are you claiming?' as the legend of the input" in {
+        OtherReliefsRebasedTestDataItem.jsoupDoc.body.getElementsByTag("label").text should include (Messages("calc.otherReliefs.question"))
+      }
+
+      "display an input box for the Other Tax Reliefs" in {
+        OtherReliefsRebasedTestDataItem.jsoupDoc.body.getElementById("otherReliefs").tagName() shouldEqual "input"
+      }
+
+      "display an 'Add relief' button " in {
+        OtherReliefsRebasedTestDataItem.jsoupDoc.body.getElementById("add-relief-button").text shouldEqual Messages("calc.otherReliefs.button.addRelief")
+      }
+
+      "include helptext for 'Total gain'" in {
+        OtherReliefsRebasedTestDataItem.jsoupDoc.body.getElementById("totalGain").text should include (Messages("calc.otherReliefs.totalGain"))
+      }
+
+      "include helptext for 'Taxable gain'" in {
+        OtherReliefsRebasedTestDataItem.jsoupDoc.body.getElementById("taxableGain").text should include (Messages("calc.otherReliefs.taxableGain"))
+      }
+    }
+
+    "when not supplied with any previous value" should {
+      object OtherReliefsRebasedTestDataItem extends fakeRequestTo("other-reliefs-rebased", TestCalculationController.otherReliefsRebased)
+
+      "contain no pre-filled data" in {
+        mockfetchAndGetFormData[OtherReliefsModel](None)
+        OtherReliefsRebasedTestDataItem.jsoupDoc.body.getElementById("otherReliefs").attr("value") shouldBe ""
+      }
+    }
+
+    "when supplied with a previous value" should {
+      val testotherReliefsRebasedModel = OtherReliefsModel(Some(1000))
+      object OtherReliefsRebasedTestDataItem extends fakeRequestTo("other-reliefs-rebased", TestCalculationController.otherReliefsRebased)
+
+      "contain the pre-supplied data" in {
+        mockfetchAndGetFormData[OtherReliefsModel](Some(testotherReliefsRebasedModel))
+        OtherReliefsRebasedTestDataItem.jsoupDoc.body.getElementById("otherReliefs").attr("value") shouldBe "1000"
+      }
     }
   }
 
@@ -3268,101 +3713,101 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     "individual is chosen with a flat calculation" when {
 
       "the user has provided a value for the AEA" should {
-        keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-        keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+        mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+        mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
         object SummaryTestDataItem extends fakeRequestTo("summary", TestCalculationController.summary)
 
         "return a 200" in {
-          keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-          keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+          mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+          mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
           status(SummaryTestDataItem.result) shouldBe 200
         }
 
         "return some HTML that" should {
 
           "should have the title 'Summary'" in {
-            keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-            keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+            mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+            mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
             SummaryTestDataItem.jsoupDoc.getElementsByTag("title").text shouldEqual Messages("calc.summary.title")
           }
 
           "have a back button" in {
-            keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-            keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+            mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+            mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
             SummaryTestDataItem.jsoupDoc.getElementById("back-link").text shouldEqual Messages("calc.base.back")
           }
 
           "have the correct sub-heading 'You owe'" in {
-            keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-            keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+            mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+            mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
             SummaryTestDataItem.jsoupDoc.select("h1 span").text shouldEqual Messages("calc.summary.secondaryHeading")
           }
 
           "have a result amount currently set to £8000.00" in {
-            keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-            keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+            mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+            mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
             SummaryTestDataItem.jsoupDoc.select("h1 b").text shouldEqual "£8000.00"
           }
 
           "have a 'Calculation details' section that" should {
 
             "include the section heading 'Calculation details" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.select("#calcDetails").text should include(Messages("calc.summary.calculation.details.title"))
             }
 
             "include 'How would you like to work out your tax?'" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.select("#calcDetails").text should include(Messages("calc.summary.calculation.details.calculationElection"))
             }
 
             "have an election description of 'How much of your total gain you've made since 5 April 2015'" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.body().getElementById("calcDetails(0)").text() shouldBe Messages("calc.summary.calculation.details.flatCalculation")
             }
 
             "include 'Your total gain'" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.select("#calcDetails").text should include(Messages("calc.summary.calculation.details.totalGain"))
             }
 
             "have a total gain equal to £40000.00" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.body().getElementById("calcDetails(1)").text() shouldBe "£40000.00"
             }
 
             "include 'Your taxable gain'" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.select("#calcDetails").text should include(Messages("calc.summary.calculation.details.taxableGain"))
             }
 
             "have a taxable gain equal to £40000.00" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.body().getElementById("calcDetails(2)").text() shouldBe "£40000.00"
             }
 
             "include 'Your tax rate'" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.select("#calcDetails").text should include(Messages("calc.summary.calculation.details.taxRate"))
             }
 
             "have a base tax rate of £32000" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.body().getElementById("calcDetails(3)").text() shouldBe "£32000.00 at 18%"
             }
 
             "have an upper tax rate of £8000" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.body().getElementById("calcDetails(4)").text() shouldBe "£8000.00 at 28%"
             }
 
@@ -3371,56 +3816,56 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           "have a 'Personal details' section that" should {
 
             "include the section heading 'Personal details" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.select("#personalDetails").text should include(Messages("calc.summary.personal.details.title"))
             }
 
             "include the question 'Who owned the property?'" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.select("#personalDetails").text should include(Messages("calc.customerType.question"))
             }
 
             "have an 'individual' owner" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(0)").text() shouldBe "Individual"
             }
 
             "include the question 'What’s your total income for this tax year?'" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.select("#personalDetails").text should include(Messages("calc.currentIncome.question"))
             }
 
             "have an total income of £1000" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(1)").text() shouldBe "£1000.00"
             }
 
             "include the question 'What's your Personal Allowance for this tax year?'" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.select("#personalDetails").text should include(Messages("calc.personalAllowance.question"))
             }
 
             "have a personal allowance of £9000" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(2)").text() shouldBe "£9000.00"
             }
 
             "include the question 'How much of your Capital Gains Tax allowance have you got left'" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.select("#personalDetails").text should include(Messages("calc.annualExemptAmount.question"))
             }
 
             "have a remaining CGT Allowance of £1500" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(3)").text() shouldBe "£1500.00"
             }
           }
@@ -3428,32 +3873,32 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           "have a 'Purchase details' section that" should {
 
             "include the section heading 'Purchase details" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.select("#purchaseDetails").text should include(Messages("calc.summary.purchase.details.title"))
             }
 
             "include the question 'How much did you pay for the property?'" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.select("#purchaseDetails").text should include(Messages("calc.acquisitionValue.question"))
             }
 
             "have an acquisition value of £100000" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.body().getElementById("purchaseDetails(0)").text() shouldBe "£100000.00"
             }
 
             "include the question 'How much did you pay in costs when you became the property owner?'" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.select("#purchaseDetails").text should include(Messages("calc.acquisitionCosts.question"))
             }
 
             "have a acquisition costs of £0" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.body().getElementById("purchaseDetails(1)").text() shouldBe "£0.00"
             }
           }
@@ -3461,20 +3906,20 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           "have a 'Property details' section that" should {
 
             "include the section heading 'Property details" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.select("#propertyDetails").text should include(Messages("calc.summary.property.details.title"))
             }
 
             "include the question 'Did you make any improvements to the property?'" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.select("#propertyDetails").text should include(Messages("calc.improvements.question"))
             }
 
             "the answer to the improvements question should be No" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.body.getElementById("propertyDetails(0)").text shouldBe "No"
             }
           }
@@ -3482,44 +3927,44 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           "have a 'Sale details' section that" should {
 
             "include the section heading 'Sale details" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.select("#saleDetails").text should include(Messages("calc.summary.sale.details.title"))
             }
 
             "include the question 'When did you sign the contract that made someone else the owner?'" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.select("#saleDetails").text should include(Messages("calc.disposalDate.question"))
             }
 
             "the date of disposal should be '10 October 2010" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.body().getElementById("saleDetails(0)").text shouldBe "10 October 2010"
             }
 
             "include the question 'How much did you sell or give away the property for?'" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.select("#saleDetails").text should include(Messages("calc.disposalValue.question"))
             }
 
             "the value of the sale should be £150000" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.body().getElementById("saleDetails(1)").text shouldBe "£150000.00"
             }
 
             "include the question 'How much did you pay in costs when you stopped being the property owner?'" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.select("#saleDetails").text should include(Messages("calc.disposalCosts.question"))
             }
 
             "the value of the costs should be £0" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.body().getElementById("saleDetails(2)").text shouldBe "£0.00"
             }
           }
@@ -3527,44 +3972,44 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           "have a 'Deductions details' section that" should {
 
             "include the section heading 'Deductions" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.select("#deductions").text should include(Messages("calc.summary.deductions.title"))
             }
 
             "include the question 'Are you claiming Entrepreneurs' Relief?'" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.select("#deductions").text should include(Messages("calc.entrepreneursRelief.question"))
             }
 
             "have the answer to entrepreneurs relief question be 'No'" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.body().getElementById("deductions(0)").text shouldBe "No"
             }
 
             "include the question 'Whats the total value of your allowable losses?'" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.select("#deductions").text should include(Messages("calc.allowableLosses.question.two"))
             }
 
             "the value of allowable losses should be £0" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.body().getElementById("deductions(1)").text shouldBe "£0.00"
             }
 
             "include the question 'What other reliefs are you claiming?'" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.select("#deductions").text should include(Messages("calc.otherReliefs.question"))
             }
 
             "the value of other reliefs should be £0" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.body().getElementById("deductions(2)").text shouldBe "£0.00"
             }
 
@@ -3573,14 +4018,14 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           "have a 'What to do next' section that" should {
 
             "have the heading 'What to do next'" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.select("#whatToDoNext H2").text shouldEqual (Messages("calc.common.next.actions.heading"))
             }
 
             "include the text 'You need to tell HMRC about the property'" in {
-              keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-              keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
               SummaryTestDataItem.jsoupDoc.select("#whatToDoNext").text should
                 include(Messages("calc.summary.next.actions.text"))
               include(Messages("calc.summary.next.actions.link"))
@@ -3588,63 +4033,63 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           }
 
           "have a link to 'Start again'" in {
-            keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-            keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+            mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+            mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
             SummaryTestDataItem.jsoupDoc.select("#startAgain").text shouldEqual Messages("calc.summary.startAgain")
           }
         }
       }
 
       "the user has provided no value for the AEA" should {
-        keystoreSummaryValue(TestModels.summaryIndividualFlatWithoutAEA)
-        keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+        mockCreateSummary(TestModels.summaryIndividualFlatWithoutAEA)
+        mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
         object SummaryTestDataItem extends fakeRequestTo("summary", TestCalculationController.summary)
 
         "have a remaining CGT Allowance of £11100" in {
-          keystoreSummaryValue(TestModels.summaryIndividualFlatWithoutAEA)
-          keystoreFlatCalculateValue(Some(TestModels.calcModelOneRate))
+          mockCreateSummary(TestModels.summaryIndividualFlatWithoutAEA)
+          mockCalculateFlatValue(Some(TestModels.calcModelOneRate))
           SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(3)").text() shouldBe "£11100.00"
         }
 
         "the answer to the improvements question should be Yes" in {
-          keystoreSummaryValue(TestModels.summaryIndividualFlatWithAEA)
-          keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+          mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+          mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
           SummaryTestDataItem.jsoupDoc.body.getElementById("propertyDetails(0)").text shouldBe "Yes"
         }
 
         "the value of the improvements should be £8000" in {
-          keystoreSummaryValue(TestModels.summaryIndividualFlatWithoutAEA)
-          keystoreFlatCalculateValue(Some(TestModels.calcModelOneRate))
+          mockCreateSummary(TestModels.summaryIndividualFlatWithoutAEA)
+          mockCalculateFlatValue(Some(TestModels.calcModelOneRate))
           SummaryTestDataItem.jsoupDoc.body.getElementById("propertyDetails(1)").text shouldBe "£8000.00"
         }
 
         "the value of the disposal costs should be £600" in {
-          keystoreSummaryValue(TestModels.summaryIndividualFlatWithoutAEA)
-          keystoreFlatCalculateValue(Some(TestModels.calcModelOneRate))
+          mockCreateSummary(TestModels.summaryIndividualFlatWithoutAEA)
+          mockCalculateFlatValue(Some(TestModels.calcModelOneRate))
           SummaryTestDataItem.jsoupDoc.body().getElementById("saleDetails(2)").text shouldBe "£600.00"
         }
 
         "have a acquisition costs of £300" in {
-          keystoreSummaryValue(TestModels.summaryIndividualFlatWithoutAEA)
-          keystoreFlatCalculateValue(Some(TestModels.calcModelOneRate))
+          mockCreateSummary(TestModels.summaryIndividualFlatWithoutAEA)
+          mockCalculateFlatValue(Some(TestModels.calcModelOneRate))
           SummaryTestDataItem.jsoupDoc.body().getElementById("purchaseDetails(1)").text() shouldBe "£300.00"
         }
 
         "the value of allowable losses should be £50000" in {
-          keystoreSummaryValue(TestModels.summaryIndividualFlatWithoutAEA)
-          keystoreFlatCalculateValue(Some(TestModels.calcModelOneRate))
+          mockCreateSummary(TestModels.summaryIndividualFlatWithoutAEA)
+          mockCalculateFlatValue(Some(TestModels.calcModelOneRate))
           SummaryTestDataItem.jsoupDoc.body().getElementById("deductions(1)").text shouldBe "£50000.00"
         }
 
         "the value of other reliefs should be £999" in {
-          keystoreSummaryValue(TestModels.summaryIndividualFlatWithoutAEA)
-          keystoreFlatCalculateValue(Some(TestModels.calcModelOneRate))
+          mockCreateSummary(TestModels.summaryIndividualFlatWithoutAEA)
+          mockCalculateFlatValue(Some(TestModels.calcModelOneRate))
           SummaryTestDataItem.jsoupDoc.body().getElementById("deductions(2)").text shouldBe "£999.00"
         }
 
         "have a base tax rate of 20%" in {
-          keystoreSummaryValue(TestModels.summaryIndividualFlatWithoutAEA)
-          keystoreFlatCalculateValue(Some(TestModels.calcModelOneRate))
+          mockCreateSummary(TestModels.summaryIndividualFlatWithoutAEA)
+          mockCalculateFlatValue(Some(TestModels.calcModelOneRate))
           SummaryTestDataItem.jsoupDoc.body().getElementById("calcDetails(3)").text() shouldBe "20%"
         }
       }
@@ -3653,61 +4098,61 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     "regular trustee is chosen with a time apportioned calculation" when {
 
       "the user has provided a value for the AEA" should {
-        keystoreSummaryValue(TestModels.summaryTrusteeTAWithAEA)
-        keystoreTACalculateValue(Some(TestModels.calcModelOneRate))
+        mockCreateSummary(TestModels.summaryTrusteeTAWithAEA)
+        mockCalculateTAValue(Some(TestModels.calcModelOneRate))
         object SummaryTestDataItem extends fakeRequestTo("summary", TestCalculationController.summary)
 
         "have an election description of time apportionment method" in {
-          keystoreSummaryValue(TestModels.summaryTrusteeTAWithAEA)
-          keystoreTACalculateValue(Some(TestModels.calcModelOneRate))
+          mockCreateSummary(TestModels.summaryTrusteeTAWithAEA)
+          mockCalculateTAValue(Some(TestModels.calcModelOneRate))
           SummaryTestDataItem.jsoupDoc.body().getElementById("calcDetails(0)").text() shouldBe Messages("calc.summary.calculation.details.timeCalculation")
         }
 
         "have an acquisition date of '9 September 1990'" in{
-          keystoreSummaryValue(TestModels.summaryTrusteeTAWithAEA)
-          keystoreTACalculateValue(Some(TestModels.calcModelOneRate))
+          mockCreateSummary(TestModels.summaryTrusteeTAWithAEA)
+          mockCalculateTAValue(Some(TestModels.calcModelOneRate))
           SummaryTestDataItem.jsoupDoc.body().getElementById("purchaseDetails(0)").text() shouldBe ("09 September 1999")
         }
 
         "have a 'trustee' owner" in {
-          keystoreSummaryValue(TestModels.summaryTrusteeTAWithAEA)
-          keystoreTACalculateValue(Some(TestModels.calcModelOneRate))
+          mockCreateSummary(TestModels.summaryTrusteeTAWithAEA)
+          mockCalculateTAValue(Some(TestModels.calcModelOneRate))
           SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(0)").text() shouldBe "Trustee"
         }
 
         "have an answer of 'No to the disabled trustee question" in {
-          keystoreSummaryValue(TestModels.summaryTrusteeTAWithAEA)
-          keystoreTACalculateValue(Some(TestModels.calcModelOneRate))
+          mockCreateSummary(TestModels.summaryTrusteeTAWithAEA)
+          mockCalculateTAValue(Some(TestModels.calcModelOneRate))
           SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(1)").text() shouldBe "No"
         }
 
         "have a remaining CGT Allowance of £1500" in {
-          keystoreSummaryValue(TestModels.summaryTrusteeTAWithAEA)
-          keystoreTACalculateValue(Some(TestModels.calcModelOneRate))
+          mockCreateSummary(TestModels.summaryTrusteeTAWithAEA)
+          mockCalculateTAValue(Some(TestModels.calcModelOneRate))
           SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(2)").text() shouldBe "£1500.00"
         }
 
         "have a base tax rate of 20%" in {
-          keystoreSummaryValue(TestModels.summaryTrusteeTAWithAEA)
-          keystoreTACalculateValue(Some(TestModels.calcModelOneRate))
+          mockCreateSummary(TestModels.summaryTrusteeTAWithAEA)
+          mockCalculateTAValue(Some(TestModels.calcModelOneRate))
           SummaryTestDataItem.jsoupDoc.body().getElementById("calcDetails(3)").text() shouldBe "20%"
         }
       }
 
       "the user has provided no value for the AEA" should {
-        keystoreSummaryValue(TestModels.summaryTrusteeTAWithoutAEA)
-        keystoreTACalculateValue(Some(TestModels.calcModelTwoRates))
+        mockCreateSummary(TestModels.summaryTrusteeTAWithoutAEA)
+        mockCalculateTAValue(Some(TestModels.calcModelTwoRates))
         object SummaryTestDataItem extends fakeRequestTo("summary", TestCalculationController.summary)
 
         "have an answer of 'No to the disabled trustee question" in {
-          keystoreSummaryValue(TestModels.summaryTrusteeTAWithoutAEA)
-          keystoreTACalculateValue(Some(TestModels.calcModelTwoRates))
+          mockCreateSummary(TestModels.summaryTrusteeTAWithoutAEA)
+          mockCalculateTAValue(Some(TestModels.calcModelTwoRates))
           SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(1)").text() shouldBe "No"
         }
 
         "have a remaining CGT Allowance of £5050" in {
-          keystoreSummaryValue(TestModels.summaryTrusteeTAWithoutAEA)
-          keystoreTACalculateValue(Some(TestModels.calcModelTwoRates))
+          mockCreateSummary(TestModels.summaryTrusteeTAWithoutAEA)
+          mockCalculateTAValue(Some(TestModels.calcModelTwoRates))
           SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(2)").text() shouldBe "£5050.00"
         }
       }
@@ -3716,37 +4161,37 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     "disabled trustee is chosen with a time apportioned calculation" when {
 
       "the user has provided a value for the AEA" should {
-        keystoreSummaryValue(TestModels.summaryDisabledTrusteeTAWithAEA)
-        keystoreTACalculateValue(Some(TestModels.calcModelTwoRates))
+        mockCreateSummary(TestModels.summaryDisabledTrusteeTAWithAEA)
+        mockCalculateTAValue(Some(TestModels.calcModelTwoRates))
         object SummaryTestDataItem extends fakeRequestTo("summary", TestCalculationController.summary)
 
         "have an answer of 'Yes' to the disabled trustee question" in {
-          keystoreSummaryValue(TestModels.summaryDisabledTrusteeTAWithAEA)
-          keystoreTACalculateValue(Some(TestModels.calcModelTwoRates))
+          mockCreateSummary(TestModels.summaryDisabledTrusteeTAWithAEA)
+          mockCalculateTAValue(Some(TestModels.calcModelTwoRates))
           SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(1)").text() shouldBe "Yes"
         }
 
         "have a remaining CGT Allowance of £1500" in {
-          keystoreSummaryValue(TestModels.summaryDisabledTrusteeTAWithAEA)
-          keystoreTACalculateValue(Some(TestModels.calcModelTwoRates))
+          mockCreateSummary(TestModels.summaryDisabledTrusteeTAWithAEA)
+          mockCalculateTAValue(Some(TestModels.calcModelTwoRates))
           SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(2)").text() shouldBe "£1500.00"
         }
       }
 
       "the user has provided no value for the AEA" should {
-        keystoreSummaryValue(TestModels.summaryDisabledTrusteeTAWithoutAEA)
-        keystoreTACalculateValue(Some(TestModels.calcModelTwoRates))
+        mockCreateSummary(TestModels.summaryDisabledTrusteeTAWithoutAEA)
+        mockCalculateTAValue(Some(TestModels.calcModelTwoRates))
         object SummaryTestDataItem extends fakeRequestTo("summary", TestCalculationController.summary)
 
         "have an answer of 'Yes' to the disabled trustee question" in {
-          keystoreSummaryValue(TestModels.summaryDisabledTrusteeTAWithoutAEA)
-          keystoreTACalculateValue(Some(TestModels.calcModelTwoRates))
+          mockCreateSummary(TestModels.summaryDisabledTrusteeTAWithoutAEA)
+          mockCalculateTAValue(Some(TestModels.calcModelTwoRates))
           SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(1)").text() shouldBe "Yes"
         }
 
         "have a remaining CGT Allowance of £11100" in {
-          keystoreSummaryValue(TestModels.summaryDisabledTrusteeTAWithoutAEA)
-          keystoreTACalculateValue(Some(TestModels.calcModelTwoRates))
+          mockCreateSummary(TestModels.summaryDisabledTrusteeTAWithoutAEA)
+          mockCalculateTAValue(Some(TestModels.calcModelTwoRates))
           SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(2)").text() shouldBe "£11100.00"
         }
       }
@@ -3755,41 +4200,158 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     "personal representative is chosen with a flat calculation" when {
 
       "the user has provided a value for the AEA" should {
-        keystoreSummaryValue(TestModels.summaryRepresentativeFlatWithAEA)
-        keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+        mockCreateSummary(TestModels.summaryRepresentativeFlatWithAEA)
+        mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
         object SummaryTestDataItem extends fakeRequestTo("summary", TestCalculationController.summary)
 
         "have a 'Personal Representative' owner" in {
-          keystoreSummaryValue(TestModels.summaryRepresentativeFlatWithAEA)
-          keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+          mockCreateSummary(TestModels.summaryRepresentativeFlatWithAEA)
+          mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
           SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(0)").text() shouldBe "Personal Representative"
         }
 
         "have a remaining CGT Allowance of £1500" in {
-          keystoreSummaryValue(TestModels.summaryRepresentativeFlatWithAEA)
-          keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+          mockCreateSummary(TestModels.summaryRepresentativeFlatWithAEA)
+          mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
           SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(1)").text() shouldBe "£1500.00"
         }
       }
 
       "the user has provided no value for the AEA" should {
-        keystoreSummaryValue(TestModels.summaryRepresentativeFlatWithoutAEA)
-        keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+        mockCreateSummary(TestModels.summaryRepresentativeFlatWithoutAEA)
+        mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
         object SummaryTestDataItem extends fakeRequestTo("summary", TestCalculationController.summary)
 
         "have a 'Personal Representative' owner" in {
-          keystoreSummaryValue(TestModels.summaryRepresentativeFlatWithoutAEA)
-          keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+          mockCreateSummary(TestModels.summaryRepresentativeFlatWithoutAEA)
+          mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
           SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(0)").text() shouldBe "Personal Representative"
         }
 
         "have a remaining CGT Allowance of £11100" in {
-          keystoreSummaryValue(TestModels.summaryRepresentativeFlatWithoutAEA)
-          keystoreFlatCalculateValue(Some(TestModels.calcModelTwoRates))
+          mockCreateSummary(TestModels.summaryRepresentativeFlatWithoutAEA)
+          mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
           SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(1)").text() shouldBe "£11100.00"
         }
       }
 
+    }
+    "individual is chosen with a rebased calculation" when {
+
+      "user provides no acquisition date and has two tax rates" should {
+        mockCreateSummary(TestModels.summaryIndividualRebased)
+        mockCalculateRebasedValue(Some(TestModels.calcModelTwoRates))
+        object SummaryTestDataItem extends fakeRequestTo("summary", TestCalculationController.summary)
+
+        "have an election description of 'How much of your total gain you've made since 5 April 2015'" in {
+          mockCreateSummary(TestModels.summaryIndividualRebased)
+          mockCalculateRebasedValue(Some(TestModels.calcModelTwoRates))
+          SummaryTestDataItem.jsoupDoc.body().getElementById("calcDetails(0)").text() shouldBe Messages("calc.summary.calculation.details.rebasedCalculation")
+        }
+
+        "include the question for the rebased value" in {
+          mockCreateSummary(TestModels.summaryIndividualRebased)
+          mockCalculateRebasedValue(Some(TestModels.calcModelTwoRates))
+          SummaryTestDataItem.jsoupDoc.select("#purchaseDetails").text should include(Messages("calc.rebasedValue.questionTwo"))
+        }
+
+        "have a value for the rebased value" in {
+          mockCreateSummary(TestModels.summaryIndividualRebased)
+          mockCalculateRebasedValue(Some(TestModels.calcModelTwoRates))
+          SummaryTestDataItem.jsoupDoc.body.getElementById("purchaseDetails(1)").text() shouldBe "£150000.00"
+        }
+
+        "include the question for the rebased costs" in {
+          mockCreateSummary(TestModels.summaryIndividualRebased)
+          mockCalculateRebasedValue(Some(TestModels.calcModelTwoRates))
+          SummaryTestDataItem.jsoupDoc.select("#purchaseDetails").text should include(Messages("calc.rebasedCosts.questionTwo"))
+        }
+
+        "have a value for the rebased costs" in {
+          mockCreateSummary(TestModels.summaryIndividualRebased)
+          mockCalculateRebasedValue(Some(TestModels.calcModelTwoRates))
+          SummaryTestDataItem.jsoupDoc.body.getElementById("purchaseDetails(2)").text() shouldBe "£1000.00"
+        }
+
+        "include the question for the improvements before" in {
+          mockCreateSummary(TestModels.summaryIndividualRebased)
+          mockCalculateRebasedValue(Some(TestModels.calcModelTwoRates))
+          SummaryTestDataItem.jsoupDoc.select("#propertyDetails").text should include(Messages("calc.improvements.questionThree"))
+        }
+
+        "have a value for the improvements before" in {
+          mockCreateSummary(TestModels.summaryIndividualRebased)
+          mockCalculateRebasedValue(Some(TestModels.calcModelTwoRates))
+          SummaryTestDataItem.jsoupDoc.body.getElementById("propertyDetails(1)").text() shouldBe "£2000.00"
+        }
+
+        "include the question for the improvements after" in {
+          mockCreateSummary(TestModels.summaryIndividualRebased)
+          mockCalculateRebasedValue(Some(TestModels.calcModelTwoRates))
+          SummaryTestDataItem.jsoupDoc.select("#propertyDetails").text should include(Messages("calc.improvements.questionFour"))
+        }
+
+        "have a value for the improvements after" in {
+          mockCreateSummary(TestModels.summaryIndividualRebased)
+          mockCalculateRebasedValue(Some(TestModels.calcModelTwoRates))
+          SummaryTestDataItem.jsoupDoc.body.getElementById("propertyDetails(2)").text() shouldBe "£3000.00"
+        }
+
+        "have a value for the other reliefs rebased" in {
+          mockCreateSummary(TestModels.summaryIndividualRebased)
+          mockCalculateRebasedValue(Some(TestModels.calcModelTwoRates))
+          SummaryTestDataItem.jsoupDoc.body.getElementById("deductions(2)").text() shouldBe "£777.00"
+        }
+
+      }
+
+      "user provides no acquisition date and has one tax rate" should {
+        mockCreateSummary(TestModels.summaryIndividualRebasedNoAcqDate)
+        mockCalculateRebasedValue(Some(TestModels.calcModelOneRate))
+        object SummaryTestDataItem extends fakeRequestTo("summary", TestCalculationController.summary)
+
+        "have an election description of 'How much of your total gain you've made since 5 April 2015'" in {
+          mockCreateSummary(TestModels.summaryIndividualRebasedNoAcqDate)
+          mockCalculateRebasedValue(Some(TestModels.calcModelOneRate))
+          SummaryTestDataItem.jsoupDoc.body().getElementById("calcDetails(0)").text() shouldBe Messages("calc.summary.calculation.details.rebasedCalculation")
+        }
+
+        "the value of allowable losses should be £0" in {
+          mockCreateSummary(TestModels.summaryIndividualRebasedNoAcqDate)
+          mockCalculateRebasedValue(Some(TestModels.calcModelOneRate))
+          SummaryTestDataItem.jsoupDoc.body().getElementById("deductions(1)").text shouldBe "£0.00"
+        }
+
+        "the value of other reliefs should be £0" in {
+          mockCreateSummary(TestModels.summaryIndividualRebasedNoAcqDate)
+          mockCalculateRebasedValue(Some(TestModels.calcModelOneRate))
+          SummaryTestDataItem.jsoupDoc.body().getElementById("deductions(2)").text shouldBe "£0.00"
+        }
+      }
+
+      "user provides acquisition date and no rebased costs" should {
+        mockCreateSummary(TestModels.summaryIndividualRebasedNoRebasedCosts)
+        mockCalculateRebasedValue(Some(TestModels.calcModelOneRate))
+        object SummaryTestDataItem extends fakeRequestTo("summary", TestCalculationController.summary)
+
+        "have no value for the rebased costs" in {
+          mockCreateSummary(TestModels.summaryIndividualRebasedNoRebasedCosts)
+          mockCalculateRebasedValue(Some(TestModels.calcModelOneRate))
+          SummaryTestDataItem.jsoupDoc.body.getElementById("purchaseDetails(2)").text() shouldBe "£0.00"
+        }
+      }
+
+      "user provides no acquisition date and no rebased costs" should {
+        mockCreateSummary(TestModels.summaryIndividualRebasedNoAcqDateOrRebasedCosts)
+        mockCalculateRebasedValue(Some(TestModels.calcModelOneRate))
+        object SummaryTestDataItem extends fakeRequestTo("summary", TestCalculationController.summary)
+
+        "have no value for the rebased costs" in {
+          mockCreateSummary(TestModels.summaryIndividualRebasedNoAcqDateOrRebasedCosts)
+          mockCalculateRebasedValue(Some(TestModels.calcModelOneRate))
+          SummaryTestDataItem.jsoupDoc.body.getElementById("purchaseDetails(1)").text() shouldBe "£0.00"
+        }
+      }
     }
   }
 
@@ -3799,60 +4361,60 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       object CurrentIncomeTestDataItem extends fakeRequestTo("currentIncome", TestCalculationController.currentIncome)
 
       "return a 200" in {
-        keystoreFetchCondition[CurrentIncomeModel](None)
+        mockfetchAndGetFormData[CurrentIncomeModel](None)
         status(CurrentIncomeTestDataItem.result) shouldBe 200
       }
 
       "return some HTML that" should {
 
         "contain some text and use the character set utf-8" in {
-          keystoreFetchCondition[CurrentIncomeModel](None)
+          mockfetchAndGetFormData[CurrentIncomeModel](None)
           contentType(CurrentIncomeTestDataItem.result) shouldBe Some("text/html")
           charset(CurrentIncomeTestDataItem.result) shouldBe Some("utf-8")
         }
 
         "have the title 'In the tax year when you stopped owning the property, what was your total UK income?'" in {
-          keystoreFetchCondition[CurrentIncomeModel](None)
+          mockfetchAndGetFormData[CurrentIncomeModel](None)
           CurrentIncomeTestDataItem.jsoupDoc.title shouldEqual Messages("calc.currentIncome.question")
         }
 
         "have the heading Calculate your tax (non-residents) " in {
-          keystoreFetchCondition[CurrentIncomeModel](None)
+          mockfetchAndGetFormData[CurrentIncomeModel](None)
           CurrentIncomeTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
         }
 
         "have a 'Back' link " in {
-          keystoreFetchCondition[CurrentIncomeModel](None)
+          mockfetchAndGetFormData[CurrentIncomeModel](None)
           CurrentIncomeTestDataItem.jsoupDoc.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
         }
 
         "have the question 'In the tax year when you stopped owning the property, what was your total UK income?' as the label of the input" in {
-          keystoreFetchCondition[CurrentIncomeModel](None)
+          mockfetchAndGetFormData[CurrentIncomeModel](None)
           CurrentIncomeTestDataItem.jsoupDoc.body.getElementsByTag("label").text.contains(Messages("calc.currentIncome.question")) shouldBe true
         }
 
         "have the help text 'Tax years start on 6 April' as the form-hint of the input" in {
-          keystoreFetchCondition[CurrentIncomeModel](None)
+          mockfetchAndGetFormData[CurrentIncomeModel](None)
           CurrentIncomeTestDataItem.jsoupDoc.body.getElementsByClass("form-hint").text shouldEqual Messages("calc.currentIncome.helpText")
         }
 
         "display an input box for the Current Income Amount" in {
-          keystoreFetchCondition[CurrentIncomeModel](None)
+          mockfetchAndGetFormData[CurrentIncomeModel](None)
           CurrentIncomeTestDataItem.jsoupDoc.body.getElementById("currentIncome").tagName() shouldEqual "input"
         }
 
         "have no value auto-filled into the input box" in {
-          keystoreFetchCondition[CurrentIncomeModel](None)
+          mockfetchAndGetFormData[CurrentIncomeModel](None)
           CurrentIncomeTestDataItem.jsoupDoc.getElementById("currentIncome").attr("value") shouldBe empty
         }
 
         "display a 'Continue' button " in {
-          keystoreFetchCondition[CurrentIncomeModel](None)
+          mockfetchAndGetFormData[CurrentIncomeModel](None)
           CurrentIncomeTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
         }
 
         "should contain a Read more sidebar with a link to CGT allowances" in {
-          keystoreFetchCondition[CurrentIncomeModel](None)
+          mockfetchAndGetFormData[CurrentIncomeModel](None)
           CurrentIncomeTestDataItem.jsoupDoc.select("aside h2").text shouldBe Messages("calc.common.readMore")
           CurrentIncomeTestDataItem.jsoupDoc.select("aside a").first.text shouldBe Messages("calc.currentIncome.link.one")
           CurrentIncomeTestDataItem.jsoupDoc.select("aside a").last.text shouldBe Messages("calc.currentIncome.link.two")
@@ -3865,13 +4427,13 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new CurrentIncomeModel(1000)
 
       "return a 200" in {
-        keystoreFetchCondition[CurrentIncomeModel](Some(testModel))
+        mockfetchAndGetFormData[CurrentIncomeModel](Some(testModel))
         status(CurrentIncomeTestDataItem.result) shouldBe 200
       }
 
       "return some HTML that" should {
         "have some value auto-filled into the input box" in {
-          keystoreFetchCondition[CurrentIncomeModel](Some(testModel))
+          mockfetchAndGetFormData[CurrentIncomeModel](Some(testModel))
           CurrentIncomeTestDataItem.jsoupDoc.getElementById("currentIncome").attr("value") shouldBe "1000"
         }
       }
@@ -3880,7 +4442,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
   "In CalculationController calling the .submitCurrentIncome action " when {
 
-    def keystoreCacheCondition[T](data: CurrentIncomeModel): Unit = {
+    def mockSaveFormData[T](data: CurrentIncomeModel): Unit = {
       lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
       when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(returnedCacheMap))
@@ -3895,12 +4457,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       )
 
       "return a 303" in {
-        keystoreCacheCondition(testModel)
+        mockSaveFormData(testModel)
         status(CurrentIncomeTestDataItem.result) shouldBe 303
       }
 
       s"redirect to ${routes.CalculationController.personalAllowance()}" in {
-        keystoreCacheCondition[CurrentIncomeModel](testModel)
+        mockSaveFormData[CurrentIncomeModel](testModel)
         redirectLocation(CurrentIncomeTestDataItem.result) shouldBe Some(s"${routes.CalculationController.personalAllowance()}")
       }
     }
@@ -3944,7 +4506,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       }
 
       s"fail with message ${Messages("calc.currentIncome.errorDecimalPlaces")}" in {
-        keystoreCacheCondition(testModel)
+        mockSaveFormData(testModel)
         CurrentIncomeTestDataItem.jsoupDoc.getElementsByClass("error-notification").text should include (Messages("calc.currentIncome.errorDecimalPlaces"))
       }
     }

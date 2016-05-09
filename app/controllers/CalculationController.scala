@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit
 
 import connectors.CalculatorConnector
 import common.Dates
+import constructors.CalculationElectionConstructor
 import forms.OtherPropertiesForm._
 import forms.AcquisitionValueForm._
 import forms.CustomerTypeForm._
@@ -38,6 +39,8 @@ import forms.AcquisitionCostsForm._
 import forms.CurrentIncomeForm._
 import forms.CalculationElectionForm._
 import forms.AcquisitionDateForm._
+import forms.RebasedValueForm._
+import forms.RebasedCostsForm._
 import models._
 import play.api.mvc.{AnyContent, Action}
 import uk.gov.hmrc.play.frontend.controller.FrontendController
@@ -50,11 +53,13 @@ import scala.concurrent.duration.Duration
 
 object CalculationController extends CalculationController {
   val calcConnector = CalculatorConnector
+  val calcElectionConstructor = CalculationElectionConstructor
 }
 
 trait CalculationController extends FrontendController {
 
   val calcConnector: CalculatorConnector
+  val calcElectionConstructor: CalculationElectionConstructor
 
   //################### Customer Type methods #######################
   val customerType = Action.async { implicit request =>
@@ -80,7 +85,7 @@ trait CalculationController extends FrontendController {
 
   //################### Disabled Trustee methods #######################
   val disabledTrustee = Action.async { implicit request =>
-    calcConnector.fetchAndGetFormData[DisabledTrusteeModel]("isVulnerable").map {
+    calcConnector.fetchAndGetFormData[DisabledTrusteeModel]("disabledTrustee").map {
       case Some(data) => Ok(calculation.disabledTrustee(disabledTrusteeForm.fill(data)))
       case None => Ok(calculation.disabledTrustee(disabledTrusteeForm))
     }
@@ -90,7 +95,7 @@ trait CalculationController extends FrontendController {
     disabledTrusteeForm.bindFromRequest.fold(
       errors => BadRequest(calculation.disabledTrustee(errors)),
       success => {
-        calcConnector.saveFormData("isVulnerable",success)
+        calcConnector.saveFormData("disabledTrustee",success)
         Redirect(routes.CalculationController.otherProperties())
       }
     )
@@ -210,25 +215,56 @@ trait CalculationController extends FrontendController {
 
   //################### Rebased value methods #######################
   val rebasedValue = Action.async {implicit request =>
-    Future.successful(Ok(calculation.rebasedValue()))
+    calcConnector.fetchAndGetFormData[RebasedValueModel]("rebasedValue").map {
+      case Some(data) => Ok(calculation.rebasedValue(rebasedValueForm.fill(data)))
+      case None => Ok(calculation.rebasedValue(rebasedValueForm))
+    }
+  }
+
+  val submitRebasedValue = Action { implicit request =>
+    rebasedValueForm.bindFromRequest.fold(
+      errors => BadRequest(calculation.rebasedValue(errors)),
+      success => {
+        calcConnector.saveFormData("rebasedValue", success)
+        success.hasRebasedValue match {
+          case "Yes" => Redirect(routes.CalculationController.rebasedCosts())
+          case "No" => Redirect(routes.CalculationController.improvements())
+        }
+      }
+    )
   }
 
   //################### Rebased costs methods #######################
   val rebasedCosts = Action.async {implicit request =>
-    Future.successful(Ok(calculation.rebasedCosts()))
+    calcConnector.fetchAndGetFormData[RebasedCostsModel]("rebasedCosts").map {
+      case Some(data) => Ok(calculation.rebasedCosts(rebasedCostsForm.fill(data)))
+      case None => Ok(calculation.rebasedCosts(rebasedCostsForm))
+    }
+  }
+
+  val submitRebasedCosts = Action {implicit request =>
+    rebasedCostsForm.bindFromRequest.fold(
+      errors => BadRequest(calculation.rebasedCosts(errors)),
+      success => {
+        calcConnector.saveFormData("rebasedCosts", success)
+        Redirect(routes.CalculationController.improvements())
+      }
+    )
   }
 
   //################### Improvements methods #######################
   val improvements = Action.async { implicit request =>
+    val hasRebasedValue = calcConnector.fetchAndGetValue[RebasedValueModel]("rebasedValue").getOrElse(RebasedValueModel("No", None)).hasRebasedValue
     calcConnector.fetchAndGetFormData[ImprovementsModel]("improvements").map {
-      case Some(data) => Ok(calculation.improvements(improvementsForm.fill(data)))
-      case None => Ok(calculation.improvements(improvementsForm))
+      case Some(data) => Ok(calculation.improvements(improvementsForm.fill(data), hasRebasedValue))
+      case None => Ok(calculation.improvements(improvementsForm, hasRebasedValue))
     }
   }
 
   val submitImprovements = Action { implicit request =>
+    val hasRebasedValue = calcConnector.fetchAndGetValue[RebasedValueModel]("rebasedValue").getOrElse(RebasedValueModel("No", None)).hasRebasedValue
     improvementsForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.improvements(errors)),
+      errors => BadRequest(calculation.improvements(errors, hasRebasedValue)),
       success => {
         calcConnector.saveFormData("improvements", success)
         Redirect(routes.CalculationController.disposalDate())
@@ -340,20 +376,19 @@ trait CalculationController extends FrontendController {
       success => {
         calcConnector.saveFormData("allowableLosses", success)
         calcConnector.fetchAndGetValue[AcquisitionDateModel]("acquisitionDate") match {
-          case Some(data) if data.hasAcquisitionDate == "Yes" => {
-            Dates.dateAfterStart(data.day.get, data.month.get, data.year.get) match {
-              case true => {
+          case Some(data) => data.hasAcquisitionDate match {
+            case "Yes" =>
+              if (Dates.dateAfterStart(data.day.get, data.month.get, data.year.get)) {
                 calcConnector.saveFormData("calculationElection", CalculationElectionModel("flat"))
                 Redirect(routes.CalculationController.otherReliefs())
               }
-              case false => Redirect(routes.CalculationController.calculationElection())
+              else Redirect(routes.CalculationController.calculationElection())
+            case "No" => {
+              calcConnector.saveFormData("calculationElection", CalculationElectionModel("flat"))
+              Redirect(routes.CalculationController.otherReliefs())
             }
           }
-          case Some(data) if data.hasAcquisitionDate == "No" => {
-            calcConnector.saveFormData("calculationElection", CalculationElectionModel("flat"))
-            Redirect(routes.CalculationController.otherReliefs())
-          }
-          case None => {
+          case _ => {
             calcConnector.saveFormData("calculationElection", CalculationElectionModel("flat"))
             Redirect(routes.CalculationController.otherReliefs())
           }
@@ -364,16 +399,18 @@ trait CalculationController extends FrontendController {
   //################### Calculation Election methods #######################
   def calculationElection = Action.async { implicit request =>
     val construct = calcConnector.createSummary(hc)
+    val content = calcElectionConstructor.generateElection(construct, hc)
     calcConnector.fetchAndGetFormData[CalculationElectionModel]("calculationElection").map {
-      case Some(data) => Ok(calculation.calculationElection(calculationElectionForm.fill(data), construct))
-      case None => Ok(calculation.calculationElection(calculationElectionForm, construct))
+      case Some(data) => Ok(calculation.calculationElection(calculationElectionForm.fill(data), construct, content))
+      case None => Ok(calculation.calculationElection(calculationElectionForm, construct, content))
     }
   }
 
   def submitCalculationElection = Action { implicit request =>
     val construct = calcConnector.createSummary(hc)
+    val content = calcElectionConstructor.generateElection(construct, hc)
     calculationElectionForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.calculationElection(errors, construct)),
+      errors => BadRequest(calculation.calculationElection(errors, construct, content)),
       success => {
         calcConnector.saveFormData("calculationElection", success)
         Redirect(routes.CalculationController.summary())
@@ -443,8 +480,16 @@ trait CalculationController extends FrontendController {
   }
 
   //################### Rebased Other Reliefs methods #######################
-  val otherReliefsRebased = Action.async {implicit request =>
-    Future.successful(Ok(calculation.otherReliefsRebased()))
+  def otherReliefsRebased: Action[AnyContent] = Action.async { implicit request =>
+    val construct = calcConnector.createSummary(hc)
+    calcConnector.calculateRebased(construct).map {
+      case Some(dataResult) => {
+        Await.result(calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefsRebased").map {
+          case Some(data) => Ok(calculation.otherReliefsRebased(otherReliefsForm.fill(data), dataResult))
+          case None => Ok(calculation.otherReliefsRebased(otherReliefsForm, dataResult))
+        }, Duration("5s"))
+      }
+    }
   }
 
   //################### Summary Methods ##########################
@@ -452,16 +497,19 @@ trait CalculationController extends FrontendController {
     val construct = calcConnector.createSummary(hc)
     construct.calculationElectionModel.calculationType match {
       case "flat" => {
-        calcConnector.calculateFlat(construct).map {
-          case Some(data) => Ok(calculation.summary(construct, data))
-          case None => Ok(calculation.summary(construct, null))
-        }
+        calcConnector.calculateFlat(construct).map ( result =>
+          Ok(calculation.summary(construct, result.get))
+        )
       }
       case "time" => {
-        calcConnector.calculateTA(construct).map {
-          case Some(data) => Ok(calculation.summary(construct, data))
-          case None => Ok(calculation.summary(construct, null))
-        }
+        calcConnector.calculateTA(construct).map ( result =>
+          Ok(calculation.summary(construct, result.get))
+        )
+      }
+      case "rebased" => {
+        calcConnector.calculateRebased(construct).map ( result =>
+          Ok(calculation.summary(construct, result.get))
+        )
       }
     }
   }

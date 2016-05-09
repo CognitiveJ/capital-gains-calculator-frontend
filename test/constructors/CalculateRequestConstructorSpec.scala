@@ -16,6 +16,7 @@
 
 package constructors
 
+import common.TestModels
 import models._
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -30,6 +31,8 @@ class CalculateRequestConstructorSpec extends UnitSpec {
     None,
     AcquisitionDateModel("Yes", Some(9), Some(9), Some(1990)),
     AcquisitionValueModel(100000),
+    Some(RebasedValueModel("No", None)),
+    None,
     ImprovementsModel("No", None),
     DisposalDateModel(10, 10, 2010),
     DisposalValueModel(150000),
@@ -39,6 +42,7 @@ class CalculateRequestConstructorSpec extends UnitSpec {
     AllowableLossesModel("No", None),
     CalculationElectionModel("flat"),
     OtherReliefsModel(None),
+    OtherReliefsModel(None),
     OtherReliefsModel(None)
   )
 
@@ -46,7 +50,7 @@ class CalculateRequestConstructorSpec extends UnitSpec {
     "return a string from the baseCalcUrl as an individual with no prior disposal" in {
       CalculateRequestConstructor.baseCalcUrl(sumModel) shouldEqual "customerType=individual&priorDisposal=No&currentIncome=1000" +
         "&personalAllowanceAmt=11100&disposalValue=150000&disposalCosts=0&acquisitionValueAmt=100000" +
-        "&acquisitionCostsAmt=0&reliefs=0&allowableLossesAmt=0&entReliefClaimed=No"
+        "&acquisitionCostsAmt=0&allowableLossesAmt=0&entReliefClaimed=No"
     }
 
     "return a string from the baseCalcUrl as a trustee with a prior disposal" in {
@@ -59,6 +63,8 @@ class CalculateRequestConstructorSpec extends UnitSpec {
         Some(AnnualExemptAmountModel(5000)),
         AcquisitionDateModel("Yes", Some(9), Some(9), Some(1990)),
         AcquisitionValueModel(100000),
+        Some(RebasedValueModel("No", None)),
+        None,
         ImprovementsModel("No", None),
         DisposalDateModel(10, 10, 2010),
         DisposalValueModel(150000),
@@ -68,20 +74,48 @@ class CalculateRequestConstructorSpec extends UnitSpec {
         AllowableLossesModel("No", None),
         CalculationElectionModel("flat"),
         OtherReliefsModel(None),
+        OtherReliefsModel(None),
         OtherReliefsModel(None)
       )
       CalculateRequestConstructor.baseCalcUrl(sumModelTrustee) shouldEqual "customerType=trustee&priorDisposal=Yes&annualExemptAmount=5000&isVulnerable=No" +
         "&disposalValue=150000&disposalCosts=0&acquisitionValueAmt=100000" +
-        "&acquisitionCostsAmt=0&reliefs=0&allowableLossesAmt=0&entReliefClaimed=No"
+        "&acquisitionCostsAmt=0&allowableLossesAmt=0&entReliefClaimed=No"
     }
 
-    "return a string from the flatCalcUrlExtra" in {
-      CalculateRequestConstructor.flatCalcUrlExtra(sumModel) shouldEqual "&improvementsAmt=0"
+    "return a string from the flatCalcUrlExtra with no improvements" in {
+      CalculateRequestConstructor.flatCalcUrlExtra(sumModel) shouldEqual "&improvementsAmt=0&improvementsAmtAfter=0&reliefs=0"
     }
 
-    "return a string from the taCalcUrlExtra" in {
-      CalculateRequestConstructor.taCalcUrlExtra(sumModel) shouldEqual "&improvementsAmt=0&disposalDate=2010-10-10" +
-        "&acquisitionDate=1990-9-9"
+    "return a string from the flatCalcUrlExtra with improvements and no rebased value model" in {
+      CalculateRequestConstructor.flatCalcUrlExtra(TestModels.summaryIndividualImprovementsNoRebasedModel) shouldEqual "&improvementsAmt=8000&improvementsAmtAfter=0&reliefs=999"
+    }
+
+    "return a string from the flatCalcUrlExtra with improvements and a rebased value model with no improvements after" in {
+      CalculateRequestConstructor.flatCalcUrlExtra(TestModels.summaryIndividualFlatWithoutAEA) shouldEqual "&improvementsAmt=8000&improvementsAmtAfter=0&reliefs=999"
+    }
+
+    "return a string from the flatCalcUrlExtra with improvements and a rebased value model with improvements after" in {
+      CalculateRequestConstructor.flatCalcUrlExtra(TestModels.summaryIndividualImprovementsWithRebasedModel) shouldEqual "&improvementsAmt=8000&improvementsAmtAfter=1000&reliefs=999"
+    }
+
+    "return a string from the taCalcUrlExtra with no improvements" in {
+      CalculateRequestConstructor.taCalcUrlExtra(sumModel) shouldEqual "&improvementsAmt=0&improvementsAmtAfter=0&disposalDate=2010-10-10" +
+        "&acquisitionDate=1990-9-9&reliefs=0"
+    }
+
+    "return a string from the taCalcUrlExtra with improvements and no rebased value model" in {
+      CalculateRequestConstructor.taCalcUrlExtra(TestModels.summaryIndividualImprovementsNoRebasedModel) shouldEqual "&improvementsAmt=8000&improvementsAmtAfter=0&disposalDate=2010-10-10" +
+        "&acquisitionDate=1999-9-9&reliefs=888"
+    }
+
+    "return a string from the taCalcUrlExtra with improvements and a rebased value model with no improvements after" in {
+      CalculateRequestConstructor.taCalcUrlExtra(TestModels.summaryTrusteeTAWithoutAEA) shouldEqual "&improvementsAmt=8000&improvementsAmtAfter=0&disposalDate=2010-10-10" +
+        "&acquisitionDate=1999-9-9&reliefs=888"
+    }
+
+    "return a string from the taCalcUrlExtra with improvements and a rebased value model with improvements after" in {
+      CalculateRequestConstructor.taCalcUrlExtra(TestModels.summaryIndividualImprovementsWithRebasedModel) shouldEqual "&improvementsAmt=8000&improvementsAmtAfter=1000&disposalDate=2010-10-10" +
+        "&acquisitionDate=1999-9-9&reliefs=888"
     }
   }
 

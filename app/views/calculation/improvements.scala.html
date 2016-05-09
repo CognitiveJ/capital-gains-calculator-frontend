@@ -1,8 +1,9 @@
-@import models.ImprovementsModel
+@import models._
+@import constructors._
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 @import views.html.helpers._
 
-@(improvementsForm: Form[ImprovementsModel])(implicit request: Request[_])
+@(improvementsForm: Form[ImprovementsModel], hasRebasedValue: String)(implicit request: Request[_])
 
 @main_template(Messages("calc.improvements.question")) {
 
@@ -12,17 +13,7 @@
 
     @govHelpers.form(action = routes.CalculationController.submitImprovements) {
 
-        @formHiddenYesNoRadio(
-            improvementsForm,
-            "isClaimingImprovements",
-            Messages("calc.improvements.question"),
-            formInputMoney(
-                improvementsForm,
-                "improvementsAmt",
-                Messages("calc.improvements.questionTwo")
-            ),
-            Some(Messages("calc.improvements.help"))
-)
+        @ImprovementsConstructor.generateImprovements(improvementsForm, hasRebasedValue)
 
         <button class="button" type="submit" id="continue-button">@Messages("calc.base.continue")</button>
     }

@@ -27,6 +27,8 @@ case class SummaryModel (
                           annualExemptAmountModel: Option[AnnualExemptAmountModel],
                           acquisitionDateModel: AcquisitionDateModel,
                           acquisitionValueModel: AcquisitionValueModel,
+                          rebasedValueModel: Option[RebasedValueModel],
+                          rebasedCostsModel: Option[RebasedCostsModel],
                           improvementsModel: ImprovementsModel,
                           disposalDateModel: DisposalDateModel,
                           disposalValueModel: DisposalValueModel,
@@ -36,7 +38,8 @@ case class SummaryModel (
                           allowableLossesModel : AllowableLossesModel,
                           calculationElectionModel: CalculationElectionModel,
                           otherReliefsModelFlat : OtherReliefsModel,
-                          otherReliefsModelTA: OtherReliefsModel
+                          otherReliefsModelTA: OtherReliefsModel,
+                          otherReliefsModelRebased: OtherReliefsModel
                         )
 
 object SummaryModel {

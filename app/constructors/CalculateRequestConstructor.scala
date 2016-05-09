@@ -51,10 +51,11 @@ object CalculateRequestConstructor {
       input.acquisitionValueModel.acquisitionValueAmt
     }&acquisitionCostsAmt=${
       input.acquisitionCostsModel.acquisitionCostsAmt.getOrElse(0)
-    }&reliefs=${
-      input.otherReliefsModelFlat.otherReliefs.getOrElse(0)
     }&allowableLossesAmt=${
-      input.allowableLossesModel.allowableLossesAmt.getOrElse(0)
+      input.allowableLossesModel.isClaimingAllowableLosses match {
+        case "Yes" => input.allowableLossesModel.allowableLossesAmt.get
+        case "No" => 0
+      }
     }&entReliefClaimed=${
       input.entrepreneursReliefModel.entReliefClaimed
     }"
@@ -62,17 +63,44 @@ object CalculateRequestConstructor {
 
   def flatCalcUrlExtra(input: SummaryModel): String = {
     s"&improvementsAmt=${
-      input.improvementsModel.improvementsAmt.getOrElse(0)
+      input.improvementsModel.isClaimingImprovements match {
+        case "Yes" => input.improvementsModel.improvementsAmt.get
+        case "No" => 0
+      }
+    }${improvementsAfter(input)
+    }&reliefs=${
+      input.otherReliefsModelFlat.otherReliefs.getOrElse(0)
     }"
   }
 
   def taCalcUrlExtra(input: SummaryModel): String = {
     s"&improvementsAmt=${
-      input.improvementsModel.improvementsAmt.getOrElse(0)
+      input.improvementsModel.isClaimingImprovements match {
+        case "Yes" => input.improvementsModel.improvementsAmt.get
+        case "No" => 0
+      }
+    }${improvementsAfter(input)
     }&disposalDate=${
       input.disposalDateModel.year}-${input.disposalDateModel.month}-${input.disposalDateModel.day
     }&acquisitionDate=${
       input.acquisitionDateModel.year.get}-${input.acquisitionDateModel.month.get}-${input.acquisitionDateModel.day.get
+    }&reliefs=${
+      input.otherReliefsModelTA.otherReliefs.getOrElse(0)
     }"
   }
+
+  def improvementsAfter (input: SummaryModel) = s"&improvementsAmtAfter=${
+    input.improvementsModel.isClaimingImprovements match {
+      case "Yes" => {
+        input.rebasedValueModel match {
+          case Some(data) => data.hasRebasedValue match {
+            case "Yes" => input.improvementsModel.improvementsAmtAfter.getOrElse(0)
+            case "No" => 0
+          }
+          case None => 0
+        }
+      }
+      case "No" => 0
+    }
+  }"
 }
