@@ -3755,6 +3755,31 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
   }
 
+  "In CalculationController calling the .submitOtherReliefsRebased action" when {
+    def mockSaveFormData[T](data: OtherReliefsModel): Unit = {
+      lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+      when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(returnedCacheMap))
+    }
+
+    "submitting a valid form and an amount of 1000" should {
+      object OtherReliefsRebasedTestDataItem extends fakeRequestToPost("other-reliefs-rebased", TestCalculationController.submitOtherReliefsRebased, ("otherReliefs", "1000"))
+      val otherReliefsRebasedTestModel = new OtherReliefsModel(Some(1000))
+      mockCreateSummary(sumModelRebased)
+      mockCalculateRebasedValue(Some(calcModelTwoRates))
+
+      "return a 303" in {
+        mockSaveFormData[OtherReliefsModel](otherReliefsRebasedTestModel)
+        status(OtherReliefsRebasedTestDataItem.result) shouldBe 303
+      }
+
+      s"redirect to ${routes.CalculationController.calculationElection()}" in {
+        mockSaveFormData[OtherReliefsModel](otherReliefsRebasedTestModel)
+        redirectLocation(OtherReliefsRebasedTestDataItem.result) shouldBe Some(s"${routes.CalculationController.calculationElection()}")
+      }
+    }
+  }
+
   //################### Summary tests #######################
   "In CalculationController calling the .summary action" when {
 
