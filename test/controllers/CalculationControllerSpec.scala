@@ -3930,6 +3930,18 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
               SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(2)").text() shouldBe "£9000.00"
             }
 
+            "include the question 'What was the total taxable gain of your previous Capital Gains in the tax year you stopped owning the property?'" in {
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
+              SummaryTestDataItem.jsoupDoc.select("#personalDetails").text should include(Messages("calc.otherProperties.questionTwo"))
+            }
+
+            "have a total taxable gain of prior disposals of £9600" in {
+              mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
+              mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
+              SummaryTestDataItem.jsoupDoc.body.getElementById("personalDetails(3)").text() shouldBe "£9600.00"
+            }
+
             "include the question 'How much of your Capital Gains Tax allowance have you got left'" in {
               mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
               mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
@@ -3939,7 +3951,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
             "have a remaining CGT Allowance of £1500" in {
               mockCreateSummary(TestModels.summaryIndividualFlatWithAEA)
               mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
-              SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(3)").text() shouldBe "£1500.00"
+              SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(4)").text() shouldBe "£1500.00"
             }
           }
 
@@ -4199,10 +4211,16 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(1)").text() shouldBe "No"
         }
 
+        "have a total taxable gain of prior disposals of £9600" in {
+          mockCreateSummary(TestModels.summaryTrusteeTAWithAEA)
+          mockCalculateTAValue(Some(TestModels.calcModelOneRate))
+          SummaryTestDataItem.jsoupDoc.body.getElementById("personalDetails(2)").text() shouldBe "£9600.00"
+        }
+
         "have a remaining CGT Allowance of £1500" in {
           mockCreateSummary(TestModels.summaryTrusteeTAWithAEA)
           mockCalculateTAValue(Some(TestModels.calcModelOneRate))
-          SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(2)").text() shouldBe "£1500.00"
+          SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(3)").text() shouldBe "£1500.00"
         }
 
         "have a base tax rate of 20%" in {
@@ -4247,7 +4265,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         "have a remaining CGT Allowance of £1500" in {
           mockCreateSummary(TestModels.summaryDisabledTrusteeTAWithAEA)
           mockCalculateTAValue(Some(TestModels.calcModelTwoRates))
-          SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(2)").text() shouldBe "£1500.00"
+          SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(3)").text() shouldBe "£1500.00"
         }
       }
 
@@ -4283,10 +4301,16 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(0)").text() shouldBe "Personal Representative"
         }
 
+        "have a total taxable gain of prior disposals of £9600" in {
+          mockCreateSummary(TestModels.summaryRepresentativeFlatWithAEA)
+          mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
+          SummaryTestDataItem.jsoupDoc.body.getElementById("personalDetails(1)").text() shouldBe "£9600.00"
+        }
+
         "have a remaining CGT Allowance of £1500" in {
           mockCreateSummary(TestModels.summaryRepresentativeFlatWithAEA)
           mockCalculateFlatValue(Some(TestModels.calcModelTwoRates))
-          SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(1)").text() shouldBe "£1500.00"
+          SummaryTestDataItem.jsoupDoc.body().getElementById("personalDetails(2)").text() shouldBe "£1500.00"
         }
       }
 
