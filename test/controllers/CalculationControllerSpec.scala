@@ -714,7 +714,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       object OtherPropertiesTestDataItem extends fakeRequestToPost(
         "other-properties",
         TestCalculationController.submitOtherProperties,
-        ("otherProperties", "Yes")
+        ("otherProperties", "Yes"),("otherPropertiesAmt", "2100")
       )
       val testModel = new OtherPropertiesModel("Yes", Some(2100))
 
@@ -751,6 +751,49 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         status(OtherPropertiesTestDataItem.result) shouldBe 400
       }
     }
+
+    "submitting an invalid form with 'Yes' selection and a null amount" should {
+      object OtherPropertiesTestDataItem extends fakeRequestToPost(
+        "other-properties",
+        TestCalculationController.submitAllowableLosses,
+        ("otherProperties", "Yes"), ("otherPropertiesAmt", "")
+      )
+      val testModel = new OtherPropertiesModel("Yes", None)
+
+      "return a 400" in {
+        mockSaveFormData[OtherPropertiesModel](testModel)
+        status(OtherPropertiesTestDataItem.result) shouldBe 400
+      }
+    }
+
+    "submitting an invalid form with 'Yes' selection and an amount with three decimal places" should {
+      object OtherPropertiesTestDataItem extends fakeRequestToPost(
+        "other-properties",
+        TestCalculationController.submitAllowableLosses,
+        ("otherProperties", "Yes"), ("otherPropertiesAmt", "1000.111")
+      )
+      val testModel = new OtherPropertiesModel("Yes", Some(1000.111))
+
+      "return a 400" in {
+        mockSaveFormData[OtherPropertiesModel](testModel)
+        status(OtherPropertiesTestDataItem.result) shouldBe 400
+      }
+    }
+
+    "submitting an invalid form with 'Yes' selection and a negative amount" should {
+      object OtherPropertiesTestDataItem extends fakeRequestToPost(
+        "other-properties",
+        TestCalculationController.submitAllowableLosses,
+        ("otherProperties", "Yes"), ("otherPropertiesAmt", "-1000")
+      )
+      val testModel = new OtherPropertiesModel("Yes", Some(-1000))
+
+      "return a 400" in {
+        mockSaveFormData[OtherPropertiesModel](testModel)
+        status(OtherPropertiesTestDataItem.result) shouldBe 400
+      }
+    }
+
   }
 
   //############## Annual Exempt Amount tests ######################
