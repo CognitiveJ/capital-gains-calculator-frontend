@@ -3175,7 +3175,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           mockCreateSummary(TestModels.summaryTrusteeTAWithoutAEA)
           mockGenerateElection
           mockfetchAndGetFormData[CalculationElectionModel](None)
-          CalculationElectionTestDataItem.jsoupDoc.body.getElementById("question-information").text shouldEqual Messages("calc.calculationElection.message")
+          CalculationElectionTestDataItem.jsoupDoc.body.getElementById("calculationElection").text shouldEqual Messages("calc.calculationElection.message")
         }
 
         "have a calculationElectionHelper for the option of a flat calculation rendered on the page" in {
@@ -3297,6 +3297,16 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         mockCalculateTAValue(Some(TestModels.calcModelTwoRates))
         mockSaveFormData[CalculationElectionModel](calculationElectionTestModel)
         status(CalculationElectionTestDataItem.result) shouldBe 400
+      }
+
+      "display a visible Error Summary field" in {
+        mockSaveFormData[CalculationElectionModel](calculationElectionTestModel)
+        CalculationElectionTestDataItem.jsoupDoc.getElementById("error-summary-display").hasClass("error-summary--show")
+      }
+
+      "link to the invalid input box in Error Summary" in {
+        mockSaveFormData[CalculationElectionModel](calculationElectionTestModel)
+        CalculationElectionTestDataItem.jsoupDoc.getElementById("calculationElection-error-summary").attr("href") should include ("#calculationElection")
       }
     }
 
