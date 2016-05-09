@@ -433,16 +433,10 @@ trait CalculationController extends FrontendController {
   def otherReliefs: Action[AnyContent] = Action.async { implicit request =>
     val construct = calcConnector.createSummary(hc)
     calcConnector.calculateFlat(construct).map {
-      case Some(dataResult) => {
+      dataResult => {
         Await.result(calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefsFlat").map {
-          case Some(data) => Ok(calculation.otherReliefs(otherReliefsForm.fill(data), dataResult))
-          case None => Ok(calculation.otherReliefs(otherReliefsForm, dataResult))
-        }, Duration("5s"))
-      }
-      case None => {
-        Await.result(calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefsFlat").map {
-          case Some(data) => Ok(calculation.otherReliefs(otherReliefsForm.fill(data), CalculationResultModel(0.0, 0.0, 0.0, 0, None, None)))
-          case None => Ok(calculation.otherReliefs(otherReliefsForm, CalculationResultModel(0.0, 0.0, 0.0, 0, None, None)))
+          case Some(data) => Ok(calculation.otherReliefs(otherReliefsForm.fill(data), dataResult.get))
+          case None => Ok(calculation.otherReliefs(otherReliefsForm, dataResult.get))
         }, Duration("5s"))
       }
     }
@@ -473,10 +467,10 @@ trait CalculationController extends FrontendController {
   def otherReliefsTA: Action[AnyContent] = Action.async { implicit request =>
     val construct = calcConnector.createSummary(hc)
     calcConnector.calculateTA(construct).map {
-      case Some(dataResult) => {
+      dataResult => {
         Await.result(calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefsTA").map {
-          case Some(data) => Ok(calculation.otherReliefsTA(otherReliefsForm.fill(data), dataResult))
-          case None => Ok(calculation.otherReliefsTA(otherReliefsForm, dataResult))
+          case Some(data) => Ok(calculation.otherReliefsTA(otherReliefsForm.fill(data), dataResult.get))
+          case None => Ok(calculation.otherReliefsTA(otherReliefsForm, dataResult.get))
         }, Duration("5s"))
       }
     }
@@ -496,10 +490,10 @@ trait CalculationController extends FrontendController {
   def otherReliefsRebased: Action[AnyContent] = Action.async { implicit request =>
     val construct = calcConnector.createSummary(hc)
     calcConnector.calculateRebased(construct).map {
-      case Some(dataResult) => {
+      dataResult => {
         Await.result(calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefsRebased").map {
-          case Some(data) => Ok(calculation.otherReliefsRebased(otherReliefsForm.fill(data), dataResult))
-          case None => Ok(calculation.otherReliefsRebased(otherReliefsForm, dataResult))
+          case Some(data) => Ok(calculation.otherReliefsRebased(otherReliefsForm.fill(data), dataResult.get))
+          case None => Ok(calculation.otherReliefsRebased(otherReliefsForm, dataResult.get))
         }, Duration("5s"))
       }
     }
