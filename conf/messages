@@ -76,7 +76,7 @@ calc.otherProperties.question = In the tax year when you stopped owning the prop
 ## Annual Exempt Amount ##
 calc.annualExemptAmount.question = How much of your Capital Gains Tax allowance have you got left?
 calc.annualExemptAmount.link.one = Capital Gains Tax allowances
-calc.annualExemptAmount.errorMax = Maximum allowance is £11000
+calc.annualExemptAmount.errorMax = Maximum allowance is £
 calc.annualExemptAmount.errorNegative = Allowance can''t be negative
 calc.annualExemptAmount.errorDecimalPlaces = Allowance has too many decimal numbers
 

@@ -24,11 +24,14 @@ import common.Validation._
 
 object PersonalAllowanceForm {
 
+  val maxPA = 12100
+
   val personalAllowanceForm = Form (
     mapping(
       "personalAllowance" -> bigDecimal
         .verifying(Messages("calc.personalAllowance.errorNegative"), personalAllowance => isPositive(personalAllowance))
         .verifying(Messages("calc.personalAllowance.errorDecimalPlaces"), personalAllowance => isMaxTwoDecimalPlaces(personalAllowance))
+        .verifying(Messages("calc.personalAllowance.errorMaxLimit"), personalAllowance => personalAllowance <= maxPA)
     )(PersonalAllowanceModel.apply)(PersonalAllowanceModel.unapply)
   )
 }

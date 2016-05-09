@@ -624,6 +624,25 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       }
     }
 
+    "submitting a form which exceeds the maximum PA amount" should {
+      object PersonalAllowanceTestDataItem extends fakeRequestToPost(
+        "personal-allowance",
+        TestCalculationController.submitPersonalAllowance,
+        ("personalAllowance", "12100.01")
+      )
+      val testModel = new PersonalAllowanceModel(12100.01)
+
+      "return a 400" in {
+        mockSaveFormData[PersonalAllowanceModel](testModel)
+        status(PersonalAllowanceTestDataItem.result) shouldBe 400
+      }
+
+      s"fail with message ${Messages("calc.personalAllowance.errorMaxLimit")}" in {
+        mockSaveFormData(testModel)
+        PersonalAllowanceTestDataItem.jsoupDoc.getElementsByClass("error-notification").text should include (Messages("calc.personalAllowance.errorMaxLimit"))
+      }
+    }
+
   }
 
   //############## Other Properties tests ######################
