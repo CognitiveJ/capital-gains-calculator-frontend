@@ -8,6 +8,8 @@
 
     <a id="back-link" class="back-link" href="#">@Messages("calc.base.back")</a>
 
+    @govHelpers.errorSummary(Messages("calc.error.summary.heading"), acquisitionCostsForm)
+
     <h1 class="heading-large">@Messages("calc.base.pageHeading")</h1>
 
     @govHelpers.form(action = routes.CalculationController.submitAcquisitionCosts) {
