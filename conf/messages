@@ -73,6 +73,10 @@ calc.personalAllowance.errorDecimalPlaces = Your Personal Allowance has too many
 ## Other Properties ##
 calc.otherProperties.question = In the tax year when you stopped owning the property, did you sell or give away anything else that''s covered by Capital Gains Tax?
 calc.otherProperties.questionTwo = What was the total taxable gain of your previous Capital Gains in the tax year you stopped owning the property?
+calc.otherProperties.errorNegative = Your previous Taxable Gain can''t be negative
+calc.otherProperties.errorDecimalPlaces = Your previous Taxable Gain has too many decimal numbers
+calc.otherProperties.errorQuestion = Please provide a value for your previous Taxable Gain
+
 
 ## Annual Exempt Amount ##
 calc.annualExemptAmount.question = How much of your Capital Gains Tax allowance have you got left?
