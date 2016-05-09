@@ -208,7 +208,18 @@ trait CalculationController extends FrontendController {
       errors => BadRequest(calculation.acquisitionValue(errors)),
       success => {
         calcConnector.saveFormData("acquisitionValue", success)
-        Redirect(routes.CalculationController.improvements())
+        val connection = calcConnector.fetchAndGetValue[AcquisitionDateModel]("acquisitionDate")
+        if (!Dates.dateAfterStart(
+            connection.get.day.getOrElse(0),
+            connection.get.month.getOrElse(0),
+            connection.get.year.getOrElse(0))
+          )
+        {
+          Redirect(routes.CalculationController.rebasedValue())
+        }
+        else {
+          Redirect(routes.CalculationController.improvements())
+        }
       }
     )
   }
