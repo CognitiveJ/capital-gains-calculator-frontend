@@ -2535,6 +2535,16 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           mockSaveFormData(testModel)
           AcquisitionCostsTestDataItem.jsoupDoc.getElementsByClass("error-notification").text should include (Messages("calc.acquisitionCosts.errorNegative"))
         }
+
+        "display a visible Error Summary field" in {
+          mockSaveFormData(testModel)
+          AcquisitionCostsTestDataItem.jsoupDoc.getElementById("error-summary-display").hasClass("error-summary--show")
+        }
+
+        "link to the invalid input box in Error Summary" in {
+          mockSaveFormData(testModel)
+          AcquisitionCostsTestDataItem.jsoupDoc.getElementById("acquisitionCosts-error-summary").attr("href") should include ("#acquisitionCosts")
+        }
       }
 
       "with value 1.111" should {
@@ -2553,6 +2563,16 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         s"fail with message ${Messages("calc.acquisitionCosts.errorDecimalPlaces")}" in {
           mockSaveFormData(testModel)
           AcquisitionCostsTestDataItem.jsoupDoc.getElementsByClass("error-notification").text should include(Messages("calc.acquisitionCosts.errorDecimalPlaces"))
+        }
+
+        "display a visible Error Summary field" in {
+          mockSaveFormData(testModel)
+          AcquisitionCostsTestDataItem.jsoupDoc.getElementById("error-summary-display").hasClass("error-summary--show")
+        }
+
+        "link to the invalid input box in Error Summary" in {
+          mockSaveFormData(testModel)
+          AcquisitionCostsTestDataItem.jsoupDoc.getElementById("acquisitionCosts-error-summary").attr("href") should include ("#acquisitionCosts")
         }
       }
     }
