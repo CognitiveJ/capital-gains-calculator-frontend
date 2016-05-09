@@ -1332,17 +1332,57 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         .thenReturn(Future.successful(returnedCacheMap))
     }
 
-    "submitting a valid form" should {
-      val testModel = new AcquisitionValueModel(1000)
+    "submitting a valid form with a date after 5 5 2015" should {
+
+      val acquisitionDateModelYesAfterStartDate = new AcquisitionDateModel("Yes", Some(10), Some(10), Some(2017))
+
       object AcquisitionValueTestDataItem extends fakeRequestToPost (
         "acquisition-value",
         TestCalculationController.submitAcquisitionValue,
         ("acquisitionValue", "1000")
       )
 
-      "return a 303" in {
-        mockSaveFormData(testModel)
+      s"return a 303 to ${routes.CalculationController.improvements()}" in {
+        mockSaveFormData(new AcquisitionValueModel(1000))
+        mockfetchAndGetValue[AcquisitionDateModel](Some(acquisitionDateModelYesAfterStartDate))
         status(AcquisitionValueTestDataItem.result) shouldBe 303
+        redirectLocation(AcquisitionValueTestDataItem.result) shouldBe Some(s"${routes.CalculationController.improvements()}")
+      }
+    }
+
+    "submitting a valid form with a date before 5 5 2015" should {
+
+      val acquisitionDateModelYesBeforeStartDate = new AcquisitionDateModel("Yes", Some(10), Some(10), Some(2010))
+
+      object AcquisitionValueTestDataItem extends fakeRequestToPost (
+        "acquisition-value",
+        TestCalculationController.submitAcquisitionValue,
+        ("acquisitionValue", "1000")
+      )
+
+      s"return a 303 to ${routes.CalculationController.rebasedValue()}" in {
+        mockSaveFormData(new AcquisitionValueModel(1000))
+        mockfetchAndGetValue[AcquisitionDateModel](Some(acquisitionDateModelYesBeforeStartDate))
+        status(AcquisitionValueTestDataItem.result) shouldBe 303
+        redirectLocation(AcquisitionValueTestDataItem.result) shouldBe Some(s"${routes.CalculationController.rebasedValue()}")
+      }
+    }
+
+    "submitting a valid form with No date supplied" should {
+
+      val acquisitionDateModelNoStartDate = new AcquisitionDateModel("No", None, None, None)
+
+      object AcquisitionValueTestDataItem extends fakeRequestToPost (
+        "acquisition-value",
+        TestCalculationController.submitAcquisitionValue,
+        ("acquisitionValue", "1000")
+      )
+
+      s"return a 303 to ${routes.CalculationController.rebasedValue()}" in {
+        mockSaveFormData(new AcquisitionValueModel(1000))
+        mockfetchAndGetValue[AcquisitionDateModel](Some(acquisitionDateModelNoStartDate))
+        status(AcquisitionValueTestDataItem.result) shouldBe 303
+        redirectLocation(AcquisitionValueTestDataItem.result) shouldBe Some(s"${routes.CalculationController.rebasedValue()}")
       }
     }
 
