@@ -76,6 +76,12 @@ class CalculationElectionConstructorSpec extends UnitSpec with MockitoSugar {
         mockRebasedCalc
         TestCalculationElectionConstructor.generateElection(TestModels.summaryIndividualRebased, hc).size shouldBe 3
       }
+
+      "produce a two entry sequence if there is a value for the rebased calculation supplied but the acquisition date is not supplied." in {
+        mockFlatCalc
+        mockRebasedCalc
+        TestCalculationElectionConstructor.generateElection(TestModels.summaryIndividualRebasedNoAcqDate, hc).size shouldBe 2
+      }
     }
   }
 }
