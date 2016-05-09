@@ -3295,14 +3295,6 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         status(OtherReliefsTestDataItem.result) shouldBe 200
       }
 
-      "return a 200 with an invalid calculation result" in {
-        object OtherReliefsTestDataItem extends fakeRequestTo("other-reliefs", TestCalculationController.otherReliefs)
-        mockCreateSummary(sumModelFlat)
-        mockCalculateFlatValue(None)
-        mockfetchAndGetFormData[OtherReliefsModel](None)
-        status(OtherReliefsTestDataItem.result) shouldBe 200
-      }
-
       "return some HTML that" should {
 
         "contain some text and use the character set utf-8" in {
@@ -3367,14 +3359,6 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       "return a 200 with a valid calculation call" in {
         mockCreateSummary(sumModelFlat)
         mockCalculateFlatValue(Some(calcModelTwoRates))
-        mockfetchAndGetFormData[OtherReliefsModel](Some(testOtherReliefsModel))
-        status(OtherReliefsTestDataItem.result) shouldBe 200
-      }
-
-      "return a 200 with an invalid calculation call" in {
-        object OtherReliefsTestDataItem extends fakeRequestTo("other-reliefs", TestCalculationController.otherReliefs)
-        mockCreateSummary(sumModelFlat)
-        mockCalculateFlatValue(None)
         mockfetchAndGetFormData[OtherReliefsModel](Some(testOtherReliefsModel))
         status(OtherReliefsTestDataItem.result) shouldBe 200
       }
