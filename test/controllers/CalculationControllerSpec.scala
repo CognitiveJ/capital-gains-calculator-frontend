@@ -750,12 +750,13 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         mockSaveFormData[OtherPropertiesModel](testModel)
         status(OtherPropertiesTestDataItem.result) shouldBe 400
       }
+
     }
 
     "submitting an invalid form with 'Yes' selection and a null amount" should {
       object OtherPropertiesTestDataItem extends fakeRequestToPost(
         "other-properties",
-        TestCalculationController.submitAllowableLosses,
+        TestCalculationController.submitOtherProperties,
         ("otherProperties", "Yes"), ("otherPropertiesAmt", "")
       )
       val testModel = new OtherPropertiesModel("Yes", None)
@@ -769,7 +770,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     "submitting an invalid form with 'Yes' selection and an amount with three decimal places" should {
       object OtherPropertiesTestDataItem extends fakeRequestToPost(
         "other-properties",
-        TestCalculationController.submitAllowableLosses,
+        TestCalculationController.submitOtherProperties,
         ("otherProperties", "Yes"), ("otherPropertiesAmt", "1000.111")
       )
       val testModel = new OtherPropertiesModel("Yes", Some(1000.111))
@@ -778,12 +779,17 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         mockSaveFormData[OtherPropertiesModel](testModel)
         status(OtherPropertiesTestDataItem.result) shouldBe 400
       }
+
+      s"fail with message ${Messages("calc.otherProperties.errorDecimalPlaces")}" in {
+        mockSaveFormData[OtherPropertiesModel](testModel)
+        OtherPropertiesTestDataItem.jsoupDoc.getElementsByClass("error-notification").text should include (Messages("calc.otherProperties.errorDecimalPlaces"))
+      }
     }
 
     "submitting an invalid form with 'Yes' selection and a negative amount" should {
       object OtherPropertiesTestDataItem extends fakeRequestToPost(
         "other-properties",
-        TestCalculationController.submitAllowableLosses,
+        TestCalculationController.submitOtherProperties,
         ("otherProperties", "Yes"), ("otherPropertiesAmt", "-1000")
       )
       val testModel = new OtherPropertiesModel("Yes", Some(-1000))
@@ -791,6 +797,11 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       "return a 400" in {
         mockSaveFormData[OtherPropertiesModel](testModel)
         status(OtherPropertiesTestDataItem.result) shouldBe 400
+      }
+
+      s"fail with message ${Messages("calc.otherProperties.errorNegative")}" in {
+        mockSaveFormData[OtherPropertiesModel](testModel)
+        OtherPropertiesTestDataItem.jsoupDoc.getElementsByClass("error-notification").text should include (Messages("calc.otherProperties.errorNegative"))
       }
     }
 
