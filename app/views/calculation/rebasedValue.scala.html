@@ -6,6 +6,9 @@
 
 @main_template(Messages("calc.rebasedValue.question")) {
     <a id="back-link" class="back-link" href="#">Back</a>
+
+    @govHelpers.errorSummary(Messages("calc.error.summary.heading"), rebasedValueForm)
+
     <h1 class="heading-large">@Messages("calc.base.pageHeading")</h1>
 
         @govHelpers.form(action = routes.CalculationController.submitRebasedValue) {

@@ -9,6 +9,8 @@
 
   <a id="back-link" class="back-link" href="@routes.IntroductionController.introduction">@Messages("calc.base.back")</a>
 
+  @govHelpers.errorSummary(Messages("calc.error.summary.heading"), customerTypeForm)
+
   <h1 class="heading-large">@Messages("calc.base.pageHeading")</h1> 
 
   @govHelpers.form(action = routes.CalculationController.submitCustomerType) {
@@ -21,7 +23,8 @@
                 "trustee"->Messages("calc.customerType.trustee"),
                 "personalRep"->Messages("calc.customerType.personalRep")),
             '_legend -> Messages("calc.customerType.question"),
-            '_labelClass -> "block-label"
+            '_labelClass -> "block-label",
+            '_legendID -> "customerType"
         )
     </div>
 

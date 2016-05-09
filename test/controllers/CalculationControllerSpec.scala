@@ -330,6 +330,16 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         mockSaveFormData[CustomerTypeModel](testModel)
         status(CustomerTypeTestDataItem.result) shouldBe 400
       }
+
+      "display a visible Error Summary field" in {
+        mockSaveFormData[CustomerTypeModel](testModel)
+        CustomerTypeTestDataItem.jsoupDoc.getElementById("error-summary-display").hasClass("error-summary--show")
+      }
+
+      "link to the radio field set in Error Summary" in {
+        mockSaveFormData[CustomerTypeModel](testModel)
+        CustomerTypeTestDataItem.jsoupDoc.getElementById("customerType-error-summary").attr("href") should include ("#customerType")
+      }
     }
 
     "submitting an invalid form with incorrect content" should {
