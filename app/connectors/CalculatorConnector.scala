@@ -88,7 +88,7 @@ trait CalculatorConnector {
       fetchAndGetValue[DisabledTrusteeModel]("disabledTrustee"),
       fetchAndGetValue[CurrentIncomeModel]("currentIncome"),
       fetchAndGetValue[PersonalAllowanceModel]("personalAllowance"),
-      fetchAndGetValue[OtherPropertiesModel]("otherProperties").getOrElse(OtherPropertiesModel("No")),
+      fetchAndGetValue[OtherPropertiesModel]("otherProperties").getOrElse(OtherPropertiesModel("No", None)),
       fetchAndGetValue[AnnualExemptAmountModel]("annualExemptAmount"),
       fetchAndGetValue[AcquisitionDateModel]("acquisitionDate").getOrElse(AcquisitionDateModel("No", None, None, None)),
       fetchAndGetValue[AcquisitionValueModel]("acquisitionValue").getOrElse(AcquisitionValueModel(0)),
