@@ -2753,11 +2753,12 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     "supplied with no pre-existing data" should {
 
       object CalculationElectionTestDataItem extends fakeRequestTo("calculation-election", TestCalculationController.calculationElection)
-      keystoreSummaryValue(TestModels.summaryTrusteeTAWithoutAEA)
       keystoreTACalculateValue(Some(TestModels.calcModelTwoRates))
-      keystoreFlatCalculateValue(Some(TestModels.calcModelOneRate))
+      //keystoreFlatCalculateValue(Some(TestModels.calcModelOneRate))
 
       "return a 200" in {
+        keystoreSummaryValue(sumModelFlat)
+        keystoreFlatCalculateValue(Some(calcModelOneRate))
         keystoreFetchCondition[CalculationElectionModel](None)
         status(CalculationElectionTestDataItem.result) shouldBe 200
       }

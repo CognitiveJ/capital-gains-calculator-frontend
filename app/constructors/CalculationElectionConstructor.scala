@@ -26,6 +26,8 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
+// scalastyle:off
+
 object CalculationElectionConstructor extends CalculationElectionConstructor {
   val calcConnector = CalculatorConnector
 }
@@ -60,3 +62,4 @@ trait CalculationElectionConstructor {
     Await.result(calcConnector.calculateTA(summary)(hc), Duration("5s")).get.taxOwed.setScale(2).toString()
   }
 }
+//scalastyle:on
