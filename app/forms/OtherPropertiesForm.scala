@@ -51,9 +51,9 @@ object OtherPropertiesForm {
       "otherPropertiesAmt" -> optional(bigDecimal)
     )(OtherPropertiesModel.apply)(OtherPropertiesModel.unapply).verifying(Messages("calc.otherProperties.errorQuestion"),
       otherPropertiesForm => validate(otherPropertiesForm))
-      .verifying(Messages("calc.otherProperties.errorMinimum"),
+      .verifying(Messages("calc.otherProperties.errorNegative"),
         otherPropertiesForm => validateMinimum(otherPropertiesForm))
-      .verifying(Messages("calc.otherProperties.errorDecimal"),
+      .verifying(Messages("calc.otherProperties.errorDecimalPlaces"),
         otherPropertiesForm => validateTwoDec(otherPropertiesForm))
   )
 }

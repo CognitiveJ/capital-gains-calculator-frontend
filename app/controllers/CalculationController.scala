@@ -208,7 +208,18 @@ trait CalculationController extends FrontendController {
       errors => BadRequest(calculation.acquisitionValue(errors)),
       success => {
         calcConnector.saveFormData("acquisitionValue", success)
-        Redirect(routes.CalculationController.improvements())
+        val connection = calcConnector.fetchAndGetValue[AcquisitionDateModel]("acquisitionDate")
+        if (!Dates.dateAfterStart(
+            connection.get.day.getOrElse(0),
+            connection.get.month.getOrElse(0),
+            connection.get.year.getOrElse(0))
+          )
+        {
+          Redirect(routes.CalculationController.rebasedValue())
+        }
+        else {
+          Redirect(routes.CalculationController.improvements())
+        }
       }
     )
   }
@@ -397,7 +408,7 @@ trait CalculationController extends FrontendController {
     )
   }
   //################### Calculation Election methods #######################
-  def calculationElection = Action.async { implicit request =>
+  def calculationElection: Action[AnyContent] = Action.async { implicit request =>
     val construct = calcConnector.createSummary(hc)
     val content = calcElectionConstructor.generateElection(construct, hc)
     calcConnector.fetchAndGetFormData[CalculationElectionModel]("calculationElection").map {
@@ -406,7 +417,7 @@ trait CalculationController extends FrontendController {
     }
   }
 
-  def submitCalculationElection = Action { implicit request =>
+  def submitCalculationElection: Action[AnyContent] = Action { implicit request =>
     val construct = calcConnector.createSummary(hc)
     val content = calcElectionConstructor.generateElection(construct, hc)
     calculationElectionForm.bindFromRequest.fold(
@@ -419,35 +430,31 @@ trait CalculationController extends FrontendController {
   }
 
   //################### Other Reliefs methods #######################
-  def otherReliefs = Action.async { implicit request =>
+  def otherReliefs: Action[AnyContent] = Action.async { implicit request =>
     val construct = calcConnector.createSummary(hc)
     calcConnector.calculateFlat(construct).map {
-      case Some(dataResult) => {
+      dataResult => {
         Await.result(calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefsFlat").map {
-          case Some(data) => Ok(calculation.otherReliefs(otherReliefsForm.fill(data), dataResult))
-          case None => Ok(calculation.otherReliefs(otherReliefsForm, dataResult))
-        }, Duration("5s"))
-      }
-      case None => {
-        Await.result(calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefsFlat").map {
-          case Some(data) => Ok(calculation.otherReliefs(otherReliefsForm.fill(data), CalculationResultModel(0.0, 0.0, 0.0, 0, None, None)))
-          case None => Ok(calculation.otherReliefs(otherReliefsForm, CalculationResultModel(0.0, 0.0, 0.0, 0, None, None)))
+          case Some(data) => Ok(calculation.otherReliefs(otherReliefsForm.fill(data), dataResult.get))
+          case None => Ok(calculation.otherReliefs(otherReliefsForm, dataResult.get))
         }, Duration("5s"))
       }
     }
   }
 
-  def submitOtherReliefs = Action { implicit request =>
+  def submitOtherReliefs: Action[AnyContent] = Action { implicit request =>
     val construct = calcConnector.createSummary(hc)
     otherReliefsForm.bindFromRequest.fold(
       errors => BadRequest(calculation.otherReliefs(errors, CalculationResultModel(0.0, 0.0, 0.0, 0, None, None))),
       success => {
         calcConnector.saveFormData("otherReliefsFlat", success)
         construct.acquisitionDateModel.hasAcquisitionDate match {
-          case "Yes" if Dates.dateAfterStart(construct.acquisitionDateModel.day.get, construct.acquisitionDateModel.month.get, construct.acquisitionDateModel.year.get) => {
+          case "Yes" if Dates.dateAfterStart(construct.acquisitionDateModel.day.get,
+            construct.acquisitionDateModel.month.get, construct.acquisitionDateModel.year.get) => {
             Redirect(routes.CalculationController.summary())
           }
-          case "Yes" if !Dates.dateAfterStart(construct.acquisitionDateModel.day.get, construct.acquisitionDateModel.month.get, construct.acquisitionDateModel.year.get) => {
+          case "Yes" if !Dates.dateAfterStart(construct.acquisitionDateModel.day.get,
+            construct.acquisitionDateModel.month.get, construct.acquisitionDateModel.year.get) => {
             Redirect(routes.CalculationController.calculationElection())
           }
           case "No" => Redirect(routes.CalculationController.summary())
@@ -457,13 +464,13 @@ trait CalculationController extends FrontendController {
   }
 
   //################### Time Apportioned Other Reliefs methods #######################
-  def otherReliefsTA = Action.async { implicit request =>
+  def otherReliefsTA: Action[AnyContent] = Action.async { implicit request =>
     val construct = calcConnector.createSummary(hc)
     calcConnector.calculateTA(construct).map {
-      case Some(dataResult) => {
+      dataResult => {
         Await.result(calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefsTA").map {
-          case Some(data) => Ok(calculation.otherReliefsTA(otherReliefsForm.fill(data), dataResult))
-          case None => Ok(calculation.otherReliefsTA(otherReliefsForm, dataResult))
+          case Some(data) => Ok(calculation.otherReliefsTA(otherReliefsForm.fill(data), dataResult.get))
+          case None => Ok(calculation.otherReliefsTA(otherReliefsForm, dataResult.get))
         }, Duration("5s"))
       }
     }
@@ -483,10 +490,10 @@ trait CalculationController extends FrontendController {
   def otherReliefsRebased: Action[AnyContent] = Action.async { implicit request =>
     val construct = calcConnector.createSummary(hc)
     calcConnector.calculateRebased(construct).map {
-      case Some(dataResult) => {
+      dataResult => {
         Await.result(calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefsRebased").map {
-          case Some(data) => Ok(calculation.otherReliefsRebased(otherReliefsForm.fill(data), dataResult))
-          case None => Ok(calculation.otherReliefsRebased(otherReliefsForm, dataResult))
+          case Some(data) => Ok(calculation.otherReliefsRebased(otherReliefsForm.fill(data), dataResult.get))
+          case None => Ok(calculation.otherReliefsRebased(otherReliefsForm, dataResult.get))
         }, Duration("5s"))
       }
     }
