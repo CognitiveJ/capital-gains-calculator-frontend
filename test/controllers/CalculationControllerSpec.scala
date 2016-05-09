@@ -1380,17 +1380,57 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         .thenReturn(Future.successful(returnedCacheMap))
     }
 
-    "submitting a valid form" should {
-      val testModel = new AcquisitionValueModel(1000)
+    "submitting a valid form with a date after 5 5 2015" should {
+
+      val acquisitionDateModelYesAfterStartDate = new AcquisitionDateModel("Yes", Some(10), Some(10), Some(2017))
+
       object AcquisitionValueTestDataItem extends fakeRequestToPost (
         "acquisition-value",
         TestCalculationController.submitAcquisitionValue,
         ("acquisitionValue", "1000")
       )
 
-      "return a 303" in {
-        mockSaveFormData(testModel)
+      s"return a 303 to ${routes.CalculationController.improvements()}" in {
+        mockSaveFormData(new AcquisitionValueModel(1000))
+        mockfetchAndGetValue[AcquisitionDateModel](Some(acquisitionDateModelYesAfterStartDate))
         status(AcquisitionValueTestDataItem.result) shouldBe 303
+        redirectLocation(AcquisitionValueTestDataItem.result) shouldBe Some(s"${routes.CalculationController.improvements()}")
+      }
+    }
+
+    "submitting a valid form with a date before 5 5 2015" should {
+
+      val acquisitionDateModelYesBeforeStartDate = new AcquisitionDateModel("Yes", Some(10), Some(10), Some(2010))
+
+      object AcquisitionValueTestDataItem extends fakeRequestToPost (
+        "acquisition-value",
+        TestCalculationController.submitAcquisitionValue,
+        ("acquisitionValue", "1000")
+      )
+
+      s"return a 303 to ${routes.CalculationController.rebasedValue()}" in {
+        mockSaveFormData(new AcquisitionValueModel(1000))
+        mockfetchAndGetValue[AcquisitionDateModel](Some(acquisitionDateModelYesBeforeStartDate))
+        status(AcquisitionValueTestDataItem.result) shouldBe 303
+        redirectLocation(AcquisitionValueTestDataItem.result) shouldBe Some(s"${routes.CalculationController.rebasedValue()}")
+      }
+    }
+
+    "submitting a valid form with No date supplied" should {
+
+      val acquisitionDateModelNoStartDate = new AcquisitionDateModel("No", None, None, None)
+
+      object AcquisitionValueTestDataItem extends fakeRequestToPost (
+        "acquisition-value",
+        TestCalculationController.submitAcquisitionValue,
+        ("acquisitionValue", "1000")
+      )
+
+      s"return a 303 to ${routes.CalculationController.rebasedValue()}" in {
+        mockSaveFormData(new AcquisitionValueModel(1000))
+        mockfetchAndGetValue[AcquisitionDateModel](Some(acquisitionDateModelNoStartDate))
+        status(AcquisitionValueTestDataItem.result) shouldBe 303
+        redirectLocation(AcquisitionValueTestDataItem.result) shouldBe Some(s"${routes.CalculationController.rebasedValue()}")
       }
     }
 
@@ -3343,14 +3383,6 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         status(OtherReliefsTestDataItem.result) shouldBe 200
       }
 
-      "return a 200 with an invalid calculation result" in {
-        object OtherReliefsTestDataItem extends fakeRequestTo("other-reliefs", TestCalculationController.otherReliefs)
-        mockCreateSummary(sumModelFlat)
-        mockCalculateFlatValue(None)
-        mockfetchAndGetFormData[OtherReliefsModel](None)
-        status(OtherReliefsTestDataItem.result) shouldBe 200
-      }
-
       "return some HTML that" should {
 
         "contain some text and use the character set utf-8" in {
@@ -3415,14 +3447,6 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       "return a 200 with a valid calculation call" in {
         mockCreateSummary(sumModelFlat)
         mockCalculateFlatValue(Some(calcModelTwoRates))
-        mockfetchAndGetFormData[OtherReliefsModel](Some(testOtherReliefsModel))
-        status(OtherReliefsTestDataItem.result) shouldBe 200
-      }
-
-      "return a 200 with an invalid calculation call" in {
-        object OtherReliefsTestDataItem extends fakeRequestTo("other-reliefs", TestCalculationController.otherReliefs)
-        mockCreateSummary(sumModelFlat)
-        mockCalculateFlatValue(None)
         mockfetchAndGetFormData[OtherReliefsModel](Some(testOtherReliefsModel))
         status(OtherReliefsTestDataItem.result) shouldBe 200
       }
@@ -3751,6 +3775,31 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       "contain the pre-supplied data" in {
         mockfetchAndGetFormData[OtherReliefsModel](Some(testotherReliefsRebasedModel))
         OtherReliefsRebasedTestDataItem.jsoupDoc.body.getElementById("otherReliefs").attr("value") shouldBe "1000"
+      }
+    }
+  }
+
+  "In CalculationController calling the .submitOtherReliefsRebased action" when {
+    def mockSaveFormData[T](data: OtherReliefsModel): Unit = {
+      lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+      when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(returnedCacheMap))
+    }
+
+    "submitting a valid form and an amount of 1000" should {
+      object OtherReliefsRebasedTestDataItem extends fakeRequestToPost("other-reliefs-rebased", TestCalculationController.submitOtherReliefsRebased, ("otherReliefs", "1000"))
+      val otherReliefsRebasedTestModel = new OtherReliefsModel(Some(1000))
+      mockCreateSummary(sumModelRebased)
+      mockCalculateRebasedValue(Some(calcModelTwoRates))
+
+      "return a 303" in {
+        mockSaveFormData[OtherReliefsModel](otherReliefsRebasedTestModel)
+        status(OtherReliefsRebasedTestDataItem.result) shouldBe 303
+      }
+
+      s"redirect to ${routes.CalculationController.calculationElection()}" in {
+        mockSaveFormData[OtherReliefsModel](otherReliefsRebasedTestModel)
+        redirectLocation(OtherReliefsRebasedTestDataItem.result) shouldBe Some(s"${routes.CalculationController.calculationElection()}")
       }
     }
   }
