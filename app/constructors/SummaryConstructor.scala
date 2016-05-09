@@ -339,4 +339,13 @@ object SummaryConstructor {
       }
     )
   }
+
+  def gainMessage (result: CalculationResultModel) = {
+    if (result.totalGain >= 0) Messages("calc.otherReliefs.totalGain")
+    else Messages("calc.otherReliefs.totalLoss")
+  }
+
+  def setPositive (result: CalculationResultModel) = {
+    BigDecimal(Math.abs(result.totalGain.toDouble))
+  }
 }
