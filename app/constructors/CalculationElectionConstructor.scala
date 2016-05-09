@@ -34,6 +34,7 @@ trait CalculationElectionConstructor {
 
   val calcConnector: CalculatorConnector
 
+  //scalastyle:off
   def generateElection(summary: SummaryModel, hc: HeaderCarrier): Seq[(String, String, String, Option[String], String)]= {
     summary.acquisitionDateModel.hasAcquisitionDate match {
       case "Yes" if Dates.dateAfterStart(summary.acquisitionDateModel.day.get,
@@ -77,8 +78,23 @@ trait CalculationElectionConstructor {
         }
       }
       case "No" => {
-        Seq(("flat", resultFlat(summary, hc), Messages("calc.calculationElection.message.flat"),
-          None, routes.CalculationController.otherReliefs().toString()))
+        if (summary.rebasedValueModel.get.hasRebasedValue.equals("Yes")) {
+          Seq(
+            ("flat", resultFlat(summary, hc),
+              Messages("calc.calculationElection.message.flat"),
+              None,
+              routes.CalculationController.otherReliefs().toString()),
+            ("rebased", resultRebased(summary, hc),
+              Messages("calc.calculationElection.messages.rebased"),
+              Some(Messages("calc.calculationElection.message.rebasedDate")),
+              routes.CalculationController.otherReliefsRebased().toString())
+          )
+        }
+        else {
+          Seq(("flat", resultFlat(summary, hc), Messages("calc.calculationElection.message.flat"),
+            None, routes.CalculationController.otherReliefs().toString())
+          )
+        }
       }
     }
   }
