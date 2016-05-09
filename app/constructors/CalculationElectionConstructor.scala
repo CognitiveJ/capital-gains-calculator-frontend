@@ -34,29 +34,80 @@ trait CalculationElectionConstructor {
 
   val calcConnector: CalculatorConnector
 
+  //scalastyle:off
   def generateElection(summary: SummaryModel, hc: HeaderCarrier): Seq[(String, String, String, Option[String], String)]= {
     summary.acquisitionDateModel.hasAcquisitionDate match {
-      case "Yes" if Dates.dateAfterStart(summary.acquisitionDateModel.day.get, summary.acquisitionDateModel.month.get, summary.acquisitionDateModel.year.get) => {
-        Seq(("flat", resultFlat(summary, hc), Messages("calc.calculationElection.message.flat"), None, routes.CalculationController.otherReliefs().toString()))
+      case "Yes" if Dates.dateAfterStart(summary.acquisitionDateModel.day.get,
+        summary.acquisitionDateModel.month.get, summary.acquisitionDateModel.year.get) => {
+        Seq(("flat", resultFlat(summary, hc),
+          Messages("calc.calculationElection.message.flat"),
+          None,
+          routes.CalculationController.otherReliefs().toString()))
       }
-      case "Yes" if !Dates.dateAfterStart(summary.acquisitionDateModel.day.get, summary.acquisitionDateModel.month.get, summary.acquisitionDateModel.year.get) => {
-        Seq(
-          ("flat", resultFlat(summary, hc), Messages("calc.calculationElection.message.flat"),
-            None, routes.CalculationController.otherReliefs().toString()),
-          ("time", resultTime(summary, hc), Messages("calc.calculationElection.message.time"),
-            Some(Messages("calc.calculationElection.message.timeDate")), routes.CalculationController.otherReliefsTA().toString()))
+      case "Yes" if !Dates.dateAfterStart(summary.acquisitionDateModel.day.get,
+        summary.acquisitionDateModel.month.get,
+        summary.acquisitionDateModel.year.get) => {
+
+        if (summary.rebasedValueModel.get.hasRebasedValue.equals("Yes")) {
+          Seq(
+            ("flat", resultFlat(summary, hc),
+              Messages("calc.calculationElection.message.flat"),
+              None,
+              routes.CalculationController.otherReliefs().toString()),
+            ("time", resultTime(summary, hc),
+              Messages("calc.calculationElection.message.time"),
+              Some(Messages("calc.calculationElection.message.timeDate")),
+              routes.CalculationController.otherReliefsTA().toString()),
+            ("rebased", resultRebased(summary, hc),
+              Messages("calc.calculationElection.messages.rebased"),
+              Some(Messages("calc.calculationElection.message.rebasedDate")),
+              routes.CalculationController.otherReliefsRebased().toString())
+          )
+        }
+        else {
+          Seq(
+            ("flat", resultFlat(summary, hc),
+              Messages("calc.calculationElection.message.flat"),
+              None,
+              routes.CalculationController.otherReliefs().toString()),
+            ("time", resultTime(summary, hc),
+              Messages("calc.calculationElection.message.time"),
+              Some(Messages("calc.calculationElection.message.timeDate")),
+              routes.CalculationController.otherReliefsTA().toString())
+          )
+        }
       }
       case "No" => {
-        Seq(("flat", resultFlat(summary, hc), Messages("calc.calculationElection.message.flat"), None, routes.CalculationController.otherReliefs().toString()))
+        if (summary.rebasedValueModel.get.hasRebasedValue.equals("Yes")) {
+          Seq(
+            ("flat", resultFlat(summary, hc),
+              Messages("calc.calculationElection.message.flat"),
+              None,
+              routes.CalculationController.otherReliefs().toString()),
+            ("rebased", resultRebased(summary, hc),
+              Messages("calc.calculationElection.messages.rebased"),
+              Some(Messages("calc.calculationElection.message.rebasedDate")),
+              routes.CalculationController.otherReliefsRebased().toString())
+          )
+        }
+        else {
+          Seq(("flat", resultFlat(summary, hc), Messages("calc.calculationElection.message.flat"),
+            None, routes.CalculationController.otherReliefs().toString())
+          )
+        }
       }
     }
   }
 
-  def resultFlat (summary: SummaryModel, hc: HeaderCarrier) = {
+  def resultFlat (summary: SummaryModel, hc: HeaderCarrier): String = {
     Await.result(calcConnector.calculateFlat(summary)(hc), Duration("5s")).get.taxOwed.setScale(2).toString()
   }
 
-  def resultTime(summary: SummaryModel, hc: HeaderCarrier) = {
+  def resultTime(summary: SummaryModel, hc: HeaderCarrier): String = {
     Await.result(calcConnector.calculateTA(summary)(hc), Duration("5s")).get.taxOwed.setScale(2).toString()
+  }
+
+  def resultRebased(summary: SummaryModel, hc: HeaderCarrier): String = {
+    Await.result(calcConnector.calculateRebased(summary)(hc), Duration("5s")).get.taxOwed.setScale(2).toString()
   }
 }
