@@ -47,10 +47,6 @@ object CalculateRequestConstructor {
       input.disposalValueModel.disposalValue
     }&disposalCosts=${
       input.disposalCostsModel.disposalCosts.getOrElse(0)
-    }&acquisitionValueAmt=${
-      input.acquisitionValueModel.acquisitionValueAmt
-    }&acquisitionCostsAmt=${
-      input.acquisitionCostsModel.acquisitionCostsAmt.getOrElse(0)
     }&allowableLossesAmt=${
       input.allowableLossesModel.isClaimingAllowableLosses match {
         case "Yes" => input.allowableLossesModel.allowableLossesAmt.get
@@ -62,45 +58,58 @@ object CalculateRequestConstructor {
   }
 
   def flatCalcUrlExtra(input: SummaryModel): String = {
-    s"&improvementsAmt=${
-      input.improvementsModel.isClaimingImprovements match {
-        case "Yes" => input.improvementsModel.improvementsAmt.get
-        case "No" => 0
-      }
-    }${improvementsAfter(input)
+    s"${improvements(input)
+    }${acquisition(input)
     }&reliefs=${
       input.otherReliefsModelFlat.otherReliefs.getOrElse(0)
     }"
   }
 
   def taCalcUrlExtra(input: SummaryModel): String = {
-    s"&improvementsAmt=${
-      input.improvementsModel.isClaimingImprovements match {
-        case "Yes" => input.improvementsModel.improvementsAmt.get
-        case "No" => 0
-      }
-    }${improvementsAfter(input)
+    s"${improvements(input)
     }&disposalDate=${
       input.disposalDateModel.year}-${input.disposalDateModel.month}-${input.disposalDateModel.day
     }&acquisitionDate=${
       input.acquisitionDateModel.year.get}-${input.acquisitionDateModel.month.get}-${input.acquisitionDateModel.day.get
+    }${acquisition(input)
     }&reliefs=${
       input.otherReliefsModelTA.otherReliefs.getOrElse(0)
     }"
   }
 
-  def improvementsAfter (input: SummaryModel) = s"&improvementsAmtAfter=${
+  def rebasedCalcUrlExtra(input: SummaryModel): String = {
+    s"&improvementsAmt=${input.improvementsModel.isClaimingImprovements match {
+      case "Yes" => input.improvementsModel.improvementsAmtAfter.get
+      case "No" => 0
+    }
+    }&rebasedValueAmt=${input.rebasedValueModel.get.rebasedValueAmt.get
+    }&rebasedCostsAmt=${input.rebasedCostsModel.get.hasRebasedCosts match {
+      case "Yes" => input.rebasedCostsModel.get.rebasedCosts.get
+      case "No" => 0
+    }
+    }&reliefs=${
+      input.otherReliefsModelRebased.otherReliefs.getOrElse(0)
+    }"
+  }
+
+  def improvements (input: SummaryModel) = s"&improvementsAmt=${
     input.improvementsModel.isClaimingImprovements match {
       case "Yes" => {
         input.rebasedValueModel match {
           case Some(data) => data.hasRebasedValue match {
-            case "Yes" => input.improvementsModel.improvementsAmtAfter.getOrElse(0)
-            case "No" => 0
+            case "Yes" => input.improvementsModel.improvementsAmtAfter.getOrElse(BigDecimal(0)) + input.improvementsModel.improvementsAmt.getOrElse(BigDecimal(0))
+            case "No" => input.improvementsModel.improvementsAmt.getOrElse(0)
           }
-          case None => 0
+          case None => input.improvementsModel.improvementsAmt.getOrElse(0)
         }
       }
       case "No" => 0
     }
+  }"
+
+  def acquisition (input: SummaryModel) = s"&acquisitionValueAmt=${
+    input.acquisitionValueModel.acquisitionValueAmt
+  }&acquisitionCostsAmt=${
+    input.acquisitionCostsModel.acquisitionCostsAmt.getOrElse(0)
   }"
 }
