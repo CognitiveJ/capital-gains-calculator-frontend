@@ -769,10 +769,15 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
   //############## Annual Exempt Amount tests ######################
   "In CalculationController calling the .annualExemptAmount action " when {
+    val mockedDisabledTrusteeModel = new DisabledTrusteeModel("")
+    val mockedCustomerType = new CustomerTypeModel("individual")
+
     "not supplied with a pre-existing stored model" should {
       object AnnualExemptAmountTestDataItem extends fakeRequestTo("allowance", TestCalculationController.annualExemptAmount)
 
       "return a 200" in {
+        mockfetchAndGetFormData(Some(mockedCustomerType))
+        mockfetchAndGetValue(Some(mockedDisabledTrusteeModel))
         mockfetchAndGetFormData[AnnualExemptAmountModel](None)
         status(AnnualExemptAmountTestDataItem.result) shouldBe 200
       }
@@ -780,157 +785,269 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       "return some HTML that" should {
 
         "contain some text and use the character set utf-8" in {
+          mockfetchAndGetFormData(Some(mockedCustomerType))
+          mockfetchAndGetValue(Some(mockedDisabledTrusteeModel))
           mockfetchAndGetFormData[AnnualExemptAmountModel](None)
           contentType(AnnualExemptAmountTestDataItem.result) shouldBe Some("text/html")
           charset(AnnualExemptAmountTestDataItem.result) shouldBe Some("utf-8")
         }
 
         "have the title 'How much of your Capital Gains Tax allowance have you got left?'" in {
+          mockfetchAndGetFormData(Some(mockedCustomerType))
+          mockfetchAndGetValue(Some(mockedDisabledTrusteeModel))
           mockfetchAndGetFormData[AnnualExemptAmountModel](None)
           AnnualExemptAmountTestDataItem.jsoupDoc.title shouldEqual Messages("calc.annualExemptAmount.question")
         }
 
         "have the heading Calculate your tax (non-residents) " in {
+          mockfetchAndGetFormData(Some(mockedCustomerType))
+          mockfetchAndGetValue(Some(mockedDisabledTrusteeModel))
           mockfetchAndGetFormData[AnnualExemptAmountModel](None)
           AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
         }
 
         "have a 'Back' link " in {
+          mockfetchAndGetFormData(Some(mockedCustomerType))
+          mockfetchAndGetValue(Some(mockedDisabledTrusteeModel))
           mockfetchAndGetFormData[AnnualExemptAmountModel](None)
           AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
         }
 
         "have the question 'How much of your Capital Gains Tax allowance have you got left?' as the legend of the input" in {
+          mockfetchAndGetFormData(Some(mockedCustomerType))
+          mockfetchAndGetValue(Some(mockedDisabledTrusteeModel))
           mockfetchAndGetFormData[AnnualExemptAmountModel](None)
-          AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementsByTag("label").text should include (Messages("calc.annualExemptAmount.question"))
+          AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementsByTag("label").text should include(Messages("calc.annualExemptAmount.question"))
         }
 
         "display an input box for the Annual Exempt Amount" in {
+          mockfetchAndGetFormData(Some(mockedCustomerType))
+          mockfetchAndGetValue(Some(mockedDisabledTrusteeModel))
           mockfetchAndGetFormData[AnnualExemptAmountModel](None)
           AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementById("annualExemptAmount").tagName() shouldEqual "input"
         }
 
         "have no value auto-filled into the input box" in {
+          mockfetchAndGetFormData(Some(mockedCustomerType))
+          mockfetchAndGetValue(Some(mockedDisabledTrusteeModel))
           mockfetchAndGetFormData[AnnualExemptAmountModel](None)
           AnnualExemptAmountTestDataItem.jsoupDoc.getElementById("annualExemptAmount").attr("value") shouldBe empty
         }
 
         "display a 'Continue' button " in {
+          mockfetchAndGetFormData(Some(mockedCustomerType))
+          mockfetchAndGetValue(Some(mockedDisabledTrusteeModel))
           mockfetchAndGetFormData[AnnualExemptAmountModel](None)
           AnnualExemptAmountTestDataItem.jsoupDoc.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
         }
 
         "should contain a Read more sidebar with a link to CGT allowances" in {
+          mockfetchAndGetFormData(Some(mockedCustomerType))
+          mockfetchAndGetValue(Some(mockedDisabledTrusteeModel))
           mockfetchAndGetFormData[AnnualExemptAmountModel](None)
           AnnualExemptAmountTestDataItem.jsoupDoc.select("aside h2").text shouldBe Messages("calc.common.readMore")
           AnnualExemptAmountTestDataItem.jsoupDoc.select("aside a").text shouldBe Messages("calc.annualExemptAmount.link.one")
         }
       }
     }
-  }
 
-  "supplied with a pre-existing stored model" should {
-    object AnnualExemptAmountTestDataItem extends fakeRequestTo("allowance", TestCalculationController.annualExemptAmount)
-    val testModel = new AnnualExemptAmountModel(1000)
+    "supplied with a pre-existing stored model" should {
 
-    "return a 200" in {
-      mockfetchAndGetFormData[AnnualExemptAmountModel](Some(testModel))
-      status(AnnualExemptAmountTestDataItem.result) shouldBe 200
-    }
-
-    "return some HTML that" should {
-
-      "contain some text and use the character set utf-8" in {
-        mockfetchAndGetFormData[AnnualExemptAmountModel](Some(testModel))
-        contentType(AnnualExemptAmountTestDataItem.result) shouldBe Some("text/html")
-        charset(AnnualExemptAmountTestDataItem.result) shouldBe Some("utf-8")
-      }
-
-      "have the value 1000 auto-filled into the input box" in {
-        mockfetchAndGetFormData[AnnualExemptAmountModel](Some(testModel))
-        AnnualExemptAmountTestDataItem.jsoupDoc.getElementById("annualExemptAmount").attr("value") shouldEqual ("1000")
-      }
-    }
-  }
-
-  "In CalculationController calling the .submitAnnualExemptAmount action" when {
-    def mockSaveFormData[T](data: AnnualExemptAmountModel): Unit = {
-      lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
-      when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
-        .thenReturn(Future.successful(returnedCacheMap))
-    }
-    "submitting a valid form" should {
-      object AnnualExemptAmountTestDataItem extends fakeRequestToPost(
-        "allowance",
-        TestCalculationController.submitAnnualExemptAmount,
-        ("annualExemptAmount", "1000")
-      )
+      object AnnualExemptAmountTestDataItem extends fakeRequestTo("allowance", TestCalculationController.annualExemptAmount)
       val testModel = new AnnualExemptAmountModel(1000)
 
-      "return a 303" in {
-        mockSaveFormData[AnnualExemptAmountModel](testModel)
-        status(AnnualExemptAmountTestDataItem.result) shouldBe 303
+      "return a 200" in {
+        mockfetchAndGetFormData(Some(mockedCustomerType))
+        mockfetchAndGetValue(Some(mockedDisabledTrusteeModel))
+        mockfetchAndGetFormData[AnnualExemptAmountModel](Some(testModel))
+        status(AnnualExemptAmountTestDataItem.result) shouldBe 200
+      }
+
+      "return some HTML that" should {
+
+        "contain some text and use the character set utf-8" in {
+          mockfetchAndGetFormData(Some(mockedCustomerType))
+          mockfetchAndGetValue(Some(mockedDisabledTrusteeModel))
+          mockfetchAndGetFormData[AnnualExemptAmountModel](Some(testModel))
+          contentType(AnnualExemptAmountTestDataItem.result) shouldBe Some("text/html")
+          charset(AnnualExemptAmountTestDataItem.result) shouldBe Some("utf-8")
+        }
+
+        "have the value 1000 auto-filled into the input box" in {
+          mockfetchAndGetFormData(Some(mockedCustomerType))
+          mockfetchAndGetValue(Some(mockedDisabledTrusteeModel))
+          mockfetchAndGetFormData[AnnualExemptAmountModel](Some(testModel))
+          AnnualExemptAmountTestDataItem.jsoupDoc.getElementById("annualExemptAmount").attr("value") shouldEqual ("1000")
+        }
       }
     }
 
-    "submitting an invalid form with no value" should {
-      object AnnualExemptAmountTestDataItem extends fakeRequestToPost(
-        "allowance",
-        TestCalculationController.submitAnnualExemptAmount,
-        ("annualExemptAmount", "")
-      )
-      val testModel = new AnnualExemptAmountModel(0)
-
-      "return a 400" in {
-        mockSaveFormData[AnnualExemptAmountModel](testModel)
-        status(AnnualExemptAmountTestDataItem.result) shouldBe 400
-      }
-    }
-
-    "submitting an invalid form above the maximum value" should {
-      object AnnualExemptAmountTestDataItem extends fakeRequestToPost(
-        "allowance",
-        TestCalculationController.submitAnnualExemptAmount,
-        ("annualExemptAmount", "15000")
-      )
-      val testModel = new AnnualExemptAmountModel(15000)
-
-      "return a 400" in {
-        mockSaveFormData[AnnualExemptAmountModel](testModel)
-        status(AnnualExemptAmountTestDataItem.result) shouldBe 400
-      }
-    }
-
-    "submitting an invalid form below the minimum" should {
-      object AnnualExemptAmountTestDataItem extends fakeRequestToPost(
-        "allowance",
-        TestCalculationController.submitAnnualExemptAmount,
-        ("annualExemptAmount", "-1000")
-      )
-      val testModel = new AnnualExemptAmountModel(-1000)
-
-      "return a 400" in {
-        mockSaveFormData[AnnualExemptAmountModel](testModel)
-        status(AnnualExemptAmountTestDataItem.result) shouldBe 400
-      }
-    }
-
-    "submitting an invalid form with value 1.111" should {
-      object AnnualExemptAmountTestDataItem extends fakeRequestToPost(
-        "allowance",
-        TestCalculationController.submitAnnualExemptAmount,
-        ("annualExemptAmount", "1.111")
-      )
-      val testModel = new AnnualExemptAmountModel(-1000)
-
-      "return a 400" in {
-        mockSaveFormData[AnnualExemptAmountModel](testModel)
-        status(AnnualExemptAmountTestDataItem.result) shouldBe 400
+    "In CalculationController calling the .submitAnnualExemptAmount action" when {
+      def mockSaveFormData[T](data: AnnualExemptAmountModel): Unit = {
+        lazy val returnedCacheMap = CacheMap("form-id", Map("data" -> Json.toJson(data)))
+        when(mockCalcConnector.saveFormData[T](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+          .thenReturn(Future.successful(returnedCacheMap))
       }
 
-      s"fail with message ${Messages("calc.annualExemptAmount.errorDecimalPlaces")}" in {
-        mockSaveFormData(testModel)
-        AnnualExemptAmountTestDataItem.jsoupDoc.getElementsByClass("error-notification").text should include (Messages("calc.annualExemptAmount.errorDecimalPlaces"))
+      "submitting a valid form" should {
+        object AnnualExemptAmountTestDataItem extends fakeRequestToPost(
+          "allowance",
+          TestCalculationController.submitAnnualExemptAmount,
+          ("annualExemptAmount", "1000")
+        )
+        val testModel = new AnnualExemptAmountModel(1000)
+
+        "return a 303" in {
+          mockfetchAndGetFormData(Some(mockedCustomerType))
+          mockfetchAndGetValue(Some(mockedDisabledTrusteeModel))
+          mockSaveFormData[AnnualExemptAmountModel](testModel)
+          status(AnnualExemptAmountTestDataItem.result) shouldBe 303
+        }
+      }
+
+      "submitting an invalid form with no value" should {
+        object AnnualExemptAmountTestDataItem extends fakeRequestToPost(
+          "allowance",
+          TestCalculationController.submitAnnualExemptAmount,
+          ("annualExemptAmount", "")
+        )
+        val testModel = new AnnualExemptAmountModel(0)
+
+        "return a 400" in {
+          mockfetchAndGetFormData(Some(mockedCustomerType))
+          mockfetchAndGetValue(Some(mockedDisabledTrusteeModel))
+          mockSaveFormData[AnnualExemptAmountModel](testModel)
+          status(AnnualExemptAmountTestDataItem.result) shouldBe 400
+        }
+      }
+
+      "submitting an valid form below the maximum value for a non-vulnerable trustee" should {
+        object AnnualExemptAmountTestDataItem extends fakeRequestToPost(
+          "allowance",
+          TestCalculationController.submitAnnualExemptAmount,
+          ("annualExemptAmount", "5550")
+        )
+        val testModel = new AnnualExemptAmountModel(5550)
+        val mockedCustomerType = new CustomerTypeModel("trustee")
+        val mockedDisabledTrusteeModel = new DisabledTrusteeModel("No")
+
+        "return a 303" in {
+          mockfetchAndGetFormData(Some(mockedCustomerType))
+          mockfetchAndGetValue(Some(mockedDisabledTrusteeModel))
+          mockSaveFormData[AnnualExemptAmountModel](testModel)
+          status(AnnualExemptAmountTestDataItem.result) shouldBe 303
+        }
+      }
+
+      "submitting an valid form when no customer type selected (impossible - for coverage only)" should {
+        object AnnualExemptAmountTestDataItem extends fakeRequestToPost(
+          "allowance",
+          TestCalculationController.submitAnnualExemptAmount,
+          ("annualExemptAmount", "1")
+        )
+        val testModel = new AnnualExemptAmountModel(1)
+        val mockedCustomerType = new CustomerTypeModel("trustee")
+        val mockedDisabledTrusteeModel = new DisabledTrusteeModel("No")
+
+        "return a 303" in {
+          mockfetchAndGetFormData(None)
+          mockfetchAndGetValue(Some(mockedDisabledTrusteeModel))
+          mockSaveFormData[AnnualExemptAmountModel](testModel)
+          status(AnnualExemptAmountTestDataItem.result) shouldBe 303
+        }
+      }
+
+      "submitting an invalid form above the maximum value for a non-vulnerable trustee" should {
+        object AnnualExemptAmountTestDataItem extends fakeRequestToPost(
+          "allowance",
+          TestCalculationController.submitAnnualExemptAmount,
+          ("annualExemptAmount", "5550.01")
+        )
+        val testModel = new AnnualExemptAmountModel(5550.01)
+        val mockedCustomerType = new CustomerTypeModel("trustee")
+        val mockedDisabledTrusteeModel = new DisabledTrusteeModel("No")
+
+        "return a 400" in {
+          mockfetchAndGetFormData(Some(mockedCustomerType))
+          mockfetchAndGetValue(Some(mockedDisabledTrusteeModel))
+          mockSaveFormData[AnnualExemptAmountModel](testModel)
+          status(AnnualExemptAmountTestDataItem.result) shouldBe 400
+        }
+      }
+
+      "submitting an invalid form above the maximum value for a vulnerable trustee" should {
+        object AnnualExemptAmountTestDataItem extends fakeRequestToPost(
+          "allowance",
+          TestCalculationController.submitAnnualExemptAmount,
+          ("annualExemptAmount", "11100.01")
+        )
+        val testModel = new AnnualExemptAmountModel(11100.01)
+        val mockedCustomerType = new CustomerTypeModel("trustee")
+        val mockedDisabledTrusteeModel = new DisabledTrusteeModel("Yes")
+
+        "return a 400" in {
+          mockfetchAndGetFormData(Some(mockedCustomerType))
+          mockfetchAndGetValue(Some(mockedDisabledTrusteeModel))
+          mockSaveFormData[AnnualExemptAmountModel](testModel)
+          status(AnnualExemptAmountTestDataItem.result) shouldBe 400
+        }
+      }
+
+      "submitting an invalid form above the maximum value for a non-Trustee customer type" should {
+        object AnnualExemptAmountTestDataItem extends fakeRequestToPost(
+          "allowance",
+          TestCalculationController.submitAnnualExemptAmount,
+          ("annualExemptAmount", "11100.01")
+        )
+        val testModel = new AnnualExemptAmountModel(11100.01)
+        val mockedCustomerType = new CustomerTypeModel("individual")
+        val mockedDisabledTrusteeModel = new DisabledTrusteeModel("")
+
+        "return a 400" in {
+          mockfetchAndGetFormData(Some(mockedCustomerType))
+          mockfetchAndGetValue(Some(mockedDisabledTrusteeModel))
+          mockSaveFormData[AnnualExemptAmountModel](testModel)
+          status(AnnualExemptAmountTestDataItem.result) shouldBe 400
+        }
+      }
+
+      "submitting an invalid form below the minimum" should {
+        object AnnualExemptAmountTestDataItem extends fakeRequestToPost(
+          "allowance",
+          TestCalculationController.submitAnnualExemptAmount,
+          ("annualExemptAmount", "-1000")
+        )
+        val testModel = new AnnualExemptAmountModel(-1000)
+
+        "return a 400" in {
+          mockfetchAndGetFormData(Some(mockedCustomerType))
+          mockfetchAndGetValue(Some(mockedDisabledTrusteeModel))
+          mockSaveFormData[AnnualExemptAmountModel](testModel)
+          status(AnnualExemptAmountTestDataItem.result) shouldBe 400
+        }
+      }
+
+      "submitting an invalid form with value 1.111" should {
+        object AnnualExemptAmountTestDataItem extends fakeRequestToPost(
+          "allowance",
+          TestCalculationController.submitAnnualExemptAmount,
+          ("annualExemptAmount", "1.111")
+        )
+        val testModel = new AnnualExemptAmountModel(-1000)
+
+        "return a 400" in {
+          mockfetchAndGetFormData(Some(mockedCustomerType))
+          mockfetchAndGetValue(Some(mockedDisabledTrusteeModel))
+          mockSaveFormData[AnnualExemptAmountModel](testModel)
+          status(AnnualExemptAmountTestDataItem.result) shouldBe 400
+        }
+
+        s"fail with message ${Messages("calc.annualExemptAmount.errorDecimalPlaces")}" in {
+          mockfetchAndGetFormData(Some(mockedCustomerType))
+          mockfetchAndGetValue(Some(mockedDisabledTrusteeModel))
+          mockSaveFormData(testModel)
+          AnnualExemptAmountTestDataItem.jsoupDoc.getElementsByClass("error-notification").text should include(Messages("calc.annualExemptAmount.errorDecimalPlaces"))
+        }
       }
     }
   }
