@@ -346,6 +346,6 @@ object SummaryConstructor {
   }
 
   def setPositive (result: CalculationResultModel) = {
-    BigDecimal(Math.abs(result.totalGain.toDouble))
+    BigDecimal(Math.abs(result.totalGain.toDouble)).setScale(2).toString()
   }
 }
