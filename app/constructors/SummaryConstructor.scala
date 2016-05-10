@@ -87,61 +87,111 @@ object SummaryConstructor {
   def personalDetails(result: CalculationResultModel, summary: SummaryModel) = {
     summaryPageSection("personalDetails", Messages("calc.summary.personal.details.title"),
       summary.customerTypeModel.customerType match {
-        case "trustee" => Array(
-          Map(
-            "question" -> Messages("calc.customerType.question"),
-            "answer" -> WordUtils.capitalize(summary.customerTypeModel.customerType)
-          ),
-          Map(
-            "question" -> Messages("calc.disabledTrustee.question"),
-            "answer" -> summary.disabledTrusteeModel.get.isVulnerable
-          ),
-          Map(
-            "question" -> Messages("calc.annualExemptAmount.question"),
-            "answer" -> ("&pound;" + (summary.otherPropertiesModel.otherProperties match {
-              case "Yes" => summary.annualExemptAmountModel.get.annualExemptAmount.setScale(2).toString
-              case "No" => summary.disabledTrusteeModel.get.isVulnerable match {
+        case "trustee" => summary.otherPropertiesModel.otherProperties match {
+          case "Yes" => Array(
+            Map(
+              "question" -> Messages("calc.customerType.question"),
+              "answer" -> WordUtils.capitalize(summary.customerTypeModel.customerType)
+            ),
+            Map(
+              "question" -> Messages("calc.disabledTrustee.question"),
+              "answer" -> summary.disabledTrusteeModel.get.isVulnerable
+            ),
+            Map(
+              "question" -> Messages("calc.otherProperties.questionTwo"),
+              "answer" -> ("&pound;" + summary.otherPropertiesModel.otherPropertiesAmt.get.setScale(2).toString)
+            ),
+            Map(
+              "question" -> Messages("calc.annualExemptAmount.question"),
+              "answer" -> ("&pound;" + summary.annualExemptAmountModel.get.annualExemptAmount.setScale(2).toString)
+            )
+          )
+          case "No" => Array(
+            Map(
+              "question" -> Messages("calc.customerType.question"),
+              "answer" -> WordUtils.capitalize(summary.customerTypeModel.customerType)
+            ),
+            Map(
+              "question" -> Messages("calc.disabledTrustee.question"),
+              "answer" -> summary.disabledTrusteeModel.get.isVulnerable
+            ),
+            Map(
+              "question" -> Messages("calc.annualExemptAmount.question"),
+              "answer" -> ("&pound;" + (summary.disabledTrusteeModel.get.isVulnerable match {
                 case "Yes" => "11100.00"
-                case _ => "5050.00"
-              }
-            }))
+                case "No" => "5050.00"
+              }))
+            )
           )
-        )
-        case "individual" => Array(
-          Map(
-            "question" -> Messages("calc.customerType.question"),
-            "answer" -> WordUtils.capitalize(summary.customerTypeModel.customerType)
-          ),
-          Map(
-            "question" -> Messages("calc.currentIncome.question"),
-            "answer" -> ("&pound;" + summary.currentIncomeModel.get.currentIncome.setScale(2))
-          ),
-          Map(
-            "question" -> Messages("calc.personalAllowance.question"),
-            "answer" -> ("&pound;" + summary.personalAllowanceModel.get.personalAllowanceAmt.setScale(2))
-          ),
-          Map(
-            "question" -> Messages("calc.annualExemptAmount.question"),
-            "answer" -> ("&pound;" + (summary.otherPropertiesModel.otherProperties match {
-              case "Yes" => summary.annualExemptAmountModel.get.annualExemptAmount.setScale(2).toString
-              case "No" => "11100.00"
-            }))
+        }
+        case "individual" => summary.otherPropertiesModel.otherProperties match {
+          case "Yes" => Array(
+            Map(
+              "question" -> Messages("calc.customerType.question"),
+              "answer" -> WordUtils.capitalize(summary.customerTypeModel.customerType)
+            ),
+            Map(
+              "question" -> Messages("calc.currentIncome.question"),
+              "answer" -> ("&pound;" + summary.currentIncomeModel.get.currentIncome.setScale(2))
+            ),
+            Map(
+              "question" -> Messages("calc.personalAllowance.question"),
+              "answer" -> ("&pound;" + summary.personalAllowanceModel.get.personalAllowanceAmt.setScale(2))
+            ),
+            Map(
+              "question" -> Messages("calc.otherProperties.questionTwo"),
+              "answer" -> ("&pound;" + summary.otherPropertiesModel.otherPropertiesAmt.get.setScale(2).toString)
+            ),
+            Map(
+              "question" -> Messages("calc.annualExemptAmount.question"),
+              "answer" -> ("&pound;" + summary.annualExemptAmountModel.get.annualExemptAmount.setScale(2).toString)
+            )
           )
-        )
-
-        case "personalRep" => Array(
-          Map(
-            "question" -> Messages("calc.customerType.question"),
-            "answer" -> "Personal Representative"
-          ),
-          Map(
-            "question" -> Messages("calc.annualExemptAmount.question"),
-            "answer" -> ("&pound;" + (summary.otherPropertiesModel.otherProperties match {
-              case "Yes" => summary.annualExemptAmountModel.get.annualExemptAmount.setScale(2).toString
-              case "No" => "11100.00"
-            }))
+          case "No" => Array(
+            Map(
+              "question" -> Messages("calc.customerType.question"),
+              "answer" -> WordUtils.capitalize(summary.customerTypeModel.customerType)
+            ),
+            Map(
+              "question" -> Messages("calc.currentIncome.question"),
+              "answer" -> ("&pound;" + summary.currentIncomeModel.get.currentIncome.setScale(2))
+            ),
+            Map(
+              "question" -> Messages("calc.personalAllowance.question"),
+              "answer" -> ("&pound;" + summary.personalAllowanceModel.get.personalAllowanceAmt.setScale(2))
+            ),
+            Map(
+              "question" -> Messages("calc.annualExemptAmount.question"),
+              "answer" -> ("&pound;" + "11100.00")
+            )
           )
-        )
+        }
+        case "personalRep" => summary.otherPropertiesModel.otherProperties match {
+          case "Yes" => Array(
+            Map(
+              "question" -> Messages("calc.customerType.question"),
+              "answer" -> "Personal Representative"
+            ),
+            Map(
+              "question" -> Messages("calc.otherProperties.questionTwo"),
+              "answer" -> ("&pound;" + summary.otherPropertiesModel.otherPropertiesAmt.get.setScale(2).toString)
+            ),
+            Map(
+              "question" -> Messages("calc.annualExemptAmount.question"),
+              "answer" -> ("&pound;" + summary.annualExemptAmountModel.get.annualExemptAmount.setScale(2).toString)
+            )
+          )
+          case "No" => Array(
+            Map(
+              "question" -> Messages("calc.customerType.question"),
+              "answer" -> "Personal Representative"
+            ),
+            Map(
+              "question" -> Messages("calc.annualExemptAmount.question"),
+              "answer" -> ("&pound;" + "11100.00")
+            )
+          )
+        }
       }
     )
   }
@@ -346,5 +396,14 @@ object SummaryConstructor {
         )
       }
     )
+  }
+
+  def gainMessage (result: CalculationResultModel) = {
+    if (result.totalGain >= 0) Messages("calc.otherReliefs.totalGain")
+    else Messages("calc.otherReliefs.totalLoss")
+  }
+
+  def setPositive (result: CalculationResultModel) = {
+    BigDecimal(Math.abs(result.totalGain.toDouble)).setScale(2).toString()
   }
 }
