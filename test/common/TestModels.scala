@@ -24,6 +24,30 @@ object TestModels {
   val calcModelOneRate = CalculationResultModel(8000, 40000, 32000, 20, None, None)
   val calcModelLoss = CalculationResultModel(0, -10000, 0, 18, None, None)
 
+  val summaryIndividualFlatLoss = SummaryModel (
+    CustomerTypeModel("individual"),
+    None,
+    Some(CurrentIncomeModel(1000)),
+    Some(PersonalAllowanceModel(9000)),
+    OtherPropertiesModel("No", None),
+    None,
+    AcquisitionDateModel("No", None, None, None),
+    AcquisitionValueModel(100000),
+    Some(RebasedValueModel("No", None)),
+    None,
+    ImprovementsModel("Yes", Some(0)),
+    DisposalDateModel(10, 10, 2010),
+    DisposalValueModel(90000),
+    AcquisitionCostsModel(Some(0)),
+    DisposalCostsModel(Some(0)),
+    EntrepreneursReliefModel("No"),
+    AllowableLossesModel("Yes", Some(0)),
+    CalculationElectionModel("flat"),
+    OtherReliefsModel(Some(0)),
+    OtherReliefsModel(Some(0)),
+    OtherReliefsModel(Some(0))
+  )
+
   val summaryIndividualFlatWithoutAEA = SummaryModel (
     CustomerTypeModel("individual"),
     None,

@@ -186,6 +186,7 @@ calc.summary.title = Summary
 calc.summary.secondaryHeading = You owe
 calc.summary.calculation.details.title = Calculation details
 calc.summary.calculation.details.totalGain = Your total gain
+calc.summary.calculation.details.totalLoss = Your total loss
 calc.summary.calculation.details.taxableGain = Your taxable gain
 calc.summary.calculation.details.taxRate = Your tax rate
 calc.summary.personal.details.title = Personal details

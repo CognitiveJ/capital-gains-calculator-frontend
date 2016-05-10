@@ -4402,6 +4402,24 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           SummaryTestDataItem.jsoupDoc.body().getElementById("calcDetails(3)").text() shouldBe "20%"
         }
       }
+
+      "users calculation results in a loss" should {
+        mockCreateSummary(TestModels.summaryIndividualFlatLoss)
+        mockCalculateFlatValue(Some(TestModels.calcModelLoss))
+        object SummaryTestDataItem extends fakeRequestTo("summary", TestCalculationController.summary)
+
+        s"have ${(Messages("calc.summary.calculation.details.totalLoss"))} output" in {
+          mockCreateSummary(TestModels.summaryIndividualFlatLoss)
+          mockCalculateFlatValue(Some(TestModels.calcModelLoss))
+          SummaryTestDataItem.jsoupDoc.body.getElementById("calcDetails").text() should include (Messages("calc.summary.calculation.details.totalLoss"))
+        }
+
+        s"have £10000.00 loss" in {
+          mockCreateSummary(TestModels.summaryIndividualFlatLoss)
+          mockCalculateFlatValue(Some(TestModels.calcModelLoss))
+          SummaryTestDataItem.jsoupDoc.body.getElementById("calcDetails(1)").text() shouldBe "£10000.00"
+        }
+      }
     }
 
     "regular trustee is chosen with a time apportioned calculation" when {
