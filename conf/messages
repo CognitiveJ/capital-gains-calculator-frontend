@@ -98,8 +98,8 @@ calc.acquisitionDate.questionTwo = What was the date you signed the contract tha
 
 ## Acquisition Value ##
 calc.acquisitionValue.question = How much did you pay for the property?
-calc.acquisitionValue.errorNegative = Enter a positive number for the amount you sold the property for
-calc.acquisitionValue.errorDecimalPlaces = The amount you sold the property for has too many numbers after the decimal point
+calc.acquisitionValue.errorNegative = Enter a positive number for the amount you paid
+calc.acquisitionValue.errorDecimalPlaces = The amount you paid has too many numbers after the decimal point
 
 ## Rebased Value ##
 calc.rebasedValue.question = Do you know how much the property was worth on 5 April 2015?
@@ -141,8 +141,8 @@ calc.acquisitionCosts.errorDecimalPlaces = There are too many numbers after the 
 
 ## Disposal Costs ##
 calc.disposalCosts.question = How much did you pay in costs when you stopped being the property owner?
-calc.disposalCosts.errorNegativeNumber = Enter a positive number for your costs
-calc.disposalCosts.errorDecimalPlaces = There are too many numbers after the decimal point in your costs
+calc.disposalCosts.errorNegativeNumber = Enter a positive number for your selling costs
+calc.disposalCosts.errorDecimalPlaces = There are too many numbers after the decimal point in your selling costs
 
 ## Entrepreneurs Relief ##
 calc.entrepreneursRelief.question = Are you claiming Entrepreneurs'' Relief?
