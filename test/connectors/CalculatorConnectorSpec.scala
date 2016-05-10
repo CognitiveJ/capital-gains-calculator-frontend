@@ -49,7 +49,7 @@ class CalculatorConnectorSpec extends UnitSpec with MockitoSugar {
     None,
     Some(CurrentIncomeModel(1000)),
     Some(PersonalAllowanceModel(11100)),
-    OtherPropertiesModel("No"),
+    OtherPropertiesModel("No", None),
     None,
     AcquisitionDateModel("No", None, None, None),
     AcquisitionValueModel(100000),
@@ -73,7 +73,7 @@ class CalculatorConnectorSpec extends UnitSpec with MockitoSugar {
     None,
     Some(CurrentIncomeModel(1000)),
     Some(PersonalAllowanceModel(11100)),
-    OtherPropertiesModel("No"),
+    OtherPropertiesModel("No", None),
     None,
     AcquisitionDateModel("Yes", Some(9), Some(9), Some(9)),
     AcquisitionValueModel(100000),
@@ -97,12 +97,12 @@ class CalculatorConnectorSpec extends UnitSpec with MockitoSugar {
     None,
     Some(CurrentIncomeModel(1000)),
     Some(PersonalAllowanceModel(11100)),
-    OtherPropertiesModel("No"),
+    OtherPropertiesModel("No", None),
     None,
     AcquisitionDateModel("Yes", Some(9), Some(9), Some(9)),
     AcquisitionValueModel(100000),
-    Some(RebasedValueModel("No", None)),
-    None,
+    Some(RebasedValueModel("Yes", Some(1000))),
+    Some(RebasedCostsModel("No", None)),
     ImprovementsModel("No", None),
     DisposalDateModel(10, 10, 2010),
     DisposalValueModel(150000),
@@ -186,7 +186,7 @@ class CalculatorConnectorSpec extends UnitSpec with MockitoSugar {
       .thenReturn(Future.successful(Some(validResponse)))
 
     "return a valid response" in {
-      val testModel: SummaryModel = sumModelTA
+      val testModel: SummaryModel = sumModelRebased
       val result = TargetCalculatorConnector.calculateRebased(testModel)
       await(result) shouldBe Some(validResponse)
     }

@@ -4,6 +4,10 @@
 
 @(otherPropertiesForm: Form[OtherPropertiesModel])(implicit request: Request[_])
 
+@hiddenYesNoContent = {
+    @formInputMoney(otherPropertiesForm, "otherPropertiesAmt", Messages("calc.otherProperties.questionTwo"))
+}
+
 @main_template(Messages("calc.otherProperties.question")) {
 
     <a id="back-link" class="back-link" href="">@Messages("calc.base.back")</a>
@@ -14,16 +18,12 @@
 
     @govHelpers.form(action = routes.CalculationController.submitOtherProperties) {
         <div class="inline form-group">
-            @formInputRadioGroup(
-                field = otherPropertiesForm("otherProperties"),
-                Seq(
-                    "Yes"->Messages("calc.base.yes"),
-                    "No"->Messages("calc.base.no")),
-                '_legend -> Messages("calc.otherProperties.question"),
-                '_legendID -> "otherProperties",
-                '_labelAfter -> true,
-                '_labelClass -> "block-label"
-                )
+            @formHiddenYesNoRadio(
+                otherPropertiesForm,
+                "otherProperties",
+                Messages("calc.otherProperties.question"),
+                hiddenYesNoContent
+            )
 
         </div>
         <button class="button" type="submit" id="continue-button" >@Messages("calc.base.continue")</button>

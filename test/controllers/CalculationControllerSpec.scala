@@ -112,7 +112,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       None,
       Some(CurrentIncomeModel(1000)),
       Some(PersonalAllowanceModel(11100)),
-      OtherPropertiesModel("No"),
+      OtherPropertiesModel("No", None),
       None,
       AcquisitionDateModel("No", None, None, None),
       AcquisitionValueModel(100000),
@@ -136,7 +136,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     None,
     Some(CurrentIncomeModel(1000)),
     Some(PersonalAllowanceModel(11100)),
-    OtherPropertiesModel("Yes"),
+    OtherPropertiesModel("Yes", Some(2100)),
     Some(AnnualExemptAmountModel(9000)),
     AcquisitionDateModel("Yes", Some(9), Some(9), Some(9)),
     AcquisitionValueModel(100000),
@@ -160,7 +160,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     None,
     Some(CurrentIncomeModel(1000)),
     Some(PersonalAllowanceModel(11100)),
-    OtherPropertiesModel("Yes"),
+    OtherPropertiesModel("Yes", Some(2100)),
     Some(AnnualExemptAmountModel(9000)),
     AcquisitionDateModel("Yes", Some(9), Some(9), Some(9)),
     AcquisitionValueModel(100000),
@@ -688,7 +688,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     "supplied with a model that already contains data" should {
 
       object OtherPropertiesTestDataItem extends fakeRequestTo("other-properties", TestCalculationController.otherProperties)
-      val otherPropertiesTestModel = new OtherPropertiesModel("Yes")
+      val otherPropertiesTestModel = new OtherPropertiesModel("Yes", Some(2100))
 
       "return a 200" in {
         mockfetchAndGetFormData[OtherPropertiesModel](Some(otherPropertiesTestModel))
@@ -705,6 +705,11 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           mockfetchAndGetFormData[OtherPropertiesModel](Some(otherPropertiesTestModel))
           OtherPropertiesTestDataItem.jsoupDoc.body.getElementById("otherProperties-yes").parent.classNames().contains("selected") shouldBe true
         }
+
+        "have the value 2100 auto filled" in {
+          mockfetchAndGetFormData[OtherPropertiesModel](Some(otherPropertiesTestModel))
+          OtherPropertiesTestDataItem.jsoupDoc.body().getElementById("otherPropertiesAmt").attr("value") shouldBe "2100"
+        }
       }
     }
   }
@@ -719,9 +724,9 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       object OtherPropertiesTestDataItem extends fakeRequestToPost(
         "other-properties",
         TestCalculationController.submitOtherProperties,
-        ("otherProperties", "Yes")
+        ("otherProperties", "Yes"),("otherPropertiesAmt", "2100")
       )
-      val testModel = new OtherPropertiesModel("Yes")
+      val testModel = new OtherPropertiesModel("Yes", Some(2100))
 
       "return a 303" in {
         mockSaveFormData[OtherPropertiesModel](testModel)
@@ -735,7 +740,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         TestCalculationController.submitOtherProperties,
         ("otherProperties", "No")
       )
-      val testModel = new OtherPropertiesModel("No")
+      val testModel = new OtherPropertiesModel("No", None)
 
       "return a 303" in {
         mockSaveFormData[OtherPropertiesModel](testModel)
@@ -749,13 +754,67 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         TestCalculationController.submitOtherProperties,
         ("otherProperties", "")
       )
-      val testModel = new OtherPropertiesModel("")
+      val testModel = new OtherPropertiesModel("", None)
+
+      "return a 400" in {
+        mockSaveFormData[OtherPropertiesModel](testModel)
+        status(OtherPropertiesTestDataItem.result) shouldBe 400
+      }
+
+    }
+
+    "submitting an invalid form with 'Yes' selection and a null amount" should {
+      object OtherPropertiesTestDataItem extends fakeRequestToPost(
+        "other-properties",
+        TestCalculationController.submitOtherProperties,
+        ("otherProperties", "Yes"), ("otherPropertiesAmt", "")
+      )
+      val testModel = new OtherPropertiesModel("Yes", None)
 
       "return a 400" in {
         mockSaveFormData[OtherPropertiesModel](testModel)
         status(OtherPropertiesTestDataItem.result) shouldBe 400
       }
     }
+
+    "submitting an invalid form with 'Yes' selection and an amount with three decimal places" should {
+      object OtherPropertiesTestDataItem extends fakeRequestToPost(
+        "other-properties",
+        TestCalculationController.submitOtherProperties,
+        ("otherProperties", "Yes"), ("otherPropertiesAmt", "1000.111")
+      )
+      val testModel = new OtherPropertiesModel("Yes", Some(1000.111))
+
+      "return a 400" in {
+        mockSaveFormData[OtherPropertiesModel](testModel)
+        status(OtherPropertiesTestDataItem.result) shouldBe 400
+      }
+
+      s"fail with message ${Messages("calc.otherProperties.errorDecimalPlaces")}" in {
+        mockSaveFormData[OtherPropertiesModel](testModel)
+        OtherPropertiesTestDataItem.jsoupDoc.getElementsByClass("error-notification").text should include (Messages("calc.otherProperties.errorDecimalPlaces"))
+      }
+    }
+
+    "submitting an invalid form with 'Yes' selection and a negative amount" should {
+      object OtherPropertiesTestDataItem extends fakeRequestToPost(
+        "other-properties",
+        TestCalculationController.submitOtherProperties,
+        ("otherProperties", "Yes"), ("otherPropertiesAmt", "-1000")
+      )
+      val testModel = new OtherPropertiesModel("Yes", Some(-1000))
+
+      "return a 400" in {
+        mockSaveFormData[OtherPropertiesModel](testModel)
+        status(OtherPropertiesTestDataItem.result) shouldBe 400
+      }
+
+      s"fail with message ${Messages("calc.otherProperties.errorNegative")}" in {
+        mockSaveFormData[OtherPropertiesModel](testModel)
+        OtherPropertiesTestDataItem.jsoupDoc.getElementsByClass("error-notification").text should include (Messages("calc.otherProperties.errorNegative"))
+      }
+    }
+
   }
 
   //############## Annual Exempt Amount tests ######################
@@ -1342,17 +1401,57 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         .thenReturn(Future.successful(returnedCacheMap))
     }
 
-    "submitting a valid form" should {
-      val testModel = new AcquisitionValueModel(1000)
+    "submitting a valid form with a date after 5 5 2015" should {
+
+      val acquisitionDateModelYesAfterStartDate = new AcquisitionDateModel("Yes", Some(10), Some(10), Some(2017))
+
       object AcquisitionValueTestDataItem extends fakeRequestToPost (
         "acquisition-value",
         TestCalculationController.submitAcquisitionValue,
         ("acquisitionValue", "1000")
       )
 
-      "return a 303" in {
-        mockSaveFormData(testModel)
+      s"return a 303 to ${routes.CalculationController.improvements()}" in {
+        mockSaveFormData(new AcquisitionValueModel(1000))
+        mockfetchAndGetValue[AcquisitionDateModel](Some(acquisitionDateModelYesAfterStartDate))
         status(AcquisitionValueTestDataItem.result) shouldBe 303
+        redirectLocation(AcquisitionValueTestDataItem.result) shouldBe Some(s"${routes.CalculationController.improvements()}")
+      }
+    }
+
+    "submitting a valid form with a date before 5 5 2015" should {
+
+      val acquisitionDateModelYesBeforeStartDate = new AcquisitionDateModel("Yes", Some(10), Some(10), Some(2010))
+
+      object AcquisitionValueTestDataItem extends fakeRequestToPost (
+        "acquisition-value",
+        TestCalculationController.submitAcquisitionValue,
+        ("acquisitionValue", "1000")
+      )
+
+      s"return a 303 to ${routes.CalculationController.rebasedValue()}" in {
+        mockSaveFormData(new AcquisitionValueModel(1000))
+        mockfetchAndGetValue[AcquisitionDateModel](Some(acquisitionDateModelYesBeforeStartDate))
+        status(AcquisitionValueTestDataItem.result) shouldBe 303
+        redirectLocation(AcquisitionValueTestDataItem.result) shouldBe Some(s"${routes.CalculationController.rebasedValue()}")
+      }
+    }
+
+    "submitting a valid form with No date supplied" should {
+
+      val acquisitionDateModelNoStartDate = new AcquisitionDateModel("No", None, None, None)
+
+      object AcquisitionValueTestDataItem extends fakeRequestToPost (
+        "acquisition-value",
+        TestCalculationController.submitAcquisitionValue,
+        ("acquisitionValue", "1000")
+      )
+
+      s"return a 303 to ${routes.CalculationController.rebasedValue()}" in {
+        mockSaveFormData(new AcquisitionValueModel(1000))
+        mockfetchAndGetValue[AcquisitionDateModel](Some(acquisitionDateModelNoStartDate))
+        status(AcquisitionValueTestDataItem.result) shouldBe 303
+        redirectLocation(AcquisitionValueTestDataItem.result) shouldBe Some(s"${routes.CalculationController.rebasedValue()}")
       }
     }
 
@@ -3335,14 +3434,6 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         status(OtherReliefsTestDataItem.result) shouldBe 200
       }
 
-      "return a 200 with an invalid calculation result" in {
-        object OtherReliefsTestDataItem extends fakeRequestTo("other-reliefs", TestCalculationController.otherReliefs)
-        mockCreateSummary(sumModelFlat)
-        mockCalculateFlatValue(None)
-        mockfetchAndGetFormData[OtherReliefsModel](None)
-        status(OtherReliefsTestDataItem.result) shouldBe 200
-      }
-
       "return some HTML that" should {
 
         "contain some text and use the character set utf-8" in {
@@ -3407,14 +3498,6 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       "return a 200 with a valid calculation call" in {
         mockCreateSummary(sumModelFlat)
         mockCalculateFlatValue(Some(calcModelTwoRates))
-        mockfetchAndGetFormData[OtherReliefsModel](Some(testOtherReliefsModel))
-        status(OtherReliefsTestDataItem.result) shouldBe 200
-      }
-
-      "return a 200 with an invalid calculation call" in {
-        object OtherReliefsTestDataItem extends fakeRequestTo("other-reliefs", TestCalculationController.otherReliefs)
-        mockCreateSummary(sumModelFlat)
-        mockCalculateFlatValue(None)
         mockfetchAndGetFormData[OtherReliefsModel](Some(testOtherReliefsModel))
         status(OtherReliefsTestDataItem.result) shouldBe 200
       }

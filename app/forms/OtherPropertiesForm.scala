@@ -19,11 +19,41 @@ package forms
 import models.OtherPropertiesModel
 import play.api.data.Forms._
 import play.api.data._
+import common.Validation._
+import play.api.i18n.Messages
 
 object OtherPropertiesForm {
+
+  def validate(data: OtherPropertiesModel) = {
+    data.otherProperties match {
+      case "Yes" => data.otherPropertiesAmt.isDefined
+      case "No" => true
+    }
+  }
+
+  def validateMinimum(data: OtherPropertiesModel) = {
+    data.otherProperties match {
+      case "Yes" => isPositive(data.otherPropertiesAmt.getOrElse(0))
+      case "No" => true
+    }
+  }
+
+  def validateTwoDec(data: OtherPropertiesModel) = {
+    data.otherProperties match {
+      case "Yes" => isMaxTwoDecimalPlaces(data.otherPropertiesAmt.getOrElse(0))
+      case "No" => true
+    }
+  }
+
   val otherPropertiesForm = Form (
     mapping(
-      "otherProperties" -> nonEmptyText
-    )(OtherPropertiesModel.apply)(OtherPropertiesModel.unapply)
+      "otherProperties" -> nonEmptyText,
+      "otherPropertiesAmt" -> optional(bigDecimal)
+    )(OtherPropertiesModel.apply)(OtherPropertiesModel.unapply).verifying(Messages("calc.otherProperties.errorQuestion"),
+      otherPropertiesForm => validate(otherPropertiesForm))
+      .verifying(Messages("calc.otherProperties.errorNegative"),
+        otherPropertiesForm => validateMinimum(otherPropertiesForm))
+      .verifying(Messages("calc.otherProperties.errorDecimalPlaces"),
+        otherPropertiesForm => validateTwoDec(otherPropertiesForm))
   )
 }

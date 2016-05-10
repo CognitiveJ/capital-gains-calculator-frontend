@@ -62,16 +62,23 @@ trait CalculatorConnector {
   def calculateFlat(input: SummaryModel)(implicit hc: HeaderCarrier): Future[Option[CalculationResultModel]] = {
     http.GET[Option[CalculationResultModel]](s"$serviceUrl/capital-gains-calculator/calculate-flat?${
       CalculateRequestConstructor.baseCalcUrl(input)}${
-      CalculateRequestConstructor.flatCalcUrlExtra(input)}")
+      CalculateRequestConstructor.flatCalcUrlExtra(input)
+    }")
   }
 
   def calculateTA(input: SummaryModel)(implicit hc: HeaderCarrier): Future[Option[CalculationResultModel]] = {
     http.GET[Option[CalculationResultModel]](s"$serviceUrl/capital-gains-calculator/calculate-time-apportioned?${
       CalculateRequestConstructor.baseCalcUrl(input)}${
-      CalculateRequestConstructor.taCalcUrlExtra(input)}")
+      CalculateRequestConstructor.taCalcUrlExtra(input)
+    }")
   }
 
-  def calculateRebased(input: SummaryModel)(implicit hc: HeaderCarrier): Future[Option[CalculationResultModel]] = calculateFlat(input)
+  def calculateRebased(input: SummaryModel)(implicit hc: HeaderCarrier): Future[Option[CalculationResultModel]] = {
+    http.GET[Option[CalculationResultModel]](s"$serviceUrl/capital-gains-calculator/calculate-rebased?${
+      CalculateRequestConstructor.baseCalcUrl(input)}${
+      CalculateRequestConstructor.rebasedCalcUrlExtra(input)
+    }")
+  }
 
 
   // $COVERAGE-OFF$
@@ -81,7 +88,7 @@ trait CalculatorConnector {
       fetchAndGetValue[DisabledTrusteeModel]("disabledTrustee"),
       fetchAndGetValue[CurrentIncomeModel]("currentIncome"),
       fetchAndGetValue[PersonalAllowanceModel]("personalAllowance"),
-      fetchAndGetValue[OtherPropertiesModel]("otherProperties").getOrElse(OtherPropertiesModel("No")),
+      fetchAndGetValue[OtherPropertiesModel]("otherProperties").getOrElse(OtherPropertiesModel("No", None)),
       fetchAndGetValue[AnnualExemptAmountModel]("annualExemptAmount"),
       fetchAndGetValue[AcquisitionDateModel]("acquisitionDate").getOrElse(AcquisitionDateModel("No", None, None, None)),
       fetchAndGetValue[AcquisitionValueModel]("acquisitionValue").getOrElse(AcquisitionValueModel(0)),

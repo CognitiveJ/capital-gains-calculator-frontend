@@ -41,6 +41,9 @@ class CalculationElectionConstructorSpec extends UnitSpec with MockitoSugar {
   def mockTimeCalc = when(mockCalcConnector.calculateTA(Matchers.any())(Matchers.any()))
     .thenReturn(Future.successful(Some(CalculationResultModel(8000, 10000, 6000, 20, None, None))))
 
+  def mockRebasedCalc = when(mockCalcConnector.calculateRebased(Matchers.any())(Matchers.any()))
+    .thenReturn(Future.successful(Some(CalculationResultModel(8000, 10000, 6000, 20, None, None))))
+
   "Calling generateElection" should {
 
     "when summary has no acquisition date" should {
@@ -61,10 +64,23 @@ class CalculationElectionConstructorSpec extends UnitSpec with MockitoSugar {
 
     "when summary has an acquisition date before the tax start date" should {
 
-      "produce a two entry sequence" in {
+      "produce a two entry sequence if there is no value for rebased supplied." in {
         mockFlatCalc
         mockTimeCalc
         TestCalculationElectionConstructor.generateElection(TestModels.summaryTrusteeTAWithoutAEA, hc).size shouldBe 2
+      }
+
+      "produce a three entry sequence if there is a value for the rebased calculation supplied." in {
+        mockFlatCalc
+        mockTimeCalc
+        mockRebasedCalc
+        TestCalculationElectionConstructor.generateElection(TestModels.summaryIndividualRebased, hc).size shouldBe 3
+      }
+
+      "produce a two entry sequence if there is a value for the rebased calculation supplied but the acquisition date is not supplied." in {
+        mockFlatCalc
+        mockRebasedCalc
+        TestCalculationElectionConstructor.generateElection(TestModels.summaryIndividualRebasedNoAcqDate, hc).size shouldBe 2
       }
     }
   }
