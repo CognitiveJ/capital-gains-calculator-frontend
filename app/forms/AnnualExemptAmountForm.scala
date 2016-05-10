@@ -38,8 +38,8 @@ object AnnualExemptAmountForm {
 
   def errorMaxMessage(isAllowedMaxAEA: Boolean): String = {
     isAllowedMaxAEA match {
-      case true => Messages("calc.annualExemptAmount.errorMax") + maxAEA
-      case false => Messages("calc.annualExemptAmount.errorMax") + maxNonVulnerableTrusteeAEA
+      case true => Messages("calc.annualExemptAmount.errorMax") + maxAEA +  Messages("calc.annualExemptAmount.errorMaxEnd")
+      case false => Messages("calc.annualExemptAmount.errorMax") + maxNonVulnerableTrusteeAEA + Messages("calc.annualExemptAmount.errorMaxEnd")
     }
   }
 

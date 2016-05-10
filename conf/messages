@@ -74,7 +74,7 @@ calc.personalAllowance.linkTwo = Tax on your UK income if you live abroad
 calc.personalAllowance.errorNegative = Enter a positive number for your Personal Allowance
 calc.personalAllowance.errorDecimalPlaces = Your Personal Allowance has too many numbers after the decimal point
 calc.personalAllowance.errorMaxLimit = Enter a Personal Allowance that’s £
-calc.personalAllowance.errorMaxLimitTwo = or less
+calc.personalAllowance.errorMaxLimitEnd = or less
 
 ## Other Properties ##
 calc.otherProperties.question = In the tax year when you stopped owning the property, did you sell or give away anything else that''s covered by Capital Gains Tax?
@@ -87,9 +87,10 @@ calc.otherProperties.errorQuestion = Enter a value for your taxable gain
 ## Annual Exempt Amount ##
 calc.annualExemptAmount.question = How much of your Capital Gains Tax allowance have you got left?
 calc.annualExemptAmount.link.one = Capital Gains Tax allowances
-calc.annualExemptAmount.errorMax = Maximum allowance is £
+calc.annualExemptAmount.errorMax = Enter a Personal Allowance that’s £
+calc.annualExemptAmount.errorMaxEnd = or less
 calc.annualExemptAmount.errorNegative = Enter a positive number for your allowance
-calc.annualExemptAmount.errorDecimalPlaces = Your Allowance has too many numbers after the decimal point
+calc.annualExemptAmount.errorDecimalPlaces = Your allowance has too many numbers after the decimal point
 
 ## Acquisition Date ##
 calc.acquisitionDate.question = Do you know the date you signed the contract that made you the owner?
