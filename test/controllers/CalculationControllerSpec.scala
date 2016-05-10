@@ -4463,6 +4463,23 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
     }
   }
 
+  //############## Private Residence Relief tests ######################
+  "In CalculationController calling the .privateResidenceRelief action " should {
+    object PrivateResidenceReliefTestDataItem extends fakeRequestTo("private-residence-relief", TestCalculationController.privateResidenceRelief)
+
+    "return a 200" in {
+      status(PrivateResidenceReliefTestDataItem.result) shouldBe 200
+    }
+
+    "return some HTML that" should {
+
+      "contain some text and use the character set utf-8" in {
+        contentType(PrivateResidenceReliefTestDataItem.result) shouldBe Some("text/html")
+        charset(PrivateResidenceReliefTestDataItem.result) shouldBe Some("utf-8")
+      }
+    }
+  }
+
   //############## Current Income tests ######################
   "In CalculationController calling the .currentIncome action " when {
     "not supplied with a pre-existing stored model" should {
