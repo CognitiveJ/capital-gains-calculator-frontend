@@ -21,20 +21,32 @@ import play.api.data.Forms._
 import models._
 import play.api.i18n.Messages
 import common.Validation._
+import uk.gov.hmrc.play.http.HeaderCarrier
+import controllers.CalculationController._
 
 object AnnualExemptAmountForm {
 
-  def validateMaximum(data: BigDecimal): Option[BigDecimal] = {
-    data match {
-      case data if data > 11000 => None
-      case _ => Some(data)
+  val maxAEA = 11100
+  val maxNonVulnerableTrusteeAEA = 5550
+
+  def validateMaximum(isAllowedMaxAEA: Boolean, aea: BigDecimal): Boolean = {
+    isAllowedMaxAEA match {
+      case true => if (aea > maxAEA) false else true
+      case false => if (aea > maxNonVulnerableTrusteeAEA) false else true
     }
   }
 
-  val annualExemptAmountForm = Form(
+  def errorMaxMessage(isAllowedMaxAEA: Boolean): String = {
+    isAllowedMaxAEA match {
+      case true => Messages("calc.annualExemptAmount.errorMax") + maxAEA
+      case false => Messages("calc.annualExemptAmount.errorMax") + maxNonVulnerableTrusteeAEA
+    }
+  }
+
+  def annualExemptAmountForm (isAllowedMaxAEA: Boolean): Form[AnnualExemptAmountModel] = Form(
     mapping(
       "annualExemptAmount" -> bigDecimal
-        .verifying(Messages("calc.annualExemptAmount.errorMax"), annualExemptAmount => validateMaximum(annualExemptAmount).isDefined)
+        .verifying(errorMaxMessage(isAllowedMaxAEA), annualExemptAmount => validateMaximum(isAllowedMaxAEA, annualExemptAmount))
         .verifying(Messages("calc.annualExemptAmount.errorNegative"), annualExemptAmount => isPositive(annualExemptAmount))
         .verifying(Messages("calc.annualExemptAmount.errorDecimalPlaces"), annualExemptAmount => isMaxTwoDecimalPlaces(annualExemptAmount))
     )(AnnualExemptAmountModel.apply)(AnnualExemptAmountModel.unapply)

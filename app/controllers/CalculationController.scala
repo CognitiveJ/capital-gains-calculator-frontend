@@ -162,13 +162,28 @@ trait CalculationController extends FrontendController {
   //################### Annual Exempt Amount methods #######################
   val annualExemptAmount = Action.async { implicit request =>
     calcConnector.fetchAndGetFormData[AnnualExemptAmountModel]("annualExemptAmount").map {
-      case Some(data) => Ok(calculation.annualExemptAmount(annualExemptAmountForm.fill(data)))
-      case None => Ok(calculation.annualExemptAmount(annualExemptAmountForm))
+      case Some(data) => Ok(calculation.annualExemptAmount(annualExemptAmountForm(true).fill(data)))
+      case None => Ok(calculation.annualExemptAmount(annualExemptAmountForm(true)))
     }
   }
 
   val submitAnnualExemptAmount =  Action { implicit request =>
-    annualExemptAmountForm.bindFromRequest.fold(
+
+    def isAllowedMaxAEA(implicit hc: HeaderCarrier): Boolean = {
+      Await.result(calcConnector.fetchAndGetFormData[CustomerTypeModel]("customerType").map {
+        case Some(customerTypeModel) =>
+          customerTypeModel.customerType match {
+            case "trustee" =>
+              calcConnector.fetchAndGetValue[DisabledTrusteeModel]("disabledTrustee").map {
+                case disabledTrusteeModel => if (disabledTrusteeModel.isVulnerable == "No") false else true
+              }.getOrElse (true)
+            case _ => true
+          }
+        case _ => true
+      },Duration("5s"))
+    }
+
+    annualExemptAmountForm(isAllowedMaxAEA).bindFromRequest.fold(
       errors => BadRequest(calculation.annualExemptAmount(errors)),
       success => {
         calcConnector.saveFormData("annualExemptAmount", success)
