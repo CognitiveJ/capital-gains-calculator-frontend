@@ -16,7 +16,6 @@
 
 package forms
 
-import com.sun.org.apache.xpath.internal.operations.And
 import play.api.data._
 import play.api.data.Forms._
 import models._
