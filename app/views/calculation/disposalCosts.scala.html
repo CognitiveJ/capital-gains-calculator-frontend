@@ -6,6 +6,9 @@
 
 @main_template(Messages("calc.disposalCosts.question")) {
     <a id="back-link" class="back-link" href="@routes.CalculationController.otherProperties">Back</a>
+
+    @govHelpers.errorSummary(Messages("calc.error.summary.heading"), disposalCostsForm)
+
     <h1 class="heading-large">@Messages("calc.base.pageHeading")</h1>
 
     @govHelpers.form(action = routes.CalculationController.submitDisposalCosts) {

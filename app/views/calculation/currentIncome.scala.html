@@ -22,6 +22,8 @@
 
     <a id="back-link" class="back-link" href="@routes.CalculationController.customerType">Back</a>
 
+    @govHelpers.errorSummary(Messages("calc.error.summary.heading"), currentIncomeForm)
+
     <h1 class="heading-large">@Messages("calc.base.pageHeading")</h1>
 
     @govHelpers.form(action = routes.CalculationController.submitCurrentIncome) {

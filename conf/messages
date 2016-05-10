@@ -10,6 +10,9 @@ calc.base.yes = Yes
 calc.base.no = No
 calc.base.back = Back
 
+## Error Summary ##
+calc.error.summary.heading = This page has errors
+
 ## Common date Messages ##
 ## Use common messages if some but not all pages use these messages. ##
 calc.common.date.fields.day = Day

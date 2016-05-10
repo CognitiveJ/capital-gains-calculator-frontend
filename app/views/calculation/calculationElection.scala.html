@@ -11,17 +11,22 @@
 
     <a id="back-link" class="back-link" href="#">@Messages("calc.base.back")</a>
 
+    @govHelpers.errorSummary(Messages("calc.error.summary.heading"), calculationElectionForm)
+
     <div class="grid-row">
         <h1 class="heading-large">@Messages("calc.base.pageHeading")</h1>
-
-        <p id="question-information">@Messages("calc.calculationElection.message")</p>
     </div>
 
     @govHelpers.form(action = routes.CalculationController.submitCalculationElection) {
-        @calculationElectionHelperForm(
-            field = calculationElectionForm("calculationElection"),
-            content,
-            '_labelClass -> "block-label")
+
+        <div class="form-group">
+            @calculationElectionHelperForm(
+                field = calculationElectionForm("calculationElection"),
+                content,
+                '_labelClass -> "block-label",
+                '_legend -> Messages("calc.calculationElection.message"),
+                '_legendID -> "calculationElection")
+        </div>
 
         <div class="grid-row form-group">
             <button class="button" type="submit" id="continue-button">@Messages("calc.base.continue")</button>

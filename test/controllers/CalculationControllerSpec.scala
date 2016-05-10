@@ -330,6 +330,16 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         mockSaveFormData[CustomerTypeModel](testModel)
         status(CustomerTypeTestDataItem.result) shouldBe 400
       }
+
+      "display a visible Error Summary field" in {
+        mockSaveFormData[CustomerTypeModel](testModel)
+        CustomerTypeTestDataItem.jsoupDoc.getElementById("error-summary-display").hasClass("error-summary--show")
+      }
+
+      "link to the radio field set in Error Summary" in {
+        mockSaveFormData[CustomerTypeModel](testModel)
+        CustomerTypeTestDataItem.jsoupDoc.getElementById("customerType-error-summary").attr("href") should include ("#customerType")
+      }
     }
 
     "submitting an invalid form with incorrect content" should {
@@ -2770,6 +2780,16 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           mockSaveFormData(testModel)
           AcquisitionCostsTestDataItem.jsoupDoc.getElementsByClass("error-notification").text should include (Messages("calc.acquisitionCosts.errorNegative"))
         }
+
+        "display a visible Error Summary field" in {
+          mockSaveFormData(testModel)
+          AcquisitionCostsTestDataItem.jsoupDoc.getElementById("error-summary-display").hasClass("error-summary--show")
+        }
+
+        "link to the invalid input box in Error Summary" in {
+          mockSaveFormData(testModel)
+          AcquisitionCostsTestDataItem.jsoupDoc.getElementById("acquisitionCosts-error-summary").attr("href") should include ("#acquisitionCosts")
+        }
       }
 
       "with value 1.111" should {
@@ -2788,6 +2808,16 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         s"fail with message ${Messages("calc.acquisitionCosts.errorDecimalPlaces")}" in {
           mockSaveFormData(testModel)
           AcquisitionCostsTestDataItem.jsoupDoc.getElementsByClass("error-notification").text should include(Messages("calc.acquisitionCosts.errorDecimalPlaces"))
+        }
+
+        "display a visible Error Summary field" in {
+          mockSaveFormData(testModel)
+          AcquisitionCostsTestDataItem.jsoupDoc.getElementById("error-summary-display").hasClass("error-summary--show")
+        }
+
+        "link to the invalid input box in Error Summary" in {
+          mockSaveFormData(testModel)
+          AcquisitionCostsTestDataItem.jsoupDoc.getElementById("acquisitionCosts-error-summary").attr("href") should include ("#acquisitionCosts")
         }
       }
     }
@@ -3380,7 +3410,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           mockCreateSummary(TestModels.summaryTrusteeTAWithoutAEA)
           mockGenerateElection
           mockfetchAndGetFormData[CalculationElectionModel](None)
-          CalculationElectionTestDataItem.jsoupDoc.body.getElementById("question-information").text shouldEqual Messages("calc.calculationElection.message")
+          CalculationElectionTestDataItem.jsoupDoc.body.getElementById("calculationElection").text shouldEqual Messages("calc.calculationElection.message")
         }
 
         "have a calculationElectionHelper for the option of a flat calculation rendered on the page" in {
@@ -3502,6 +3532,16 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         mockCalculateTAValue(Some(TestModels.calcModelTwoRates))
         mockSaveFormData[CalculationElectionModel](calculationElectionTestModel)
         status(CalculationElectionTestDataItem.result) shouldBe 400
+      }
+
+      "display a visible Error Summary field" in {
+        mockSaveFormData[CalculationElectionModel](calculationElectionTestModel)
+        CalculationElectionTestDataItem.jsoupDoc.getElementById("error-summary-display").hasClass("error-summary--show")
+      }
+
+      "link to the invalid input box in Error Summary" in {
+        mockSaveFormData[CalculationElectionModel](calculationElectionTestModel)
+        CalculationElectionTestDataItem.jsoupDoc.getElementById("calculationElection-error-summary").attr("href") should include ("#calculationElection")
       }
     }
 
