@@ -59,7 +59,7 @@ trait CalculationElectionConstructor {
               Some(Messages("calc.calculationElection.message.timeDate")),
               routes.CalculationController.otherReliefsTA().toString()),
             ("rebased", resultRebased(summary, hc),
-              Messages("calc.calculationElection.messages.rebased"),
+              Messages("calc.calculationElection.message.rebased"),
               Some(Messages("calc.calculationElection.message.rebasedDate")),
               routes.CalculationController.otherReliefsRebased().toString())
           )
@@ -85,7 +85,7 @@ trait CalculationElectionConstructor {
               None,
               routes.CalculationController.otherReliefs().toString()),
             ("rebased", resultRebased(summary, hc),
-              Messages("calc.calculationElection.messages.rebased"),
+              Messages("calc.calculationElection.message.rebased"),
               Some(Messages("calc.calculationElection.message.rebasedDate")),
               routes.CalculationController.otherReliefsRebased().toString())
           )

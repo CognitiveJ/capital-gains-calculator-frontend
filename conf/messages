@@ -199,3 +199,5 @@ calc.summary.startAgain = Start again
 calc.summary.calculation.details.calculationElection = How would you like to work out your tax?
 calc.summary.calculation.details.timeCalculation = The percentage of your total gain you''ve made since
 calc.summary.calculation.details.flatCalculation = How much you''ve gained on the property since you became the owner
+calc.summary.calculation.details.rebasedCalculation = How much you''ve gained on the property since 5 April 2015
+

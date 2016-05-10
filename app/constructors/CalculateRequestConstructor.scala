@@ -79,7 +79,7 @@ object CalculateRequestConstructor {
 
   def rebasedCalcUrlExtra(input: SummaryModel): String = {
     s"&improvementsAmt=${input.improvementsModel.isClaimingImprovements match {
-      case "Yes" => input.improvementsModel.improvementsAmtAfter.get
+      case "Yes" => input.improvementsModel.improvementsAmtAfter.getOrElse(0)
       case "No" => 0
     }
     }&rebasedValue=${input.rebasedValueModel.get.rebasedValueAmt.get
