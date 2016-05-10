@@ -23,7 +23,7 @@
                         @elements.args.get('_helpText)
                     </span>
                 }
-                @elements.errors.map{error => <span class="error-notification">@Messages(error)</span>}
+                @elements.errors.map{error => <span class="error-notification">@Messages("calc.base.optionReqError")</span>}
 
                 @radioOptions.map { case (value, amount, message, dateMessage, linkUrl) =>
                     @defining(s"${elements.field.name}-${value.toLowerCase.replace(" ","_")}")  { inputId =>

@@ -1401,9 +1401,9 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         status(AcquisitionDateTestDataItem.result) shouldBe 400
       }
 
-      "should error with message 'You must supply a valid date'" in {
+      "should error with message 'calc.common.date.error.invalidDate'" in {
         mockSaveFormData[AcquisitionDateModel](acquisitionDateTestModel)
-        AcquisitionDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("You must supply a valid date"))
+        AcquisitionDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("calc.common.date.error.invalidDate"))
       }
     }
 
@@ -1423,9 +1423,9 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         status(AcquisitionDateTestDataItem.result) shouldBe 400
       }
 
-      "should error with message 'You must supply a valid date'" in {
+      "should error with message 'calc.common.date.error.invalidDate'" in {
         mockSaveFormData[AcquisitionDateModel](acquisitionDateTestModel)
-        AcquisitionDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("You must supply a valid date"))
+        AcquisitionDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("calc.common.date.error.invalidDate"))
       }
     }
 
@@ -1445,9 +1445,9 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         status(AcquisitionDateTestDataItem.result) shouldBe 400
       }
 
-      "should error with message 'You must supply a valid date'" in {
+      "should error with message 'calc.common.date.error.invalidDate'" in {
         mockSaveFormData[AcquisitionDateModel](acquisitionDateTestModel)
-        AcquisitionDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("You must supply a valid date"))
+        AcquisitionDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("calc.common.date.error.invalidDate"))
       }
     }
   }
@@ -2443,9 +2443,9 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         status(DisposalDateTestDataItem.result) shouldBe 400
       }
 
-      "should error with message 'Numeric vaue expected'" in {
+      "should error with message 'calc.common.date.error.invalidDate'" in {
         mockSaveFormData[DisposalDateModel](testModel)
-        DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include ("You must supply a valid date")
+        DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("calc.common.date.error.invalidDate"))
       }
     }
     "submitting a month with no value" should {
@@ -2461,9 +2461,9 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         status(DisposalDateTestDataItem.result) shouldBe 400
       }
 
-      "should error with message 'Numeric vaue expected'" in {
+      "should error with message 'calc.common.date.error.invalidDate'" in {
         mockSaveFormData[DisposalDateModel](testModel)
-        DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include ("You must supply a valid date")
+        DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("calc.common.date.error.invalidDate"))
       }
     }
     "submitting a year with no value" should {
@@ -2479,9 +2479,9 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         status(DisposalDateTestDataItem.result) shouldBe 400
       }
 
-      "should error with message 'You must supply a valid date'" in {
+      "should error with message 'calc.common.date.error.invalidDate'" in {
         mockSaveFormData[DisposalDateModel](testModel)
-        DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include ("You must supply a valid date")
+        DisposalDateTestDataItem.jsoupDoc.select(".error-notification").text should include (Messages("calc.common.date.error.invalidDate"))
       }
     }
   }
