@@ -1,10 +1,34 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+@import play.api.data._
+@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+@import helpers._
 
-</body>
-</html>
+@{val content = Html(<div class="form-group">
+    <label for="daysClaimed">@(s"${Messages("calc.privateResidenceRelief.questionTwoStart")} 7 August 2015 ${Messages("calc.privateResidenceRelief.questionTwoEnd")}")</label>
+    <input class="form-control" id="daysClaimed" type="text">
+</div>)}
+
+@()(implicit request: Request[_])
+
+@sidebar = {
+<ul>
+    <li>
+        <a id="helpLink1" href="https://www.gov.uk/income-tax-rates/current-rates-and-allowances" target="_blank">@Messages("calc.personalAllowance.linkOne")</a>
+    </li>
+    <li>
+        <a id="helpLink2" href="https://www.gov.uk/tax-uk-income-live-abroad/personal-allowance" target="_blank">@Messages("calc.personalAllowance.linkTwo")</a>
+    </li>
+</ul>
+}
+
+@main_template(Messages("calc.personalAllowance.question"), sidebarLinks = Some(sidebar)) {
+
+<a id="back-link" class="back-link" href="#">@Messages("calc.base.back")</a>
+
+<h1 class="heading-large">@Messages("calc.base.pageHeading")</h1>
+
+    @hiddenYesNoRadio("isClaimingPRR", Messages("calc.privateResidenceRelief.question"), content)
+
+<button class="button" type="submit" id="continue-button">@Messages("calc.base.continue")</button>
+
+
+}
