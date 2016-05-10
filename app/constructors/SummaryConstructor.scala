@@ -24,6 +24,14 @@ import common._
 
 object SummaryConstructor {
 
+  def lossOrGainWording(gain: BigDecimal): String = {
+    if (gain < 0) {
+      Messages("calc.summary.calculation.details.totalLoss")
+    } else {
+      Messages("calc.summary.calculation.details.totalGain")
+    }
+  }
+
   def calculationDetails(result: CalculationResultModel, summary: SummaryModel) = summaryPageSection("calcDetails", Messages("calc.summary.calculation.details.title"),
     result.upperTaxGain match {
       case Some(data) => Array(
@@ -36,8 +44,8 @@ object SummaryConstructor {
           })
         ),
         Map(
-          "question" -> Messages("calc.summary.calculation.details.totalGain"),
-          "answer" -> ("&pound;" + result.totalGain.setScale(2).toString)
+          "question" -> lossOrGainWording(result.totalGain),
+          "answer" -> ("&pound;" + result.totalGain.abs.setScale(2).toString)
         ),
         Map(
           "question" -> Messages("calc.summary.calculation.details.taxableGain"),
@@ -62,8 +70,8 @@ object SummaryConstructor {
           })
         ),
         Map(
-          "question" -> Messages("calc.summary.calculation.details.totalGain"),
-          "answer" -> ("&pound;" + result.totalGain.setScale(2).toString)
+          "question" -> lossOrGainWording(result.totalGain),
+          "answer" -> ("&pound;" + result.totalGain.abs.setScale(2).toString)
         ),
         Map(
           "question" -> Messages("calc.summary.calculation.details.taxableGain"),
