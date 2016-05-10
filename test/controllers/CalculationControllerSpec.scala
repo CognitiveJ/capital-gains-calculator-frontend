@@ -3562,6 +3562,13 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
           OtherReliefsTestDataItem.jsoupDoc.body.getElementsByTag("label").text should include (Messages("calc.otherReliefs.question"))
         }
 
+        "have a value for your gain" in {
+          mockCreateSummary(sumModelFlat)
+          mockCalculateFlatValue(Some(calcModelTwoRates))
+          mockfetchAndGetFormData[OtherReliefsModel](None)
+          OtherReliefsTestDataItem.jsoupDoc.getElementById("totalGain").text() shouldBe ("£40000.00 Total gain")
+        }
+
         "display an input box for the Other Tax Reliefs" in {
           mockCreateSummary(sumModelFlat)
           mockCalculateFlatValue(Some(calcModelTwoRates))
@@ -3587,13 +3594,13 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         }
       }
     }
-    "supplied with a pre-existing stored model" should {
+    "supplied with a pre-existing stored model and a loss" should {
       object OtherReliefsTestDataItem extends fakeRequestTo("other-reliefs", TestCalculationController.otherReliefs)
       val testOtherReliefsModel = new OtherReliefsModel(Some(5000))
 
       "return a 200 with a valid calculation call" in {
         mockCreateSummary(sumModelFlat)
-        mockCalculateFlatValue(Some(calcModelTwoRates))
+        mockCalculateFlatValue(Some(TestModels.calcModelLoss))
         mockfetchAndGetFormData[OtherReliefsModel](Some(testOtherReliefsModel))
         status(OtherReliefsTestDataItem.result) shouldBe 200
       }
@@ -3602,18 +3609,24 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
 
         "contain some text and use the character set utf-8" in {
           mockCreateSummary(sumModelFlat)
-          mockCalculateFlatValue(Some(calcModelTwoRates))
+          mockCalculateFlatValue(Some(TestModels.calcModelLoss))
           contentType(OtherReliefsTestDataItem.result) shouldBe Some("text/html")
           charset(OtherReliefsTestDataItem.result) shouldBe Some("utf-8")
         }
 
         "have the value 5000 auto-filled into the input box" in {
           mockCreateSummary(sumModelFlat)
-          mockCalculateFlatValue(Some(calcModelTwoRates))
+          mockCalculateFlatValue(Some(TestModels.calcModelLoss))
           mockfetchAndGetFormData[OtherReliefsModel](Some(testOtherReliefsModel))
           OtherReliefsTestDataItem.jsoupDoc.getElementById("otherReliefs").attr("value") shouldEqual "5000"
         }
 
+        "have a value for your loss" in {
+          mockCreateSummary(sumModelFlat)
+          mockCalculateFlatValue(Some(TestModels.calcModelLoss))
+          mockfetchAndGetFormData[OtherReliefsModel](Some(testOtherReliefsModel))
+          OtherReliefsTestDataItem.jsoupDoc.getElementById("totalGain").text() shouldBe ("£10000.00 Total loss")
+        }
 
       }
     }

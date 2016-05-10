@@ -22,6 +22,7 @@ object TestModels {
 
   val calcModelTwoRates = CalculationResultModel(8000, 40000, 32000, 18, Some(8000), Some(28))
   val calcModelOneRate = CalculationResultModel(8000, 40000, 32000, 20, None, None)
+  val calcModelLoss = CalculationResultModel(0, -10000, 0, 18, None, None)
 
   val summaryIndividualFlatWithoutAEA = SummaryModel (
     CustomerTypeModel("individual"),

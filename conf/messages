@@ -172,6 +172,7 @@ calc.calculationElection.message.whyMoreDetails = They sometimes qualify for lar
 ## Other Reliefs ##
 calc.otherReliefs.question = How much extra tax relief are you claiming?
 calc.otherReliefs.totalGain = Total gain
+calc.otherReliefs.totalLoss = Total loss
 calc.otherReliefs.taxableGain = Taxable gain
 calc.otherReliefs.button.addRelief = Add relief
 calc.otherReliefs.errorMinimum = Other reliefs cannot be negative
