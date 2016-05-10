@@ -72,6 +72,9 @@ POST        /acquisition-costs       controllers.CalculationController.submitAcq
 GET         /disposal-costs          controllers.CalculationController.disposalCosts
 POST        /disposal-costs          controllers.CalculationController.submitDisposalCosts
 
+#Private Residence Relief
+GET         /private-residence-relief controllers.CalculationController.privateResidenceRelief
+
 #Entrepreneurs Relief
 GET         /entrepreneurs-relief    controllers.CalculationController.entrepreneursRelief
 POST        /entrepreneurs-relief    controllers.CalculationController.submitEntrepreneursRelief

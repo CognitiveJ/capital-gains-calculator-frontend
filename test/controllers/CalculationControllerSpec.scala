@@ -4690,6 +4690,31 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
         contentType(PrivateResidenceReliefTestDataItem.result) shouldBe Some("text/html")
         charset(PrivateResidenceReliefTestDataItem.result) shouldBe Some("utf-8")
       }
+
+      "have a back button" in {
+        PrivateResidenceReliefTestDataItem.jsoupDoc.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+      }
+
+      "have the title 'calc.privateResidenceRelief.question'" in {
+        PrivateResidenceReliefTestDataItem.jsoupDoc.title shouldEqual Messages("calc.privateResidenceRelief.question")
+      }
+
+      "have the heading 'Calculate your tax (non-residents)'" in {
+        PrivateResidenceReliefTestDataItem.jsoupDoc.body.getElementsByTag("H1").text shouldEqual Messages("calc.base.pageHeading")
+      }
+
+      "have a yes no helper with hidden content and question 'calc.privateResidenceRelief.question'" in {
+        PrivateResidenceReliefTestDataItem.jsoupDoc.body.getElementById("isClaimingPRR-yes").parent.text shouldBe Messages("calc.base.yes")
+        PrivateResidenceReliefTestDataItem.jsoupDoc.body.getElementById("isClaimingPRR-no").parent.text shouldBe Messages("calc.base.no")
+        PrivateResidenceReliefTestDataItem.jsoupDoc.body.getElementsByTag("legend").text shouldBe Messages("calc.privateResidenceRelief.question")
+      }
+
+      "have a hidden input with question 'calc.privateResidenceRelief.questionTwo'" in {
+        PrivateResidenceReliefTestDataItem.jsoupDoc.body.getElementById("daysClaimed").tagName shouldEqual "input"
+        PrivateResidenceReliefTestDataItem.jsoupDoc.select("label[for=daysClaimed]").text should include (Messages("calc.privateResidenceRelief.questionTwoStart"))
+        PrivateResidenceReliefTestDataItem.jsoupDoc.select("label[for=daysClaimed]").text should include (Messages("calc.privateResidenceRelief.questionTwoEnd"))
+
+      }
     }
   }
 
