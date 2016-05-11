@@ -3249,7 +3249,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val acqDateModel = AcquisitionDateModel("No", None, None, None)
 
       "return a 303" in {
-        mockfetchAndGetValue(Some(acqDateModel))
+        mockfetchAndGetFormData(Some(acqDateModel))
         mockSaveFormData[AllowableLossesModel](testModel)
         status(AllowableLossesTestDataItem.result) shouldBe 303
       }
@@ -3265,7 +3265,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val acqDateModel = AcquisitionDateModel("Yes", Some(1), Some(1), Some(2016))
 
       "return a 303" in {
-        mockfetchAndGetValue(Some(acqDateModel))
+        mockfetchAndGetFormData(Some(acqDateModel))
         mockSaveFormData[AllowableLossesModel](testModel)
         status(AllowableLossesTestDataItem.result) shouldBe 303
       }
@@ -3281,7 +3281,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val acqDateModel = AcquisitionDateModel("Yes", Some(1), Some(1), Some(2010))
 
       "return a 303" in {
-        mockfetchAndGetValue(Some(acqDateModel))
+        mockfetchAndGetFormData(Some(acqDateModel))
         mockSaveFormData[AllowableLossesModel](testModel)
         status(AllowableLossesTestDataItem.result) shouldBe 303
       }
@@ -3296,7 +3296,7 @@ class CalculationControllerSpec extends UnitSpec with WithFakeApplication with M
       val testModel = new AllowableLossesModel("No", Some(-1000))
 
       "return a 303" in {
-        mockfetchAndGetValue(None)
+        mockfetchAndGetFormData(None)
         mockSaveFormData[AllowableLossesModel](testModel)
         status(AllowableLossesTestDataItem.result) shouldBe 303
       }
