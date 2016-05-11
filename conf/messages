@@ -144,6 +144,13 @@ calc.disposalCosts.question = How much did you pay in costs when you stopped bei
 calc.disposalCosts.errorNegativeNumber = Enter a positive number for your selling costs
 calc.disposalCosts.errorDecimalPlaces = There are too many numbers after the decimal point in your selling costs
 
+## Private Residence Relief ##
+calc.privateResidenceRelief.question = Are you claiming Private Residence Relief?
+calc.privateResidenceRelief.questionTwoStart =  How many days before
+calc.privateResidenceRelief.questionTwoEnd =  are you claiming relief for?
+calc.privateResidenceRelief.helpLink = Private Residence Relief
+
+
 ## Entrepreneurs Relief ##
 calc.entrepreneursRelief.question = Are you claiming Entrepreneurs'' Relief?
 calc.entrepreneursRelief.link = Entrepreneurs'' Relief
