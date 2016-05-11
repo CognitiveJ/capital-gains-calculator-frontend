@@ -2,8 +2,6 @@
 
 GET         /assets/*file            controllers.Assets.at(path="/public", file)
 
-GET         /hello-world             controllers.HelloWorldController.helloWorld
-
 #Introduction route
 ########################################################
 GET         /introduction            controllers.IntroductionController.introduction
