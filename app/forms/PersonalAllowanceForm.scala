@@ -31,7 +31,7 @@ object PersonalAllowanceForm {
       "personalAllowance" -> bigDecimal
         .verifying(Messages("calc.personalAllowance.errorNegative"), personalAllowance => isPositive(personalAllowance))
         .verifying(Messages("calc.personalAllowance.errorDecimalPlaces"), personalAllowance => isMaxTwoDecimalPlaces(personalAllowance))
-        .verifying(Messages("calc.personalAllowance.errorMaxLimit") + maxPA + Messages("calc.personalAllowance.errorMaxLimitEnd"), personalAllowance => personalAllowance <= maxPA)
+        .verifying(Messages("calc.personalAllowance.errorMaxLimit") + maxPA + " " + Messages("calc.personalAllowance.errorMaxLimitEnd"), personalAllowance => personalAllowance <= maxPA)
     )(PersonalAllowanceModel.apply)(PersonalAllowanceModel.unapply)
   )
 }
