@@ -283,7 +283,7 @@ object SummaryConstructor {
             ),
             Map(
               "question" -> Messages("calc.improvements.questionFour"),
-              "answer" -> ("&pound;" + summary.improvementsModel.improvementsAmtAfter.get.setScale(2))
+              "answer" -> ("&pound;" + summary.improvementsModel.improvementsAmtAfter.getOrElse(BigDecimal(0)).setScale(2))
             )
           )
           case _ => Array(
