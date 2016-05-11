@@ -69,15 +69,15 @@ trait CalculationController extends FrontendController {
     }
   }
 
-  val submitCustomerType = Action { implicit request =>
+  val submitCustomerType = Action.async { implicit request =>
     customerTypeForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.customerType(errors)),
+      errors => Future.successful(BadRequest(calculation.customerType(errors))),
       success => {
         calcConnector.saveFormData("customerType", success)
         success.customerType match {
-          case "individual" => Redirect(routes.CalculationController.currentIncome())
-          case "trustee" => Redirect(routes.CalculationController.disabledTrustee())
-          case "personalRep" => Redirect(routes.CalculationController.otherProperties())
+          case "individual" => Future.successful(Redirect(routes.CalculationController.currentIncome()))
+          case "trustee" => Future.successful(Redirect(routes.CalculationController.disabledTrustee()))
+          case "personalRep" => Future.successful(Redirect(routes.CalculationController.otherProperties()))
         }
       }
     )
