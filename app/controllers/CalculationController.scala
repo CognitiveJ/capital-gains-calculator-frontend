@@ -225,9 +225,9 @@ trait CalculationController extends FrontendController {
     }
   }
 
-  val submitAcquisitionValue = Action { implicit request =>
+  val submitAcquisitionValue = Action.async { implicit request =>
     acquisitionValueForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.acquisitionValue(errors)),
+      errors => Future.successful(BadRequest(calculation.acquisitionValue(errors))),
       success => {
         calcConnector.saveFormData("acquisitionValue", success)
         val connection = calcConnector.fetchAndGetValue[AcquisitionDateModel]("acquisitionDate")
@@ -237,10 +237,10 @@ trait CalculationController extends FrontendController {
             connection.get.year.getOrElse(0))
           )
         {
-          Redirect(routes.CalculationController.rebasedValue())
+          Future.successful(Redirect(routes.CalculationController.rebasedValue()))
         }
         else {
-          Redirect(routes.CalculationController.improvements())
+          Future.successful(Redirect(routes.CalculationController.improvements()))
         }
       }
     )
@@ -294,13 +294,13 @@ trait CalculationController extends FrontendController {
     }
   }
 
-  val submitImprovements = Action { implicit request =>
+  val submitImprovements = Action.async { implicit request =>
     val hasRebasedValue = calcConnector.fetchAndGetValue[RebasedValueModel]("rebasedValue").getOrElse(RebasedValueModel("No", None)).hasRebasedValue
     improvementsForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.improvements(errors, hasRebasedValue)),
+      errors => Future.successful(BadRequest(calculation.improvements(errors, hasRebasedValue))),
       success => {
         calcConnector.saveFormData("improvements", success)
-        Redirect(routes.CalculationController.disposalDate())
+        Future.successful(Redirect(routes.CalculationController.disposalDate()))
       }
     )
   }
@@ -449,125 +449,155 @@ trait CalculationController extends FrontendController {
   }
   //################### Calculation Election methods #######################
   def calculationElection: Action[AnyContent] = Action.async { implicit request =>
-    val construct = calcConnector.createSummary(hc)
-    val content = calcElectionConstructor.generateElection(construct, hc)
+
+    def action (construct: SummaryModel, content: Seq[(String, String, String, Option[String], String)]) =
     calcConnector.fetchAndGetFormData[CalculationElectionModel]("calculationElection").map {
       case Some(data) => Ok(calculation.calculationElection(calculationElectionForm.fill(data), construct, content))
       case None => Ok(calculation.calculationElection(calculationElectionForm, construct, content))
     }
+
+    for {
+      construct <- calcConnector.createSummary(hc)
+      finalResult <- action(construct, calcElectionConstructor.generateElection(construct, hc))
+    } yield finalResult
   }
 
-  def submitCalculationElection: Action[AnyContent] = Action { implicit request =>
-    val construct = calcConnector.createSummary(hc)
-    val content = calcElectionConstructor.generateElection(construct, hc)
+  def submitCalculationElection: Action[AnyContent] = Action.async { implicit request =>
+
     calculationElectionForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.calculationElection(errors, construct, content)),
+      errors => {
+        calcConnector.createSummary(hc).flatMap(summaryData =>
+        Future.successful(BadRequest(calculation.calculationElection(errors, summaryData, calcElectionConstructor.generateElection(summaryData, hc)))))
+      },
       success => {
         calcConnector.saveFormData("calculationElection", success)
-        Redirect(routes.CalculationController.summary())
+        Future.successful(Redirect(routes.CalculationController.summary()))
       }
     )
   }
 
   //################### Other Reliefs methods #######################
   def otherReliefs: Action[AnyContent] = Action.async { implicit request =>
-    val construct = calcConnector.createSummary(hc)
-    calcConnector.calculateFlat(construct).map {
-      dataResult => {
-        Await.result(calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefsFlat").map {
-          case Some(data) => Ok(calculation.otherReliefs(otherReliefsForm.fill(data), dataResult.get))
-          case None => Ok(calculation.otherReliefs(otherReliefsForm, dataResult.get))
-        }, Duration("5s"))
-      }
+
+    def action (dataResult: Option[CalculationResultModel]) = calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefsFlat").map {
+      case Some(data) => Ok(calculation.otherReliefs(otherReliefsForm.fill(data), dataResult.get))
+      case None => Ok(calculation.otherReliefs(otherReliefsForm, dataResult.get))
     }
+
+    for {
+      construct <- calcConnector.createSummary(hc)
+      calculation <- calcConnector.calculateFlat(construct)
+      finalResult <- action(calculation)
+    } yield finalResult
   }
 
-  def submitOtherReliefs: Action[AnyContent] = Action { implicit request =>
-    val construct = calcConnector.createSummary(hc)
-    otherReliefsForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.otherReliefs(errors, CalculationResultModel(0.0, 0.0, 0.0, 0, None, None))),
+  def submitOtherReliefs: Action[AnyContent] = Action.async { implicit request =>
+
+    def action (dataResult: Option[CalculationResultModel], construct: SummaryModel) = otherReliefsForm.bindFromRequest.fold(
+      errors => Future.successful(BadRequest(calculation.otherReliefs(errors, dataResult.get))),
       success => {
         calcConnector.saveFormData("otherReliefsFlat", success)
         construct.acquisitionDateModel.hasAcquisitionDate match {
           case "Yes" if Dates.dateAfterStart(construct.acquisitionDateModel.day.get,
             construct.acquisitionDateModel.month.get, construct.acquisitionDateModel.year.get) => {
-            Redirect(routes.CalculationController.summary())
+            Future.successful(Redirect(routes.CalculationController.summary()))
           }
           case "Yes" if !Dates.dateAfterStart(construct.acquisitionDateModel.day.get,
             construct.acquisitionDateModel.month.get, construct.acquisitionDateModel.year.get) => {
-            Redirect(routes.CalculationController.calculationElection())
+            Future.successful(Redirect(routes.CalculationController.calculationElection()))
           }
-          case "No" => Redirect(routes.CalculationController.summary())
+          case "No" => Future.successful(Redirect(routes.CalculationController.summary()))
         }
       }
     )
+
+    for {
+      construct <- calcConnector.createSummary(hc)
+      calculation <- calcConnector.calculateFlat(construct)
+      finalResult <- action(calculation, construct)
+    } yield finalResult
   }
 
   //################### Time Apportioned Other Reliefs methods #######################
   def otherReliefsTA: Action[AnyContent] = Action.async { implicit request =>
-    val construct = calcConnector.createSummary(hc)
-    calcConnector.calculateTA(construct).map {
-      dataResult => {
-        Await.result(calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefsTA").map {
-          case Some(data) => Ok(calculation.otherReliefsTA(otherReliefsForm.fill(data), dataResult.get))
-          case None => Ok(calculation.otherReliefsTA(otherReliefsForm, dataResult.get))
-        }, Duration("5s"))
-      }
+    def action (dataResult: Option[CalculationResultModel]) = calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefsTA").map {
+      case Some(data) => Ok(calculation.otherReliefsTA(otherReliefsForm.fill(data), dataResult.get))
+      case None => Ok(calculation.otherReliefsTA(otherReliefsForm, dataResult.get))
     }
+
+    for {
+      construct <- calcConnector.createSummary(hc)
+      calculation <- calcConnector.calculateTA(construct)
+      finalResult <- action(calculation)
+    } yield finalResult
   }
 
-  val submitOtherReliefsTA = Action { implicit request =>
-    otherReliefsForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.otherReliefsTA(errors, CalculationResultModel(0.0, 0.0, 0.0, 0, None, None))),
+  val submitOtherReliefsTA = Action.async { implicit request =>
+    def action(dataResult: Option[CalculationResultModel]) = otherReliefsForm.bindFromRequest.fold(
+      errors => Future.successful(BadRequest(calculation.otherReliefsTA(errors, dataResult.get))),
       success => {
         calcConnector.saveFormData("otherReliefsTA", success)
-        Redirect(routes.CalculationController.calculationElection())
+        Future.successful(Redirect(routes.CalculationController.calculationElection()))
       }
     )
+
+    for {
+      construct <- calcConnector.createSummary(hc)
+      calculation <- calcConnector.calculateTA(construct)
+      finalResult <- action(calculation)
+    } yield finalResult
   }
 
   //################### Rebased Other Reliefs methods #######################
   def otherReliefsRebased: Action[AnyContent] = Action.async { implicit request =>
-    val construct = calcConnector.createSummary(hc)
-    calcConnector.calculateRebased(construct).map {
-      dataResult => {
-        Await.result(calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefsRebased").map {
-          case Some(data) => Ok(calculation.otherReliefsRebased(otherReliefsForm.fill(data), dataResult.get))
-          case None => Ok(calculation.otherReliefsRebased(otherReliefsForm, dataResult.get))
-        }, Duration("5s"))
-      }
+    def action (dataResult: Option[CalculationResultModel]) = calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefsRebased").map {
+      case Some(data) => Ok(calculation.otherReliefsRebased(otherReliefsForm.fill(data), dataResult.get))
+      case None => Ok(calculation.otherReliefsRebased(otherReliefsForm, dataResult.get))
     }
+
+    for {
+      construct <- calcConnector.createSummary(hc)
+      calculation <- calcConnector.calculateRebased(construct)
+      finalResult <- action(calculation)
+    } yield finalResult
   }
 
-  val submitOtherReliefsRebased = Action { implicit request =>
-    otherReliefsForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.otherReliefsRebased(errors, CalculationResultModel(0.0, 0.0, 0.0, 0, None, None))),
+  val submitOtherReliefsRebased = Action.async { implicit request =>
+    def action(dataResult: Option[CalculationResultModel]) = otherReliefsForm.bindFromRequest.fold(
+      errors => Future.successful(BadRequest(calculation.otherReliefsRebased(errors, dataResult.get))),
       success => {
         calcConnector.saveFormData("otherReliefsRebased", success)
-        Redirect(routes.CalculationController.calculationElection())
+        Future.successful(Redirect(routes.CalculationController.calculationElection()))
       }
     )
+
+    for {
+      construct <- calcConnector.createSummary(hc)
+      calculation <- calcConnector.calculateRebased(construct)
+      finalResult <- action(calculation)
+    } yield finalResult
   }
 
   //################### Summary Methods ##########################
   def summary(): Action[AnyContent] = Action.async { implicit request =>
-    val construct = calcConnector.createSummary(hc)
-    construct.calculationElectionModel.calculationType match {
+    calcConnector.createSummary(hc).flatMap(summaryData =>
+    summaryData.calculationElectionModel.calculationType match {
       case "flat" => {
-        calcConnector.calculateFlat(construct).map ( result =>
-          Ok(calculation.summary(construct, result.get))
+        calcConnector.calculateFlat(summaryData).map ( result =>
+          Ok(calculation.summary(summaryData, result.get))
         )
       }
       case "time" => {
-        calcConnector.calculateTA(construct).map ( result =>
-          Ok(calculation.summary(construct, result.get))
+        calcConnector.calculateTA(summaryData).map ( result =>
+          Ok(calculation.summary(summaryData, result.get))
         )
       }
       case "rebased" => {
-        calcConnector.calculateRebased(construct).map ( result =>
-          Ok(calculation.summary(construct, result.get))
+        calcConnector.calculateRebased(summaryData).map ( result =>
+          Ok(calculation.summary(summaryData, result.get))
         )
       }
     }
+    )
   }
 }
