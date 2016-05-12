@@ -230,7 +230,7 @@ trait CalculationController extends FrontendController {
       errors => Future.successful(BadRequest(calculation.acquisitionValue(errors))),
       success => {
         calcConnector.saveFormData("acquisitionValue", success)
-        val connection = calcConnector.fetchAndGetValue[AcquisitionDateModel]("acquisitionDate")
+        calcConnector.fetchAndGetFormData[AcquisitionDateModel]("acquisitionDate").flatMap (connection =>
         if (!Dates.dateAfterStart(
             connection.get.day.getOrElse(0),
             connection.get.month.getOrElse(0),
@@ -242,6 +242,7 @@ trait CalculationController extends FrontendController {
         else {
           Future.successful(Redirect(routes.CalculationController.improvements()))
         }
+        )
       }
     )
   }
@@ -287,17 +288,20 @@ trait CalculationController extends FrontendController {
 
   //################### Improvements methods #######################
   val improvements = Action.async { implicit request =>
-    val hasRebasedValue = calcConnector.fetchAndGetValue[RebasedValueModel]("rebasedValue").getOrElse(RebasedValueModel("No", None)).hasRebasedValue
-    calcConnector.fetchAndGetFormData[ImprovementsModel]("improvements").map {
-      case Some(data) => Ok(calculation.improvements(improvementsForm.fill(data), hasRebasedValue))
-      case None => Ok(calculation.improvements(improvementsForm, hasRebasedValue))
-    }
+    calcConnector.fetchAndGetFormData[RebasedValueModel]("rebasedValue").flatMap(rebasedValueModel =>
+      calcConnector.fetchAndGetFormData[ImprovementsModel]("improvements").map {
+        case Some(data) => Ok(calculation.improvements(improvementsForm.fill(data), rebasedValueModel.getOrElse(RebasedValueModel("No", None)).hasRebasedValue))
+        case None => Ok(calculation.improvements(improvementsForm, rebasedValueModel.getOrElse(RebasedValueModel("No", None)).hasRebasedValue))
+      }
+    )
   }
 
   val submitImprovements = Action.async { implicit request =>
-    val hasRebasedValue = calcConnector.fetchAndGetValue[RebasedValueModel]("rebasedValue").getOrElse(RebasedValueModel("No", None)).hasRebasedValue
     improvementsForm.bindFromRequest.fold(
-      errors => Future.successful(BadRequest(calculation.improvements(errors, hasRebasedValue))),
+      errors => {
+        calcConnector.fetchAndGetFormData[RebasedValueModel]("rebasedValue").flatMap(rebasedValueModel =>
+          Future.successful(BadRequest(calculation.improvements(errors, rebasedValueModel.getOrElse(RebasedValueModel("No", None)).hasRebasedValue))))
+      },
       success => {
         calcConnector.saveFormData("improvements", success)
         Future.successful(Redirect(routes.CalculationController.disposalDate()))
