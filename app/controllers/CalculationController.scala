@@ -91,12 +91,12 @@ trait CalculationController extends FrontendController {
     }
   }
 
-  val submitDisabledTrustee = Action { implicit request =>
+  val submitDisabledTrustee = Action.async { implicit request =>
     disabledTrusteeForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.disabledTrustee(errors)),
+      errors => Future.successful(BadRequest(calculation.disabledTrustee(errors))),
       success => {
         calcConnector.saveFormData("disabledTrustee",success)
-        Redirect(routes.CalculationController.otherProperties())
+        Future.successful(Redirect(routes.CalculationController.otherProperties()))
       }
     )
   }
