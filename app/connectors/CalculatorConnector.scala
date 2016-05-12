@@ -126,10 +126,10 @@ trait CalculatorConnector {
       otherReliefsFlatModel <- otherReliefsFlat
       otherReliefsTAModel <- otherReliefsTA
       otherReliefsRebasedModel <- otherReliefsRebased
-    }yield SummaryModel(customerTypeModel, disabledTrusteeModel, currentIncomeModel, personalAllowanceModel, otherPropertiesModel,
+    } yield SummaryModel(customerTypeModel, disabledTrusteeModel, currentIncomeModel, personalAllowanceModel, otherPropertiesModel,
       annualExemptAmountModel, acquisitionDateModel, acquisitionValueModel, rebasedValueModel, rebasedCostsModel, improvementsModel,
       disposalDateModel, disposalValueModel, acquisitionCostsModel, disposalCostsModel, entrepreneursReliefModel, allowableLossesModel,
       calculationElectionModel, otherReliefsFlatModel, otherReliefsTAModel, otherReliefsRebasedModel)
-
+  }
 
 }

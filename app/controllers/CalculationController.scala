@@ -456,18 +456,79 @@ trait CalculationController extends FrontendController {
       case None => Ok(calculation.calculationElection(calculationElectionForm, construct, content))
     }
 
+    def calcTimeCall(summary: SummaryModel): Future[Option[CalculationResultModel]] = {
+      summary.acquisitionDateModel.hasAcquisitionDate match {
+        case "Yes" => if (Dates.dateAfterStart(summary.acquisitionDateModel.day.get, summary.acquisitionDateModel.month.get, summary.acquisitionDateModel.year.get)) {
+          Future(None)
+        }
+        else {
+          calcConnector.calculateTA(summary)
+        }
+        case "No" => Future(None)
+      }
+    }
+
+    def calcRebasedCall(summary: SummaryModel): Future[Option[CalculationResultModel]] = {
+      summary.rebasedValueModel.getOrElse(RebasedValueModel("No", None)).hasRebasedValue match {
+        case "Yes" => summary.acquisitionDateModel.hasAcquisitionDate match {
+          case "Yes" => if (Dates.dateAfterStart(summary.acquisitionDateModel.day.get, summary.acquisitionDateModel.month.get, summary.acquisitionDateModel.year.get)) {
+            Future(None)
+          }
+          else {
+            calcConnector.calculateRebased(summary)
+          }
+          case "No" => calcConnector.calculateRebased(summary)
+        }
+        case "No" => Future(None)
+      }
+    }
+
     for {
       construct <- calcConnector.createSummary(hc)
-      finalResult <- action(construct, calcElectionConstructor.generateElection(construct, hc))
+      calcFlat <- calcConnector.calculateFlat(construct)
+      calcTA <- calcTimeCall(construct)
+      calcRebased <- calcRebasedCall(construct)
+      finalResult <- action(construct, calcElectionConstructor.generateElection(construct, hc, calcFlat, calcTA, calcRebased))
     } yield finalResult
   }
 
   def submitCalculationElection: Action[AnyContent] = Action.async { implicit request =>
 
+    def calcTimeCall(summary: SummaryModel): Future[Option[CalculationResultModel]] = {
+      summary.acquisitionDateModel.hasAcquisitionDate match {
+        case "Yes" => if (Dates.dateAfterStart(summary.acquisitionDateModel.day.get, summary.acquisitionDateModel.month.get, summary.acquisitionDateModel.year.get)) {
+          Future(None)
+        }
+        else {
+          calcConnector.calculateTA(summary)
+        }
+        case "No" => Future(None)
+      }
+    }
+
+    def calcRebasedCall(summary: SummaryModel): Future[Option[CalculationResultModel]] = {
+      summary.rebasedValueModel.getOrElse(RebasedValueModel("No", None)).hasRebasedValue match {
+        case "Yes" => summary.acquisitionDateModel.hasAcquisitionDate match {
+          case "Yes" => if (Dates.dateAfterStart(summary.acquisitionDateModel.day.get, summary.acquisitionDateModel.month.get, summary.acquisitionDateModel.year.get)) {
+            Future(None)
+          }
+          else {
+            calcConnector.calculateRebased(summary)
+          }
+          case "No" => calcConnector.calculateRebased(summary)
+        }
+        case "No" => Future(None)
+      }
+    }
+
     calculationElectionForm.bindFromRequest.fold(
       errors => {
-        calcConnector.createSummary(hc).flatMap(summaryData =>
-        Future.successful(BadRequest(calculation.calculationElection(errors, summaryData, calcElectionConstructor.generateElection(summaryData, hc)))))
+        for{
+          construct <- calcConnector.createSummary(hc)
+          calcFlat <- calcConnector.calculateFlat(construct)
+          calcTA <- calcTimeCall(construct)
+          calcRebased <- calcRebasedCall(construct)
+        } yield {BadRequest(calculation.calculationElection(errors, construct, calcElectionConstructor.generateElection(construct, hc, calcFlat, calcTA, calcRebased)))}
       },
       success => {
         calcConnector.saveFormData("calculationElection", success)
