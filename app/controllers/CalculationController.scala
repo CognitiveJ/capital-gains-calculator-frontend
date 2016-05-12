@@ -402,39 +402,27 @@ trait CalculationController extends FrontendController {
     }
   }
 
-  val submitAllowableLossesNonBlocking = Action.async { implicit request =>
-
-    allowableLossesForm.bindFromRequest.fold(
-      errors => Future.successful(BadRequest(calculation.allowableLosses(errors))),
-      success => {
-        Future(Redirect(routes.CalculationController.otherReliefs()))
-      }
-    )
-  }
-
   val submitAllowableLosses = Action.async { implicit request =>
     allowableLossesForm.bindFromRequest.fold(
       errors => Future.successful(BadRequest(calculation.allowableLosses(errors))),
       success => {
         calcConnector.saveFormData("allowableLosses", success)
-        calcConnector.fetchAndGetFormData[AcquisitionDateModel]("acquisitionDate").flatMap { formdata =>
-          formdata match {
-            case Some(data) => data.hasAcquisitionDate match {
-              case "Yes" =>
-                if (Dates.dateAfterStart(data.day.get, data.month.get, data.year.get)) {
-                  calcConnector.saveFormData("calculationElection", CalculationElectionModel("flat"))
-                  Future.successful(Redirect(routes.CalculationController.otherReliefs()))
-                }
-                else Future.successful(Redirect(routes.CalculationController.calculationElection()))
-              case "No" => {
+        calcConnector.fetchAndGetFormData[AcquisitionDateModel]("acquisitionDate").flatMap {
+          case Some(data) => data.hasAcquisitionDate match {
+            case "Yes" =>
+              if (Dates.dateAfterStart(data.day.get, data.month.get, data.year.get)) {
                 calcConnector.saveFormData("calculationElection", CalculationElectionModel("flat"))
                 Future.successful(Redirect(routes.CalculationController.otherReliefs()))
               }
-            }
-            case _ => {
+              else Future.successful(Redirect(routes.CalculationController.calculationElection()))
+            case "No" => {
               calcConnector.saveFormData("calculationElection", CalculationElectionModel("flat"))
               Future.successful(Redirect(routes.CalculationController.otherReliefs()))
             }
+          }
+          case _ => {
+            calcConnector.saveFormData("calculationElection", CalculationElectionModel("flat"))
+            Future.successful(Redirect(routes.CalculationController.otherReliefs()))
           }
         }
       }
