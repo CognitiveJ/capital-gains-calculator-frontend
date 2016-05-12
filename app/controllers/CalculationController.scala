@@ -146,14 +146,14 @@ trait CalculationController extends FrontendController {
     }
   }
 
-  val submitOtherProperties = Action { implicit request =>
+  val submitOtherProperties = Action.async { implicit request =>
     otherPropertiesForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.otherProperties(errors)),
+      errors => Future.successful(BadRequest(calculation.otherProperties(errors))),
       success => {
         calcConnector.saveFormData("otherProperties", success)
         success.otherProperties match {
-          case "Yes" => Redirect(routes.CalculationController.annualExemptAmount())
-          case "No" => Redirect(routes.CalculationController.acquisitionDate())
+          case "Yes" => Future.successful(Redirect(routes.CalculationController.annualExemptAmount()))
+          case "No" => Future.successful(Redirect(routes.CalculationController.acquisitionDate()))
        }
       }
     )
