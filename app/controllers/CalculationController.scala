@@ -42,7 +42,7 @@ import forms.AcquisitionDateForm._
 import forms.RebasedValueForm._
 import forms.RebasedCostsForm._
 import models._
-import play.api.mvc.{AnyContent, Action}
+import play.api.mvc.{Result, AnyContent, Action}
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -167,29 +167,39 @@ trait CalculationController extends FrontendController {
     }
   }
 
-  val submitAnnualExemptAmount =  Action { implicit request =>
+  val submitAnnualExemptAmount =  Action.async { implicit request =>
 
-    def isAllowedMaxAEA(implicit hc: HeaderCarrier): Boolean = {
-      Await.result(calcConnector.fetchAndGetFormData[CustomerTypeModel]("customerType").map {
-        case Some(customerTypeModel) =>
-          customerTypeModel.customerType match {
-            case "trustee" =>
-              calcConnector.fetchAndGetValue[DisabledTrusteeModel]("disabledTrustee").map {
-                case disabledTrusteeModel => if (disabledTrusteeModel.isVulnerable == "No") false else true
-              }.getOrElse (true)
-            case _ => true
-          }
-        case _ => true
-      },Duration("5s"))
+    def customerType(implicit hc: HeaderCarrier): Future[String] = {
+      calcConnector.fetchAndGetFormData[CustomerTypeModel]("customerType").map {
+        customerTypeModel => customerTypeModel.get.customerType
+      }
     }
 
-    annualExemptAmountForm(isAllowedMaxAEA).bindFromRequest.fold(
-      errors => BadRequest(calculation.annualExemptAmount(errors)),
-      success => {
-        calcConnector.saveFormData("annualExemptAmount", success)
-        Redirect(routes.CalculationController.acquisitionDate())
+    def trusteeAEA(customerTypeVal: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
+      customerTypeVal match {
+        case "trustee" =>
+          calcConnector.fetchAndGetFormData[DisabledTrusteeModel]("disabledTrustee").map {
+            disabledTrusteeModel => if (disabledTrusteeModel.get.isVulnerable == "No") false else true
+          }
+        case _ => Future.successful(true)
       }
-    )
+    }
+
+    def routeRequest(isDisabledTrustee: Boolean)(implicit hc: HeaderCarrier): Future[Result] = {
+      annualExemptAmountForm(isDisabledTrustee).bindFromRequest.fold(
+        errors => Future.successful(BadRequest(calculation.annualExemptAmount(errors))),
+        success => {
+          calcConnector.saveFormData("annualExemptAmount", success)
+          Future.successful(Redirect(routes.CalculationController.acquisitionDate()))
+        }
+      )
+    }
+
+    for {
+      customerTypeVal <- customerType
+      isDisabledTrustee <- trusteeAEA(customerTypeVal)
+      finalResult <- routeRequest(isDisabledTrustee)
+    } yield finalResult
   }
 
   //################### Acquisition Date methods #######################
