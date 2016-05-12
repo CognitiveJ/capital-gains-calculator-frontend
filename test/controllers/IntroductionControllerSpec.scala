@@ -44,7 +44,7 @@ class IntroductionControllerSpec extends UnitSpec with WithFakeApplication {
 
     "when called with no session" should {
 
-      object IntroductionTestDataItem extends fakeRequestTo("introduction", IntroductionController.introduction)
+      object IntroductionTestDataItem extends fakeRequestTo("", IntroductionController.introduction)
 
       "return a 200" in {
         status(IntroductionTestDataItem.result) shouldBe 200

@@ -4,7 +4,7 @@ GET         /assets/*file            controllers.Assets.at(path="/public", file)
 
 #Introduction route
 ########################################################
-GET         /introduction            controllers.IntroductionController.introduction
+GET         /                        controllers.IntroductionController.introduction
 ########################################################
 
 
