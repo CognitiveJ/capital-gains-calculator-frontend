@@ -16,9 +16,6 @@
 
 package controllers
 
-import java.lang.ProcessBuilder.Redirect
-import java.util.concurrent.TimeUnit
-
 import connectors.CalculatorConnector
 import common.Dates
 import constructors.CalculationElectionConstructor
@@ -109,12 +106,12 @@ trait CalculationController extends FrontendController {
     }
   }
 
-  val submitCurrentIncome = Action { implicit request =>
+  val submitCurrentIncome = Action.async { implicit request =>
    currentIncomeForm.bindFromRequest.fold(
-     errors => BadRequest(calculation.currentIncome(errors)),
+     errors => Future.successful(BadRequest(calculation.currentIncome(errors))),
      success => {
        calcConnector.saveFormData("currentIncome", success)
-       Redirect(routes.CalculationController.personalAllowance())
+       Future.successful(Redirect(routes.CalculationController.personalAllowance()))
      }
    )
   }
@@ -210,12 +207,12 @@ trait CalculationController extends FrontendController {
     }
   }
 
-  val submitAcquisitionDate = Action { implicit request =>
+  val submitAcquisitionDate = Action.async { implicit request =>
     acquisitionDateForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.acquisitionDate(errors)),
+      errors => Future.successful(BadRequest(calculation.acquisitionDate(errors))),
       success => {
         calcConnector.saveFormData("acquisitionDate", success)
-        Redirect(routes.CalculationController.acquisitionValue())
+        Future.successful(Redirect(routes.CalculationController.acquisitionValue()))
       }
     )
   }
@@ -257,14 +254,14 @@ trait CalculationController extends FrontendController {
     }
   }
 
-  val submitRebasedValue = Action { implicit request =>
+  val submitRebasedValue = Action.async { implicit request =>
     rebasedValueForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.rebasedValue(errors)),
+      errors => Future.successful(BadRequest(calculation.rebasedValue(errors))),
       success => {
         calcConnector.saveFormData("rebasedValue", success)
         success.hasRebasedValue match {
-          case "Yes" => Redirect(routes.CalculationController.rebasedCosts())
-          case "No" => Redirect(routes.CalculationController.improvements())
+          case "Yes" => Future.successful(Redirect(routes.CalculationController.rebasedCosts()))
+          case "No" => Future.successful(Redirect(routes.CalculationController.improvements()))
         }
       }
     )
@@ -278,12 +275,12 @@ trait CalculationController extends FrontendController {
     }
   }
 
-  val submitRebasedCosts = Action {implicit request =>
+  val submitRebasedCosts = Action.async {implicit request =>
     rebasedCostsForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.rebasedCosts(errors)),
+      errors => Future.successful(BadRequest(calculation.rebasedCosts(errors))),
       success => {
         calcConnector.saveFormData("rebasedCosts", success)
-        Redirect(routes.CalculationController.improvements())
+        Future.successful(Redirect(routes.CalculationController.improvements()))
       }
     )
   }
@@ -316,12 +313,12 @@ trait CalculationController extends FrontendController {
     }
   }
 
-  val submitDisposalDate = Action { implicit request =>
+  val submitDisposalDate = Action.async { implicit request =>
     disposalDateForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.disposalDate(errors)),
+      errors => Future.successful(BadRequest(calculation.disposalDate(errors))),
       success => {
         calcConnector.saveFormData("disposalDate", success)
-        Redirect(routes.CalculationController.disposalValue())
+        Future.successful(Redirect(routes.CalculationController.disposalValue()))
       }
     )
   }
@@ -334,12 +331,12 @@ trait CalculationController extends FrontendController {
     }
   }
 
-  val submitDisposalValue = Action { implicit request =>
+  val submitDisposalValue = Action.async { implicit request =>
     disposalValueForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.disposalValue(errors)),
+      errors => Future.successful(BadRequest(calculation.disposalValue(errors))),
       success => {
         calcConnector.saveFormData("disposalValue", success)
-        Redirect(routes.CalculationController.acquisitionCosts())
+        Future.successful(Redirect(routes.CalculationController.acquisitionCosts()))
       }
     )
   }
@@ -352,12 +349,12 @@ trait CalculationController extends FrontendController {
     }
   }
 
-  val submitAcquisitionCosts = Action { implicit request =>
+  val submitAcquisitionCosts = Action.async { implicit request =>
     acquisitionCostsForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.acquisitionCosts(errors)),
+      errors => Future.successful(BadRequest(calculation.acquisitionCosts(errors))),
       success => {
         calcConnector.saveFormData("acquisitionCosts", success)
-        Redirect(routes.CalculationController.disposalCosts())
+        Future.successful(Redirect(routes.CalculationController.disposalCosts()))
       }
     )
   }
@@ -370,12 +367,12 @@ trait CalculationController extends FrontendController {
     }
   }
 
-  val submitDisposalCosts = Action { implicit request =>
+  val submitDisposalCosts = Action.async { implicit request =>
     disposalCostsForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.disposalCosts(errors)),
+      errors => Future.successful(BadRequest(calculation.disposalCosts(errors))),
       success => {
         calcConnector.saveFormData("disposalCosts", success)
-        Redirect(routes.CalculationController.entrepreneursRelief())
+        Future.successful(Redirect(routes.CalculationController.entrepreneursRelief()))
       }
     )
   }
@@ -394,12 +391,12 @@ trait CalculationController extends FrontendController {
     }
   }
 
-  val submitEntrepreneursRelief = Action { implicit request =>
+  val submitEntrepreneursRelief = Action.async { implicit request =>
     entrepreneursReliefForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.entrepreneursRelief(errors)),
+      errors => Future.successful(BadRequest(calculation.entrepreneursRelief(errors))),
       success => {
         calcConnector.saveFormData("entrepreneursRelief", success)
-        Redirect(routes.CalculationController.allowableLosses())
+        Future.successful(Redirect(routes.CalculationController.allowableLosses()))
       }
     )
   }
