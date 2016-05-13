@@ -20,6 +20,78 @@ import models._
 
 object TestModels {
 
+  val sumModelFlat = SummaryModel(
+    CustomerTypeModel("individual"),
+    None,
+    Some(CurrentIncomeModel(1000)),
+    Some(PersonalAllowanceModel(11100)),
+    OtherPropertiesModel("No", None),
+    None,
+    AcquisitionDateModel("No", None, None, None),
+    AcquisitionValueModel(100000),
+    Some(RebasedValueModel("No", None)),
+    None,
+    ImprovementsModel("No", None),
+    DisposalDateModel(10, 10, 2010),
+    DisposalValueModel(150000),
+    AcquisitionCostsModel(None),
+    DisposalCostsModel(None),
+    EntrepreneursReliefModel("No"),
+    AllowableLossesModel("No", None),
+    CalculationElectionModel("flat"),
+    OtherReliefsModel(None),
+    OtherReliefsModel(None),
+    OtherReliefsModel(None)
+  )
+
+  val sumModelTA = SummaryModel(
+    CustomerTypeModel("individual"),
+    None,
+    Some(CurrentIncomeModel(1000)),
+    Some(PersonalAllowanceModel(11100)),
+    OtherPropertiesModel("Yes", Some(2100)),
+    Some(AnnualExemptAmountModel(9000)),
+    AcquisitionDateModel("Yes", Some(9), Some(9), Some(9)),
+    AcquisitionValueModel(100000),
+    Some(RebasedValueModel("No", None)),
+    None,
+    ImprovementsModel("Yes", Some(500)),
+    DisposalDateModel(10, 10, 2010),
+    DisposalValueModel(150000),
+    AcquisitionCostsModel(Some(650)),
+    DisposalCostsModel(Some(850)),
+    EntrepreneursReliefModel("No"),
+    AllowableLossesModel("No", None),
+    CalculationElectionModel("time"),
+    OtherReliefsModel(Some(2000)),
+    OtherReliefsModel(Some(1000)),
+    OtherReliefsModel(Some(500))
+  )
+
+  val sumModelRebased = SummaryModel(
+    CustomerTypeModel("individual"),
+    None,
+    Some(CurrentIncomeModel(1000)),
+    Some(PersonalAllowanceModel(11100)),
+    OtherPropertiesModel("Yes", Some(2100)),
+    Some(AnnualExemptAmountModel(9000)),
+    AcquisitionDateModel("Yes", Some(9), Some(9), Some(9)),
+    AcquisitionValueModel(100000),
+    Some(RebasedValueModel("No", None)),
+    None,
+    ImprovementsModel("Yes", Some(500)),
+    DisposalDateModel(10, 10, 2010),
+    DisposalValueModel(150000),
+    AcquisitionCostsModel(Some(650)),
+    DisposalCostsModel(Some(850)),
+    EntrepreneursReliefModel("No"),
+    AllowableLossesModel("No", None),
+    CalculationElectionModel("rebased"),
+    OtherReliefsModel(Some(2000)),
+    OtherReliefsModel(Some(1000)),
+    OtherReliefsModel(Some(500))
+  )
+
   val calcModelTwoRates = CalculationResultModel(8000, 40000, 32000, 18, Some(8000), Some(28))
   val calcModelOneRate = CalculationResultModel(8000, 40000, 32000, 20, None, None)
   val calcModelLoss = CalculationResultModel(0, -10000, 0, 18, None, None)
