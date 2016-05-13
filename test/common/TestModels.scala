@@ -528,4 +528,28 @@ object TestModels {
     OtherReliefsModel(None)
   )
 
+  val summaryIndividualRebasedAcqDateAfter = SummaryModel (
+    CustomerTypeModel("individual"),
+    None,
+    Some(CurrentIncomeModel(1000)),
+    Some(PersonalAllowanceModel(9000)),
+    OtherPropertiesModel("No", None),
+    None,
+    AcquisitionDateModel("Yes", Some(9), Some(9), Some(2016)),
+    AcquisitionValueModel(100000),
+    Some(RebasedValueModel("Yes", Some(150000))),
+    Some(RebasedCostsModel("No", None)),
+    ImprovementsModel("Yes", None, None),
+    DisposalDateModel(10, 10, 2010),
+    DisposalValueModel(150000),
+    AcquisitionCostsModel(Some(300)),
+    DisposalCostsModel(Some(600)),
+    EntrepreneursReliefModel("No"),
+    AllowableLossesModel("Yes", Some(50000)),
+    CalculationElectionModel("rebased"),
+    OtherReliefsModel(Some(999)),
+    OtherReliefsModel(Some(888)),
+    OtherReliefsModel(None)
+  )
+
 }

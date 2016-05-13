@@ -136,6 +136,66 @@ class CalculationElectionSpec extends UnitSpec with WithFakeApplication with Moc
       }
     }
 
+    "supplied with no pre-existing data and no acquisition date" should {
+
+      val target = setupTarget(None, None, TestModels.summaryIndividualFlatWithAEA)
+      lazy val result = target.calculationElection(fakeRequest)
+      lazy val document = Jsoup.parse(bodyOf(result))
+
+      "return a 200" in {
+        status(result) shouldBe 200
+      }
+
+    }
+
+    "supplied with no pre-existing data and an acquisition date after tax start date" should {
+
+      val target = setupTarget(None, None, TestModels.summaryIndividualRebasedAcqDateAfter)
+      lazy val result = target.calculationElection(fakeRequest)
+      lazy val document = Jsoup.parse(bodyOf(result))
+
+      "return a 200" in {
+        status(result) shouldBe 200
+      }
+
+    }
+
+    "supplied with no pre-existing data and an acquisition date before tax start date" should {
+
+      val target = setupTarget(None, None, TestModels.summaryIndividualRebased)
+      lazy val result = target.calculationElection(fakeRequest)
+      lazy val document = Jsoup.parse(bodyOf(result))
+
+      "return a 200" in {
+        status(result) shouldBe 200
+      }
+
+    }
+
+    "supplied with no pre-existing data and a None rebased value" should {
+
+      val target = setupTarget(None, None, TestModels.summaryIndividualImprovementsNoRebasedModel)
+      lazy val result = target.calculationElection(fakeRequest)
+      lazy val document = Jsoup.parse(bodyOf(result))
+
+      "return a 200" in {
+        status(result) shouldBe 200
+      }
+
+    }
+
+    "supplied with no pre-existing data and a rebased value with no acquisition date" should {
+
+      val target = setupTarget(None, None, TestModels.summaryIndividualRebasedNoAcqDate)
+      lazy val result = target.calculationElection(fakeRequest)
+      lazy val document = Jsoup.parse(bodyOf(result))
+
+      "return a 200" in {
+        status(result) shouldBe 200
+      }
+
+    }
+
     "supplied with pre-existing data" should {
 
       val target = setupTarget(Some(CalculationElectionModel("flat")), None, TestModels.summaryTrusteeTAWithoutAEA)
@@ -166,16 +226,16 @@ class CalculationElectionSpec extends UnitSpec with WithFakeApplication with Moc
       .withSession(SessionKeys.sessionId -> "12345")
       .withFormUrlEncodedBody(body: _*)
 
-    def executeTargetWithMockData(data: String, calc: Option[CalculationResultModel]): Future[Result] = {
+    def executeTargetWithMockData(data: String, calc: Option[CalculationResultModel], summary: SummaryModel): Future[Result] = {
       lazy val fakeRequest = buildRequest(("calculationElection", data))
       val mockData = new CalculationElectionModel(data)
-      val target = setupTarget(None, Some(mockData), TestModels.summaryTrusteeTAWithoutAEA, calc)
+      val target = setupTarget(None, Some(mockData), summary, calc)
       target.submitCalculationElection(fakeRequest)
     }
 
     "submitting a valid form with 'flat' selected" should {
 
-      lazy val result = executeTargetWithMockData("flat", Some(TestModels.calcModelOneRate))
+      lazy val result = executeTargetWithMockData("flat", Some(TestModels.calcModelOneRate), TestModels.summaryTrusteeTAWithoutAEA)
 
       "return a 303" in {
         status(result) shouldBe 303
@@ -188,7 +248,7 @@ class CalculationElectionSpec extends UnitSpec with WithFakeApplication with Moc
 
     "submitting a valid form with 'time' selected" should {
 
-      lazy val result = executeTargetWithMockData("time", Some(TestModels.calcModelOneRate))
+      lazy val result = executeTargetWithMockData("time", Some(TestModels.calcModelOneRate), TestModels.summaryIndividualAcqDateAfter)
 
       "return a 303" in {
         status(result) shouldBe 303
@@ -197,7 +257,7 @@ class CalculationElectionSpec extends UnitSpec with WithFakeApplication with Moc
 
     "submitting a valid form with 'rebased' selected" should {
 
-      lazy val result = executeTargetWithMockData("rebased", Some(TestModels.calcModelOneRate))
+      lazy val result = executeTargetWithMockData("rebased", Some(TestModels.calcModelOneRate), TestModels.summaryIndividualFlatWithAEA)
 
       "return a 303" in {
         status(result) shouldBe 303
@@ -206,7 +266,7 @@ class CalculationElectionSpec extends UnitSpec with WithFakeApplication with Moc
 
     "submitting a form with no data" should  {
 
-      lazy val result = executeTargetWithMockData("", Some(TestModels.calcModelOneRate))
+      lazy val result = executeTargetWithMockData("", Some(TestModels.calcModelOneRate), TestModels.summaryIndividualImprovementsWithRebasedModel)
       lazy val document = Jsoup.parse(bodyOf(result))
 
       "return a 400" in {
@@ -224,7 +284,47 @@ class CalculationElectionSpec extends UnitSpec with WithFakeApplication with Moc
 
     "submitting a form with completely unrelated 'ew1234qwer'" should  {
 
-      lazy val result = executeTargetWithMockData("ew1234qwer", Some(TestModels.calcModelOneRate))
+      lazy val result = executeTargetWithMockData("ew1234qwer", Some(TestModels.calcModelOneRate), TestModels.summaryIndividualImprovementsNoRebasedModel)
+
+      "return a 400" in {
+        status(result) shouldBe 400
+      }
+    }
+
+    "submitting an invalid form with an acquisition date after the tax start date" should {
+      lazy val result = executeTargetWithMockData("", Some(TestModels.calcModelOneRate), TestModels.summaryIndividualAcqDateAfter)
+
+      "return a 400" in {
+        status(result) shouldBe 400
+      }
+    }
+
+    "submitting an invalid form with no acquisition date" should {
+      lazy val result = executeTargetWithMockData("", Some(TestModels.calcModelOneRate), TestModels.summaryIndividualFlatWithoutAEA)
+
+      "return a 400" in {
+        status(result) shouldBe 400
+      }
+    }
+
+    "submitting an invalid form with none rebased value" should {
+      lazy val result = executeTargetWithMockData("", Some(TestModels.calcModelOneRate), TestModels.summaryIndividualImprovementsNoRebasedModel)
+
+      "return a 400" in {
+        status(result) shouldBe 400
+      }
+    }
+
+    "submitting an invalid form with a rebased value and no acquisition date" should {
+      lazy val result = executeTargetWithMockData("", Some(TestModels.calcModelOneRate), TestModels.summaryIndividualRebasedNoAcqDateOrRebasedCosts)
+
+      "return a 400" in {
+        status(result) shouldBe 400
+      }
+    }
+
+    "submitting an invalid form with a rebased value and an acquisition date after tax start" should {
+      lazy val result = executeTargetWithMockData("", Some(TestModels.calcModelOneRate), TestModels.summaryIndividualRebasedAcqDateAfter)
 
       "return a 400" in {
         status(result) shouldBe 400
