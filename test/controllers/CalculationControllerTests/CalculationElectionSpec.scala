@@ -51,7 +51,7 @@ class CalculationElectionSpec extends UnitSpec with WithFakeApplication with Moc
     when(mockCalcConnector.createSummary(Matchers.any()))
       .thenReturn(summaryData)
 
-    when(mockCalcElectionConstructor.generateElection(Matchers.any(), Matchers.any()))
+    when(mockCalcElectionConstructor.generateElection(Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any()))
       .thenReturn(Seq(
         ("flat", "8000.00", "flat calculation",
           None, routes.CalculationController.otherReliefs().toString()),
