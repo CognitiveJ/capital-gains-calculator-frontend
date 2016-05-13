@@ -32,7 +32,7 @@ import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import org.jsoup._
 import org.scalatest.mock.MockitoSugar
 import scala.concurrent.Future
-import controllers.CalculationController
+import controllers.{routes, CalculationController}
 import play.api.mvc.Result
 
 class OtherPropertiesSpec extends UnitSpec with WithFakeApplication with MockitoSugar {
@@ -153,12 +153,31 @@ class OtherPropertiesSpec extends UnitSpec with WithFakeApplication with Mockito
       target.submitOtherProperties(fakeRequest)
     }
 
-    "submitting a valid form with 'Yes' and an amount" should {
+    "submitting a valid form with 'Yes' and a non-zero amount" should {
 
       lazy val result = executeTargetWithMockData("Yes", "2100")
+      lazy val document = Jsoup.parse(bodyOf(result))
 
       "return a 303" in {
         status(result) shouldBe 303
+      }
+
+      "should redirect to the acquisitionDate page" in {
+        redirectLocation(result) shouldBe Some(s"${routes.CalculationController.acquisitionDate()}")
+      }
+    }
+
+    "submitting a valid form with 'Yes' and a nil amount" should {
+
+      lazy val result = executeTargetWithMockData("Yes", "0")
+      lazy val document = Jsoup.parse(bodyOf(result))
+
+      "return a 303" in {
+        status(result) shouldBe 303
+      }
+
+      "should redirect to the annualExemptAmountPage page" in {
+        redirectLocation(result) shouldBe Some(s"${routes.CalculationController.annualExemptAmount()}")
       }
     }
 
@@ -168,6 +187,10 @@ class OtherPropertiesSpec extends UnitSpec with WithFakeApplication with Mockito
 
       "return a 303" in {
         status(result) shouldBe 303
+      }
+
+      "should redirect to the acquisitionDate page" in {
+        redirectLocation(result) shouldBe Some(s"${routes.CalculationController.acquisitionDate()}")
       }
     }
 
