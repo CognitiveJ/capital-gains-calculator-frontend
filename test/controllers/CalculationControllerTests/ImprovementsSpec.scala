@@ -50,7 +50,7 @@ class ImprovementsSpec extends UnitSpec with WithFakeApplication with MockitoSug
     when(mockCalcConnector.fetchAndGetFormData[ImprovementsModel](Matchers.any())(Matchers.any(), Matchers.any()))
       .thenReturn(Future.successful(getData))
 
-    when(mockCalcConnector.fetchAndGetValue[RebasedValueModel](Matchers.eq("rebasedValue"))(Matchers.any(), Matchers.any()))
+    when(mockCalcConnector.fetchAndGetFormData[RebasedValueModel](Matchers.eq("rebasedValue"))(Matchers.any(), Matchers.any()))
       .thenReturn(Future.successful(rebasedValueData))
 
     lazy val data = CacheMap("form-id", Map("data" -> Json.toJson(postData.getOrElse(ImprovementsModel("",None,None)))))

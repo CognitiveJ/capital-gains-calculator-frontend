@@ -36,7 +36,7 @@ import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.Future
 
-class OtherReliefsRebased extends UnitSpec with WithFakeApplication with MockitoSugar {
+class OtherReliefsRebasedSpec extends UnitSpec with WithFakeApplication with MockitoSugar {
 
   implicit val hc = new HeaderCarrier()
 
@@ -143,80 +143,8 @@ class OtherReliefsRebased extends UnitSpec with WithFakeApplication with Mockito
     }
   }
 
-  "In CalculationController calling the .submitOtherReliefsTA action" when {
-    def buildRequest(body: (String, String)*): FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest("POST", "/calculate-your-capital-gains/other-reliefs-time-apportioned")
-      .withSession(SessionKeys.sessionId -> "12345")
-      .withFormUrlEncodedBody(body: _*)
-
-    def executeTargetWithMockData(amount: String, summary: SummaryModel): Future[Result] = {
-      lazy val fakeRequest = buildRequest(("otherReliefs", amount))
-      val numeric = "(-?\\d*.\\d*)".r
-      val mockData = amount match {
-        case numeric(money) => OtherReliefsModel(Some(BigDecimal(money)))
-        case _ => OtherReliefsModel(None)
-      }
-      val target = setupTarget(None, Some(mockData), summary, TestModels.calcModelOneRate)
-      target.submitOtherReliefs(fakeRequest)
-    }
-
-
-    "submitting a valid form with and an amount of 1000" should {
-      lazy val result = executeTargetWithMockData("1000", TestModels.summaryTrusteeTAWithAEA)
-      lazy val document = Jsoup.parse(bodyOf(result))
-
-      "return a 303" in {
-        status(result) shouldBe 303
-      }
-    }
-
-    "submitting a valid form with and an amount with two decimal places" should {
-      lazy val result = executeTargetWithMockData("1000.11", TestModels.summaryTrusteeTAWithAEA)
-      lazy val document = Jsoup.parse(bodyOf(result))
-
-      "return a 303" in {
-        status(result) shouldBe 303
-      }
-    }
-
-    "submitting an valid form with no value" should {
-      lazy val result = executeTargetWithMockData("", TestModels.summaryTrusteeTAWithAEA)
-      lazy val document = Jsoup.parse(bodyOf(result))
-
-      "return a 303" in {
-        status(result) shouldBe 303
-      }
-    }
-
-    "submitting an invalid form with an amount with three decimal places" should {
-      lazy val result = executeTargetWithMockData("1000.111", TestModels.summaryTrusteeTAWithAEA)
-      lazy val document = Jsoup.parse(bodyOf(result))
-
-      "return a 400" in {
-        status(result) shouldBe 400
-      }
-    }
-
-    "submitting an invalid form with a negative value" should {
-      lazy val result = executeTargetWithMockData("-1000", TestModels.summaryTrusteeTAWithAEA)
-      lazy val document = Jsoup.parse(bodyOf(result))
-
-      "return a 400" in {
-        status(result) shouldBe 400
-      }
-    }
-
-    "submitting an invalid form with an value of shdgsaf" should {
-      lazy val result = executeTargetWithMockData("shdgsaf", TestModels.summaryTrusteeTAWithAEA)
-      lazy val document = Jsoup.parse(bodyOf(result))
-
-      "return a 400" in {
-        status(result) shouldBe 400
-      }
-    }
-  }
-
   "In CalculationController calling the .submitOtherReliefsRebased action" when {
-    def buildRequest(body: (String, String)*): FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest("POST", "/calculate-your-capital-gains/other-reliefs-time-apportioned")
+    def buildRequest(body: (String, String)*): FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest("POST", "/calculate-your-capital-gains/other-reliefs-rebased")
       .withSession(SessionKeys.sessionId -> "12345")
       .withFormUrlEncodedBody(body: _*)
 
@@ -224,8 +152,12 @@ class OtherReliefsRebased extends UnitSpec with WithFakeApplication with Mockito
       lazy val fakeRequest = buildRequest(("otherReliefs", amount))
       val numeric = "(-?\\d*.\\d*)".r
       val mockData = amount match {
-        case numeric(money) => OtherReliefsModel(Some(BigDecimal(money)))
-        case _ => OtherReliefsModel(None)
+        case numeric(money) => {
+          OtherReliefsModel(Some(BigDecimal(money)))
+        }
+        case _ => {
+          OtherReliefsModel(None)
+        }
       }
       val target = setupTarget(None, Some(mockData), summary, TestModels.calcModelOneRate)
       target.submitOtherReliefsRebased(fakeRequest)

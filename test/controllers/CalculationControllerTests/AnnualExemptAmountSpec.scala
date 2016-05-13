@@ -49,7 +49,7 @@ class AnnualExemptAmountSpec extends UnitSpec with WithFakeApplication with Mock
     val mockCalcConnector = mock[CalculatorConnector]
     val mockCalcElectionConstructor = mock[CalculationElectionConstructor]
 
-    when(mockCalcConnector.fetchAndGetValue[DisabledTrusteeModel](Matchers.eq("disabledTrustee"))(Matchers.any(), Matchers.any()))
+    when(mockCalcConnector.fetchAndGetFormData[DisabledTrusteeModel](Matchers.eq("disabledTrustee"))(Matchers.any(), Matchers.any()))
       .thenReturn(Future.successful(Some(DisabledTrusteeModel(disabledTrustee))))
 
     when(mockCalcConnector.fetchAndGetFormData[CustomerTypeModel](Matchers.eq("customerType"))(Matchers.any(), Matchers.any()))
