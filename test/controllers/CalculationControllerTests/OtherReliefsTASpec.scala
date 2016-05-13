@@ -156,9 +156,8 @@ class OtherReliefsTASpec extends UnitSpec with WithFakeApplication with MockitoS
         case _ => OtherReliefsModel(None)
       }
       val target = setupTarget(None, Some(mockData), summary, TestModels.calcModelOneRate)
-      target.submitOtherReliefs(fakeRequest)
+      target.submitOtherReliefsTA(fakeRequest)
     }
-
 
     "submitting a valid form with and an amount of 1000" should {
       lazy val result = executeTargetWithMockData("1000", TestModels.summaryTrusteeTAWithAEA)
