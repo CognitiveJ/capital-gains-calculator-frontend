@@ -18,31 +18,32 @@ package controllers.CalculationControllerTests
 
 import connectors.CalculatorConnector
 import constructors.CalculationElectionConstructor
-import controllers.CalculationController
-import models.{AcquisitionDateModel, AcquisitionValueModel, AllowableLossesModel}
+import controllers.{CalculationController, routes}
+import models.{AcquisitionDateModel, AcquisitionValueModel, AllowableLossesModel, RebasedValueModel}
 import org.jsoup.Jsoup
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import play.api.i18n.Messages
 import play.api.libs.json.Json
-import play.api.mvc.{Result, AnyContentAsFormUrlEncoded}
+import play.api.mvc.{AnyContentAsFormUrlEncoded, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.http.{SessionKeys, HeaderCarrier}
-import uk.gov.hmrc.play.test.{WithFakeApplication, UnitSpec}
+import uk.gov.hmrc.play.http.{HeaderCarrier, SessionKeys}
+import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.Future
 
 class AllowableLossesSpec extends UnitSpec with WithFakeApplication with MockitoSugar {
 
   implicit val hc = new HeaderCarrier()
+
   def setupTarget(
                    getData: Option[AllowableLossesModel],
                    postData: Option[AllowableLossesModel],
-                   acquisitionDate: Option[AcquisitionDateModel]
-                 ): CalculationController = {
+                   acquisitionDate: Option[AcquisitionDateModel],
+                   rebasedData: Option[RebasedValueModel] = None): CalculationController = {
 
     val mockCalcConnector = mock[CalculatorConnector]
     val mockCalcElectionConstructor = mock[CalculationElectionConstructor]
@@ -52,6 +53,9 @@ class AllowableLossesSpec extends UnitSpec with WithFakeApplication with Mockito
 
     when(mockCalcConnector.fetchAndGetFormData[AcquisitionDateModel](Matchers.eq("acquisitionDate"))(Matchers.any(), Matchers.any()))
       .thenReturn(Future.successful(acquisitionDate))
+
+    when(mockCalcConnector.fetchAndGetFormData[RebasedValueModel](Matchers.eq("rebasedValue"))(Matchers.any(), Matchers.any()))
+      .thenReturn(Future.successful(rebasedData))
 
     lazy val data = CacheMap("form-id", Map("data" -> Json.toJson(postData.getOrElse(AllowableLossesModel("No", None)))))
     when(mockCalcConnector.saveFormData[AllowableLossesModel](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
@@ -141,11 +145,11 @@ class AllowableLossesSpec extends UnitSpec with WithFakeApplication with Mockito
         }
 
         "have the 'Yes' Radio option selected" in {
-            document.getElementById("isClaimingAllowableLosses-yes").parent.classNames().contains("selected") shouldBe true
+          document.getElementById("isClaimingAllowableLosses-yes").parent.classNames().contains("selected") shouldBe true
         }
 
         "have the value 9999.54 auto-filled into the input box" in {
-            document.getElementById("allowableLossesAmt").attr("value") shouldEqual ("9999.54")
+          document.getElementById("allowableLossesAmt").attr("value") shouldEqual ("9999.54")
         }
       }
     }
@@ -156,16 +160,20 @@ class AllowableLossesSpec extends UnitSpec with WithFakeApplication with Mockito
       .withSession(SessionKeys.sessionId -> "12345")
       .withFormUrlEncodedBody(body: _*)
 
-    def executeTargetWithMockData(answer: String, amount: String, acquisitionDate: AcquisitionDateModel): Future[Result] = {
-      lazy val fakeRequest = buildRequest(
-        ("isClaimingAllowableLosses", answer),
-        ("allowableLossesAmt", amount)
-      )
+    def executeTargetWithMockData(
+                                   answer: String,
+                                   amount: String,
+                                   acquisitionDate: AcquisitionDateModel,
+                                   rebasedData: Option[RebasedValueModel] = None): Future[Result] = {
+
+      lazy val fakeRequest = buildRequest(("isClaimingAllowableLosses", answer), ("allowableLossesAmt", amount))
+
       val mockData = amount match {
         case "" => AllowableLossesModel(answer, None)
         case _ => AllowableLossesModel(answer, Some(BigDecimal(amount)))
       }
-      val target = setupTarget(None, Some(mockData), Some(acquisitionDate))
+
+      val target = setupTarget(None, Some(mockData), Some(acquisitionDate), rebasedData)
       target.submitAllowableLosses(fakeRequest)
     }
 
@@ -232,6 +240,58 @@ class AllowableLossesSpec extends UnitSpec with WithFakeApplication with Mockito
         status(result) shouldBe 400
       }
     }
-  }
 
+    "submitting a valid form when an acquisition date (before 2015-04-06) has been supplied but no property was not revalued" should {
+      val dateBefore = AcquisitionDateModel("Yes", Some(1), Some(4), Some(2015))
+      lazy val result = executeTargetWithMockData("No", "", dateBefore)
+
+      "return a 303" in {
+        status(result) shouldBe 303
+      }
+
+      "redirect to the calculation election view" in {
+        redirectLocation(result) shouldBe Some(s"${routes.CalculationController.calculationElection()}")
+      }
+    }
+
+    "submitting a valid form when an acquisition date (after 2015-04-06) has been supplied but no property was not revalued" should {
+      val dateAfter = AcquisitionDateModel("Yes", Some(1), Some(6), Some(2015))
+      lazy val result = executeTargetWithMockData("No", "", dateAfter)
+
+      "return a 303" in {
+        status(result) shouldBe 303
+      }
+
+      "redirect to the other reliefs view" in {
+        redirectLocation(result) shouldBe Some(s"${routes.CalculationController.otherReliefs()}")
+      }
+    }
+
+    "submitting a valid form when no acquisition date is supplied and the property was not revalued" should {
+      val noDate = AcquisitionDateModel("No", None, None, None)
+      lazy val result = executeTargetWithMockData("No", "", noDate)
+
+      "return a 303" in {
+        status(result) shouldBe 303
+      }
+
+      "redirect to the other reliefs view" in {
+        redirectLocation(result) shouldBe Some(s"${routes.CalculationController.otherReliefs()}")
+      }
+    }
+
+    "submitting a valid form when no acquisition date is supplied and the property was revalued" should {
+      val rebased = RebasedValueModel("Yes", Some(BigDecimal(1000)))
+      val noDate = AcquisitionDateModel("No", None, None, None)
+      lazy val result = executeTargetWithMockData("No", "", noDate, Some(rebased))
+
+      "return a 303" in {
+        status(result) shouldBe 303
+      }
+
+      "redirect to the calculation election view" in {
+        redirectLocation(result) shouldBe Some(s"${routes.CalculationController.calculationElection()}")
+      }
+    }
+  }
 }
