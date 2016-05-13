@@ -136,23 +136,6 @@ class CalculatorConnectorSpec extends UnitSpec with MockitoSugar {
       lazy val result = TargetCalculatorConnector.saveFormData("customerType", testModel)
       await(result) shouldBe returnedCacheMap
     }
-
-    "fetch an option from keystore if it exists" in {
-      val testModel = CustomerTypeModel("trustee")
-      when(mockSessionCache.fetchAndGetEntry[CustomerTypeModel](Matchers.anyString())(Matchers.any(), Matchers.any()))
-        .thenReturn(Future.successful(Option(testModel)))
-
-      lazy val result = TargetCalculatorConnector.fetchAndGetValue[CustomerTypeModel]("CustomerType")
-      await(result) shouldBe Some(testModel)
-    }
-
-    "fetch a None from keystore if it does not exist" in {
-      when(mockSessionCache.fetchAndGetEntry[CustomerTypeModel](Matchers.anyString())(Matchers.any(), Matchers.any()))
-        .thenReturn(Future.successful(None))
-
-      lazy val result = TargetCalculatorConnector.fetchAndGetValue[CustomerTypeModel]("CustomerType")
-      await(result) shouldBe None
-    }
   }
 
   "Calling calculateFlat" should {
