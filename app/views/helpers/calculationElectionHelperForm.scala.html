@@ -2,6 +2,8 @@
 
 @import play.api.i18n._
 @import views.html.helper._
+@import scala.concurrent.Future
+@import scala.concurrent.ExecutionContext.Implicits.global
 
 @elements = @{new FieldElements(field.id, field, null, args.toMap, lang) }
 @fieldsetClass = {@elements.args.get('_groupClass)}

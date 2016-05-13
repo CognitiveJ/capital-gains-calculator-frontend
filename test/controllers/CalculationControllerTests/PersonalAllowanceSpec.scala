@@ -36,7 +36,7 @@ import scala.concurrent.Future
 import controllers.{CalculationController, routes}
 import play.api.mvc.Result
 
-class PersonalAllowance extends UnitSpec with WithFakeApplication with MockitoSugar {
+class PersonalAllowanceSpec extends UnitSpec with WithFakeApplication with MockitoSugar {
 
   implicit val hc = new HeaderCarrier()
 

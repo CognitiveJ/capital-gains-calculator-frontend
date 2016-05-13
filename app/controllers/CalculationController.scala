@@ -16,9 +16,6 @@
 
 package controllers
 
-import java.lang.ProcessBuilder.Redirect
-import java.util.concurrent.TimeUnit
-
 import connectors.CalculatorConnector
 import common.Dates
 import constructors.CalculationElectionConstructor
@@ -42,7 +39,7 @@ import forms.AcquisitionDateForm._
 import forms.RebasedValueForm._
 import forms.RebasedCostsForm._
 import models._
-import play.api.mvc.{AnyContent, Action}
+import play.api.mvc.{Result, AnyContent, Action}
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -91,12 +88,12 @@ trait CalculationController extends FrontendController {
     }
   }
 
-  val submitDisabledTrustee = Action { implicit request =>
+  val submitDisabledTrustee = Action.async { implicit request =>
     disabledTrusteeForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.disabledTrustee(errors)),
+      errors => Future.successful(BadRequest(calculation.disabledTrustee(errors))),
       success => {
         calcConnector.saveFormData("disabledTrustee",success)
-        Redirect(routes.CalculationController.otherProperties())
+        Future.successful(Redirect(routes.CalculationController.otherProperties()))
       }
     )
   }
@@ -109,12 +106,12 @@ trait CalculationController extends FrontendController {
     }
   }
 
-  val submitCurrentIncome = Action { implicit request =>
+  val submitCurrentIncome = Action.async { implicit request =>
    currentIncomeForm.bindFromRequest.fold(
-     errors => BadRequest(calculation.currentIncome(errors)),
+     errors => Future.successful(BadRequest(calculation.currentIncome(errors))),
      success => {
        calcConnector.saveFormData("currentIncome", success)
-       Redirect(routes.CalculationController.personalAllowance())
+       Future.successful(Redirect(routes.CalculationController.personalAllowance()))
      }
    )
   }
@@ -127,12 +124,12 @@ trait CalculationController extends FrontendController {
     }
   }
 
-  val submitPersonalAllowance = Action { implicit request =>
+  val submitPersonalAllowance = Action.async { implicit request =>
     personalAllowanceForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.personalAllowance(errors)),
+      errors => Future.successful(BadRequest(calculation.personalAllowance(errors))),
       success => {
         calcConnector.saveFormData("personalAllowance", success)
-        Redirect(routes.CalculationController.otherProperties())
+        Future.successful(Redirect(routes.CalculationController.otherProperties()))
       }
     )
   }
@@ -146,14 +143,14 @@ trait CalculationController extends FrontendController {
     }
   }
 
-  val submitOtherProperties = Action { implicit request =>
+  val submitOtherProperties = Action.async { implicit request =>
     otherPropertiesForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.otherProperties(errors)),
+      errors => Future.successful(BadRequest(calculation.otherProperties(errors))),
       success => {
         calcConnector.saveFormData("otherProperties", success)
         success.otherProperties match {
-          case "Yes" => Redirect(routes.CalculationController.annualExemptAmount())
-          case "No" => Redirect(routes.CalculationController.acquisitionDate())
+          case "Yes" => Future.successful(Redirect(routes.CalculationController.annualExemptAmount()))
+          case "No" => Future.successful(Redirect(routes.CalculationController.acquisitionDate()))
        }
       }
     )
@@ -167,29 +164,39 @@ trait CalculationController extends FrontendController {
     }
   }
 
-  val submitAnnualExemptAmount =  Action { implicit request =>
+  val submitAnnualExemptAmount =  Action.async { implicit request =>
 
-    def isAllowedMaxAEA(implicit hc: HeaderCarrier): Boolean = {
-      Await.result(calcConnector.fetchAndGetFormData[CustomerTypeModel]("customerType").map {
-        case Some(customerTypeModel) =>
-          customerTypeModel.customerType match {
-            case "trustee" =>
-              calcConnector.fetchAndGetValue[DisabledTrusteeModel]("disabledTrustee").map {
-                case disabledTrusteeModel => if (disabledTrusteeModel.isVulnerable == "No") false else true
-              }.getOrElse (true)
-            case _ => true
-          }
-        case _ => true
-      },Duration("5s"))
+    def customerType(implicit hc: HeaderCarrier): Future[String] = {
+      calcConnector.fetchAndGetFormData[CustomerTypeModel]("customerType").map {
+        customerTypeModel => customerTypeModel.get.customerType
+      }
     }
 
-    annualExemptAmountForm(isAllowedMaxAEA).bindFromRequest.fold(
-      errors => BadRequest(calculation.annualExemptAmount(errors)),
-      success => {
-        calcConnector.saveFormData("annualExemptAmount", success)
-        Redirect(routes.CalculationController.acquisitionDate())
+    def trusteeAEA(customerTypeVal: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
+      customerTypeVal match {
+        case "trustee" =>
+          calcConnector.fetchAndGetFormData[DisabledTrusteeModel]("disabledTrustee").map {
+            disabledTrusteeModel => if (disabledTrusteeModel.get.isVulnerable == "No") false else true
+          }
+        case _ => Future.successful(true)
       }
-    )
+    }
+
+    def routeRequest(isDisabledTrustee: Boolean)(implicit hc: HeaderCarrier): Future[Result] = {
+      annualExemptAmountForm(isDisabledTrustee).bindFromRequest.fold(
+        errors => Future.successful(BadRequest(calculation.annualExemptAmount(errors))),
+        success => {
+          calcConnector.saveFormData("annualExemptAmount", success)
+          Future.successful(Redirect(routes.CalculationController.acquisitionDate()))
+        }
+      )
+    }
+
+    for {
+      customerTypeVal <- customerType
+      isDisabledTrustee <- trusteeAEA(customerTypeVal)
+      finalResult <- routeRequest(isDisabledTrustee)
+    } yield finalResult
   }
 
   //################### Acquisition Date methods #######################
@@ -200,12 +207,12 @@ trait CalculationController extends FrontendController {
     }
   }
 
-  val submitAcquisitionDate = Action { implicit request =>
+  val submitAcquisitionDate = Action.async { implicit request =>
     acquisitionDateForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.acquisitionDate(errors)),
+      errors => Future.successful(BadRequest(calculation.acquisitionDate(errors))),
       success => {
         calcConnector.saveFormData("acquisitionDate", success)
-        Redirect(routes.CalculationController.acquisitionValue())
+        Future.successful(Redirect(routes.CalculationController.acquisitionValue()))
       }
     )
   }
@@ -218,23 +225,24 @@ trait CalculationController extends FrontendController {
     }
   }
 
-  val submitAcquisitionValue = Action { implicit request =>
+  val submitAcquisitionValue = Action.async { implicit request =>
     acquisitionValueForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.acquisitionValue(errors)),
+      errors => Future.successful(BadRequest(calculation.acquisitionValue(errors))),
       success => {
         calcConnector.saveFormData("acquisitionValue", success)
-        val connection = calcConnector.fetchAndGetValue[AcquisitionDateModel]("acquisitionDate")
+        calcConnector.fetchAndGetFormData[AcquisitionDateModel]("acquisitionDate").flatMap (connection =>
         if (!Dates.dateAfterStart(
             connection.get.day.getOrElse(0),
             connection.get.month.getOrElse(0),
             connection.get.year.getOrElse(0))
           )
         {
-          Redirect(routes.CalculationController.rebasedValue())
+          Future.successful(Redirect(routes.CalculationController.rebasedValue()))
         }
         else {
-          Redirect(routes.CalculationController.improvements())
+          Future.successful(Redirect(routes.CalculationController.improvements()))
         }
+        )
       }
     )
   }
@@ -247,14 +255,14 @@ trait CalculationController extends FrontendController {
     }
   }
 
-  val submitRebasedValue = Action { implicit request =>
+  val submitRebasedValue = Action.async { implicit request =>
     rebasedValueForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.rebasedValue(errors)),
+      errors => Future.successful(BadRequest(calculation.rebasedValue(errors))),
       success => {
         calcConnector.saveFormData("rebasedValue", success)
         success.hasRebasedValue match {
-          case "Yes" => Redirect(routes.CalculationController.rebasedCosts())
-          case "No" => Redirect(routes.CalculationController.improvements())
+          case "Yes" => Future.successful(Redirect(routes.CalculationController.rebasedCosts()))
+          case "No" => Future.successful(Redirect(routes.CalculationController.improvements()))
         }
       }
     )
@@ -268,32 +276,35 @@ trait CalculationController extends FrontendController {
     }
   }
 
-  val submitRebasedCosts = Action {implicit request =>
+  val submitRebasedCosts = Action.async {implicit request =>
     rebasedCostsForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.rebasedCosts(errors)),
+      errors => Future.successful(BadRequest(calculation.rebasedCosts(errors))),
       success => {
         calcConnector.saveFormData("rebasedCosts", success)
-        Redirect(routes.CalculationController.improvements())
+        Future.successful(Redirect(routes.CalculationController.improvements()))
       }
     )
   }
 
   //################### Improvements methods #######################
   val improvements = Action.async { implicit request =>
-    val hasRebasedValue = calcConnector.fetchAndGetValue[RebasedValueModel]("rebasedValue").getOrElse(RebasedValueModel("No", None)).hasRebasedValue
-    calcConnector.fetchAndGetFormData[ImprovementsModel]("improvements").map {
-      case Some(data) => Ok(calculation.improvements(improvementsForm.fill(data), hasRebasedValue))
-      case None => Ok(calculation.improvements(improvementsForm, hasRebasedValue))
-    }
+    calcConnector.fetchAndGetFormData[RebasedValueModel]("rebasedValue").flatMap(rebasedValueModel =>
+      calcConnector.fetchAndGetFormData[ImprovementsModel]("improvements").map {
+        case Some(data) => Ok(calculation.improvements(improvementsForm.fill(data), rebasedValueModel.getOrElse(RebasedValueModel("No", None)).hasRebasedValue))
+        case None => Ok(calculation.improvements(improvementsForm, rebasedValueModel.getOrElse(RebasedValueModel("No", None)).hasRebasedValue))
+      }
+    )
   }
 
-  val submitImprovements = Action { implicit request =>
-    val hasRebasedValue = calcConnector.fetchAndGetValue[RebasedValueModel]("rebasedValue").getOrElse(RebasedValueModel("No", None)).hasRebasedValue
+  val submitImprovements = Action.async { implicit request =>
     improvementsForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.improvements(errors, hasRebasedValue)),
+      errors => {
+        calcConnector.fetchAndGetFormData[RebasedValueModel]("rebasedValue").flatMap(rebasedValueModel =>
+          Future.successful(BadRequest(calculation.improvements(errors, rebasedValueModel.getOrElse(RebasedValueModel("No", None)).hasRebasedValue))))
+      },
       success => {
         calcConnector.saveFormData("improvements", success)
-        Redirect(routes.CalculationController.disposalDate())
+        Future.successful(Redirect(routes.CalculationController.disposalDate()))
       }
     )
   }
@@ -306,12 +317,12 @@ trait CalculationController extends FrontendController {
     }
   }
 
-  val submitDisposalDate = Action { implicit request =>
+  val submitDisposalDate = Action.async { implicit request =>
     disposalDateForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.disposalDate(errors)),
+      errors => Future.successful(BadRequest(calculation.disposalDate(errors))),
       success => {
         calcConnector.saveFormData("disposalDate", success)
-        Redirect(routes.CalculationController.disposalValue())
+        Future.successful(Redirect(routes.CalculationController.disposalValue()))
       }
     )
   }
@@ -324,12 +335,12 @@ trait CalculationController extends FrontendController {
     }
   }
 
-  val submitDisposalValue = Action { implicit request =>
+  val submitDisposalValue = Action.async { implicit request =>
     disposalValueForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.disposalValue(errors)),
+      errors => Future.successful(BadRequest(calculation.disposalValue(errors))),
       success => {
         calcConnector.saveFormData("disposalValue", success)
-        Redirect(routes.CalculationController.acquisitionCosts())
+        Future.successful(Redirect(routes.CalculationController.acquisitionCosts()))
       }
     )
   }
@@ -342,12 +353,12 @@ trait CalculationController extends FrontendController {
     }
   }
 
-  val submitAcquisitionCosts = Action { implicit request =>
+  val submitAcquisitionCosts = Action.async { implicit request =>
     acquisitionCostsForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.acquisitionCosts(errors)),
+      errors => Future.successful(BadRequest(calculation.acquisitionCosts(errors))),
       success => {
         calcConnector.saveFormData("acquisitionCosts", success)
-        Redirect(routes.CalculationController.disposalCosts())
+        Future.successful(Redirect(routes.CalculationController.disposalCosts()))
       }
     )
   }
@@ -360,12 +371,12 @@ trait CalculationController extends FrontendController {
     }
   }
 
-  val submitDisposalCosts = Action { implicit request =>
+  val submitDisposalCosts = Action.async { implicit request =>
     disposalCostsForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.disposalCosts(errors)),
+      errors => Future.successful(BadRequest(calculation.disposalCosts(errors))),
       success => {
         calcConnector.saveFormData("disposalCosts", success)
-        Redirect(routes.CalculationController.entrepreneursRelief())
+        Future.successful(Redirect(routes.CalculationController.entrepreneursRelief()))
       }
     )
   }
@@ -384,12 +395,12 @@ trait CalculationController extends FrontendController {
     }
   }
 
-  val submitEntrepreneursRelief = Action { implicit request =>
+  val submitEntrepreneursRelief = Action.async { implicit request =>
     entrepreneursReliefForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.entrepreneursRelief(errors)),
+      errors => Future.successful(BadRequest(calculation.entrepreneursRelief(errors))),
       success => {
         calcConnector.saveFormData("entrepreneursRelief", success)
-        Redirect(routes.CalculationController.allowableLosses())
+        Future.successful(Redirect(routes.CalculationController.allowableLosses()))
       }
     )
   }
@@ -430,125 +441,216 @@ trait CalculationController extends FrontendController {
   }
   //################### Calculation Election methods #######################
   def calculationElection: Action[AnyContent] = Action.async { implicit request =>
-    val construct = calcConnector.createSummary(hc)
-    val content = calcElectionConstructor.generateElection(construct, hc)
+
+    def action (construct: SummaryModel, content: Seq[(String, String, String, Option[String], String)]) =
     calcConnector.fetchAndGetFormData[CalculationElectionModel]("calculationElection").map {
       case Some(data) => Ok(calculation.calculationElection(calculationElectionForm.fill(data), construct, content))
       case None => Ok(calculation.calculationElection(calculationElectionForm, construct, content))
     }
+
+    def calcTimeCall(summary: SummaryModel): Future[Option[CalculationResultModel]] = {
+      summary.acquisitionDateModel.hasAcquisitionDate match {
+        case "Yes" => if (Dates.dateAfterStart(summary.acquisitionDateModel.day.get, summary.acquisitionDateModel.month.get, summary.acquisitionDateModel.year.get)) {
+          Future(None)
+        }
+        else {
+          calcConnector.calculateTA(summary)
+        }
+        case "No" => Future(None)
+      }
+    }
+
+    def calcRebasedCall(summary: SummaryModel): Future[Option[CalculationResultModel]] = {
+      summary.rebasedValueModel.getOrElse(RebasedValueModel("No", None)).hasRebasedValue match {
+        case "Yes" => summary.acquisitionDateModel.hasAcquisitionDate match {
+          case "Yes" => if (Dates.dateAfterStart(summary.acquisitionDateModel.day.get, summary.acquisitionDateModel.month.get, summary.acquisitionDateModel.year.get)) {
+            Future(None)
+          }
+          else {
+            calcConnector.calculateRebased(summary)
+          }
+          case "No" => calcConnector.calculateRebased(summary)
+        }
+        case "No" => Future(None)
+      }
+    }
+
+    for {
+      construct <- calcConnector.createSummary(hc)
+      calcFlat <- calcConnector.calculateFlat(construct)
+      calcTA <- calcTimeCall(construct)
+      calcRebased <- calcRebasedCall(construct)
+      finalResult <- action(construct, calcElectionConstructor.generateElection(construct, hc, calcFlat, calcTA, calcRebased))
+    } yield finalResult
   }
 
-  def submitCalculationElection: Action[AnyContent] = Action { implicit request =>
-    val construct = calcConnector.createSummary(hc)
-    val content = calcElectionConstructor.generateElection(construct, hc)
+  def submitCalculationElection: Action[AnyContent] = Action.async { implicit request =>
+
+    def calcTimeCall(summary: SummaryModel): Future[Option[CalculationResultModel]] = {
+      summary.acquisitionDateModel.hasAcquisitionDate match {
+        case "Yes" => if (Dates.dateAfterStart(summary.acquisitionDateModel.day.get, summary.acquisitionDateModel.month.get, summary.acquisitionDateModel.year.get)) {
+          Future(None)
+        }
+        else {
+          calcConnector.calculateTA(summary)
+        }
+        case "No" => Future(None)
+      }
+    }
+
+    def calcRebasedCall(summary: SummaryModel): Future[Option[CalculationResultModel]] = {
+      summary.rebasedValueModel.getOrElse(RebasedValueModel("No", None)).hasRebasedValue match {
+        case "Yes" => summary.acquisitionDateModel.hasAcquisitionDate match {
+          case "Yes" => if (Dates.dateAfterStart(summary.acquisitionDateModel.day.get, summary.acquisitionDateModel.month.get, summary.acquisitionDateModel.year.get)) {
+            Future(None)
+          }
+          else {
+            calcConnector.calculateRebased(summary)
+          }
+          case "No" => calcConnector.calculateRebased(summary)
+        }
+        case "No" => Future(None)
+      }
+    }
+
     calculationElectionForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.calculationElection(errors, construct, content)),
+      errors => {
+        for{
+          construct <- calcConnector.createSummary(hc)
+          calcFlat <- calcConnector.calculateFlat(construct)
+          calcTA <- calcTimeCall(construct)
+          calcRebased <- calcRebasedCall(construct)
+        } yield {BadRequest(calculation.calculationElection(errors, construct, calcElectionConstructor.generateElection(construct, hc, calcFlat, calcTA, calcRebased)))}
+      },
       success => {
         calcConnector.saveFormData("calculationElection", success)
-        Redirect(routes.CalculationController.summary())
+        Future.successful(Redirect(routes.CalculationController.summary()))
       }
     )
   }
 
   //################### Other Reliefs methods #######################
   def otherReliefs: Action[AnyContent] = Action.async { implicit request =>
-    val construct = calcConnector.createSummary(hc)
-    calcConnector.calculateFlat(construct).map {
-      dataResult => {
-        Await.result(calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefsFlat").map {
-          case Some(data) => Ok(calculation.otherReliefs(otherReliefsForm.fill(data), dataResult.get))
-          case None => Ok(calculation.otherReliefs(otherReliefsForm, dataResult.get))
-        }, Duration("5s"))
-      }
+
+    def action (dataResult: Option[CalculationResultModel]) = calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefsFlat").map {
+      case Some(data) => Ok(calculation.otherReliefs(otherReliefsForm.fill(data), dataResult.get))
+      case None => Ok(calculation.otherReliefs(otherReliefsForm, dataResult.get))
     }
+
+    for {
+      construct <- calcConnector.createSummary(hc)
+      calculation <- calcConnector.calculateFlat(construct)
+      finalResult <- action(calculation)
+    } yield finalResult
   }
 
-  def submitOtherReliefs: Action[AnyContent] = Action { implicit request =>
-    val construct = calcConnector.createSummary(hc)
-    otherReliefsForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.otherReliefs(errors, CalculationResultModel(0.0, 0.0, 0.0, 0, None, None))),
+  def submitOtherReliefs: Action[AnyContent] = Action.async { implicit request =>
+
+    def action (dataResult: Option[CalculationResultModel], construct: SummaryModel) = otherReliefsForm.bindFromRequest.fold(
+      errors => Future.successful(BadRequest(calculation.otherReliefs(errors, dataResult.get))),
       success => {
         calcConnector.saveFormData("otherReliefsFlat", success)
         construct.acquisitionDateModel.hasAcquisitionDate match {
           case "Yes" if Dates.dateAfterStart(construct.acquisitionDateModel.day.get,
             construct.acquisitionDateModel.month.get, construct.acquisitionDateModel.year.get) => {
-            Redirect(routes.CalculationController.summary())
+            Future.successful(Redirect(routes.CalculationController.summary()))
           }
           case "Yes" if !Dates.dateAfterStart(construct.acquisitionDateModel.day.get,
             construct.acquisitionDateModel.month.get, construct.acquisitionDateModel.year.get) => {
-            Redirect(routes.CalculationController.calculationElection())
+            Future.successful(Redirect(routes.CalculationController.calculationElection()))
           }
-          case "No" => Redirect(routes.CalculationController.summary())
+          case "No" => Future.successful(Redirect(routes.CalculationController.summary()))
         }
       }
     )
+
+    for {
+      construct <- calcConnector.createSummary(hc)
+      calculation <- calcConnector.calculateFlat(construct)
+      finalResult <- action(calculation, construct)
+    } yield finalResult
   }
 
   //################### Time Apportioned Other Reliefs methods #######################
   def otherReliefsTA: Action[AnyContent] = Action.async { implicit request =>
-    val construct = calcConnector.createSummary(hc)
-    calcConnector.calculateTA(construct).map {
-      dataResult => {
-        Await.result(calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefsTA").map {
-          case Some(data) => Ok(calculation.otherReliefsTA(otherReliefsForm.fill(data), dataResult.get))
-          case None => Ok(calculation.otherReliefsTA(otherReliefsForm, dataResult.get))
-        }, Duration("5s"))
-      }
+    def action (dataResult: Option[CalculationResultModel]) = calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefsTA").map {
+      case Some(data) => Ok(calculation.otherReliefsTA(otherReliefsForm.fill(data), dataResult.get))
+      case None => Ok(calculation.otherReliefsTA(otherReliefsForm, dataResult.get))
     }
+
+    for {
+      construct <- calcConnector.createSummary(hc)
+      calculation <- calcConnector.calculateTA(construct)
+      finalResult <- action(calculation)
+    } yield finalResult
   }
 
-  val submitOtherReliefsTA = Action { implicit request =>
-    otherReliefsForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.otherReliefsTA(errors, CalculationResultModel(0.0, 0.0, 0.0, 0, None, None))),
+  val submitOtherReliefsTA = Action.async { implicit request =>
+    def action(dataResult: Option[CalculationResultModel]) = otherReliefsForm.bindFromRequest.fold(
+      errors => Future.successful(BadRequest(calculation.otherReliefsTA(errors, dataResult.get))),
       success => {
         calcConnector.saveFormData("otherReliefsTA", success)
-        Redirect(routes.CalculationController.calculationElection())
+        Future.successful(Redirect(routes.CalculationController.calculationElection()))
       }
     )
+
+    for {
+      construct <- calcConnector.createSummary(hc)
+      calculation <- calcConnector.calculateTA(construct)
+      finalResult <- action(calculation)
+    } yield finalResult
   }
 
   //################### Rebased Other Reliefs methods #######################
   def otherReliefsRebased: Action[AnyContent] = Action.async { implicit request =>
-    val construct = calcConnector.createSummary(hc)
-    calcConnector.calculateRebased(construct).map {
-      dataResult => {
-        Await.result(calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefsRebased").map {
-          case Some(data) => Ok(calculation.otherReliefsRebased(otherReliefsForm.fill(data), dataResult.get))
-          case None => Ok(calculation.otherReliefsRebased(otherReliefsForm, dataResult.get))
-        }, Duration("5s"))
-      }
+    def action (dataResult: Option[CalculationResultModel]) = calcConnector.fetchAndGetFormData[OtherReliefsModel]("otherReliefsRebased").map {
+      case Some(data) => Ok(calculation.otherReliefsRebased(otherReliefsForm.fill(data), dataResult.get))
+      case None => Ok(calculation.otherReliefsRebased(otherReliefsForm, dataResult.get))
     }
+
+    for {
+      construct <- calcConnector.createSummary(hc)
+      calculation <- calcConnector.calculateRebased(construct)
+      finalResult <- action(calculation)
+    } yield finalResult
   }
 
-  val submitOtherReliefsRebased = Action { implicit request =>
-    otherReliefsForm.bindFromRequest.fold(
-      errors => BadRequest(calculation.otherReliefsRebased(errors, CalculationResultModel(0.0, 0.0, 0.0, 0, None, None))),
+  val submitOtherReliefsRebased = Action.async { implicit request =>
+    def action(dataResult: Option[CalculationResultModel]) = otherReliefsForm.bindFromRequest.fold(
+      errors => Future.successful(BadRequest(calculation.otherReliefsRebased(errors, dataResult.get))),
       success => {
         calcConnector.saveFormData("otherReliefsRebased", success)
-        Redirect(routes.CalculationController.calculationElection())
+        Future.successful(Redirect(routes.CalculationController.calculationElection()))
       }
     )
+
+    for {
+      construct <- calcConnector.createSummary(hc)
+      calculation <- calcConnector.calculateRebased(construct)
+      finalResult <- action(calculation)
+    } yield finalResult
   }
 
   //################### Summary Methods ##########################
   def summary(): Action[AnyContent] = Action.async { implicit request =>
-    val construct = calcConnector.createSummary(hc)
-    construct.calculationElectionModel.calculationType match {
+    calcConnector.createSummary(hc).flatMap(summaryData =>
+    summaryData.calculationElectionModel.calculationType match {
       case "flat" => {
-        calcConnector.calculateFlat(construct).map ( result =>
-          Ok(calculation.summary(construct, result.get))
+        calcConnector.calculateFlat(summaryData).map ( result =>
+          Ok(calculation.summary(summaryData, result.get))
         )
       }
       case "time" => {
-        calcConnector.calculateTA(construct).map ( result =>
-          Ok(calculation.summary(construct, result.get))
+        calcConnector.calculateTA(summaryData).map ( result =>
+          Ok(calculation.summary(summaryData, result.get))
         )
       }
       case "rebased" => {
-        calcConnector.calculateRebased(construct).map ( result =>
-          Ok(calculation.summary(construct, result.get))
+        calcConnector.calculateRebased(summaryData).map ( result =>
+          Ok(calculation.summary(summaryData, result.get))
         )
       }
     }
+    )
   }
 }

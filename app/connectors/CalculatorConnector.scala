@@ -51,14 +51,6 @@ trait CalculatorConnector {
     sessionCache.fetchAndGetEntry(key)
   }
 
-  def fetchAndGetValue[T](key: String)(implicit hc: HeaderCarrier, formats: Format[T]): Option[T] ={
-    Await.result(fetchAndGetFormData(key).map {
-      case Some(data) => Some(data)
-      case None => None
-    }, Duration("5s"))
-  }
-
-
   def calculateFlat(input: SummaryModel)(implicit hc: HeaderCarrier): Future[Option[CalculationResultModel]] = {
     http.GET[Option[CalculationResultModel]](s"$serviceUrl/capital-gains-calculator/calculate-flat?${
       CalculateRequestConstructor.baseCalcUrl(input)}${
@@ -81,32 +73,55 @@ trait CalculatorConnector {
   }
 
 
-  // $COVERAGE-OFF$
-  def createSummary(implicit hc: HeaderCarrier): SummaryModel = {
-    SummaryModel(
-      fetchAndGetValue[CustomerTypeModel]("customerType").getOrElse(CustomerTypeModel("null")),
-      fetchAndGetValue[DisabledTrusteeModel]("disabledTrustee"),
-      fetchAndGetValue[CurrentIncomeModel]("currentIncome"),
-      fetchAndGetValue[PersonalAllowanceModel]("personalAllowance"),
-      fetchAndGetValue[OtherPropertiesModel]("otherProperties").getOrElse(OtherPropertiesModel("No", None)),
-      fetchAndGetValue[AnnualExemptAmountModel]("annualExemptAmount"),
-      fetchAndGetValue[AcquisitionDateModel]("acquisitionDate").getOrElse(AcquisitionDateModel("No", None, None, None)),
-      fetchAndGetValue[AcquisitionValueModel]("acquisitionValue").getOrElse(AcquisitionValueModel(0)),
-      fetchAndGetValue[RebasedValueModel]("rebasedValue"),
-      fetchAndGetValue[RebasedCostsModel]("rebasedCosts"),
-      fetchAndGetValue[ImprovementsModel]("improvements").getOrElse(ImprovementsModel("No", None)),
-      fetchAndGetValue[DisposalDateModel]("disposalDate").getOrElse(DisposalDateModel(1, 1, 1900)),
-      fetchAndGetValue[DisposalValueModel]("disposalValue").getOrElse(DisposalValueModel(0)),
-      fetchAndGetValue[AcquisitionCostsModel]("acquisitionCosts").getOrElse(AcquisitionCostsModel(None)),
-      fetchAndGetValue[DisposalCostsModel]("disposalCosts").getOrElse(DisposalCostsModel(None)),
-      fetchAndGetValue[EntrepreneursReliefModel]("entrepreneursRelief").getOrElse(EntrepreneursReliefModel("No")),
-      fetchAndGetValue[AllowableLossesModel]("allowableLosses").getOrElse(AllowableLossesModel("No", None)),
-      fetchAndGetValue[CalculationElectionModel]("calculationElection").getOrElse(CalculationElectionModel("null")),
-      fetchAndGetValue[OtherReliefsModel]("otherReliefsFlat").getOrElse(OtherReliefsModel(None)),
-      fetchAndGetValue[OtherReliefsModel]("otherReliefsTA").getOrElse(OtherReliefsModel(None)),
-      fetchAndGetValue[OtherReliefsModel]("otherReliefsRebased").getOrElse(OtherReliefsModel(None))
-    )
+  def createSummary(implicit hc: HeaderCarrier): Future[SummaryModel] = {
+    val customerType = fetchAndGetFormData[CustomerTypeModel]("customerType").map(formData => formData.get)
+    val disabledTrustee = fetchAndGetFormData[DisabledTrusteeModel]("disabledTrustee")
+    val currentIncome = fetchAndGetFormData[CurrentIncomeModel]("currentIncome")
+    val personalAllowance = fetchAndGetFormData[PersonalAllowanceModel]("personalAllowance")
+    val otherProperties = fetchAndGetFormData[OtherPropertiesModel]("otherProperties").map(formData => formData.get)
+    val annualExemptAmount = fetchAndGetFormData[AnnualExemptAmountModel]("annualExemptAmount")
+    val acquisitionDate = fetchAndGetFormData[AcquisitionDateModel]("acquisitionDate").map(formData => formData.get)
+    val acquisitionValue = fetchAndGetFormData[AcquisitionValueModel]("acquisitionValue").map(formData => formData.get)
+    val rebasedValue = fetchAndGetFormData[RebasedValueModel]("rebasedValue")
+    val rebasedCosts = fetchAndGetFormData[RebasedCostsModel]("rebasedCosts")
+    val improvements = fetchAndGetFormData[ImprovementsModel]("improvements").map(formData => formData.get)
+    val disposalDate = fetchAndGetFormData[DisposalDateModel]("disposalDate").map(formData => formData.get)
+    val disposalValue = fetchAndGetFormData[DisposalValueModel]("disposalValue").map(formData => formData.get)
+    val acquisitionCosts = fetchAndGetFormData[AcquisitionCostsModel]("acquisitionCosts").map(formData => formData.get)
+    val disposalCosts = fetchAndGetFormData[DisposalCostsModel]("disposalCosts").map(formData => formData.get)
+    val entrepreneursRelief = fetchAndGetFormData[EntrepreneursReliefModel]("entrepreneursRelief").map(formData => formData.get)
+    val allowableLosses = fetchAndGetFormData[AllowableLossesModel]("allowableLosses").map(formData => formData.get)
+    val calculationElection = fetchAndGetFormData[CalculationElectionModel]("calculationElection").map(formData => formData.getOrElse(CalculationElectionModel("")))
+    val otherReliefsFlat = fetchAndGetFormData[OtherReliefsModel]("otherReliefsFlat").map(formData => formData.getOrElse(OtherReliefsModel(None)))
+    val otherReliefsTA = fetchAndGetFormData[OtherReliefsModel]("otherReliefsTA").map(formData => formData.getOrElse(OtherReliefsModel(None)))
+    val otherReliefsRebased = fetchAndGetFormData[OtherReliefsModel]("otherReliefsRebased").map(formData => formData.getOrElse(OtherReliefsModel(None)))
+
+    for {
+      customerTypeModel <- customerType
+      disabledTrusteeModel <- disabledTrustee
+      currentIncomeModel <- currentIncome
+      personalAllowanceModel <- personalAllowance
+      otherPropertiesModel <- otherProperties
+      annualExemptAmountModel <- annualExemptAmount
+      acquisitionDateModel <- acquisitionDate
+      acquisitionValueModel <- acquisitionValue
+      rebasedValueModel <- rebasedValue
+      rebasedCostsModel <- rebasedCosts
+      improvementsModel <- improvements
+      disposalDateModel <- disposalDate
+      disposalValueModel <- disposalValue
+      acquisitionCostsModel <- acquisitionCosts
+      disposalCostsModel <- disposalCosts
+      entrepreneursReliefModel <- entrepreneursRelief
+      allowableLossesModel <- allowableLosses
+      calculationElectionModel <- calculationElection
+      otherReliefsFlatModel <- otherReliefsFlat
+      otherReliefsTAModel <- otherReliefsTA
+      otherReliefsRebasedModel <- otherReliefsRebased
+    } yield SummaryModel(customerTypeModel, disabledTrusteeModel, currentIncomeModel, personalAllowanceModel, otherPropertiesModel,
+      annualExemptAmountModel, acquisitionDateModel, acquisitionValueModel, rebasedValueModel, rebasedCostsModel, improvementsModel,
+      disposalDateModel, disposalValueModel, acquisitionCostsModel, disposalCostsModel, entrepreneursReliefModel, allowableLossesModel,
+      calculationElectionModel, otherReliefsFlatModel, otherReliefsTAModel, otherReliefsRebasedModel)
   }
-  // $COVERAGE-ON$
 
 }
