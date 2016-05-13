@@ -427,18 +427,22 @@ trait CalculationController extends FrontendController {
               }
               else Future.successful(Redirect(routes.CalculationController.calculationElection()))
             case "No" => {
-              calcConnector.saveFormData("calculationElection", CalculationElectionModel("flat"))
-              Future.successful(Redirect(routes.CalculationController.otherReliefs()))
+              calcConnector.fetchAndGetFormData[RebasedValueModel]("rebasedValue").flatMap {
+                case Some(rebasedData) if rebasedData.hasRebasedValue == "Yes" => {
+                  Future.successful(Redirect(routes.CalculationController.calculationElection()))
+                }
+                case _ => {
+                  calcConnector.saveFormData("calculationElection", CalculationElectionModel("flat"))
+                  Future.successful(Redirect(routes.CalculationController.otherReliefs()))
+                }
+              }
             }
-          }
-          case _ => {
-            calcConnector.saveFormData("calculationElection", CalculationElectionModel("flat"))
-            Future.successful(Redirect(routes.CalculationController.otherReliefs()))
           }
         }
       }
     )
   }
+
   //################### Calculation Election methods #######################
   def calculationElection: Action[AnyContent] = Action.async { implicit request =>
 
