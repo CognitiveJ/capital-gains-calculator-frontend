@@ -18,6 +18,7 @@ package connectors
 
 import java.util.UUID
 
+import common.KeystoreKeys
 import models._
 import org.mockito.Matchers
 import org.mockito.Mockito._
@@ -220,17 +221,17 @@ class CalculatorConnectorSpec extends UnitSpec with MockitoSugar {
       when(mockSessionCache.fetchAndGetEntry[CustomerTypeModel](Matchers.anyString())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(Option(testModel)))
 
-      lazy val result = TargetCalculatorConnector.fetchAndGetFormData[CustomerTypeModel]("customerType")
+      lazy val result = TargetCalculatorConnector.fetchAndGetFormData[CustomerTypeModel](KeystoreKeys.customerType)
       await(result) shouldBe Some(testModel)
     }
 
     "save data to keystore" in {
       val testModel = CustomerTypeModel("trustee")
-      val returnedCacheMap = CacheMap("customerType", Map("data" -> Json.toJson(testModel)))
+      val returnedCacheMap = CacheMap(KeystoreKeys.customerType, Map("data" -> Json.toJson(testModel)))
       when(mockSessionCache.cache[CustomerTypeModel](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(returnedCacheMap))
 
-      lazy val result = TargetCalculatorConnector.saveFormData("customerType", testModel)
+      lazy val result = TargetCalculatorConnector.saveFormData(KeystoreKeys.customerType, testModel)
       await(result) shouldBe returnedCacheMap
     }
   }
