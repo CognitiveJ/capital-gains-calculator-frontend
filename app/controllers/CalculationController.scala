@@ -569,7 +569,10 @@ trait CalculationController extends FrontendController {
             construct.acquisitionDateModel.month.get, construct.acquisitionDateModel.year.get) => {
             Future.successful(Redirect(routes.CalculationController.calculationElection()))
           }
-          case "No" => Future.successful(Redirect(routes.CalculationController.summary()))
+          case "No" => construct.rebasedValueModel.getOrElse(RebasedValueModel("No", None)).hasRebasedValue match {
+            case "Yes" => Future.successful(Redirect(routes.CalculationController.calculationElection()))
+            case "No" => Future.successful(Redirect(routes.CalculationController.summary()))
+          }
         }
       }
     )
