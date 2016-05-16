@@ -380,7 +380,7 @@ trait CalculationController extends FrontendController {
       errors => Future.successful(BadRequest(calculation.disposalCosts(errors))),
       success => {
         calcConnector.saveFormData("disposalCosts", success)
-        Future.successful(Redirect(routes.CalculationController.entrepreneursRelief()))
+        Future.successful(Redirect(routes.CalculationController.privateResidenceRelief()))
       }
     )
   }

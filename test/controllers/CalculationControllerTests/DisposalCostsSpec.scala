@@ -167,8 +167,8 @@ class DisposalCostsSpec extends UnitSpec with WithFakeApplication with MockitoSu
         status(result) shouldBe 303
       }
 
-      s"redirect to ${routes.CalculationController.entrepreneursRelief()}" in {
-        redirectLocation(result) shouldBe Some(s"${routes.CalculationController.entrepreneursRelief()}")
+      s"redirect to ${routes.CalculationController.privateResidenceRelief()}" in {
+        redirectLocation(result) shouldBe Some(s"${routes.CalculationController.privateResidenceRelief()}")
       }
     }
 
