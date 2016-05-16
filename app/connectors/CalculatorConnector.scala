@@ -95,6 +95,7 @@ trait CalculatorConnector {
     val otherReliefsFlat = fetchAndGetFormData[OtherReliefsModel]("otherReliefsFlat").map(formData => formData.getOrElse(OtherReliefsModel(None)))
     val otherReliefsTA = fetchAndGetFormData[OtherReliefsModel]("otherReliefsTA").map(formData => formData.getOrElse(OtherReliefsModel(None)))
     val otherReliefsRebased = fetchAndGetFormData[OtherReliefsModel]("otherReliefsRebased").map(formData => formData.getOrElse(OtherReliefsModel(None)))
+    val privateResidenceRelief = fetchAndGetFormData[PrivateResidenceReliefModel]("privateResidenceRelief").map(formData => formData.get)
 
     for {
       customerTypeModel <- customerType
@@ -118,10 +119,11 @@ trait CalculatorConnector {
       otherReliefsFlatModel <- otherReliefsFlat
       otherReliefsTAModel <- otherReliefsTA
       otherReliefsRebasedModel <- otherReliefsRebased
+      privateResidenceReliefModel <- privateResidenceRelief
     } yield SummaryModel(customerTypeModel, disabledTrusteeModel, currentIncomeModel, personalAllowanceModel, otherPropertiesModel,
       annualExemptAmountModel, acquisitionDateModel, acquisitionValueModel, rebasedValueModel, rebasedCostsModel, improvementsModel,
       disposalDateModel, disposalValueModel, acquisitionCostsModel, disposalCostsModel, entrepreneursReliefModel, allowableLossesModel,
-      calculationElectionModel, otherReliefsFlatModel, otherReliefsTAModel, otherReliefsRebasedModel)
+      calculationElectionModel, otherReliefsFlatModel, otherReliefsTAModel, otherReliefsRebasedModel, privateResidenceReliefModel)
   }
 
 }

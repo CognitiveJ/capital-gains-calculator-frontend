@@ -39,7 +39,8 @@ case class SummaryModel (
                           calculationElectionModel: CalculationElectionModel,
                           otherReliefsModelFlat : OtherReliefsModel,
                           otherReliefsModelTA: OtherReliefsModel,
-                          otherReliefsModelRebased: OtherReliefsModel
+                          otherReliefsModelRebased: OtherReliefsModel,
+                          privateResidenceReliefModel: PrivateResidenceReliefModel
                         )
 
 object SummaryModel {
