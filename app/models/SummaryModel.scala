@@ -43,7 +43,5 @@ case class SummaryModel (
                           privateResidenceReliefModel: PrivateResidenceReliefModel
                         )
 
-object SummaryModel {
-  implicit val format = Json.format[SummaryModel]
-}
+
 

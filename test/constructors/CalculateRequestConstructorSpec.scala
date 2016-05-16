@@ -43,7 +43,8 @@ class CalculateRequestConstructorSpec extends UnitSpec {
     CalculationElectionModel("flat"),
     OtherReliefsModel(None),
     OtherReliefsModel(None),
-    OtherReliefsModel(None)
+    OtherReliefsModel(None),
+    PrivateResidenceReliefModel("No", None, None)
   )
 
   "CalculateRequest Constructor" should {
@@ -74,7 +75,8 @@ class CalculateRequestConstructorSpec extends UnitSpec {
         CalculationElectionModel("flat"),
         OtherReliefsModel(None),
         OtherReliefsModel(None),
-        OtherReliefsModel(None)
+        OtherReliefsModel(None),
+        PrivateResidenceReliefModel("No", None, None)
       )
 
       CalculateRequestConstructor.baseCalcUrl(sumModelTrustee) shouldEqual "customerType=trustee&priorDisposal=Yes&annualExemptAmount=5000" +
