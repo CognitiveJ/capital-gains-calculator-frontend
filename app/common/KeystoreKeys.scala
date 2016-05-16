@@ -16,9 +16,9 @@
 
 package common
 
-object DataKeys extends DataKeys
+object KeystoreKeys extends KeystoreKeys
 
-trait DataKeys {
+trait KeystoreKeys {
 
   val customerType = "customerType"
   val disabledTrustee = "disabledTrustee"
