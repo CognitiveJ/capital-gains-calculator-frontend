@@ -152,7 +152,9 @@ trait CalculationController extends FrontendController {
           case "Yes" =>
             success.otherPropertiesAmt match {
             case Some(data) if data.equals(BigDecimal(0)) => Future.successful(Redirect(routes.CalculationController.annualExemptAmount()))
-            case _ => Future.successful(Redirect(routes.CalculationController.acquisitionDate()))
+            case _ => {
+              calcConnector.saveFormData("annualExemptAmount", AnnualExemptAmountModel(0))
+              Future.successful(Redirect(routes.CalculationController.acquisitionDate()))}
           }
           case "No" => Future.successful(Redirect(routes.CalculationController.acquisitionDate()))
        }
