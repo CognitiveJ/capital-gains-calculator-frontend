@@ -418,22 +418,13 @@ trait CalculationController extends FrontendController {
       errors => Future.successful(BadRequest(calculation.allowableLosses(errors))),
       success => {
         calcConnector.saveFormData("allowableLosses", success)
-        calcConnector.fetchAndGetFormData[AcquisitionDateModel]("acquisitionDate").flatMap {
-          case Some(data) => data.hasAcquisitionDate match {
-            case "Yes" =>
-              if (Dates.dateAfterStart(data.day.get, data.month.get, data.year.get)) {
-                calcConnector.saveFormData("calculationElection", CalculationElectionModel("flat"))
-                Future.successful(Redirect(routes.CalculationController.otherReliefs()))
-              }
-              else Future.successful(Redirect(routes.CalculationController.calculationElection()))
-            case "No" => {
+        calcConnector.fetchAndGetFormData[AcquisitionDateModel]("acquisitionDate").flatMap { result =>
+          (result, result.get.hasAcquisitionDate) match {
+            case (Some(data), "Yes") if !Dates.dateAfterStart(data.day.get, data.month.get, data.year.get) => Future.successful(Redirect(routes.CalculationController.calculationElection()))
+            case _ => {
               calcConnector.saveFormData("calculationElection", CalculationElectionModel("flat"))
               Future.successful(Redirect(routes.CalculationController.otherReliefs()))
             }
-          }
-          case _ => {
-            calcConnector.saveFormData("calculationElection", CalculationElectionModel("flat"))
-            Future.successful(Redirect(routes.CalculationController.otherReliefs()))
           }
         }
       }
@@ -450,29 +441,34 @@ trait CalculationController extends FrontendController {
 
     def calcTimeCall(summary: SummaryModel): Future[Option[CalculationResultModel]] = {
       summary.acquisitionDateModel.hasAcquisitionDate match {
-        case "Yes" => if (Dates.dateAfterStart(summary.acquisitionDateModel.day.get, summary.acquisitionDateModel.month.get, summary.acquisitionDateModel.year.get)) {
-          Future(None)
-        }
-        else {
+        case "Yes" if !Dates.dateAfterStart(summary.acquisitionDateModel.day.get, summary.acquisitionDateModel.month.get, summary.acquisitionDateModel.year.get) => {
           calcConnector.calculateTA(summary)
         }
-        case "No" => Future(None)
+//        else {
+//          calcConnector.calculateTA(summary)
+//        }
+        case _ => Future(None)
       }
     }
 
     def calcRebasedCall(summary: SummaryModel): Future[Option[CalculationResultModel]] = {
-      summary.rebasedValueModel.getOrElse(RebasedValueModel("No", None)).hasRebasedValue match {
-        case "Yes" => summary.acquisitionDateModel.hasAcquisitionDate match {
-          case "Yes" => if (Dates.dateAfterStart(summary.acquisitionDateModel.day.get, summary.acquisitionDateModel.month.get, summary.acquisitionDateModel.year.get)) {
-            Future(None)
-          }
-          else {
-            calcConnector.calculateRebased(summary)
-          }
-          case "No" => calcConnector.calculateRebased(summary)
-        }
-        case "No" => Future(None)
+      (summary.rebasedValueModel.getOrElse(RebasedValueModel("No", None)).hasRebasedValue, summary.acquisitionDateModel.hasAcquisitionDate) match {
+        case ("Yes", "Yes") if !Dates.dateAfterStart(summary.acquisitionDateModel.day.get, summary.acquisitionDateModel.month.get, summary.acquisitionDateModel.year.get) => calcConnector.calculateRebased(summary)
+        case ("Yes", "No") => calcConnector.calculateRebased(summary)
+        case _ => Future(None)
       }
+//      summary.rebasedValueModel.getOrElse(RebasedValueModel("No", None)).hasRebasedValue match {
+//        case "Yes" => summary.acquisitionDateModel.hasAcquisitionDate match {
+//          case "Yes" => if (Dates.dateAfterStart(summary.acquisitionDateModel.day.get, summary.acquisitionDateModel.month.get, summary.acquisitionDateModel.year.get)) {
+//            Future(None)
+//          }
+//          else {
+//            calcConnector.calculateRebased(summary)
+//          }
+//          case "No" => calcConnector.calculateRebased(summary)
+//        }
+//        case "No" => Future(None)
+//      }
     }
 
     for {
