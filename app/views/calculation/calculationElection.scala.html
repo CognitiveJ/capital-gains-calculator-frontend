@@ -4,6 +4,7 @@
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 @import play.api.data._
 @import uk.gov.hmrc.play.http.HeaderCarrier
+@import scala.concurrent.Future
 
 @(calculationElectionForm: Form[CalculationElectionModel], summaryModel: SummaryModel, content: Seq[(String, String, String, Option[String], String)])(implicit request: Request[_], hc: HeaderCarrier)
 
