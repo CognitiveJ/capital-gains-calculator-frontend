@@ -147,40 +147,45 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
               document.select("#personalDetails").text should include(Messages("calc.customerType.question"))
             }
 
-            "have an 'individual' owner" in {
+            "have an 'individual' owner and link to the customer-type page" in {
               document.body().getElementById("personalDetails(0)").text() shouldBe "Individual"
+              document.body().getElementById("personalDetails(0)").attr("href") shouldEqual "/calculate-your-capital-gains/customer-type"
             }
 
             "include the question 'What’s your total income for this tax year?'" in {
               document.select("#personalDetails").text should include(Messages("calc.currentIncome.question"))
             }
 
-            "have an total income of £1000" in {
+            "have an total income of £1000 and link to the current-income screen" in {
               document.body().getElementById("personalDetails(1)").text() shouldBe "£1000.00"
+              document.body().getElementById("personalDetails(1)").attr("href") shouldEqual "/calculate-your-capital-gains/current-income"
             }
 
             "include the question 'What's your Personal Allowance for this tax year?'" in {
               document.select("#personalDetails").text should include(Messages("calc.personalAllowance.question"))
             }
 
-            "have a personal allowance of £9000" in {
+            "have a personal allowance of £9000 that has a link to the personal allowance page." in {
               document.body().getElementById("personalDetails(2)").text() shouldBe "£9000.00"
+              document.body().getElementById("personalDetails(2)").attr("href") shouldEqual "/calculate-your-capital-gains/personal-allowance"
             }
 
             "include the question 'What was the total taxable gain of your previous Capital Gains in the tax year you stopped owning the property?'" in {
               document.select("#personalDetails").text should include(Messages("calc.otherProperties.questionTwo"))
             }
 
-            "have a total taxable gain of prior disposals of £9600" in {
-              document.body.getElementById("personalDetails(3)").text() shouldBe "£9600.00"
+            "have a total taxable gain of prior disposals of £9600 and link to the other-properties page" in {
+              document.body().getElementById("personalDetails(3)").text() shouldBe "£9600.00"
+              document.body().getElementById("personalDetails(3)").attr("href") shouldEqual "/calculate-your-capital-gains/other-properties"
             }
 
             "include the question 'How much of your Capital Gains Tax allowance have you got left'" in {
               document.select("#personalDetails").text should include(Messages("calc.annualExemptAmount.question"))
             }
 
-            "have a remaining CGT Allowance of £1500" in {
+            "have a remaining CGT Allowance of £1500 and link to the allowance page" in {
               document.body().getElementById("personalDetails(4)").text() shouldBe "£1500.00"
+              document.body().getElementById("personalDetails(4)").attr("href") shouldEqual "/calculate-your-capital-gains/allowance"
             }
           }
 
@@ -194,16 +199,18 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
               document.select("#purchaseDetails").text should include(Messages("calc.acquisitionValue.question"))
             }
 
-            "have an acquisition value of £100000" in {
+            "have an acquisition value of £100000 and link to the acquisition value page" in {
               document.body().getElementById("purchaseDetails(0)").text() shouldBe "£100000.00"
+              document.body().getElementById("purchaseDetails(0)").attr("href") shouldEqual "/calculate-your-capital-gains/acquisition-value"
             }
 
             "include the question 'How much did you pay in costs when you became the property owner?'" in {
               document.select("#purchaseDetails").text should include(Messages("calc.acquisitionCosts.question"))
             }
 
-            "have a acquisition costs of £0" in {
+            "have a acquisition costs of £0 and link to the acquisition-costs page" in {
               document.body().getElementById("purchaseDetails(1)").text() shouldBe "£0.00"
+              document.body().getElementById("purchaseDetails(1)").attr("href") shouldEqual "/calculate-your-capital-gains/acquisition-costs"
             }
           }
 
@@ -217,8 +224,9 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
               document.select("#propertyDetails").text should include(Messages("calc.improvements.question"))
             }
 
-            "the answer to the improvements question should be No" in {
+            "the answer to the improvements question should be No and should link to the improvements page" in {
               document.body.getElementById("propertyDetails(0)").text shouldBe "No"
+              document.body().getElementById("propertyDetails(0)").attr("href") shouldEqual "/calculate-your-capital-gains/improvements"
             }
           }
 
@@ -232,24 +240,27 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
               document.select("#saleDetails").text should include(Messages("calc.disposalDate.question"))
             }
 
-            "the date of disposal should be '10 October 2010" in {
+            "the date of disposal should be '10 October 2010 and link to the disposal-date page" in {
               document.body().getElementById("saleDetails(0)").text shouldBe "10 October 2010"
+              document.body().getElementById("saleDetails(0)").attr("href") shouldEqual "/calculate-your-capital-gains/disposal-date"
             }
 
             "include the question 'How much did you sell or give away the property for?'" in {
               document.select("#saleDetails").text should include(Messages("calc.disposalValue.question"))
             }
 
-            "the value of the sale should be £150000" in {
+            "the value of the sale should be £150000 and link to the disposal-value page" in {
               document.body().getElementById("saleDetails(1)").text shouldBe "£150000.00"
+              document.body().getElementById("saleDetails(1)").attr("href") shouldEqual "/calculate-your-capital-gains/disposal-value"
             }
 
             "include the question 'How much did you pay in costs when you stopped being the property owner?'" in {
               document.select("#saleDetails").text should include(Messages("calc.disposalCosts.question"))
             }
 
-            "the value of the costs should be £0" in {
+            "the value of the costs should be £0 and link to the disposal costs page" in {
               document.body().getElementById("saleDetails(2)").text shouldBe "£0.00"
+              document.body().getElementById("saleDetails(2)").attr("href") shouldEqual "/calculate-your-capital-gains/disposal-costs"
             }
           }
 
@@ -263,24 +274,27 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
               document.select("#deductions").text should include(Messages("calc.entrepreneursRelief.question"))
             }
 
-            "have the answer to entrepreneurs relief question be 'No'" in {
+            "have the answer to entrepreneurs relief question be 'No' and link to the entrepreurs-relief page" in {
               document.body().getElementById("deductions(0)").text shouldBe "No"
+              document.body().getElementById("deductions(0)").attr("href") shouldEqual "/calculate-your-capital-gains/entrepreneurs-relief"
             }
 
             "include the question 'Whats the total value of your allowable losses?'" in {
               document.select("#deductions").text should include(Messages("calc.allowableLosses.question.two"))
             }
 
-            "the value of allowable losses should be £0" in {
+            "the value of allowable losses should be £0 and link to the allowable-losses page" in {
               document.body().getElementById("deductions(1)").text shouldBe "£0.00"
+              document.body().getElementById("deductions(1)").attr("href") shouldEqual "/calculate-your-capital-gains/allowable-losses"
             }
 
             "include the question 'What other reliefs are you claiming?'" in {
               document.select("#deductions").text should include(Messages("calc.otherReliefs.question"))
             }
 
-            "the value of other reliefs should be £0" in {
+            "the value of other reliefs should be £0 and link to the other-reliefs page" in {
               document.body().getElementById("deductions(2)").text shouldBe "£0.00"
+              document.body().getElementById("deductions(2)").attr("href") shouldEqual "/calculate-your-capital-gains/other-reliefs"
             }
 
           }
