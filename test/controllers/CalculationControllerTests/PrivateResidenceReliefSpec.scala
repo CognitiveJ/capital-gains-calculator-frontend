@@ -18,8 +18,8 @@ package controllers.CalculationControllerTests
 
 import connectors.CalculatorConnector
 import constructors.CalculationElectionConstructor
-import controllers.CalculationController
 import models._
+import controllers.{routes, CalculationController}
 import org.jsoup.Jsoup
 import org.mockito.Matchers
 import org.mockito.Mockito._
@@ -72,6 +72,7 @@ class PrivateResidenceReliefSpec extends UnitSpec with WithFakeApplication with 
     }
   }
 
+  //GET Tests
   "In CalculationController calling the .privateResidenceRelief action " should {
 
     "when not supplied wth a pre-existing stored model" should {
@@ -611,5 +612,20 @@ class PrivateResidenceReliefSpec extends UnitSpec with WithFakeApplication with 
       }
     }
   }
-}
 
+  //POST Tests
+  "In CalculationController calling the .submitPrivateResidenceRelief action " should {
+
+    lazy val fakeRequest = FakeRequest("POST", "/calculate-your-capital-gains/private-residence-relief").withSession(SessionKeys.sessionId -> "12345")
+    val target = setupTarget(None, None)
+    lazy val result = target.submitPrivateResidenceRelief(fakeRequest)
+
+    "return a 303" in {
+      status(result) shouldBe 303
+    }
+
+    s"redirect to ${routes.CalculationController.entrepreneursRelief()}" in {
+      redirectLocation(result) shouldBe Some(s"${routes.CalculationController.entrepreneursRelief()}")
+    }
+  }
+}
