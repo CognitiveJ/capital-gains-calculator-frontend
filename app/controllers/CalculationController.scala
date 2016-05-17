@@ -393,6 +393,10 @@ trait CalculationController extends FrontendController {
     Future.successful(Ok(calculation.privateResidenceRelief()))
   }
 
+  val submitPrivateResidenceRelief = Action.async { implicit request =>
+    Future.successful(Redirect(routes.CalculationController.entrepreneursRelief()))
+  }
+
   //################### Entrepreneurs Relief methods #######################
   val entrepreneursRelief = Action.async { implicit request =>
     calcConnector.fetchAndGetFormData[EntrepreneursReliefModel](KeystoreKeys.entrepreneursRelief).map {

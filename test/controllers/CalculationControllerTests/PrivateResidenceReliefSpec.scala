@@ -18,7 +18,7 @@ package controllers.CalculationControllerTests
 
 import connectors.CalculatorConnector
 import constructors.CalculationElectionConstructor
-import controllers.CalculationController
+import controllers.{routes, CalculationController}
 import models.PrivateResidenceReliefModel
 import org.jsoup.Jsoup
 import org.mockito.Matchers
@@ -37,6 +37,7 @@ import scala.concurrent.Future
 class PrivateResidenceReliefSpec extends UnitSpec with WithFakeApplication with MockitoSugar {
 
   implicit val hc = new HeaderCarrier()
+
   def setupTarget(getData: Option[PrivateResidenceReliefModel], postData: Option[PrivateResidenceReliefModel]): CalculationController = {
 
     val mockCalcConnector = mock[CalculatorConnector]
@@ -55,6 +56,7 @@ class PrivateResidenceReliefSpec extends UnitSpec with WithFakeApplication with 
     }
   }
 
+  //GET Tests
   "In CalculationController calling the .privateResidenceRelief action " should {
     lazy val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/private-residence-relief").withSession(SessionKeys.sessionId -> "12345")
     val target = setupTarget(None, None)
@@ -92,9 +94,25 @@ class PrivateResidenceReliefSpec extends UnitSpec with WithFakeApplication with 
 
       "have a hidden input with question 'calc.privateResidenceRelief.questionTwo'" in {
         document.body.getElementById("daysClaimed").tagName shouldEqual "input"
-        document.select("label[for=daysClaimed]").text should include (Messages("calc.privateResidenceRelief.questionTwoStart"))
-        document.select("label[for=daysClaimed]").text should include (Messages("calc.privateResidenceRelief.questionTwoEnd"))
+        document.select("label[for=daysClaimed]").text should include(Messages("calc.privateResidenceRelief.questionTwoStart"))
+        document.select("label[for=daysClaimed]").text should include(Messages("calc.privateResidenceRelief.questionTwoEnd"))
       }
+    }
+  }
+
+  //POST Tests
+  "In CalculationController calling the .submitPrivateResidenceRelief action " should {
+
+    lazy val fakeRequest = FakeRequest("POST", "/calculate-your-capital-gains/private-residence-relief").withSession(SessionKeys.sessionId -> "12345")
+    val target = setupTarget(None, None)
+    lazy val result = target.submitPrivateResidenceRelief(fakeRequest)
+
+    "return a 303" in {
+      status(result) shouldBe 303
+    }
+
+    s"redirect to ${routes.CalculationController.entrepreneursRelief()}" in {
+      redirectLocation(result) shouldBe Some(s"${routes.CalculationController.entrepreneursRelief()}")
     }
   }
 }

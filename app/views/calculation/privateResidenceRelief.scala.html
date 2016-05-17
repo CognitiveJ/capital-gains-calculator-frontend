@@ -20,12 +20,13 @@
 
 <h1 class="heading-large">@Messages("calc.base.pageHeading")</h1>
 
-    @hiddenYesNoRadio("isClaimingPRR", Messages("calc.privateResidenceRelief.question"), Html((<div class="form-group">
-    <label for="daysClaimed">{s"${Messages("calc.privateResidenceRelief.questionTwoStart")} 7 August 2015 ${Messages("calc.privateResidenceRelief.questionTwoEnd")}"}</label>
-    <input class="form-control" id="daysClaimed" type="text"/>
-</div>).toString))
+    @govHelpers.form(action = routes.CalculationController.submitPrivateResidenceRelief) {
 
-<button class="button" type="submit" id="continue-button">@Messages("calc.base.continue")</button>
+        @hiddenYesNoRadio("isClaimingPRR", Messages("calc.privateResidenceRelief.question"), Html((<div class="form-group">
+        <label for="daysClaimed">{s"${Messages("calc.privateResidenceRelief.questionTwoStart")} 7 August 2015 ${Messages("calc.privateResidenceRelief.questionTwoEnd")}"}</label>
+        <input class="form-control" id="daysClaimed" type="text"/>
+        </div>).toString))
 
-
+        <button class="button" type="submit" id="continue-button">@Messages("calc.base.continue")</button>
+    }
 }
