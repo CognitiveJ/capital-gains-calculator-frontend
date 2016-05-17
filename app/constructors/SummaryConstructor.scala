@@ -17,7 +17,7 @@
 package constructors
 
 import controllers.routes
-import models.{RebasedValueModel, SummaryModel, CalculationResultModel}
+import models.{SummaryDataItemModel, RebasedValueModel, SummaryModel, CalculationResultModel}
 import org.apache.commons.lang3.text.WordUtils
 import play.api.i18n.Messages
 import views.html.helpers._
@@ -38,60 +38,60 @@ object SummaryConstructor {
   def calculationDetails(result: CalculationResultModel, summary: SummaryModel) = summaryPageSection("calcDetails", Messages("calc.summary.calculation.details.title"),
     result.upperTaxGain match {
       case Some(data) => Array(
-        Map(
-          "question" -> Messages("calc.summary.calculation.details.calculationElection"),
-          "answer" -> (summary.calculationElectionModel.calculationType match {
+        SummaryDataItemModel(
+          Messages("calc.summary.calculation.details.calculationElection"),
+          summary.calculationElectionModel.calculationType match {
             case "flat" => Messages("calc.summary.calculation.details.flatCalculation")
             case "time" => Messages("calc.summary.calculation.details.timeCalculation")
             case "rebased" => Messages("calc.summary.calculation.details.rebasedCalculation")
-          }),
-          "link" -> routes.CalculationController.calculationElection().toString()
+          },
+          Some(routes.CalculationController.calculationElection().toString())
         ),
-        Map(
-          "question" -> lossOrGainWording(result.totalGain),
-          "answer" -> ("&pound;" + result.totalGain.abs.setScale(2).toString),
-          "link" -> ""
+        SummaryDataItemModel(
+          lossOrGainWording(result.totalGain),
+          "&pound;" + result.totalGain.abs.setScale(2).toString,
+          None
         ),
-        Map(
-          "question" -> Messages("calc.summary.calculation.details.taxableGain"),
-          "answer" -> ("&pound;" + result.taxableGain.setScale(2).toString),
-          "link" -> ""
+        SummaryDataItemModel(
+          Messages("calc.summary.calculation.details.taxableGain"),
+          "&pound;" + result.taxableGain.setScale(2).toString,
+          None
         ),
-        Map(
-          "question" -> Messages("calc.summary.calculation.details.taxRate"),
-          "answer" -> ("&pound;" + result.baseTaxGain.setScale(2).toString + " at " + result.baseTaxRate + "%"),
-          "link" -> ""
+        SummaryDataItemModel(
+          Messages("calc.summary.calculation.details.taxRate"),
+          "&pound;" + result.baseTaxGain.setScale(2).toString + " at " + result.baseTaxRate + "%",
+          None
         ),
-        Map(
-          "question" -> "",
-          "answer" -> ("&pound;" + result.upperTaxGain.get.setScale(2).toString + " at " + result.upperTaxRate.get.toString + "%"),
-          "link" -> ""
+        SummaryDataItemModel(
+          "",
+          "&pound;" + result.upperTaxGain.get.setScale(2).toString + " at " + result.upperTaxRate.get.toString + "%",
+          None
         )
       )
       case None => Array(
-        Map(
-          "question" -> Messages("calc.summary.calculation.details.calculationElection"),
-          "answer" -> (summary.calculationElectionModel.calculationType match {
+        SummaryDataItemModel(
+          Messages("calc.summary.calculation.details.calculationElection"),
+          summary.calculationElectionModel.calculationType match {
             case "flat" => Messages("calc.summary.calculation.details.flatCalculation")
             case "time" => Messages("calc.summary.calculation.details.timeCalculation")
             case "rebased" => Messages("calc.summary.calculation.details.rebasedCalculation")
-          }),
-          "link" -> routes.CalculationController.calculationElection().toString()
+          },
+          Some(routes.CalculationController.calculationElection().toString())
         ),
-        Map(
-          "question" -> lossOrGainWording(result.totalGain),
-          "answer" -> ("&pound;" + result.totalGain.abs.setScale(2).toString),
-          "link" -> ""
+        SummaryDataItemModel(
+          lossOrGainWording(result.totalGain),
+          "&pound;" + result.totalGain.abs.setScale(2).toString,
+          None
         ),
-        Map(
-          "question" -> Messages("calc.summary.calculation.details.taxableGain"),
-          "answer" -> ("&pound;" + (result.baseTaxGain + result.upperTaxGain.getOrElse(0)).setScale(2).toString),
-          "link" -> ""
+        SummaryDataItemModel(
+          Messages("calc.summary.calculation.details.taxableGain"),
+          "&pound;" + (result.baseTaxGain + result.upperTaxGain.getOrElse(0)).setScale(2).toString,
+          None
         ),
-        Map(
-          "question" -> Messages("calc.summary.calculation.details.taxRate"),
-          "answer" -> (result.baseTaxRate + "%"),
-          "link" -> ""
+        SummaryDataItemModel(
+          Messages("calc.summary.calculation.details.taxRate"),
+          result.baseTaxRate + "%",
+          None
         )
       )
     }
@@ -102,106 +102,127 @@ object SummaryConstructor {
       summary.customerTypeModel.customerType match {
         case "trustee" => summary.otherPropertiesModel.otherProperties match {
           case "Yes" => Array(
-            Map(
-              "question" -> Messages("calc.customerType.question"),
-              "answer" -> WordUtils.capitalize(summary.customerTypeModel.customerType)
+            SummaryDataItemModel(
+              Messages("calc.customerType.question"),
+              WordUtils.capitalize(summary.customerTypeModel.customerType),
+              Some(routes.CalculationController.customerType().toString())
             ),
-            Map(
-              "question" -> Messages("calc.disabledTrustee.question"),
-              "answer" -> summary.disabledTrusteeModel.get.isVulnerable
+            SummaryDataItemModel(
+              Messages("calc.disabledTrustee.question"),
+              summary.disabledTrusteeModel.get.isVulnerable,
+              Some(routes.CalculationController.disabledTrustee().toString())
             ),
-            Map(
-              "question" -> Messages("calc.otherProperties.questionTwo"),
-              "answer" -> ("&pound;" + summary.otherPropertiesModel.otherPropertiesAmt.get.setScale(2).toString)
+            SummaryDataItemModel(
+              Messages("calc.otherProperties.questionTwo"),
+              "&pound;" + summary.otherPropertiesModel.otherPropertiesAmt.get.setScale(2).toString,
+              Some(routes.CalculationController.otherProperties().toString())
             ),
-            Map(
-              "question" -> Messages("calc.annualExemptAmount.question"),
-              "answer" -> ("&pound;" + summary.annualExemptAmountModel.get.annualExemptAmount.setScale(2).toString)
+            SummaryDataItemModel(
+              Messages("calc.annualExemptAmount.question"),
+              "&pound;" + summary.annualExemptAmountModel.get.annualExemptAmount.setScale(2).toString,
+              Some(routes.CalculationController.annualExemptAmount().toString())
             )
           )
           case "No" => Array(
-            Map(
-              "question" -> Messages("calc.customerType.question"),
-              "answer" -> WordUtils.capitalize(summary.customerTypeModel.customerType)
+            SummaryDataItemModel(
+              Messages("calc.customerType.question"),
+              WordUtils.capitalize(summary.customerTypeModel.customerType),
+              Some(routes.CalculationController.calculationElection().toString())
             ),
-            Map(
-              "question" -> Messages("calc.disabledTrustee.question"),
-              "answer" -> summary.disabledTrusteeModel.get.isVulnerable
+            SummaryDataItemModel(
+              Messages("calc.disabledTrustee.question"),
+              summary.disabledTrusteeModel.get.isVulnerable,
+              Some(routes.CalculationController.disabledTrustee().toString())
             ),
-            Map(
-              "question" -> Messages("calc.annualExemptAmount.question"),
-              "answer" -> ("&pound;" + (summary.disabledTrusteeModel.get.isVulnerable match {
+            SummaryDataItemModel(
+              Messages("calc.annualExemptAmount.question"),
+              "&pound;" + (summary.disabledTrusteeModel.get.isVulnerable match {
                 case "Yes" => "11100.00"
                 case "No" => "5050.00"
-              }))
+              }),
+              Some(routes.CalculationController.annualExemptAmount().toString())
             )
           )
         }
         case "individual" => summary.otherPropertiesModel.otherProperties match {
           case "Yes" => Array(
-            Map(
-              "question" -> Messages("calc.customerType.question"),
-              "answer" -> WordUtils.capitalize(summary.customerTypeModel.customerType)
+            SummaryDataItemModel(
+              Messages("calc.customerType.question"),
+              WordUtils.capitalize(summary.customerTypeModel.customerType),
+              Some(routes.CalculationController.customerType().toString())
             ),
-            Map(
-              "question" -> Messages("calc.currentIncome.question"),
-              "answer" -> ("&pound;" + summary.currentIncomeModel.get.currentIncome.setScale(2))
+            SummaryDataItemModel(
+              Messages("calc.currentIncome.question"),
+              "&pound;" + summary.currentIncomeModel.get.currentIncome.setScale(2),
+              Some(routes.CalculationController.currentIncome().toString())
             ),
-            Map(
-              "question" -> Messages("calc.personalAllowance.question"),
-              "answer" -> ("&pound;" + summary.personalAllowanceModel.get.personalAllowanceAmt.setScale(2))
+            SummaryDataItemModel(
+              Messages("calc.personalAllowance.question"),
+              "&pound;" + summary.personalAllowanceModel.get.personalAllowanceAmt.setScale(2),
+              Some(routes.CalculationController.personalAllowance().toString())
             ),
-            Map(
-              "question" -> Messages("calc.otherProperties.questionTwo"),
-              "answer" -> ("&pound;" + summary.otherPropertiesModel.otherPropertiesAmt.get.setScale(2).toString)
+            SummaryDataItemModel(
+              Messages("calc.otherProperties.questionTwo"),
+              "&pound;" + summary.otherPropertiesModel.otherPropertiesAmt.get.setScale(2).toString,
+              Some(routes.CalculationController.otherProperties().toString())
             ),
-            Map(
-              "question" -> Messages("calc.annualExemptAmount.question"),
-              "answer" -> ("&pound;" + summary.annualExemptAmountModel.get.annualExemptAmount.setScale(2).toString)
+            SummaryDataItemModel(
+              Messages("calc.annualExemptAmount.question"),
+              "&pound;" + summary.annualExemptAmountModel.get.annualExemptAmount.setScale(2).toString,
+              Some(routes.CalculationController.annualExemptAmount().toString())
             )
           )
           case "No" => Array(
-            Map(
-              "question" -> Messages("calc.customerType.question"),
-              "answer" -> WordUtils.capitalize(summary.customerTypeModel.customerType)
+            SummaryDataItemModel(
+              Messages("calc.customerType.question"),
+              WordUtils.capitalize(summary.customerTypeModel.customerType),
+              Some(routes.CalculationController.customerType().toString())
             ),
-            Map(
-              "question" -> Messages("calc.currentIncome.question"),
-              "answer" -> ("&pound;" + summary.currentIncomeModel.get.currentIncome.setScale(2))
+            SummaryDataItemModel(
+              Messages("calc.currentIncome.question"),
+              "&pound;" + summary.currentIncomeModel.get.currentIncome.setScale(2),
+              Some(routes.CalculationController.currentIncome().toString())
             ),
-            Map(
-              "question" -> Messages("calc.personalAllowance.question"),
-              "answer" -> ("&pound;" + summary.personalAllowanceModel.get.personalAllowanceAmt.setScale(2))
+            SummaryDataItemModel(
+              Messages("calc.personalAllowance.question"),
+              "&pound;" + summary.personalAllowanceModel.get.personalAllowanceAmt.setScale(2),
+              Some(routes.CalculationController.personalAllowance().toString())
             ),
-            Map(
-              "question" -> Messages("calc.annualExemptAmount.question"),
-              "answer" -> ("&pound;" + "11100.00")
+            SummaryDataItemModel(
+              Messages("calc.annualExemptAmount.question"),
+              "&pound;" + "11100.00",
+              Some(routes.CalculationController.annualExemptAmount().toString())
             )
           )
         }
         case "personalRep" => summary.otherPropertiesModel.otherProperties match {
           case "Yes" => Array(
-            Map(
-              "question" -> Messages("calc.customerType.question"),
-              "answer" -> "Personal Representative"
+            SummaryDataItemModel(
+              Messages("calc.customerType.question"),
+              "Personal Representative",
+              Some(routes.CalculationController.customerType().toString())
             ),
-            Map(
-              "question" -> Messages("calc.otherProperties.questionTwo"),
-              "answer" -> ("&pound;" + summary.otherPropertiesModel.otherPropertiesAmt.get.setScale(2).toString)
+            SummaryDataItemModel(
+              Messages("calc.otherProperties.questionTwo"),
+              "&pound;" + summary.otherPropertiesModel.otherPropertiesAmt.get.setScale(2).toString,
+              Some(routes.CalculationController.otherProperties().toString())
             ),
-            Map(
-              "question" -> Messages("calc.annualExemptAmount.question"),
-              "answer" -> ("&pound;" + summary.annualExemptAmountModel.get.annualExemptAmount.setScale(2).toString)
+            SummaryDataItemModel(
+              Messages("calc.annualExemptAmount.question"),
+              "&pound;" + summary.annualExemptAmountModel.get.annualExemptAmount.setScale(2).toString,
+              Some(routes.CalculationController.annualExemptAmount().toString())
             )
           )
           case "No" => Array(
-            Map(
-              "question" -> Messages("calc.customerType.question"),
-              "answer" -> "Personal Representative"
+            SummaryDataItemModel(
+              Messages("calc.customerType.question"),
+              "Personal Representative",
+              Some(routes.CalculationController.customerType().toString())
             ),
-            Map(
-              "question" -> Messages("calc.annualExemptAmount.question"),
-              "answer" -> ("&pound;" + "11100.00")
+            SummaryDataItemModel(
+              Messages("calc.annualExemptAmount.question"),
+              "&pound;" + "11100.00",
+              Some(routes.CalculationController.annualExemptAmount().toString())
             )
           )
         }
@@ -212,70 +233,80 @@ object SummaryConstructor {
   def acquisitionDetails(result: CalculationResultModel, summary: SummaryModel) = {
     summaryPageSection("purchaseDetails", Messages("calc.summary.purchase.details.title"),
       summary.calculationElectionModel.calculationType match {
-        case "rebased" => {summary.acquisitionDateModel.hasAcquisitionDate match {
+        case "rebased" => summary.acquisitionDateModel.hasAcquisitionDate match {
           case "Yes" => Array(
-            Map(
-              "question" -> Messages("calc.acquisitionDate.questionTwo"),
-              "answer" -> Dates.datePageFormat.format(Dates.constructDate(summary.acquisitionDateModel.day.get, summary.acquisitionDateModel.month.get, summary.acquisitionDateModel.year.get))
+            SummaryDataItemModel(
+              Messages("calc.acquisitionDate.questionTwo"),
+              Dates.datePageFormat.format(Dates.constructDate(summary.acquisitionDateModel.day.get, summary.acquisitionDateModel.month.get, summary.acquisitionDateModel.year.get)),
+              Some(routes.CalculationController.acquisitionDate().toString())
             ),
-            Map(
-              "question" -> Messages("calc.rebasedValue.questionTwo"),
-              "answer" -> ("&pound;" + summary.rebasedValueModel.get.rebasedValueAmt.get.setScale(2).toString)
+            SummaryDataItemModel(
+              Messages("calc.rebasedValue.questionTwo"),
+              "&pound;" + summary.rebasedValueModel.get.rebasedValueAmt.get.setScale(2).toString,
+              Some(routes.CalculationController.rebasedValue().toString())
             ),
-            Map(
-              "question" -> Messages("calc.rebasedCosts.questionTwo"),
-              "answer" -> ("&pound;" + (summary.rebasedCostsModel.get.hasRebasedCosts match {
+            SummaryDataItemModel(
+              Messages("calc.rebasedCosts.questionTwo"),
+              "&pound;" + (summary.rebasedCostsModel.get.hasRebasedCosts match {
                 case "Yes" => summary.rebasedCostsModel.get.rebasedCosts.get.setScale(2).toString
                 case "No" => "0.00"
-              }))
+              }),
+              Some(routes.CalculationController.rebasedCosts().toString())
             )
           )
           case "No" => Array(
-            Map(
-              "question" -> Messages("calc.rebasedValue.questionTwo"),
-              "answer" -> ("&pound;" + summary.rebasedValueModel.get.rebasedValueAmt.get.setScale(2).toString)
+            SummaryDataItemModel(
+              Messages("calc.rebasedValue.questionTwo"),
+              "&pound;" + summary.rebasedValueModel.get.rebasedValueAmt.get.setScale(2).toString,
+              Some(routes.CalculationController.rebasedValue().toString())
             ),
-            Map(
-              "question" -> Messages("calc.rebasedCosts.questionTwo"),
-              "answer" -> ("&pound;" + (summary.rebasedCostsModel.get.hasRebasedCosts match {
+            SummaryDataItemModel(
+              Messages("calc.rebasedCosts.questionTwo"),
+              "&pound;" + (summary.rebasedCostsModel.get.hasRebasedCosts match {
                 case "Yes" => summary.rebasedCostsModel.get.rebasedCosts.get.setScale(2).toString
                 case "No" => "0.00"
-              }))
+              }),
+              Some(routes.CalculationController.rebasedCosts().toString())
             )
           )
-        }}
-        case _ => {summary.acquisitionDateModel.hasAcquisitionDate match {
+        }
+        case _ => summary.acquisitionDateModel.hasAcquisitionDate match {
           case "Yes" => Array(
-            Map(
-              "question" -> Messages("calc.acquisitionDate.questionTwo"),
-              "answer" -> Dates.datePageFormat.format(Dates.constructDate(summary.acquisitionDateModel.day.get, summary.acquisitionDateModel.month.get, summary.acquisitionDateModel.year.get))
+            SummaryDataItemModel(
+              Messages("calc.acquisitionDate.questionTwo"),
+              Dates.datePageFormat.format(Dates.constructDate(summary.acquisitionDateModel.day.get, summary.acquisitionDateModel.month.get, summary.acquisitionDateModel.year.get)),
+              Some(routes.CalculationController.acquisitionDate().toString())
             ),
-            Map(
-              "question" -> Messages("calc.acquisitionValue.question"),
-              "answer" -> ("&pound;" + summary.acquisitionValueModel.acquisitionValueAmt.setScale(2).toString)
+            SummaryDataItemModel(
+              Messages("calc.acquisitionValue.question"),
+              "&pound;" + summary.acquisitionValueModel.acquisitionValueAmt.setScale(2).toString,
+              Some(routes.CalculationController.acquisitionValue().toString())
             ),
-            Map(
-              "question" -> Messages("calc.acquisitionCosts.question"),
-              "answer" -> ("&pound;" + (summary.acquisitionCostsModel.acquisitionCostsAmt match {
+            SummaryDataItemModel(
+              Messages("calc.acquisitionCosts.question"),
+              "&pound;" + (summary.acquisitionCostsModel.acquisitionCostsAmt match {
                 case Some(data) => data.setScale(2).toString
                 case None => "0.00"
-              }))
+              }),
+              Some(routes.CalculationController.acquisitionCosts().toString())
             )
           )
           case "No" => Array(
-            Map(
-              "question" -> Messages("calc.acquisitionValue.question"),
-              "answer" -> ("&pound;" + summary.acquisitionValueModel.acquisitionValueAmt.setScale(2).toString)
+            SummaryDataItemModel(
+              Messages("calc.acquisitionValue.question"),
+              "&pound;" + summary.acquisitionValueModel.acquisitionValueAmt.setScale(2).toString,
+              Some(routes.CalculationController.acquisitionValue().toString())
             ),
-            Map(
-              "question" -> Messages("calc.acquisitionCosts.question"),
-              "answer" -> ("&pound;" + (summary.acquisitionCostsModel.acquisitionCostsAmt match {
+            SummaryDataItemModel(
+              Messages("calc.acquisitionCosts.question"),
+              "&pound;" + (summary.acquisitionCostsModel.acquisitionCostsAmt match {
                 case Some(data) => data.setScale(2).toString
                 case None => "0.00"
-              }))
+              }),
+              Some(routes.CalculationController.acquisitionCosts().toString())
             )
           )
-        }}
+        }
       }
 
     )
@@ -286,37 +317,44 @@ object SummaryConstructor {
       summary.improvementsModel.isClaimingImprovements match {
         case "Yes" => summary.calculationElectionModel.calculationType match {
           case "rebased" => Array(
-            Map(
-              "question" -> Messages("calc.improvements.question"),
-              "answer" -> summary.improvementsModel.isClaimingImprovements
+            SummaryDataItemModel(
+              Messages("calc.improvements.question"),
+              summary.improvementsModel.isClaimingImprovements,
+              Some(routes.CalculationController.improvements().toString())
             ),
-            Map(
-              "question" -> Messages("calc.improvements.questionThree"),
-              "answer" -> ("&pound;" + summary.improvementsModel.improvementsAmt.get.setScale(2))
+            SummaryDataItemModel(
+              Messages("calc.improvements.questionThree"),
+              "&pound;" + summary.improvementsModel.improvementsAmt.get.setScale(2),
+              Some(routes.CalculationController.improvements().toString())
             ),
-            Map(
-              "question" -> Messages("calc.improvements.questionFour"),
-              "answer" -> ("&pound;" + summary.improvementsModel.improvementsAmtAfter.getOrElse(BigDecimal(0)).setScale(2))
+            SummaryDataItemModel(
+              Messages("calc.improvements.questionFour"),
+              "&pound;" + summary.improvementsModel.improvementsAmtAfter.getOrElse(BigDecimal(0)).setScale(2),
+              Some(routes.CalculationController.improvements().toString())
             )
           )
           case _ => Array(
-            Map(
-              "question" -> Messages("calc.improvements.question"),
-              "answer" -> summary.improvementsModel.isClaimingImprovements
+            SummaryDataItemModel(
+              Messages("calc.improvements.question"),
+              summary.improvementsModel.isClaimingImprovements,
+              Some(routes.CalculationController.improvements().toString())
             ),
-            Map(
-              "question" -> Messages("calc.improvements.questionTwo"),
-              "answer" -> ("&pound;" + {summary.improvementsModel.improvementsAmt.getOrElse(BigDecimal(0))
+            SummaryDataItemModel(
+              Messages("calc.improvements.questionTwo"),
+              "&pound;" + {summary.improvementsModel.improvementsAmt.getOrElse(BigDecimal(0))
                 .+(summary.improvementsModel.improvementsAmtAfter.getOrElse(BigDecimal(0))).setScale(2)
-              })
+              },
+              Some(routes.CalculationController.improvements().toString())
             )
           )
         }
 
         case "No" => Array(
-          Map(
-            "question" -> Messages("calc.improvements.question"),
-            "answer" -> summary.improvementsModel.isClaimingImprovements)
+          SummaryDataItemModel(
+            Messages("calc.improvements.question"),
+            summary.improvementsModel.isClaimingImprovements,
+            Some(routes.CalculationController.improvements().toString())
+          )
         )
       }
     )
@@ -325,20 +363,23 @@ object SummaryConstructor {
   def saleDetails(result: CalculationResultModel, summary: SummaryModel) = {
     summaryPageSection("saleDetails", Messages("calc.summary.sale.details.title"),
       Array(
-        Map(
-          "question" -> Messages("calc.disposalDate.question"),
-          "answer" -> Dates.datePageFormat.format(Dates.constructDate(summary.disposalDateModel.day, summary.disposalDateModel.month, summary.disposalDateModel.year))
+        SummaryDataItemModel(
+          Messages("calc.disposalDate.question"),
+          Dates.datePageFormat.format(Dates.constructDate(summary.disposalDateModel.day, summary.disposalDateModel.month, summary.disposalDateModel.year)),
+          Some(routes.CalculationController.disposalDate().toString())
         ),
-        Map(
-          "question" -> Messages("calc.disposalValue.question"),
-          "answer" -> ("&pound;" + summary.disposalValueModel.disposalValue.setScale(2).toString)
+        SummaryDataItemModel(
+          Messages("calc.disposalValue.question"),
+          "&pound;" + summary.disposalValueModel.disposalValue.setScale(2).toString,
+          Some(routes.CalculationController.disposalValue().toString())
         ),
-        Map(
-          "question" -> Messages("calc.disposalCosts.question"),
-          "answer" -> ("&pound;" + (summary.disposalCostsModel.disposalCosts match {
+        SummaryDataItemModel(
+          Messages("calc.disposalCosts.question"),
+          "&pound;" + (summary.disposalCostsModel.disposalCosts match {
             case Some(data) => data.setScale(2).toString
             case None => "0.00"
-          }))
+          }),
+          Some(routes.CalculationController.disposalCosts().toString())
         )
       )
     )
@@ -348,63 +389,72 @@ object SummaryConstructor {
     summaryPageSection("deductions", Messages("calc.summary.deductions.title"),
       summary.calculationElectionModel.calculationType match {
         case "flat" => Array(
-          Map(
-            "question" -> Messages("calc.entrepreneursRelief.question"),
-            "answer" -> summary.entrepreneursReliefModel.entReliefClaimed
+          SummaryDataItemModel(
+            Messages("calc.entrepreneursRelief.question"),
+            summary.entrepreneursReliefModel.entReliefClaimed,
+            Some(routes.CalculationController.entrepreneursRelief().toString())
           ),
-          Map(
-            "question" -> Messages("calc.allowableLosses.question.two"),
-            "answer" -> ("&pound;" + (summary.allowableLossesModel.isClaimingAllowableLosses match {
+          SummaryDataItemModel(
+            Messages("calc.allowableLosses.question.two"),
+            "&pound;" + (summary.allowableLossesModel.isClaimingAllowableLosses match {
               case "Yes" => summary.allowableLossesModel.allowableLossesAmt.get.setScale(2).toString
               case "No" => "0.00"
-            }))
+            }),
+            Some(routes.CalculationController.allowableLosses().toString())
           ),
-          Map(
-            "question" -> Messages("calc.otherReliefs.question"),
-            "answer" -> ("&pound;" + (summary.otherReliefsModelFlat.otherReliefs match {
+          SummaryDataItemModel(
+            Messages("calc.otherReliefs.question"),
+            "&pound;" + (summary.otherReliefsModelFlat.otherReliefs match {
               case Some(data) => data.setScale(2).toString
               case None => "0.00"
-            }))
+            }),
+            Some(routes.CalculationController.otherReliefs().toString())
           )
         )
         case "time" => Array(
-          Map(
-            "question" -> Messages("calc.entrepreneursRelief.question"),
-            "answer" -> summary.entrepreneursReliefModel.entReliefClaimed
+          SummaryDataItemModel(
+            Messages("calc.entrepreneursRelief.question"),
+            summary.entrepreneursReliefModel.entReliefClaimed,
+            Some(routes.CalculationController.entrepreneursRelief().toString())
           ),
-          Map(
-            "question" -> Messages("calc.allowableLosses.question.two"),
-            "answer" -> ("&pound;" + (summary.allowableLossesModel.isClaimingAllowableLosses match {
+          SummaryDataItemModel(
+            Messages("calc.allowableLosses.question.two"),
+            "&pound;" + (summary.allowableLossesModel.isClaimingAllowableLosses match {
               case "Yes" => summary.allowableLossesModel.allowableLossesAmt.get.setScale(2).toString
               case "No" => "0.00"
-            }))
+            }),
+            Some(routes.CalculationController.allowableLosses().toString())
           ),
-          Map(
-            "question" -> Messages("calc.otherReliefs.question"),
-            "answer" -> ("&pound;" + (summary.otherReliefsModelTA.otherReliefs match {
+          SummaryDataItemModel(
+            Messages("calc.otherReliefs.question"),
+            "&pound;" + (summary.otherReliefsModelTA.otherReliefs match {
               case Some(data) => data.setScale(2).toString
               case None => "0.00"
-            }))
+            }),
+            Some(routes.CalculationController.otherReliefsTA().toString())
           )
         )
         case "rebased" => Array(
-          Map(
-            "question" -> Messages("calc.entrepreneursRelief.question"),
-            "answer" -> summary.entrepreneursReliefModel.entReliefClaimed
+          SummaryDataItemModel(
+            Messages("calc.entrepreneursRelief.question"),
+            summary.entrepreneursReliefModel.entReliefClaimed,
+            Some(routes.CalculationController.entrepreneursRelief().toString())
           ),
-          Map(
-            "question" -> Messages("calc.allowableLosses.question.two"),
-            "answer" -> ("&pound;" + (summary.allowableLossesModel.isClaimingAllowableLosses match {
+          SummaryDataItemModel(
+            Messages("calc.allowableLosses.question.two"),
+            "&pound;" + (summary.allowableLossesModel.isClaimingAllowableLosses match {
               case "Yes" => summary.allowableLossesModel.allowableLossesAmt.get.setScale(2).toString
               case "No" => "0.00"
-            }))
+            }),
+            Some(routes.CalculationController.allowableLosses().toString())
           ),
-          Map(
-            "question" -> Messages("calc.otherReliefs.question"),
-            "answer" -> ("&pound;" + (summary.otherReliefsModelRebased.otherReliefs match {
+          SummaryDataItemModel(
+            Messages("calc.otherReliefs.question"),
+            "&pound;" + (summary.otherReliefsModelRebased.otherReliefs match {
               case Some(data) => data.setScale(2).toString
               case None => "0.00"
-            }))
+            }),
+            Some(routes.CalculationController.otherReliefsRebased().toString())
           )
         )
       }
