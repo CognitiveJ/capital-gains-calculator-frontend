@@ -16,6 +16,8 @@
 
 package controllers
 
+import java.text.SimpleDateFormat
+
 import connectors.CalculatorConnector
 import common.Dates
 import constructors.CalculationElectionConstructor
@@ -38,7 +40,9 @@ import forms.CalculationElectionForm._
 import forms.AcquisitionDateForm._
 import forms.RebasedValueForm._
 import forms.RebasedCostsForm._
+import forms.PrivateResidenceReliefForm._
 import models._
+import java.util.{Calendar, Date}
 import play.api.mvc.{Result, AnyContent, Action}
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -386,9 +390,79 @@ trait CalculationController extends FrontendController {
   }
 
   //################### Private Residence Relief methods #######################
-
   val privateResidenceRelief = Action.async { implicit request =>
-    Future.successful(Ok(calculation.privateResidenceRelief()))
+
+    def getDisposalDate: Future[Option[Date]] = calcConnector.fetchAndGetFormData[DisposalDateModel]("disposalDate").map {
+      case Some(data) => Some(Dates.constructDate(data.day, data.month, data.year))
+      case _ => None
+    }
+
+    def getAcquisitionDate: Future[Option[Date]] = calcConnector.fetchAndGetFormData[AcquisitionDateModel]("acquisitionDate").map {
+      case Some(data) => data.hasAcquisitionDate match {
+        case "Yes" => Some(Dates.constructDate(data.day.get, data.month.get, data.year.get))
+        case _ => None
+      }
+      case _ => None
+    }
+
+    def getRebasedAmount: Future[Boolean] = calcConnector.fetchAndGetFormData[RebasedValueModel]("rebasedValue").map {
+      case Some(data) if data.hasRebasedValue == "Yes" => true
+      case _ => false
+    }
+
+    def action(disposalDate: Option[Date], acquisitionDate: Option[Date], hasRebasedValue: Boolean) = {
+
+      //Determine whether to show the Between question
+      val showBetweenQuestion = disposalDate match {
+        case Some(date) =>
+          if (Dates.dateAfterOctober(date)) {
+            acquisitionDate match {
+              case Some(acquisitionDateValue) if !Dates.dateAfterStart(acquisitionDateValue) => true
+              case _ => if (hasRebasedValue) true else false
+            }
+          } else false
+        case _ => false
+      }
+
+      //Determine whether to show the Before question
+      val showBeforeQuestion = disposalDate match {
+        case Some(disposalDateValue) =>
+          if (Dates.dateAfterOctober(disposalDateValue)) {
+            acquisitionDate match {
+              case Some(acquisitionDateValue) => true
+              case _ => false
+            }
+          } else {
+            acquisitionDate match {
+              case Some(acquisitionDateValue) if !Dates.dateAfterStart(acquisitionDateValue) => true
+              case _ => false
+            }
+          }
+        case _ => false
+      }
+
+      val disposalDateLess18Months = disposalDate match {
+        case Some(date) =>
+          val cal = Calendar.getInstance()
+          cal.setTime(disposalDate.get)
+          cal.add(Calendar.MONTH,-18)
+          new SimpleDateFormat("d MMMMM yyyy").format(cal.getTime)
+        case _ => ""
+      }
+
+      calcConnector.fetchAndGetFormData[PrivateResidenceReliefModel]("privateResidenceRelief").map {
+        case Some(data) => Ok(calculation.privateResidenceRelief(privateResidenceReliefForm.fill(data), showBetweenQuestion, showBeforeQuestion, disposalDateLess18Months))
+        case None => Ok(calculation.privateResidenceRelief(privateResidenceReliefForm, showBetweenQuestion, showBeforeQuestion, disposalDateLess18Months))
+      }
+
+    }
+
+    for {
+      disposalDate <- getDisposalDate
+      acquisitionDate <- getAcquisitionDate
+      hasRebasedValue <- getRebasedAmount
+      finalResult <- action(disposalDate, acquisitionDate, hasRebasedValue)
+    } yield finalResult
   }
 
   //################### Entrepreneurs Relief methods #######################
