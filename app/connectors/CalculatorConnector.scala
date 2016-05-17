@@ -26,6 +26,8 @@ import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet, HttpResponse}
 import scala.concurrent.ExecutionContext.Implicits.global
 
+import common.KeystoreKeys
+
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
@@ -74,27 +76,27 @@ trait CalculatorConnector {
 
 
   def createSummary(implicit hc: HeaderCarrier): Future[SummaryModel] = {
-    val customerType = fetchAndGetFormData[CustomerTypeModel]("customerType").map(formData => formData.get)
-    val disabledTrustee = fetchAndGetFormData[DisabledTrusteeModel]("disabledTrustee")
-    val currentIncome = fetchAndGetFormData[CurrentIncomeModel]("currentIncome")
-    val personalAllowance = fetchAndGetFormData[PersonalAllowanceModel]("personalAllowance")
-    val otherProperties = fetchAndGetFormData[OtherPropertiesModel]("otherProperties").map(formData => formData.get)
-    val annualExemptAmount = fetchAndGetFormData[AnnualExemptAmountModel]("annualExemptAmount")
-    val acquisitionDate = fetchAndGetFormData[AcquisitionDateModel]("acquisitionDate").map(formData => formData.get)
-    val acquisitionValue = fetchAndGetFormData[AcquisitionValueModel]("acquisitionValue").map(formData => formData.get)
-    val rebasedValue = fetchAndGetFormData[RebasedValueModel]("rebasedValue")
-    val rebasedCosts = fetchAndGetFormData[RebasedCostsModel]("rebasedCosts")
-    val improvements = fetchAndGetFormData[ImprovementsModel]("improvements").map(formData => formData.get)
-    val disposalDate = fetchAndGetFormData[DisposalDateModel]("disposalDate").map(formData => formData.get)
-    val disposalValue = fetchAndGetFormData[DisposalValueModel]("disposalValue").map(formData => formData.get)
-    val acquisitionCosts = fetchAndGetFormData[AcquisitionCostsModel]("acquisitionCosts").map(formData => formData.get)
-    val disposalCosts = fetchAndGetFormData[DisposalCostsModel]("disposalCosts").map(formData => formData.get)
-    val entrepreneursRelief = fetchAndGetFormData[EntrepreneursReliefModel]("entrepreneursRelief").map(formData => formData.get)
-    val allowableLosses = fetchAndGetFormData[AllowableLossesModel]("allowableLosses").map(formData => formData.get)
-    val calculationElection = fetchAndGetFormData[CalculationElectionModel]("calculationElection").map(formData => formData.getOrElse(CalculationElectionModel("")))
-    val otherReliefsFlat = fetchAndGetFormData[OtherReliefsModel]("otherReliefsFlat").map(formData => formData.getOrElse(OtherReliefsModel(None)))
-    val otherReliefsTA = fetchAndGetFormData[OtherReliefsModel]("otherReliefsTA").map(formData => formData.getOrElse(OtherReliefsModel(None)))
-    val otherReliefsRebased = fetchAndGetFormData[OtherReliefsModel]("otherReliefsRebased").map(formData => formData.getOrElse(OtherReliefsModel(None)))
+    val customerType = fetchAndGetFormData[CustomerTypeModel](KeystoreKeys.customerType).map(formData => formData.get)
+    val disabledTrustee = fetchAndGetFormData[DisabledTrusteeModel](KeystoreKeys.disabledTrustee)
+    val currentIncome = fetchAndGetFormData[CurrentIncomeModel](KeystoreKeys.currentIncome)
+    val personalAllowance = fetchAndGetFormData[PersonalAllowanceModel](KeystoreKeys.personalAllowance)
+    val otherProperties = fetchAndGetFormData[OtherPropertiesModel](KeystoreKeys.otherProperties).map(formData => formData.get)
+    val annualExemptAmount = fetchAndGetFormData[AnnualExemptAmountModel](KeystoreKeys.annualExemptAmount)
+    val acquisitionDate = fetchAndGetFormData[AcquisitionDateModel](KeystoreKeys.acquisitionDate).map(formData => formData.get)
+    val acquisitionValue = fetchAndGetFormData[AcquisitionValueModel](KeystoreKeys.acquisitionValue).map(formData => formData.get)
+    val rebasedValue = fetchAndGetFormData[RebasedValueModel](KeystoreKeys.rebasedValue)
+    val rebasedCosts = fetchAndGetFormData[RebasedCostsModel](KeystoreKeys.rebasedCosts)
+    val improvements = fetchAndGetFormData[ImprovementsModel](KeystoreKeys.improvements).map(formData => formData.get)
+    val disposalDate = fetchAndGetFormData[DisposalDateModel](KeystoreKeys.disposalDate).map(formData => formData.get)
+    val disposalValue = fetchAndGetFormData[DisposalValueModel](KeystoreKeys.disposalValue).map(formData => formData.get)
+    val acquisitionCosts = fetchAndGetFormData[AcquisitionCostsModel](KeystoreKeys.acquisitionCosts).map(formData => formData.get)
+    val disposalCosts = fetchAndGetFormData[DisposalCostsModel](KeystoreKeys.disposalCosts).map(formData => formData.get)
+    val entrepreneursRelief = fetchAndGetFormData[EntrepreneursReliefModel](KeystoreKeys.entrepreneursRelief).map(formData => formData.get)
+    val allowableLosses = fetchAndGetFormData[AllowableLossesModel](KeystoreKeys.allowableLosses).map(formData => formData.get)
+    val calculationElection = fetchAndGetFormData[CalculationElectionModel](KeystoreKeys.calculationElection).map(formData => formData.getOrElse(CalculationElectionModel("")))
+    val otherReliefsFlat = fetchAndGetFormData[OtherReliefsModel](KeystoreKeys.otherReliefsFlat).map(formData => formData.getOrElse(OtherReliefsModel(None)))
+    val otherReliefsTA = fetchAndGetFormData[OtherReliefsModel](KeystoreKeys.otherReliefsTA).map(formData => formData.getOrElse(OtherReliefsModel(None)))
+    val otherReliefsRebased = fetchAndGetFormData[OtherReliefsModel](KeystoreKeys.otherReliefsRebased).map(formData => formData.getOrElse(OtherReliefsModel(None)))
 
     for {
       customerTypeModel <- customerType
