@@ -394,12 +394,12 @@ trait CalculationController extends FrontendController {
   //################### Private Residence Relief methods #######################
   val privateResidenceRelief = Action.async { implicit request =>
 
-    def getDisposalDate: Future[Option[Date]] = calcConnector.fetchAndGetFormData[DisposalDateModel]("disposalDate").map {
+    def getDisposalDate: Future[Option[Date]] = calcConnector.fetchAndGetFormData[DisposalDateModel](KeystoreKeys.disposalDate).map {
       case Some(data) => Some(Dates.constructDate(data.day, data.month, data.year))
       case _ => None
     }
 
-    def getAcquisitionDate: Future[Option[Date]] = calcConnector.fetchAndGetFormData[AcquisitionDateModel]("acquisitionDate").map {
+    def getAcquisitionDate: Future[Option[Date]] = calcConnector.fetchAndGetFormData[AcquisitionDateModel](KeystoreKeys.acquisitionDate).map {
       case Some(data) => data.hasAcquisitionDate match {
         case "Yes" => Some(Dates.constructDate(data.day.get, data.month.get, data.year.get))
         case _ => None
@@ -407,7 +407,7 @@ trait CalculationController extends FrontendController {
       case _ => None
     }
 
-    def getRebasedAmount: Future[Boolean] = calcConnector.fetchAndGetFormData[RebasedValueModel]("rebasedValue").map {
+    def getRebasedAmount: Future[Boolean] = calcConnector.fetchAndGetFormData[RebasedValueModel](KeystoreKeys.rebasedValue).map {
       case Some(data) if data.hasRebasedValue == "Yes" => true
       case _ => false
     }
@@ -452,7 +452,7 @@ trait CalculationController extends FrontendController {
         case _ => ""
       }
 
-      calcConnector.fetchAndGetFormData[PrivateResidenceReliefModel]("privateResidenceRelief").map {
+      calcConnector.fetchAndGetFormData[PrivateResidenceReliefModel](KeystoreKeys.privateResidenceRelief).map {
         case Some(data) => Ok(calculation.privateResidenceRelief(privateResidenceReliefForm.fill(data), showBetweenQuestion, showBeforeQuestion, disposalDateLess18Months))
         case None => Ok(calculation.privateResidenceRelief(privateResidenceReliefForm, showBetweenQuestion, showBeforeQuestion, disposalDateLess18Months))
       }
