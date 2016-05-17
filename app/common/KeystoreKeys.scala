@@ -41,5 +41,5 @@ trait KeystoreKeys {
   val otherReliefsFlat = "otherReliefsFlat"
   val otherReliefsTA = "otherReliefsTA"
   val otherReliefsRebased = "otherReliefsRebased"
-  
+  val privateResidenceRelief = "privateResidenceRelief"
 }
