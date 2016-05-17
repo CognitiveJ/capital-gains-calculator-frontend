@@ -91,8 +91,9 @@ class DisposalCostsSpec extends UnitSpec with WithFakeApplication with MockitoSu
           document.getElementsByTag("title").text shouldBe Messages("calc.disposalCosts.question")
         }
 
-        "have a back link" in {
-          document.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+        s"have a 'Back' link to ${routes.CalculationController.acquisitionCosts}" in {
+          document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+          document.body.getElementById("back-link").attr("href") shouldEqual routes.CalculationController.acquisitionCosts.toString()
         }
 
         "have the heading 'Calculate your tax (non-residents)'" in {

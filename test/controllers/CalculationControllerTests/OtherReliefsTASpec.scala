@@ -19,7 +19,7 @@ package controllers.CalculationControllerTests
 import common.TestModels
 import connectors.CalculatorConnector
 import constructors.CalculationElectionConstructor
-import controllers.CalculationController
+import controllers.{routes, CalculationController}
 import models.{CalculationResultModel, SummaryModel, OtherReliefsModel}
 import org.jsoup.Jsoup
 import org.mockito.Matchers
@@ -94,8 +94,9 @@ class OtherReliefsTASpec extends UnitSpec with WithFakeApplication with MockitoS
         document.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
       }
 
-      "have a 'Back' link " in {
+      s"have a 'Back' link to ${routes.CalculationController.calculationElection}" in {
         document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+        document.body.getElementById("back-link").attr("href") shouldEqual routes.CalculationController.calculationElection.toString()
       }
 
       "have the question 'How much extra tax relief are you claiming?' as the legend of the input" in {

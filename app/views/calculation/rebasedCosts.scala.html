@@ -5,7 +5,8 @@
 @(rebasedCosts: Form[RebasedCostsModel])(implicit request: Request[_])
 
 @main_template(Messages("calc.rebasedCosts.question")) {
-    <a id="back-link" class="back-link" href="#">Back</a>
+
+    <a id="back-link" class="back-link" href="@routes.CalculationController.rebasedValue">Back</a>
 
     @govHelpers.errorSummary(Messages("calc.error.summary.heading"), rebasedCosts)
 

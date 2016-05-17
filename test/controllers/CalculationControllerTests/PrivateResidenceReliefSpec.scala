@@ -74,8 +74,9 @@ class PrivateResidenceReliefSpec extends UnitSpec with WithFakeApplication with 
         charset(result) shouldBe Some("utf-8")
       }
 
-      "have a back button" in {
+      s"have a 'Back' link to ${routes.CalculationController.disposalCosts}" in {
         document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+        document.body.getElementById("back-link").attr("href") shouldEqual routes.CalculationController.disposalCosts.toString()
       }
 
       "have the title 'calc.privateResidenceRelief.question'" in {
