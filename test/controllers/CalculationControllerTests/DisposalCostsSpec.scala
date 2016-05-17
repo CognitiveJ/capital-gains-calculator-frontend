@@ -208,6 +208,18 @@ class DisposalCostsSpec extends UnitSpec with WithFakeApplication with MockitoSu
       }
     }
 
+    "submitting a valid form when an invalid Acquisition Date Model has been supplied and no property was revalued" should {
+      lazy val result = executeTargetWithMockData("1000", AcquisitionDateModel("invalid", None, None, None))
+
+      "return a 303" in {
+        status(result) shouldBe 303
+      }
+
+      s"redirect to ${routes.CalculationController.entrepreneursRelief()}" in {
+        redirectLocation(result) shouldBe Some(s"${routes.CalculationController.entrepreneursRelief()}")
+      }
+    }
+
     "submitting an valid form with no value" should {
 
       lazy val result = executeTargetWithMockData("", AcquisitionDateModel("No", None, None, None))

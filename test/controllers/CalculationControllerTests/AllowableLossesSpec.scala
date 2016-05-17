@@ -293,5 +293,18 @@ class AllowableLossesSpec extends UnitSpec with WithFakeApplication with Mockito
         redirectLocation(result) shouldBe Some(s"${routes.CalculationController.calculationElection()}")
       }
     }
+
+    "submitting a valid form when an invalid Acquisition Date Model has been supplied and no property was revalued" should {
+      val invalidDate = AcquisitionDateModel("invalid", None, None, None)
+      lazy val result = executeTargetWithMockData("No", "", invalidDate)
+
+      "return a 303" in {
+        status(result) shouldBe 303
+      }
+
+      s"redirect to ${routes.CalculationController.otherReliefs()}" in {
+        redirectLocation(result) shouldBe Some(s"${routes.CalculationController.otherReliefs()}")
+      }
+    }
   }
 }

@@ -383,17 +383,15 @@ trait CalculationController extends FrontendController {
       success => {
         calcConnector.saveFormData(KeystoreKeys.disposalCosts, success)
         calcConnector.fetchAndGetFormData[AcquisitionDateModel](KeystoreKeys.acquisitionDate).flatMap {
-          case Some(data) => data.hasAcquisitionDate match {
-            case "Yes" =>
-              Future.successful(Redirect(routes.CalculationController.privateResidenceRelief()))
-            case "No" => {
-              calcConnector.fetchAndGetFormData[RebasedValueModel](KeystoreKeys.rebasedValue).flatMap {
-                case Some(rebasedData) if rebasedData.hasRebasedValue == "Yes" => {
-                  Future.successful(Redirect(routes.CalculationController.privateResidenceRelief()))
-                }
-                case _ => {
-                  Future.successful(Redirect(routes.CalculationController.entrepreneursRelief()))
-                }
+          case Some(data) if data.hasAcquisitionDate == "Yes" =>
+            Future.successful(Redirect(routes.CalculationController.privateResidenceRelief()))
+          case _ => {
+            calcConnector.fetchAndGetFormData[RebasedValueModel](KeystoreKeys.rebasedValue).flatMap {
+              case Some(rebasedData) if rebasedData.hasRebasedValue == "Yes" => {
+                Future.successful(Redirect(routes.CalculationController.privateResidenceRelief()))
+              }
+              case _ => {
+                Future.successful(Redirect(routes.CalculationController.entrepreneursRelief()))
               }
             }
           }
@@ -440,22 +438,20 @@ trait CalculationController extends FrontendController {
       success => {
         calcConnector.saveFormData(KeystoreKeys.allowableLosses, success)
         calcConnector.fetchAndGetFormData[AcquisitionDateModel](KeystoreKeys.acquisitionDate).flatMap {
-          case Some(data) => data.hasAcquisitionDate match {
-            case "Yes" =>
+          case Some(data) if data.hasAcquisitionDate == "Yes" =>
               if (Dates.dateAfterStart(data.day.get, data.month.get, data.year.get)) {
                 calcConnector.saveFormData(KeystoreKeys.calculationElection, CalculationElectionModel("flat"))
                 Future.successful(Redirect(routes.CalculationController.otherReliefs()))
               }
               else Future.successful(Redirect(routes.CalculationController.calculationElection()))
-            case "No" => {
-              calcConnector.fetchAndGetFormData[RebasedValueModel](KeystoreKeys.rebasedValue).flatMap {
-                case Some(rebasedData) if rebasedData.hasRebasedValue == "Yes" => {
-                  Future.successful(Redirect(routes.CalculationController.calculationElection()))
-                }
-                case _ => {
-                  calcConnector.saveFormData(KeystoreKeys.calculationElection, CalculationElectionModel("flat"))
-                  Future.successful(Redirect(routes.CalculationController.otherReliefs()))
-                }
+          case _ => {
+            calcConnector.fetchAndGetFormData[RebasedValueModel](KeystoreKeys.rebasedValue).flatMap {
+              case Some(rebasedData) if rebasedData.hasRebasedValue == "Yes" => {
+                Future.successful(Redirect(routes.CalculationController.calculationElection()))
+              }
+              case _ => {
+                calcConnector.saveFormData(KeystoreKeys.calculationElection, CalculationElectionModel("flat"))
+                Future.successful(Redirect(routes.CalculationController.otherReliefs()))
               }
             }
           }
