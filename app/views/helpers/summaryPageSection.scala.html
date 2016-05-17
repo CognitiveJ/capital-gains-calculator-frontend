@@ -1,4 +1,4 @@
-@(sectionId: String, sectionTitle: String, sectionContent: Array[Map[String,String]])
+@(sectionId: String, sectionTitle: String, sectionContent: Array[Map[String, String, String]])
 
 <section id="@sectionId">
     @for(i <- 0 until sectionContent.length) {
@@ -11,7 +11,7 @@
                     <span class="lede">@sectionContent(i)("question")</span>
                 </div>
                 <div class="grid-layout__column grid-layout__column--1-3">
-                    <span id="@inputId" class="lede">@Html(sectionContent(i)("answer"))</span>
+                    <a id="@inputId" class="lede" href=@sectionContent(i)("link")>@Html(sectionContent(i)("answer"))</a>
                 </div>
             </div>
         }

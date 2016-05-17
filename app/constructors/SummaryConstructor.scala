@@ -16,6 +16,7 @@
 
 package constructors
 
+import controllers.routes
 import models.{RebasedValueModel, SummaryModel, CalculationResultModel}
 import org.apache.commons.lang3.text.WordUtils
 import play.api.i18n.Messages
@@ -32,6 +33,8 @@ object SummaryConstructor {
     }
   }
 
+  //scalastyle:off
+
   def calculationDetails(result: CalculationResultModel, summary: SummaryModel) = summaryPageSection("calcDetails", Messages("calc.summary.calculation.details.title"),
     result.upperTaxGain match {
       case Some(data) => Array(
@@ -41,23 +44,28 @@ object SummaryConstructor {
             case "flat" => Messages("calc.summary.calculation.details.flatCalculation")
             case "time" => Messages("calc.summary.calculation.details.timeCalculation")
             case "rebased" => Messages("calc.summary.calculation.details.rebasedCalculation")
-          })
+          }),
+          "link" -> routes.CalculationController.calculationElection().toString()
         ),
         Map(
           "question" -> lossOrGainWording(result.totalGain),
-          "answer" -> ("&pound;" + result.totalGain.abs.setScale(2).toString)
+          "answer" -> ("&pound;" + result.totalGain.abs.setScale(2).toString),
+          "link" -> ""
         ),
         Map(
           "question" -> Messages("calc.summary.calculation.details.taxableGain"),
-          "answer" -> ("&pound;" + result.taxableGain.setScale(2).toString)
+          "answer" -> ("&pound;" + result.taxableGain.setScale(2).toString),
+          "link" -> ""
         ),
         Map(
           "question" -> Messages("calc.summary.calculation.details.taxRate"),
-          "answer" -> ("&pound;" + result.baseTaxGain.setScale(2).toString + " at " + result.baseTaxRate + "%")
+          "answer" -> ("&pound;" + result.baseTaxGain.setScale(2).toString + " at " + result.baseTaxRate + "%"),
+          "link" -> ""
         ),
         Map(
           "question" -> "",
-          "answer" -> ("&pound;" + result.upperTaxGain.get.setScale(2).toString + " at " + result.upperTaxRate.get.toString + "%")
+          "answer" -> ("&pound;" + result.upperTaxGain.get.setScale(2).toString + " at " + result.upperTaxRate.get.toString + "%"),
+          "link" -> ""
         )
       )
       case None => Array(
@@ -67,19 +75,24 @@ object SummaryConstructor {
             case "flat" => Messages("calc.summary.calculation.details.flatCalculation")
             case "time" => Messages("calc.summary.calculation.details.timeCalculation")
             case "rebased" => Messages("calc.summary.calculation.details.rebasedCalculation")
-          })
+          }),
+          "link" -> routes.CalculationController.calculationElection().toString()
         ),
         Map(
           "question" -> lossOrGainWording(result.totalGain),
-          "answer" -> ("&pound;" + result.totalGain.abs.setScale(2).toString)
+          "answer" -> ("&pound;" + result.totalGain.abs.setScale(2).toString),
+          "link" -> ""
         ),
         Map(
           "question" -> Messages("calc.summary.calculation.details.taxableGain"),
-          "answer" -> ("&pound;" + (result.baseTaxGain + result.upperTaxGain.getOrElse(0)).setScale(2).toString)
+          "answer" -> ("&pound;" + (result.baseTaxGain + result.upperTaxGain.getOrElse(0)).setScale(2).toString),
+          "link" -> ""
         ),
         Map(
           "question" -> Messages("calc.summary.calculation.details.taxRate"),
-          "answer" -> (result.baseTaxRate + "%"))
+          "answer" -> (result.baseTaxRate + "%"),
+          "link" -> ""
+        )
       )
     }
   )
