@@ -14,6 +14,13 @@ calc.base.optionReqError = Choose one of the options
 ## Error Summary ##
 calc.error.summary.heading = This page has errors
 
+## Feedback ##
+feedback.title = Feedback
+
+## Feedback Thank You ##
+feedback.thankyou.title = Feedback received
+feedback.thankyou.back = Back
+
 ## Common date Messages ##
 ## Use common messages if some but not all pages use these messages. ##
 calc.common.date.fields.day = Day
