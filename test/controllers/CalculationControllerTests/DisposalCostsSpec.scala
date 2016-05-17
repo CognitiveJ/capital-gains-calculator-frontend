@@ -39,13 +39,22 @@ class DisposalCostsSpec extends UnitSpec with WithFakeApplication with MockitoSu
 
   implicit val hc = new HeaderCarrier()
 
-  def setupTarget(getData: Option[DisposalCostsModel], postData: Option[DisposalCostsModel]): CalculationController = {
+  def setupTarget(getData: Option[DisposalCostsModel],
+                  postData: Option[DisposalCostsModel],
+                  acquisitionDate: Option[AcquisitionDateModel],
+                  rebasedData: Option[RebasedValueModel] = None): CalculationController = {
 
     val mockCalcConnector = mock[CalculatorConnector]
     val mockCalcElectionConstructor = mock[CalculationElectionConstructor]
 
     when(mockCalcConnector.fetchAndGetFormData[DisposalCostsModel](Matchers.any())(Matchers.any(), Matchers.any()))
       .thenReturn(Future.successful(getData))
+
+    when(mockCalcConnector.fetchAndGetFormData[AcquisitionDateModel](Matchers.eq("acquisitionDate"))(Matchers.any(), Matchers.any()))
+      .thenReturn(Future.successful(acquisitionDate))
+
+    when(mockCalcConnector.fetchAndGetFormData[RebasedValueModel](Matchers.eq("rebasedValue"))(Matchers.any(), Matchers.any()))
+      .thenReturn(Future.successful(rebasedData))
 
     lazy val data = CacheMap("form-id", Map("data" -> Json.toJson(postData.getOrElse(DisposalCostsModel(None)))))
     when(mockCalcConnector.saveFormData[DisposalCostsModel](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
@@ -64,7 +73,7 @@ class DisposalCostsSpec extends UnitSpec with WithFakeApplication with MockitoSu
 
     "not supplied with a pre-existing stored model" should {
 
-      val target = setupTarget(None, None)
+      val target = setupTarget(None, None, None, None)
       lazy val result = target.disposalCosts(fakeRequest)
       lazy val document = Jsoup.parse(bodyOf(result))
 
@@ -116,7 +125,7 @@ class DisposalCostsSpec extends UnitSpec with WithFakeApplication with MockitoSu
 
     "supplied with a pre-existing stored model" should {
 
-      val target = setupTarget(Some(DisposalCostsModel(Some(1000))), None)
+      val target = setupTarget(Some(DisposalCostsModel(Some(1000))), None, None, None)
       lazy val result = target.disposalCosts(fakeRequest)
       lazy val document = Jsoup.parse(bodyOf(result))
 
@@ -145,7 +154,9 @@ class DisposalCostsSpec extends UnitSpec with WithFakeApplication with MockitoSu
       .withSession(SessionKeys.sessionId -> "12345")
       .withFormUrlEncodedBody(body: _*)
 
-    def executeTargetWithMockData(amount: String): Future[Result] = {
+    def executeTargetWithMockData(amount: String,
+                                  acquisitionDate: AcquisitionDateModel,
+                                  rebasedData: Option[RebasedValueModel] = None): Future[Result] = {
 
       lazy val fakeRequest = buildRequest(("disposalCosts", amount))
 
@@ -155,13 +166,50 @@ class DisposalCostsSpec extends UnitSpec with WithFakeApplication with MockitoSu
         case _ => new DisposalCostsModel(None)
       }
 
-      val target = setupTarget(None, Some(mockData))
+      val target = setupTarget(None, Some(mockData), Some(acquisitionDate), rebasedData)
       target.submitDisposalCosts(fakeRequest)
     }
 
-    "submitting a valid form" should {
+    "submitting a valid form when any acquisition date has been supplied but no property was revalued" should {
 
-      lazy val result = executeTargetWithMockData("1000")
+      lazy val result = executeTargetWithMockData("1000", AcquisitionDateModel("Yes", Some(12), Some(3), Some(2016)))
+
+      "return a 303" in {
+        status(result) shouldBe 303
+      }
+
+      s"redirect to ${routes.CalculationController.privateResidenceRelief()}" in {
+        redirectLocation(result) shouldBe Some(s"${routes.CalculationController.privateResidenceRelief()}")
+      }
+    }
+
+    "submitting a valid form when no acquisition date has been supplied but a property was revalued" should {
+      val rebased = RebasedValueModel("Yes", Some(BigDecimal(1000)))
+      lazy val result = executeTargetWithMockData("1000", AcquisitionDateModel("No", None, None, None), Some(rebased))
+
+      "return a 303" in {
+        status(result) shouldBe 303
+      }
+
+      s"redirect to ${routes.CalculationController.privateResidenceRelief()}" in {
+        redirectLocation(result) shouldBe Some(s"${routes.CalculationController.privateResidenceRelief()}")
+      }
+    }
+
+    "submitting a valid form when no acquisition date has been supplied and no property was revalued" should {
+      lazy val result = executeTargetWithMockData("1000", AcquisitionDateModel("No", None, None, None))
+
+      "return a 303" in {
+        status(result) shouldBe 303
+      }
+
+      s"redirect to ${routes.CalculationController.entrepreneursRelief()}" in {
+        redirectLocation(result) shouldBe Some(s"${routes.CalculationController.entrepreneursRelief()}")
+      }
+    }
+
+    "submitting a valid form when an invalid Acquisition Date Model has been supplied and no property was revalued" should {
+      lazy val result = executeTargetWithMockData("1000", AcquisitionDateModel("invalid", None, None, None))
 
       "return a 303" in {
         status(result) shouldBe 303
@@ -174,7 +222,7 @@ class DisposalCostsSpec extends UnitSpec with WithFakeApplication with MockitoSu
 
     "submitting an valid form with no value" should {
 
-      lazy val result = executeTargetWithMockData("")
+      lazy val result = executeTargetWithMockData("", AcquisitionDateModel("No", None, None, None))
 
       "return a 303" in {
         status(result) shouldBe 303
@@ -183,7 +231,7 @@ class DisposalCostsSpec extends UnitSpec with WithFakeApplication with MockitoSu
 
     "submitting an invalid form with a negative value of -432" should {
 
-      lazy val result = executeTargetWithMockData("-432")
+      lazy val result = executeTargetWithMockData("-432", AcquisitionDateModel("No", None, None, None))
       lazy val document = Jsoup.parse(bodyOf(result))
 
       "return a 400" in {
@@ -197,7 +245,7 @@ class DisposalCostsSpec extends UnitSpec with WithFakeApplication with MockitoSu
 
     "submitting an invalid form with a value that has more than two decimal places" should {
 
-      lazy val result = executeTargetWithMockData("432.222")
+      lazy val result = executeTargetWithMockData("432.222", AcquisitionDateModel("No", None, None, None))
       lazy val document = Jsoup.parse(bodyOf(result))
 
       "return a 400" in {
@@ -211,7 +259,7 @@ class DisposalCostsSpec extends UnitSpec with WithFakeApplication with MockitoSu
 
     "submitting an invalid form with a value that is negative and has more than two decimal places" should {
 
-      lazy val result = executeTargetWithMockData("-432.9876")
+      lazy val result = executeTargetWithMockData("-432.9876", AcquisitionDateModel("No", None, None, None))
       lazy val document = Jsoup.parse(bodyOf(result))
 
       "return a 400" in {
