@@ -35,6 +35,15 @@ import scala.concurrent.Future
 
 object FeedbackController extends FeedbackController with PartialRetriever {
 
+  override val httpPost = WSHttp
+  override val httpGet = WSHttp
+
+  override def contactFormReferer(implicit request: Request[AnyContent]): String = request.headers.get(REFERER).getOrElse("")
+  override def localSubmitUrl(implicit request: Request[AnyContent]): String = routes.FeedbackController.submit().url
+
+  protected def authConnector: AuthConnector = ???
+  protected def loadPartial(url : String)(implicit request : RequestHeader) : HtmlPartial = ???
+
   implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = new CachedStaticHtmlPartialRetriever {
     override val httpGet: HttpGet = WSHttp
   }
@@ -44,14 +53,7 @@ object FeedbackController extends FeedbackController with PartialRetriever {
     override def crypto: (String) => String = cookie => SessionCookieCryptoFilter.encrypt(cookie)
   }
 
-  override val httpPost = WSHttp
-  override def contactFormReferer(implicit request: Request[AnyContent]): String = request.headers.get(REFERER).getOrElse("")
-  override def localSubmitUrl(implicit request: Request[AnyContent]): String = routes.FeedbackController.submit().url
-
-  override val httpGet: HttpGet = WSHttp
-  protected def authConnector: AuthConnector = ???
-  protected def loadPartial(url : String)(implicit request : RequestHeader) : HtmlPartial = ???
-
+  override val applicationConfig: AppConfig = ApplicationConfig
 }
 
 trait FeedbackController extends FrontendController with Actions {
@@ -62,14 +64,16 @@ trait FeedbackController extends FrontendController with Actions {
   def contactFormReferer(implicit request: Request[AnyContent]): String
   def localSubmitUrl(implicit request: Request[AnyContent]): String
 
+  val applicationConfig: AppConfig
+
   private val TICKET_ID = "ticketId"
   private def feedbackFormPartialUrl(implicit request: Request[AnyContent]) =
-    s"${ApplicationConfig.contactFrontendPartialBaseUrl}/contact/beta-feedback/form/?submitUrl=${urlEncode(localSubmitUrl)}" +
-      s"&service=${urlEncode(ApplicationConfig.contactFormServiceIdentifier)}&referer=${urlEncode(contactFormReferer)}"
+    s"${applicationConfig.contactFrontendPartialBaseUrl}/contact/beta-feedback/form/?submitUrl=${urlEncode(localSubmitUrl)}" +
+      s"&service=${urlEncode(applicationConfig.contactFormServiceIdentifier)}&referer=${urlEncode(contactFormReferer)}"
   private def feedbackHmrcSubmitPartialUrl(implicit request: Request[AnyContent]) =
-    s"${ApplicationConfig.contactFrontendPartialBaseUrl}/contact/beta-feedback/form?resubmitUrl=${urlEncode(localSubmitUrl)}"
+    s"${applicationConfig.contactFrontendPartialBaseUrl}/contact/beta-feedback/form?resubmitUrl=${urlEncode(localSubmitUrl)}"
   private def feedbackThankYouPartialUrl(ticketId: String)(implicit request: Request[AnyContent]) =
-    s"${ApplicationConfig.contactFrontendPartialBaseUrl}/contact/beta-feedback/form/confirmation?ticketId=${urlEncode(ticketId)}"
+    s"${applicationConfig.contactFrontendPartialBaseUrl}/contact/beta-feedback/form/confirmation?ticketId=${urlEncode(ticketId)}"
 
   def show: Action[AnyContent] = UnauthorisedAction {
     implicit request =>
@@ -87,11 +91,7 @@ trait FeedbackController extends FrontendController with Actions {
             resp.status match {
               case HttpStatus.OK => Redirect(routes.FeedbackController.thankyou()).withSession(request.session + (TICKET_ID -> resp.body))
               case HttpStatus.BAD_REQUEST => BadRequest(views.html.feedback.feedback(feedbackFormPartialUrl, Some(Html(resp.body))))
-              case status => {
-                Logger.warn(s"Unexpected status code from feedback form: $status")
-                Logger.warn(s"error: ${resp.body}")
-                InternalServerError
-              }
+              case status => Logger.warn(s"Unexpected status code from feedback form: $status"); InternalServerError
             }
         }
       }.getOrElse {
@@ -115,11 +115,11 @@ trait FeedbackController extends FrontendController with Actions {
   }
 
   object CgtHeaderCarrierForPartialsConverter extends HeaderCarrierForPartialsConverter {
+    override val crypto = encryptCookieString _
+
     def encryptCookieString(cookie: String) : String = {
       SessionCookieCryptoFilter.encrypt(cookie)
     }
-
-    override val crypto = encryptCookieString _
   }
 
   implicit val readPartialsForm: HttpReads[HttpResponse] = new HttpReads[HttpResponse] {
