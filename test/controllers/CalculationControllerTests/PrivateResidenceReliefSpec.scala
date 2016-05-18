@@ -26,6 +26,7 @@ import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import play.api.i18n.Messages
 import play.api.libs.json.Json
+import play.api.mvc.{Result, AnyContentAsFormUrlEncoded}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.cache.client.CacheMap
@@ -621,9 +622,38 @@ class PrivateResidenceReliefSpec extends UnitSpec with WithFakeApplication with 
   //POST Tests
   "In CalculationController calling the .submitPrivateResidenceRelief action " should {
 
-    lazy val fakeRequest = FakeRequest("POST", "/calculate-your-capital-gains/private-residence-relief").withSession(SessionKeys.sessionId -> "12345")
-    val target = setupTarget(None, None)
-    lazy val result = target.submitPrivateResidenceRelief(fakeRequest)
+    def buildRequest(body: (String, String)*): FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest("POST", "/calculate-your-capital-gains/private-residence-relief")
+      .withSession(SessionKeys.sessionId -> "12345")
+      .withFormUrlEncodedBody(body: _*)
+
+    def executeTargetWithMockData
+    (
+      selection: String,
+      daysClaimed: String,
+      daysClaimedAfter: String,
+      disposalDateData: Option[DisposalDateModel] = None,
+      acquisitionDateData: Option[AcquisitionDateModel] = None,
+      rebasedValueData: Option[RebasedValueModel] = None
+    ): Future[Result] = {
+      lazy val fakeRequest = buildRequest(
+        ("isClaimingPRR", selection),
+        ("daysClaimed", daysClaimed),
+        ("daysClaimedAfter",daysClaimedAfter)
+      )
+      val daysClaimedValue = daysClaimed match {
+        case "" => 0
+        case _ => BigDecimal(daysClaimed)
+      }
+      val daysClaimedAfterValue = daysClaimedAfter match {
+        case "" => 0
+        case _ => BigDecimal(daysClaimed)
+      }
+      val mockData = Some(PrivateResidenceReliefModel(selection, Some(BigDecimal(daysClaimed)), Some(BigDecimal(daysClaimedAfter))))
+      val target = setupTarget(None, mockData, disposalDateData, acquisitionDateData, rebasedValueData)
+      target.submitPersonalAllowance(fakeRequest)
+    }
+
+    lazy val result = executeTargetWithMockData("Yes", "", "")
 
     "return a 303" in {
       status(result) shouldBe 303
