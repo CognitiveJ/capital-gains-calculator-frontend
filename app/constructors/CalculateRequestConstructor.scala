@@ -63,7 +63,8 @@ object CalculateRequestConstructor {
     }${acquisition(input)
     }&reliefs=${
       input.otherReliefsModelFlat.otherReliefs.getOrElse(0)
-    }"
+    }${privateResidenceReliefFlat(input)
+    }${isClaimingPRR(input)}"
   }
 
   def taCalcUrlExtra(input: SummaryModel): String = {
@@ -75,7 +76,8 @@ object CalculateRequestConstructor {
     }${acquisition(input)
     }&reliefs=${
       input.otherReliefsModelTA.otherReliefs.getOrElse(0)
-    }"
+    }${privateResidenceReliefTA(input)
+    }${isClaimingPRR(input)}"
   }
 
   def rebasedCalcUrlExtra(input: SummaryModel): String = {
@@ -90,7 +92,11 @@ object CalculateRequestConstructor {
     }
     }&reliefs=${
       input.otherReliefsModelRebased.otherReliefs.getOrElse(0)
-    }"
+    }${privateResidenceReliefRebased(input)
+    }&claimingPRR=${input.privateResidenceReliefModel match {
+      case Some(PrivateResidenceReliefModel("Yes", claimed, after)) => "Yes"
+      case _ => "No"
+    }}"
   }
 
   def improvements (input: SummaryModel) = s"&improvementsAmt=${
@@ -116,7 +122,8 @@ object CalculateRequestConstructor {
         s"&daysClaimed=${claimed.get}"
 
       case (AcquisitionDateModel("Yes", day, month, year), Some(PrivateResidenceReliefModel("Yes", claimed, after)))
-        if !Dates.dateAfterStart(day.get, month.get, year.get) => daysClaimedAcquisitionBeforeStart(input, claimed, after)
+        if !Dates.dateAfterStart(day.get, month.get, year.get) =>
+        daysClaimedAcquisitionBeforeStart(input, claimed, after)
 
       case _ => ""
     }
@@ -154,6 +161,13 @@ object CalculateRequestConstructor {
     }
     else ""
   }
+
+  def isClaimingPRR (input: SummaryModel) = s"&claimingPRR=${
+    (input.acquisitionDateModel, input.privateResidenceReliefModel) match {
+      case (AcquisitionDateModel("Yes", day, month, year), Some(PrivateResidenceReliefModel("Yes", claimed, after))) => "Yes"
+      case _ => "No"
+    }
+  }"
 
   def acquisition (input: SummaryModel) = s"&acquisitionValueAmt=${
     input.acquisitionValueModel.acquisitionValueAmt

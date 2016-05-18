@@ -85,47 +85,62 @@ class CalculateRequestConstructorSpec extends UnitSpec {
     }
 
     "return a string from the flatCalcUrlExtra with no improvements" in {
-      CalculateRequestConstructor.flatCalcUrlExtra(sumModel) shouldEqual "&improvementsAmt=0&acquisitionValueAmt=100000&acquisitionCostsAmt=0&reliefs=0"
+      CalculateRequestConstructor.flatCalcUrlExtra(sumModel) shouldEqual "&improvementsAmt=0&acquisitionValueAmt=100000&acquisitionCostsAmt=0&reliefs=0&claimingPRR=No"
     }
 
     "return a string from the flatCalcUrlExtra with improvements and no rebased value model" in {
-      CalculateRequestConstructor.flatCalcUrlExtra(TestModels.summaryIndividualImprovementsNoRebasedModel) shouldEqual "&improvementsAmt=8000&acquisitionValueAmt=100000&acquisitionCostsAmt=300&reliefs=999"
+      CalculateRequestConstructor.flatCalcUrlExtra(TestModels.summaryIndividualImprovementsNoRebasedModel) shouldEqual "&improvementsAmt=8000&acquisitionValueAmt=100000&acquisitionCostsAmt=300&reliefs=999&claimingPRR=No"
     }
 
     "return a string from the flatCalcUrlExtra with improvements and a rebased value model with no improvements after" in {
-      CalculateRequestConstructor.flatCalcUrlExtra(TestModels.summaryIndividualFlatWithoutAEA) shouldEqual "&improvementsAmt=8000&acquisitionValueAmt=100000&acquisitionCostsAmt=300&reliefs=999"
+      CalculateRequestConstructor.flatCalcUrlExtra(TestModels.summaryIndividualFlatWithoutAEA) shouldEqual "&improvementsAmt=8000&acquisitionValueAmt=100000&acquisitionCostsAmt=300&reliefs=999&claimingPRR=No"
     }
 
     "return a string from the flatCalcUrlExtra with improvements and a rebased value model with improvements after" in {
-      CalculateRequestConstructor.flatCalcUrlExtra(TestModels.summaryIndividualImprovementsWithRebasedModel) shouldEqual "&improvementsAmt=9000&acquisitionValueAmt=100000&acquisitionCostsAmt=300&reliefs=999"
+      CalculateRequestConstructor.flatCalcUrlExtra(TestModels.summaryIndividualImprovementsWithRebasedModel) shouldEqual "&improvementsAmt=9000&acquisitionValueAmt=100000&acquisitionCostsAmt=300&reliefs=999&claimingPRR=No"
+    }
+
+    "return a string from the flatCalcUrlExtra with PRR claimed" in {
+      CalculateRequestConstructor.flatCalcUrlExtra(TestModels.summaryIndividualWithAllOptions) shouldEqual "&improvementsAmt=8000&acquisitionValueAmt=100000&acquisitionCostsAmt=300" +
+        "&reliefs=999&daysClaimed=100&claimingPRR=Yes"
     }
 
     "return a string from the taCalcUrlExtra with no improvements" in {
       CalculateRequestConstructor.taCalcUrlExtra(sumModel) shouldEqual "&improvementsAmt=0&disposalDate=2010-10-10" +
-        "&acquisitionDate=1990-9-9&acquisitionValueAmt=100000&acquisitionCostsAmt=0&reliefs=0"
+        "&acquisitionDate=1990-9-9&acquisitionValueAmt=100000&acquisitionCostsAmt=0&reliefs=0&claimingPRR=No"
     }
 
     "return a string from the taCalcUrlExtra with improvements and no rebased value model" in {
       CalculateRequestConstructor.taCalcUrlExtra(TestModels.summaryIndividualImprovementsNoRebasedModel) shouldEqual "&improvementsAmt=8000&disposalDate=2010-10-10" +
-        "&acquisitionDate=1999-9-9&acquisitionValueAmt=100000&acquisitionCostsAmt=300&reliefs=888"
+        "&acquisitionDate=1999-9-9&acquisitionValueAmt=100000&acquisitionCostsAmt=300&reliefs=888&claimingPRR=No"
     }
 
     "return a string from the taCalcUrlExtra with improvements and a rebased value model with no improvements after" in {
       CalculateRequestConstructor.taCalcUrlExtra(TestModels.summaryTrusteeTAWithoutAEA) shouldEqual "&improvementsAmt=8000&disposalDate=2010-10-10" +
-        "&acquisitionDate=1999-9-9&acquisitionValueAmt=100000&acquisitionCostsAmt=300&reliefs=888"
+        "&acquisitionDate=1999-9-9&acquisitionValueAmt=100000&acquisitionCostsAmt=300&reliefs=888&claimingPRR=No"
     }
 
     "return a string from the taCalcUrlExtra with improvements and a rebased value model with improvements after" in {
       CalculateRequestConstructor.taCalcUrlExtra(TestModels.summaryIndividualImprovementsWithRebasedModel) shouldEqual "&improvementsAmt=9000&disposalDate=2010-10-10" +
-        "&acquisitionDate=1999-9-9&acquisitionValueAmt=100000&acquisitionCostsAmt=300&reliefs=888"
+        "&acquisitionDate=1999-9-9&acquisitionValueAmt=100000&acquisitionCostsAmt=300&reliefs=888&claimingPRR=No"
+    }
+
+    "return a string from the taCalcUrlExtra with PRR" in {
+      CalculateRequestConstructor.taCalcUrlExtra(TestModels.summaryIndividualWithAllOptions) shouldEqual "&improvementsAmt=8000&disposalDate=2010-10-10" +
+        "&acquisitionDate=1999-9-9&acquisitionValueAmt=100000&acquisitionCostsAmt=300&reliefs=888&daysClaimed=100&claimingPRR=Yes"
     }
 
     "return a string from the rebasedCalcUrlExtra with no improvements or rebased costs" in {
-      CalculateRequestConstructor.rebasedCalcUrlExtra(TestModels.summaryIndividualRebasedNoImprovements) shouldEqual "&improvementsAmt=0&rebasedValue=150000&revaluationCost=0&reliefs=0"
+      CalculateRequestConstructor.rebasedCalcUrlExtra(TestModels.summaryIndividualRebasedNoImprovements) shouldEqual "&improvementsAmt=0&rebasedValue=150000&revaluationCost=0&reliefs=0&claimingPRR=No"
     }
 
     "return a string from the rebasedCalcUrlExtra with improvements and rebased costs" in {
-      CalculateRequestConstructor.rebasedCalcUrlExtra(TestModels.summaryIndividualRebased) shouldEqual "&improvementsAmt=3000&rebasedValue=150000&revaluationCost=1000&reliefs=777"
+      CalculateRequestConstructor.rebasedCalcUrlExtra(TestModels.summaryIndividualRebased) shouldEqual "&improvementsAmt=3000&rebasedValue=150000&revaluationCost=1000&reliefs=777&claimingPRR=No"
+    }
+
+    "return a string from the rebasedCalcUrlExtra with PRR" in {
+      CalculateRequestConstructor.rebasedCalcUrlExtra(TestModels.summaryIndividualWithAllOptions) shouldEqual "&improvementsAmt=0&rebasedValue=1000&revaluationCost=500" +
+        "&reliefs=777&claimingPRR=Yes"
     }
 
     "return a string from the improvements with a rebased value and claiming improvements with an empty field" in {
@@ -158,6 +173,22 @@ class CalculateRequestConstructorSpec extends UnitSpec {
 
     "return a string from privateResidenceReliefRebased with a Rebased Value and a disposal date after 18 month period with no acqDate" in {
       CalculateRequestConstructor.privateResidenceReliefRebased(TestModels.summaryIndividualPRRNoAcqDateAndDisposalDateAfterWithRebased) shouldEqual "&daysClaimed=100"
+    }
+
+    "return an empty string from privateResidenceReliefRebased with a Rebased Value and a disposal date after 18 month period with an acqDate after the start" in {
+      CalculateRequestConstructor.privateResidenceReliefRebased(TestModels.summaryIndividualPRRAcqDateAfterAndDisposalDateAfterWithRebased) shouldEqual ""
+    }
+
+    "return a string from privateResidenceReliefRebased with a Rebased Value and a disposal date after 18 month period with an acqDate before the start" in {
+      CalculateRequestConstructor.privateResidenceReliefRebased(TestModels.summaryIndividualPRRAcqDateBeforeAndDisposalDateAfterWithRebased) shouldEqual "&daysClaimed=50"
+    }
+
+    "return an empty string from privateResidenceReliefRebased with no Rebased PRR" in {
+      CalculateRequestConstructor.privateResidenceReliefRebased(TestModels.summaryIndividualFlatWithAEA) shouldEqual ""
+    }
+
+    "return a string with default zero values where Nones are found in daysClaimedAcquisitionBeforeStart" in {
+      CalculateRequestConstructor.daysClaimedAcquisitionBeforeStart(TestModels.summaryIndividualPRRAcqDateAfterAndDisposalDateAfter, None, None) shouldEqual "&daysClaimed=0"
     }
 
   }
