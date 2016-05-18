@@ -102,5 +102,11 @@ POST        /other-reliefs-rebased              controllers.CalculationControlle
 ########################################################
 GET         /summary                 controllers.CalculationController.summary
 
+#Feedback routes
+GET         /feedback               controllers.FeedbackController.show
+POST        /feedback               controllers.FeedbackController.submit
+GET         /thankyou               controllers.FeedbackController.thankyou
+
+
 # Map static resources from the /public folder to the /assets URL path
 GET    /assets/*file             controllers.Assets.at(path="/public", file)
