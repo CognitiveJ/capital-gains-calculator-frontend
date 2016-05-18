@@ -74,6 +74,10 @@ trait CalculatorConnector {
     }")
   }
 
+  def clearKeystore()(implicit hc: HeaderCarrier) = {
+    sessionCache.remove()
+  }
+
 
   def createSummary(implicit hc: HeaderCarrier): Future[SummaryModel] = {
     val customerType = fetchAndGetFormData[CustomerTypeModel](KeystoreKeys.customerType).map(formData => formData.get)
