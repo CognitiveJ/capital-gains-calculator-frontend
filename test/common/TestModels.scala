@@ -42,7 +42,7 @@ object TestModels {
     OtherReliefsModel(None),
     OtherReliefsModel(None),
     OtherReliefsModel(None),
-    PrivateResidenceReliefModel("No", None, None)
+    None
   )
 
   val sumModelTA = SummaryModel(
@@ -67,7 +67,7 @@ object TestModels {
     OtherReliefsModel(Some(2000)),
     OtherReliefsModel(Some(1000)),
     OtherReliefsModel(Some(500)),
-    PrivateResidenceReliefModel("No", None, None)
+    Some(PrivateResidenceReliefModel("No", None, None))
   )
 
   val sumModelRebased = SummaryModel(
@@ -92,7 +92,7 @@ object TestModels {
     OtherReliefsModel(Some(2000)),
     OtherReliefsModel(Some(1000)),
     OtherReliefsModel(Some(500)),
-    PrivateResidenceReliefModel("No", None, None)
+    Some(PrivateResidenceReliefModel("No", None, None))
   )
 
   val calcModelTwoRates = CalculationResultModel(8000, 40000, 32000, 18, Some(8000), Some(28))
@@ -121,7 +121,7 @@ object TestModels {
     OtherReliefsModel(Some(0)),
     OtherReliefsModel(Some(0)),
     OtherReliefsModel(Some(0)),
-    PrivateResidenceReliefModel("No", None, None)
+    None
   )
 
   val summaryIndividualFlatWithoutAEA = SummaryModel (
@@ -146,7 +146,7 @@ object TestModels {
     OtherReliefsModel(Some(999)),
     OtherReliefsModel(Some(888)),
     OtherReliefsModel(Some(777)),
-    PrivateResidenceReliefModel("No", None, None)
+    None
   )
 
   val summaryIndividualFlatWithAEA = SummaryModel (
@@ -171,7 +171,7 @@ object TestModels {
     OtherReliefsModel(None),
     OtherReliefsModel(None),
     OtherReliefsModel(None),
-    PrivateResidenceReliefModel("No", None, None)
+    None
   )
 
   val summaryTrusteeTAWithAEA = SummaryModel (
@@ -196,7 +196,7 @@ object TestModels {
     OtherReliefsModel(None),
     OtherReliefsModel(None),
     OtherReliefsModel(None),
-    PrivateResidenceReliefModel("No", None, None)
+    Some(PrivateResidenceReliefModel("No", None, None))
   )
 
   val summaryTrusteeTAWithoutAEA = SummaryModel (
@@ -221,7 +221,7 @@ object TestModels {
     OtherReliefsModel(Some(999)),
     OtherReliefsModel(Some(888)),
     OtherReliefsModel(Some(777)),
-    PrivateResidenceReliefModel("No", None, None)
+    Some(PrivateResidenceReliefModel("No", None, None))
   )
 
   val summaryDisabledTrusteeTAWithAEA = SummaryModel (
@@ -246,7 +246,7 @@ object TestModels {
     OtherReliefsModel(None),
     OtherReliefsModel(None),
     OtherReliefsModel(None),
-    PrivateResidenceReliefModel("No", None, None)
+    Some(PrivateResidenceReliefModel("No", None, None))
   )
 
   val summaryDisabledTrusteeTAWithoutAEA = SummaryModel (
@@ -271,7 +271,7 @@ object TestModels {
     OtherReliefsModel(Some(999)),
     OtherReliefsModel(Some(888)),
     OtherReliefsModel(Some(777)),
-    PrivateResidenceReliefModel("No", None, None)
+    Some(PrivateResidenceReliefModel("No", None, None))
   )
 
   val summaryRepresentativeFlatWithoutAEA = SummaryModel (
@@ -296,7 +296,7 @@ object TestModels {
     OtherReliefsModel(Some(999)),
     OtherReliefsModel(Some(888)),
     OtherReliefsModel(Some(777)),
-    PrivateResidenceReliefModel("No", None, None)
+    None
   )
 
   val summaryRepresentativeFlatWithAEA = SummaryModel (
@@ -321,7 +321,7 @@ object TestModels {
     OtherReliefsModel(None),
     OtherReliefsModel(None),
     OtherReliefsModel(None),
-    PrivateResidenceReliefModel("No", None, None)
+    None
   )
 
   val summaryIndividualAcqDateAfter = SummaryModel (
@@ -346,7 +346,7 @@ object TestModels {
     OtherReliefsModel(Some(999)),
     OtherReliefsModel(Some(888)),
     OtherReliefsModel(Some(777)),
-    PrivateResidenceReliefModel("No", None, None)
+    Some(PrivateResidenceReliefModel("No", None, None))
   )
 
   val summaryIndividualImprovementsNoRebasedModel = SummaryModel (
@@ -371,7 +371,7 @@ object TestModels {
     OtherReliefsModel(Some(999)),
     OtherReliefsModel(Some(888)),
     OtherReliefsModel(Some(777)),
-    PrivateResidenceReliefModel("No", None, None)
+    Some(PrivateResidenceReliefModel("No", None, None))
   )
 
   val summaryIndividualImprovementsWithRebasedModel = SummaryModel (
@@ -396,7 +396,7 @@ object TestModels {
     OtherReliefsModel(Some(999)),
     OtherReliefsModel(Some(888)),
     OtherReliefsModel(Some(777)),
-    PrivateResidenceReliefModel("No", None, None)
+    Some(PrivateResidenceReliefModel("No", None, None))
   )
 
   val summaryIndividualRebased = SummaryModel (
@@ -421,7 +421,7 @@ object TestModels {
     OtherReliefsModel(Some(999)),
     OtherReliefsModel(Some(888)),
     OtherReliefsModel(Some(777)),
-    PrivateResidenceReliefModel("No", None, None)
+    Some(PrivateResidenceReliefModel("No", None, None))
   )
 
   val summaryIndividualRebasedNoAcqDate = SummaryModel (
@@ -446,7 +446,7 @@ object TestModels {
     OtherReliefsModel(None),
     OtherReliefsModel(None),
     OtherReliefsModel(None),
-    PrivateResidenceReliefModel("No", None, None)
+    Some(PrivateResidenceReliefModel("No", None, None))
   )
 
   val summaryIndividualRebasedNoRebasedCosts = SummaryModel (
@@ -471,7 +471,7 @@ object TestModels {
     OtherReliefsModel(Some(999)),
     OtherReliefsModel(Some(888)),
     OtherReliefsModel(Some(777)),
-    PrivateResidenceReliefModel("No", None, None)
+    Some(PrivateResidenceReliefModel("No", None, None))
   )
 
   val summaryIndividualRebasedNoAcqDateOrRebasedCosts = SummaryModel (
@@ -496,7 +496,7 @@ object TestModels {
     OtherReliefsModel(None),
     OtherReliefsModel(None),
     OtherReliefsModel(None),
-    PrivateResidenceReliefModel("No", None, None)
+    Some(PrivateResidenceReliefModel("No", None, None))
   )
 
   val summaryIndividualRebasedNoImprovements = SummaryModel (
@@ -521,7 +521,7 @@ object TestModels {
     OtherReliefsModel(Some(999)),
     OtherReliefsModel(Some(888)),
     OtherReliefsModel(None),
-    PrivateResidenceReliefModel("No", None, None)
+    Some(PrivateResidenceReliefModel("No", None, None))
   )
 
   val summaryIndividualRebasedNoneImprovements = SummaryModel (
@@ -546,7 +546,7 @@ object TestModels {
     OtherReliefsModel(Some(999)),
     OtherReliefsModel(Some(888)),
     OtherReliefsModel(None),
-    PrivateResidenceReliefModel("No", None, None)
+    Some(PrivateResidenceReliefModel("No", None, None))
   )
 
   val summaryIndividualRebasedAcqDateAfter = SummaryModel (
@@ -571,7 +571,207 @@ object TestModels {
     OtherReliefsModel(Some(999)),
     OtherReliefsModel(Some(888)),
     OtherReliefsModel(None),
-    PrivateResidenceReliefModel("No", None, None)
+    Some(PrivateResidenceReliefModel("No", None, None))
+  )
+
+  val summaryIndividualPRRAcqDateAfterAndDisposalDateBefore = SummaryModel (
+    CustomerTypeModel("individual"),
+    None,
+    Some(CurrentIncomeModel(1000)),
+    Some(PersonalAllowanceModel(9000)),
+    OtherPropertiesModel("No", None),
+    None,
+    AcquisitionDateModel("Yes", Some(9), Some(9), Some(2016)),
+    AcquisitionValueModel(100000),
+    Some(RebasedValueModel("Yes", Some(150000))),
+    Some(RebasedCostsModel("No", None)),
+    ImprovementsModel("Yes", None, None),
+    DisposalDateModel(10, 10, 2018),
+    DisposalValueModel(150000),
+    AcquisitionCostsModel(Some(300)),
+    DisposalCostsModel(Some(600)),
+    EntrepreneursReliefModel("No"),
+    AllowableLossesModel("Yes", Some(50000)),
+    CalculationElectionModel("rebased"),
+    OtherReliefsModel(Some(999)),
+    OtherReliefsModel(Some(888)),
+    OtherReliefsModel(None),
+    Some(PrivateResidenceReliefModel("Yes", Some(100), Some(50)))
+  )
+
+  val summaryIndividualPRRAcqDateAfterAndNoRebased = SummaryModel (
+    CustomerTypeModel("individual"),
+    None,
+    Some(CurrentIncomeModel(1000)),
+    Some(PersonalAllowanceModel(9000)),
+    OtherPropertiesModel("No", None),
+    None,
+    AcquisitionDateModel("Yes", Some(9), Some(9), Some(2012)),
+    AcquisitionValueModel(100000),
+    Some(RebasedValueModel("No", None)),
+    Some(RebasedCostsModel("No", None)),
+    ImprovementsModel("Yes", None, None),
+    DisposalDateModel(10, 10, 2018),
+    DisposalValueModel(150000),
+    AcquisitionCostsModel(Some(300)),
+    DisposalCostsModel(Some(600)),
+    EntrepreneursReliefModel("No"),
+    AllowableLossesModel("Yes", Some(50000)),
+    CalculationElectionModel("rebased"),
+    OtherReliefsModel(Some(999)),
+    OtherReliefsModel(Some(888)),
+    OtherReliefsModel(None),
+    Some(PrivateResidenceReliefModel("Yes", Some(100), Some(50)))
+  )
+
+  val summaryIndividualPRRAcqDateAfterAndDisposalDateAfter = SummaryModel (
+    CustomerTypeModel("individual"),
+    None,
+    Some(CurrentIncomeModel(1000)),
+    Some(PersonalAllowanceModel(9000)),
+    OtherPropertiesModel("No", None),
+    None,
+    AcquisitionDateModel("Yes", Some(9), Some(9), Some(2012)),
+    AcquisitionValueModel(100000),
+    Some(RebasedValueModel("Yes", Some(1000))),
+    Some(RebasedCostsModel("No", None)),
+    ImprovementsModel("Yes", None, None),
+    DisposalDateModel(10, 10, 2018),
+    DisposalValueModel(150000),
+    AcquisitionCostsModel(Some(300)),
+    DisposalCostsModel(Some(600)),
+    EntrepreneursReliefModel("No"),
+    AllowableLossesModel("Yes", Some(50000)),
+    CalculationElectionModel("rebased"),
+    OtherReliefsModel(Some(999)),
+    OtherReliefsModel(Some(888)),
+    OtherReliefsModel(None),
+    Some(PrivateResidenceReliefModel("Yes", Some(100), Some(50)))
+  )
+
+  val summaryIndividualPRRAcqDateAfterAndDisposalDateBeforeWithRebased = SummaryModel (
+    CustomerTypeModel("individual"),
+    None,
+    Some(CurrentIncomeModel(1000)),
+    Some(PersonalAllowanceModel(9000)),
+    OtherPropertiesModel("No", None),
+    None,
+    AcquisitionDateModel("Yes", Some(9), Some(9), Some(2012)),
+    AcquisitionValueModel(100000),
+    Some(RebasedValueModel("Yes", Some(1000))),
+    Some(RebasedCostsModel("No", None)),
+    ImprovementsModel("Yes", None, None),
+    DisposalDateModel(10, 10, 2015),
+    DisposalValueModel(150000),
+    AcquisitionCostsModel(Some(300)),
+    DisposalCostsModel(Some(600)),
+    EntrepreneursReliefModel("No"),
+    AllowableLossesModel("Yes", Some(50000)),
+    CalculationElectionModel("rebased"),
+    OtherReliefsModel(Some(999)),
+    OtherReliefsModel(Some(888)),
+    OtherReliefsModel(None),
+    Some(PrivateResidenceReliefModel("Yes", Some(100), Some(50)))
+  )
+
+  val summaryIndividualPRRNoAcqDateAndDisposalDateAfterWithRebased = SummaryModel (
+    CustomerTypeModel("individual"),
+    None,
+    Some(CurrentIncomeModel(1000)),
+    Some(PersonalAllowanceModel(9000)),
+    OtherPropertiesModel("No", None),
+    None,
+    AcquisitionDateModel("No", None, None, None),
+    AcquisitionValueModel(100000),
+    Some(RebasedValueModel("Yes", Some(1000))),
+    Some(RebasedCostsModel("No", None)),
+    ImprovementsModel("Yes", None, None),
+    DisposalDateModel(10, 10, 2018),
+    DisposalValueModel(150000),
+    AcquisitionCostsModel(Some(300)),
+    DisposalCostsModel(Some(600)),
+    EntrepreneursReliefModel("No"),
+    AllowableLossesModel("Yes", Some(50000)),
+    CalculationElectionModel("rebased"),
+    OtherReliefsModel(Some(999)),
+    OtherReliefsModel(Some(888)),
+    OtherReliefsModel(None),
+    Some(PrivateResidenceReliefModel("Yes", Some(100), Some(50)))
+  )
+
+  val summaryIndividualPRRAcqDateAfterAndDisposalDateAfterWithRebased = SummaryModel (
+    CustomerTypeModel("individual"),
+    None,
+    Some(CurrentIncomeModel(1000)),
+    Some(PersonalAllowanceModel(9000)),
+    OtherPropertiesModel("No", None),
+    None,
+    AcquisitionDateModel("Yes", Some(9), Some(9), Some(2016)),
+    AcquisitionValueModel(100000),
+    Some(RebasedValueModel("Yes", Some(1000))),
+    Some(RebasedCostsModel("No", None)),
+    ImprovementsModel("Yes", None, None),
+    DisposalDateModel(10, 10, 2018),
+    DisposalValueModel(150000),
+    AcquisitionCostsModel(Some(300)),
+    DisposalCostsModel(Some(600)),
+    EntrepreneursReliefModel("No"),
+    AllowableLossesModel("Yes", Some(50000)),
+    CalculationElectionModel("rebased"),
+    OtherReliefsModel(Some(999)),
+    OtherReliefsModel(Some(888)),
+    OtherReliefsModel(None),
+    Some(PrivateResidenceReliefModel("Yes", Some(100), Some(50)))
+  )
+
+  val summaryIndividualPRRAcqDateBeforeAndDisposalDateAfterWithRebased = SummaryModel (
+    CustomerTypeModel("individual"),
+    None,
+    Some(CurrentIncomeModel(1000)),
+    Some(PersonalAllowanceModel(9000)),
+    OtherPropertiesModel("No", None),
+    None,
+    AcquisitionDateModel("Yes", Some(9), Some(9), Some(2012)),
+    AcquisitionValueModel(100000),
+    Some(RebasedValueModel("Yes", Some(1000))),
+    Some(RebasedCostsModel("No", None)),
+    ImprovementsModel("Yes", None, None),
+    DisposalDateModel(10, 10, 2018),
+    DisposalValueModel(150000),
+    AcquisitionCostsModel(Some(300)),
+    DisposalCostsModel(Some(600)),
+    EntrepreneursReliefModel("No"),
+    AllowableLossesModel("Yes", Some(50000)),
+    CalculationElectionModel("rebased"),
+    OtherReliefsModel(Some(999)),
+    OtherReliefsModel(Some(888)),
+    OtherReliefsModel(None),
+    Some(PrivateResidenceReliefModel("Yes", Some(100), Some(50)))
+  )
+
+  val summaryIndividualWithAllOptions = SummaryModel (
+    CustomerTypeModel("individual"),
+    None,
+    Some(CurrentIncomeModel(1000)),
+    Some(PersonalAllowanceModel(9000)),
+    OtherPropertiesModel("No", None),
+    None,
+    AcquisitionDateModel("Yes", Some(9), Some(9), Some(1999)),
+    AcquisitionValueModel(100000),
+    Some(RebasedValueModel("Yes", Some(1000))),
+    Some(RebasedCostsModel("Yes", Some(500))),
+    ImprovementsModel("Yes", Some(8000)),
+    DisposalDateModel(10, 10, 2018),
+    DisposalValueModel(150000),
+    AcquisitionCostsModel(Some(300)),
+    DisposalCostsModel(Some(600)),
+    EntrepreneursReliefModel("No"),
+    AllowableLossesModel("Yes", Some(50000)),
+    CalculationElectionModel("flat"),
+    OtherReliefsModel(Some(999)),
+    OtherReliefsModel(Some(888)),
+    OtherReliefsModel(Some(777)),
+    Some(PrivateResidenceReliefModel("Yes", Some(100), Some(50)))
   )
 
 }
