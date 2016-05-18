@@ -640,27 +640,40 @@ class PrivateResidenceReliefSpec extends UnitSpec with WithFakeApplication with 
         ("daysClaimed", daysClaimed),
         ("daysClaimedAfter",daysClaimedAfter)
       )
-      val daysClaimedValue = daysClaimed match {
-        case "" => 0
-        case _ => BigDecimal(daysClaimed)
+      val numeric = "(0-9*)".r
+      val daysClaimedValue: BigDecimal = daysClaimed match {
+        case numeric(data) => BigDecimal(data)
+        case _ => 0
       }
-      val daysClaimedAfterValue = daysClaimedAfter match {
-        case "" => 0
-        case _ => BigDecimal(daysClaimed)
+      val daysClaimedAfterValue: BigDecimal = daysClaimedAfter match {
+        case numeric(data) => BigDecimal(data)
+        case _ => 0
       }
-      val mockData = Some(PrivateResidenceReliefModel(selection, Some(BigDecimal(daysClaimed)), Some(BigDecimal(daysClaimedAfter))))
+      val mockData = Some(PrivateResidenceReliefModel(selection, Some(daysClaimedValue), Some(daysClaimedAfterValue)))
       val target = setupTarget(None, mockData, disposalDateData, acquisitionDateData, rebasedValueData)
-      target.submitPersonalAllowance(fakeRequest)
+      target.submitPrivateResidenceRelief(fakeRequest)
     }
 
-    lazy val result = executeTargetWithMockData("Yes", "", "")
+    "when supplied with a valid model" should {
 
-    "return a 303" in {
-      status(result) shouldBe 303
+      lazy val result = executeTargetWithMockData("Yes", "", "")
+
+      "return a 303" in {
+        status(result) shouldBe 303
+      }
+
+      s"redirect to ${routes.CalculationController.entrepreneursRelief()}" in {
+        redirectLocation(result) shouldBe Some(s"${routes.CalculationController.entrepreneursRelief()}")
+      }
     }
 
-    s"redirect to ${routes.CalculationController.entrepreneursRelief()}" in {
-      redirectLocation(result) shouldBe Some(s"${routes.CalculationController.entrepreneursRelief()}")
+    "when supplied with an invalid model" should {
+
+      lazy val result = executeTargetWithMockData("", "", "")
+
+      "return a 400" in {
+        status(result) shouldBe 400
+      }
     }
   }
 }
