@@ -2,7 +2,6 @@
 calc.base.pageHeading = Calculate your Capital Gains Tax
 calc.base.continue = Continue
 calc.base.taxStart = 6 April 2015
-calc.base.back = Back
 calc.base.calculate.tax.heading = Calculate your Capital Gains Tax
 calc.base.percentage.comp = complete
 calc.base.button.continue = Continue
@@ -13,6 +12,12 @@ calc.base.optionReqError = Choose one of the options
 
 ## Error Summary ##
 calc.error.summary.heading = This page has errors
+
+## Feedback ##
+feedback.title = Feedback
+
+## Feedback Thank You ##
+feedback.thankyou.title = Feedback received
 
 ## Common date Messages ##
 ## Use common messages if some but not all pages use these messages. ##
@@ -146,8 +151,10 @@ calc.disposalCosts.errorDecimalPlaces = There are too many numbers after the dec
 
 ## Private Residence Relief ##
 calc.privateResidenceRelief.question = Are you claiming Private Residence Relief?
-calc.privateResidenceRelief.questionTwoStart =  How many days before
-calc.privateResidenceRelief.questionTwoEnd =  are you claiming relief for?
+calc.privateResidenceRelief.questionBetween.partOne = How many days between 5 April 2015 and
+calc.privateResidenceRelief.questionBetween.partTwo = are you claiming relief for?
+calc.privateResidenceRelief.questionBefore.partOne = How many days before
+calc.privateResidenceRelief.questionBefore.partTwo = are you claiming relief for?
 calc.privateResidenceRelief.helpLink = Private Residence Relief
 
 
