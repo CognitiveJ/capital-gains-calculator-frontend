@@ -99,6 +99,7 @@ trait CalculatorConnector {
     val otherReliefsRebased = fetchAndGetFormData[OtherReliefsModel](KeystoreKeys.otherReliefsRebased).map(formData => formData.getOrElse(OtherReliefsModel(None)))
     val privateResidenceRelief = fetchAndGetFormData[PrivateResidenceReliefModel](KeystoreKeys.privateResidenceRelief)
 
+
     for {
       customerTypeModel <- customerType
       disabledTrusteeModel <- disabledTrustee

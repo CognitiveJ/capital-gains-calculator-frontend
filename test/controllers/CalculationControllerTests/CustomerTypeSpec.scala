@@ -32,7 +32,7 @@ import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import org.jsoup._
 import org.scalatest.mock.MockitoSugar
 import scala.concurrent.Future
-import controllers.CalculationController
+import controllers.{routes, CalculationController}
 import play.api.mvc.Result
 
 class CustomerTypeSpec extends UnitSpec with WithFakeApplication with MockitoSugar {
@@ -87,8 +87,9 @@ class CustomerTypeSpec extends UnitSpec with WithFakeApplication with MockitoSug
           document.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
         }
 
-        "have a 'Back' link " in {
+        s"have a 'Back' link to ${routes.IntroductionController.introduction}" in {
           document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+          document.body.getElementById("back-link").attr("href") shouldEqual routes.IntroductionController.introduction.toString()
         }
 
         "have the question 'Who owned the property?' as the legend of the input" in {

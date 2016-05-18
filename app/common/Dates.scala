@@ -24,7 +24,7 @@ object Dates {
   val sf = new SimpleDateFormat("dd/MM/yyyy")
   val datePageFormat = new SimpleDateFormat("dd MMMM yyyy")
   val taxStartDate = sf.parse("05/04/2015")
-  val prrMinDate = sf.parse("06/10/2016")
+  val taxStartDatePlus18Months = sf.parse("05/10/2016")
 
   def constructDate (day: Int, month: Int, year: Int): Date = {
     sf.parse(s"$day/$month/$year")
@@ -35,7 +35,15 @@ object Dates {
   }
 
   def dateAfter18Months (day: Int, month: Int, year: Int): Boolean = {
-    constructDate(day, month, year).after(prrMinDate)
+    constructDate(day, month, year).after(taxStartDatePlus18Months)
+  }
+
+  def dateAfterStart (date: Date): Boolean = {
+    date.after(taxStartDate)
+  }
+
+  def dateAfterOctober (date: Date): Boolean = {
+    date.after(taxStartDatePlus18Months)
   }
 }
 
