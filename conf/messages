@@ -149,6 +149,9 @@ calc.privateResidenceRelief.question = Are you claiming Private Residence Relief
 calc.privateResidenceRelief.questionTwoStart =  How many days before
 calc.privateResidenceRelief.questionTwoEnd =  are you claiming relief for?
 calc.privateResidenceRelief.helpLink = Private Residence Relief
+calc.privateResidenceRelief.error.noValueProvided = Enter the value for your days claimed
+calc.privateResidenceRelief.error.errorNegative = Enter a positive number for your days claimed
+calc.privateResidenceRelief.error.errorDecimalPlaces = There are too many numbers after the decimal point in your days claimed
 
 
 ## Entrepreneurs Relief ##
