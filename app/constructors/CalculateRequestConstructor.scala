@@ -16,7 +16,8 @@
 
 package constructors
 
-import models.SummaryModel
+import common.Dates
+import models.{PrivateResidenceReliefModel, AcquisitionDateModel, RebasedValueModel, SummaryModel}
 
 object CalculateRequestConstructor {
 
@@ -106,6 +107,53 @@ object CalculateRequestConstructor {
       case "No" => 0
     }
   }"
+
+  def privateResidenceReliefFlat (input: SummaryModel) = s"${
+    (input.acquisitionDateModel, input.privateResidenceReliefModel) match {
+      case (AcquisitionDateModel("Yes", day, month, year), Some(PrivateResidenceReliefModel("Yes", claimed, after)))
+        if Dates.dateAfterStart(day.get, month.get, year.get) &&
+          Dates.dateAfter18Months(input.disposalDateModel.day, input.disposalDateModel.month, input.disposalDateModel.year) =>
+        s"&daysClaimed=${claimed.get}"
+
+      case (AcquisitionDateModel("Yes", day, month, year), Some(PrivateResidenceReliefModel("Yes", claimed, after)))
+        if !Dates.dateAfterStart(day.get, month.get, year.get) => daysClaimedAcquisitionBeforeStart(input, claimed, after)
+
+      case _ => ""
+    }
+  }"
+
+  def privateResidenceReliefTA (input: SummaryModel) = s"${
+    (input.acquisitionDateModel, input.privateResidenceReliefModel) match {
+      case (AcquisitionDateModel("Yes", day, month, year), Some(PrivateResidenceReliefModel("Yes", claimed, after)))
+        if !Dates.dateAfterStart(day.get, month.get, year.get) => daysClaimedAcquisitionBeforeStart(input, claimed, after)
+
+      case _ => ""
+    }
+  }"
+
+  def privateResidenceReliefRebased (input: SummaryModel) = s"${
+    (input.rebasedValueModel, input.privateResidenceReliefModel) match {
+      case (Some(RebasedValueModel("Yes", rebasedValue)), Some(PrivateResidenceReliefModel("Yes", claimed, after)))
+        if Dates.dateAfter18Months(input.disposalDateModel.day, input.disposalDateModel.month, input.disposalDateModel.year) =>
+        daysClaimedDisposalAfter18Months(input, claimed, after)
+      case _ => ""
+    }
+  }"
+
+  def daysClaimedAcquisitionBeforeStart(input: SummaryModel, claimed: Option[BigDecimal], after: Option[BigDecimal]) = {
+    if (input.rebasedValueModel.get.hasRebasedValue == "No") s"&daysClaimed=${claimed.get}"
+    else if (Dates.dateAfter18Months(input.disposalDateModel.day, input.disposalDateModel.month, input.disposalDateModel.year))
+      s"&daysClaimed=${claimed.getOrElse(BigDecimal(0)) + after.getOrElse(BigDecimal(0))}"
+    else s"&daysClaimed=${claimed.get}"
+  }
+
+  def daysClaimedDisposalAfter18Months(input: SummaryModel, claimed: Option[BigDecimal], after: Option[BigDecimal]) = {
+    if (input.acquisitionDateModel.hasAcquisitionDate == "No") s"&daysClaimed=${claimed.get}"
+    else if (!Dates.dateAfterStart(input.acquisitionDateModel.day.get, input.acquisitionDateModel.month.get, input.acquisitionDateModel.year.get)) {
+      s"&daysClaimed=${after.getOrElse(0)}"
+    }
+    else ""
+  }
 
   def acquisition (input: SummaryModel) = s"&acquisitionValueAmt=${
     input.acquisitionValueModel.acquisitionValueAmt

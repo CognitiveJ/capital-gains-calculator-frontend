@@ -44,7 +44,7 @@ class CalculateRequestConstructorSpec extends UnitSpec {
     OtherReliefsModel(None),
     OtherReliefsModel(None),
     OtherReliefsModel(None),
-    PrivateResidenceReliefModel("No", None, None)
+    Some(PrivateResidenceReliefModel("No", None, None))
   )
 
   "CalculateRequest Constructor" should {
@@ -76,7 +76,7 @@ class CalculateRequestConstructorSpec extends UnitSpec {
         OtherReliefsModel(None),
         OtherReliefsModel(None),
         OtherReliefsModel(None),
-        PrivateResidenceReliefModel("No", None, None)
+        Some(PrivateResidenceReliefModel("No", None, None))
       )
 
       CalculateRequestConstructor.baseCalcUrl(sumModelTrustee) shouldEqual "customerType=trustee&priorDisposal=Yes&annualExemptAmount=5000" +
@@ -131,6 +131,35 @@ class CalculateRequestConstructorSpec extends UnitSpec {
     "return a string from the improvements with a rebased value and claiming improvements with an empty field" in {
       CalculateRequestConstructor.improvements(TestModels.summaryIndividualRebasedNoneImprovements) shouldEqual "&improvementsAmt=0"
     }
+
+    "return a string from privateResidenceReliefFlat with an acquisition date after tax start date and disposal date after 18 month period" in {
+      CalculateRequestConstructor.privateResidenceReliefFlat(TestModels.summaryIndividualPRRAcqDateAfterAndDisposalDateBefore) shouldEqual "&daysClaimed=100"
+    }
+
+    "return a string from privateResidenceReliefFlat with an acquisition date before tax start date and no rebased value" in {
+      CalculateRequestConstructor.privateResidenceReliefFlat(TestModels.summaryIndividualPRRAcqDateAfterAndNoRebased) shouldEqual "&daysClaimed=100"
+    }
+
+    "return a string from privateResidenceReliefFlat with an acquisition date before tax start date, a rebased value and disposal date after the 18 month period" in {
+      CalculateRequestConstructor.privateResidenceReliefFlat(TestModels.summaryIndividualPRRAcqDateAfterAndDisposalDateAfter) shouldEqual "&daysClaimed=150"
+    }
+
+    "return an empty string from privateResidenceReliefFlat with an answer of no to PRR" in {
+      CalculateRequestConstructor.privateResidenceReliefFlat(TestModels.summaryIndividualFlatWithAEA) shouldEqual ""
+    }
+
+    "return a string from privateResidenceReliefTA with an acquisition date before tax start date, a rebased value and disposal date after the 18 month period" in {
+      CalculateRequestConstructor.privateResidenceReliefTA(TestModels.summaryIndividualPRRAcqDateAfterAndDisposalDateBeforeWithRebased) shouldEqual "&daysClaimed=100"
+    }
+
+    "return an empty string from privateResidenceReliefTA with an answer of no to PRR" in {
+      CalculateRequestConstructor.privateResidenceReliefTA(TestModels.summaryIndividualFlatWithAEA) shouldEqual ""
+    }
+
+    "return a string from privateResidenceReliefRebased with a Rebased Value and a disposal date after 18 month period with no acqDate" in {
+      CalculateRequestConstructor.privateResidenceReliefRebased(TestModels.summaryIndividualPRRNoAcqDateAndDisposalDateAfterWithRebased) shouldEqual "&daysClaimed=100"
+    }
+
   }
 
 }

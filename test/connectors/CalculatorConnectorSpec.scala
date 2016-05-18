@@ -111,7 +111,7 @@ class CalculatorConnectorSpec extends UnitSpec with MockitoSugar {
       .thenReturn(Future.successful(otherReliefsModel))
 
     when(mockSessionCache.fetchAndGetEntry[PrivateResidenceReliefModel](Matchers.eq("privateResidenceRelief"))(Matchers.any(), Matchers.any()))
-      .thenReturn(Future.successful(Some(summary.privateResidenceReliefModel)))
+      .thenReturn(Future.successful(summary.privateResidenceReliefModel))
   }
 
   val sumModelFlat = SummaryModel(
@@ -136,7 +136,7 @@ class CalculatorConnectorSpec extends UnitSpec with MockitoSugar {
     OtherReliefsModel(None),
     OtherReliefsModel(None),
     OtherReliefsModel(None),
-    PrivateResidenceReliefModel("No", None, None)
+    None
   )
 
   val sumModelTA = SummaryModel(
@@ -161,7 +161,7 @@ class CalculatorConnectorSpec extends UnitSpec with MockitoSugar {
     OtherReliefsModel(None),
     OtherReliefsModel(None),
     OtherReliefsModel(None),
-    PrivateResidenceReliefModel("No", None, None)
+    Some(PrivateResidenceReliefModel("No", None, None))
   )
 
   val sumModelRebased = SummaryModel(
@@ -186,7 +186,7 @@ class CalculatorConnectorSpec extends UnitSpec with MockitoSugar {
     OtherReliefsModel(None),
     OtherReliefsModel(None),
     OtherReliefsModel(None),
-    PrivateResidenceReliefModel("No", None, None)
+    Some(PrivateResidenceReliefModel("No", None, None))
   )
 
   val sumModelFlatDefaulted = SummaryModel(
@@ -211,7 +211,7 @@ class CalculatorConnectorSpec extends UnitSpec with MockitoSugar {
     OtherReliefsModel(None),
     OtherReliefsModel(None),
     OtherReliefsModel(None),
-    PrivateResidenceReliefModel("No", None, None)
+    None
   )
 
   "Calculator Connector" should {
