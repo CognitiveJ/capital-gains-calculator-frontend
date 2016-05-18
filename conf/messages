@@ -146,8 +146,10 @@ calc.disposalCosts.errorDecimalPlaces = There are too many numbers after the dec
 
 ## Private Residence Relief ##
 calc.privateResidenceRelief.question = Are you claiming Private Residence Relief?
-calc.privateResidenceRelief.questionTwoStart =  How many days before
-calc.privateResidenceRelief.questionTwoEnd =  are you claiming relief for?
+calc.privateResidenceRelief.questionBetween.partOne = How many days between 5 April 2015 and
+calc.privateResidenceRelief.questionBetween.partTwo = are you claiming relief for?
+calc.privateResidenceRelief.questionBefore.partOne = How many days before
+calc.privateResidenceRelief.questionBefore.partTwo = are you claiming relief for?
 calc.privateResidenceRelief.helpLink = Private Residence Relief
 
 
