@@ -94,10 +94,10 @@ class PrivateResidenceReliefSpec extends UnitSpec with WithFakeApplication with 
           charset(result) shouldBe Some("utf-8")
         }
 
-        "have a back button" in {
+        s"have a 'Back' link to ${routes.CalculationController.disposalCosts}" in {
           document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+          document.body.getElementById("back-link").attr("href") shouldEqual routes.CalculationController.disposalCosts.toString()
         }
-
 
         "have the title 'calc.privateResidenceRelief.question'" in {
           document.title shouldEqual Messages("calc.privateResidenceRelief.question")
@@ -367,6 +367,20 @@ class PrivateResidenceReliefSpec extends UnitSpec with WithFakeApplication with 
             document.body.getElementById("daysClaimedAfter") shouldEqual null
           }
         }
+      }
+
+      "when disposal date is < 6 October 2016, no acquisition date with rebased value" should {
+
+        lazy val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/private-residence-relief").withSession(SessionKeys.sessionId -> "12345")
+        val target = setupTarget(
+          Some(PrivateResidenceReliefModel("Yes", None, None)),
+          None,
+          Some(DisposalDateModel(5, 10, 2016)),
+          Some(AcquisitionDateModel("No", None, None, None)),
+          Some(RebasedValueModel("Yes",Some(455)))
+        )
+        lazy val result = target.privateResidenceRelief(fakeRequest)
+        lazy val document = Jsoup.parse(bodyOf(result))
 
         s"have a 'Back' link to ${routes.CalculationController.disposalCosts}" in {
           document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
