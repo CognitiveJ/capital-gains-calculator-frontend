@@ -86,8 +86,9 @@ class AllowableLossesSpec extends UnitSpec with WithFakeApplication with Mockito
           charset(result) shouldBe Some("utf-8")
         }
 
-        "have a back button" in {
+        s"have a 'Back' link to ${routes.CalculationController.entrepreneursRelief}" in {
           document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+          document.body.getElementById("back-link").attr("href") shouldEqual routes.CalculationController.entrepreneursRelief.toString()
         }
 
         "have the title 'Are you claiming any allowable losses?'" in {

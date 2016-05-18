@@ -32,7 +32,7 @@ import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import org.jsoup._
 import org.scalatest.mock.MockitoSugar
 import scala.concurrent.Future
-import controllers.CalculationController
+import controllers.{routes, CalculationController}
 import play.api.mvc.Result
 
 class DisabledTrusteeSpec extends UnitSpec with WithFakeApplication with MockitoSugar {
@@ -86,8 +86,9 @@ class DisabledTrusteeSpec extends UnitSpec with WithFakeApplication with Mockito
           document.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
         }
 
-        "have a 'Back' link " in {
+        s"have a 'Back' link to ${routes.CalculationController.customerType}" in {
           document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+          document.body.getElementById("back-link").attr("href") shouldEqual routes.CalculationController.customerType.toString()
         }
 
         "have the question 'When did you sign the contract that made someone else the owner?' as the legend of the input" in {
