@@ -14,7 +14,7 @@
 
                     @defining(s"${sectionId}(${i})") { inputId =>
                         @if(sectionContent(i).link.isDefined) {
-                            <a id="@inputId" class="lede" href="@sectionContent(i).link.get">@Html(sectionContent(i).answer)</a>
+                            <a id="@inputId" class="lede" href=@sectionContent(i).link.get>@Html(sectionContent(i).answer)</a>
                         }
                     }
                     @defining(s"${sectionId}(${i})") { inputIdNone =>

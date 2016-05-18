@@ -19,7 +19,7 @@ package controllers.CalculationControllerTests
 import common.TestModels
 import connectors.CalculatorConnector
 import constructors.CalculationElectionConstructor
-import controllers.CalculationController
+import controllers.{routes, CalculationController}
 import models.{CalculationResultModel, SummaryModel}
 import org.jsoup.Jsoup
 import org.mockito.Matchers
@@ -149,7 +149,7 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
 
             "have an 'individual' owner and link to the customer-type page" in {
               document.body().getElementById("personalDetails(0)").text() shouldBe "Individual"
-              document.body().getElementById("personalDetails(0)").attr("href") shouldEqual "/calculate-your-capital-gains/customer-type"
+              document.body().getElementById("personalDetails(0)").attr("href") shouldEqual routes.CalculationController.customerType().toString()
             }
 
             "include the question 'What’s your total income for this tax year?'" in {
@@ -158,7 +158,7 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
 
             "have an total income of £1000 and link to the current-income screen" in {
               document.body().getElementById("personalDetails(1)").text() shouldBe "£1000.00"
-              document.body().getElementById("personalDetails(1)").attr("href") shouldEqual "/calculate-your-capital-gains/current-income"
+              document.body().getElementById("personalDetails(1)").attr("href") shouldEqual routes.CalculationController.currentIncome().toString()
             }
 
             "include the question 'What's your Personal Allowance for this tax year?'" in {
@@ -167,7 +167,7 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
 
             "have a personal allowance of £9000 that has a link to the personal allowance page." in {
               document.body().getElementById("personalDetails(2)").text() shouldBe "£9000.00"
-              document.body().getElementById("personalDetails(2)").attr("href") shouldEqual "/calculate-your-capital-gains/personal-allowance"
+              document.body().getElementById("personalDetails(2)").attr("href") shouldEqual routes.CalculationController.personalAllowance().toString()
             }
 
             "include the question 'What was the total taxable gain of your previous Capital Gains in the tax year you stopped owning the property?'" in {
@@ -176,7 +176,7 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
 
             "have a total taxable gain of prior disposals of £9600 and link to the other-properties page" in {
               document.body().getElementById("personalDetails(3)").text() shouldBe "£9600.00"
-              document.body().getElementById("personalDetails(3)").attr("href") shouldEqual "/calculate-your-capital-gains/other-properties"
+              document.body().getElementById("personalDetails(3)").attr("href") shouldEqual routes.CalculationController.otherProperties().toString()
             }
 
             "include the question 'How much of your Capital Gains Tax allowance have you got left'" in {
@@ -185,7 +185,7 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
 
             "have a remaining CGT Allowance of £1500 and link to the allowance page" in {
               document.body().getElementById("personalDetails(4)").text() shouldBe "£1500.00"
-              document.body().getElementById("personalDetails(4)").attr("href") shouldEqual "/calculate-your-capital-gains/allowance"
+              document.body().getElementById("personalDetails(4)").attr("href") shouldEqual routes.CalculationController.annualExemptAmount().toString()
             }
           }
 
@@ -201,7 +201,7 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
 
             "have an acquisition value of £100000 and link to the acquisition value page" in {
               document.body().getElementById("purchaseDetails(0)").text() shouldBe "£100000.00"
-              document.body().getElementById("purchaseDetails(0)").attr("href") shouldEqual "/calculate-your-capital-gains/acquisition-value"
+              document.body().getElementById("purchaseDetails(0)").attr("href") shouldEqual routes.CalculationController.acquisitionValue().toString()
             }
 
             "include the question 'How much did you pay in costs when you became the property owner?'" in {
@@ -210,7 +210,7 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
 
             "have a acquisition costs of £0 and link to the acquisition-costs page" in {
               document.body().getElementById("purchaseDetails(1)").text() shouldBe "£0.00"
-              document.body().getElementById("purchaseDetails(1)").attr("href") shouldEqual "/calculate-your-capital-gains/acquisition-costs"
+              document.body().getElementById("purchaseDetails(1)").attr("href") shouldEqual routes.CalculationController.acquisitionCosts().toString()
             }
           }
 
@@ -226,7 +226,7 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
 
             "the answer to the improvements question should be No and should link to the improvements page" in {
               document.body.getElementById("propertyDetails(0)").text shouldBe "No"
-              document.body().getElementById("propertyDetails(0)").attr("href") shouldEqual "/calculate-your-capital-gains/improvements"
+              document.body().getElementById("propertyDetails(0)").attr("href") shouldEqual routes.CalculationController.improvements().toString()
             }
           }
 
@@ -242,7 +242,7 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
 
             "the date of disposal should be '10 October 2010 and link to the disposal-date page" in {
               document.body().getElementById("saleDetails(0)").text shouldBe "10 October 2010"
-              document.body().getElementById("saleDetails(0)").attr("href") shouldEqual "/calculate-your-capital-gains/disposal-date"
+              document.body().getElementById("saleDetails(0)").attr("href") shouldEqual routes.CalculationController.disposalDate().toString()
             }
 
             "include the question 'How much did you sell or give away the property for?'" in {
@@ -251,7 +251,7 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
 
             "the value of the sale should be £150000 and link to the disposal-value page" in {
               document.body().getElementById("saleDetails(1)").text shouldBe "£150000.00"
-              document.body().getElementById("saleDetails(1)").attr("href") shouldEqual "/calculate-your-capital-gains/disposal-value"
+              document.body().getElementById("saleDetails(1)").attr("href") shouldEqual routes.CalculationController.disposalValue().toString()
             }
 
             "include the question 'How much did you pay in costs when you stopped being the property owner?'" in {
@@ -260,7 +260,7 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
 
             "the value of the costs should be £0 and link to the disposal costs page" in {
               document.body().getElementById("saleDetails(2)").text shouldBe "£0.00"
-              document.body().getElementById("saleDetails(2)").attr("href") shouldEqual "/calculate-your-capital-gains/disposal-costs"
+              document.body().getElementById("saleDetails(2)").attr("href") shouldEqual routes.CalculationController.disposalCosts().toString()
             }
           }
 
@@ -276,7 +276,7 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
 
             "have the answer to entrepreneurs relief question be 'No' and link to the entrepreurs-relief page" in {
               document.body().getElementById("deductions(0)").text shouldBe "No"
-              document.body().getElementById("deductions(0)").attr("href") shouldEqual "/calculate-your-capital-gains/entrepreneurs-relief"
+              document.body().getElementById("deductions(0)").attr("href") shouldEqual routes.CalculationController.entrepreneursRelief().toString()
             }
 
             "include the question 'Whats the total value of your allowable losses?'" in {
@@ -285,7 +285,7 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
 
             "the value of allowable losses should be £0 and link to the allowable-losses page" in {
               document.body().getElementById("deductions(1)").text shouldBe "£0.00"
-              document.body().getElementById("deductions(1)").attr("href") shouldEqual "/calculate-your-capital-gains/allowable-losses"
+              document.body().getElementById("deductions(1)").attr("href") shouldEqual routes.CalculationController.allowableLosses().toString()
             }
 
             "include the question 'What other reliefs are you claiming?'" in {
@@ -294,7 +294,7 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
 
             "the value of other reliefs should be £0 and link to the other-reliefs page" in {
               document.body().getElementById("deductions(2)").text shouldBe "£0.00"
-              document.body().getElementById("deductions(2)").attr("href") shouldEqual "/calculate-your-capital-gains/other-reliefs"
+              document.body().getElementById("deductions(2)").attr("href") shouldEqual routes.CalculationController.otherReliefs().toString()
             }
 
           }
@@ -533,6 +533,7 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
 
         "have a value for the other reliefs rebased" in {
           document.body.getElementById("deductions(2)").text() shouldBe "£777.00"
+          document.body().getElementById("deductions(2)").attr("href") shouldEqual routes.CalculationController.otherReliefsRebased().toString()
         }
 
       }
