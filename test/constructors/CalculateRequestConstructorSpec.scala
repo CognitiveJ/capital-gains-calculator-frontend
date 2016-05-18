@@ -126,8 +126,8 @@ class CalculateRequestConstructorSpec extends UnitSpec {
     }
 
     "return a string from the taCalcUrlExtra with PRR" in {
-      CalculateRequestConstructor.taCalcUrlExtra(TestModels.summaryIndividualWithAllOptions) shouldEqual "&improvementsAmt=8000&disposalDate=2010-10-10" +
-        "&acquisitionDate=1999-9-9&acquisitionValueAmt=100000&acquisitionCostsAmt=300&reliefs=888&daysClaimed=100&isClaimingPRR=Yes"
+      CalculateRequestConstructor.taCalcUrlExtra(TestModels.summaryIndividualWithAllOptions) shouldEqual "&improvementsAmt=8000&disposalDate=2018-10-10" +
+        "&acquisitionDate=1999-9-9&acquisitionValueAmt=100000&acquisitionCostsAmt=300&reliefs=888&daysClaimedAfter=50&isClaimingPRR=Yes"
     }
 
     "return a string from the rebasedCalcUrlExtra with no improvements or rebased costs" in {
@@ -140,7 +140,7 @@ class CalculateRequestConstructorSpec extends UnitSpec {
 
     "return a string from the rebasedCalcUrlExtra with PRR" in {
       CalculateRequestConstructor.rebasedCalcUrlExtra(TestModels.summaryIndividualWithAllOptions) shouldEqual "&improvementsAmt=0&rebasedValue=1000&revaluationCost=500" +
-        "&reliefs=777&isClaimingPRR=Yes"
+        "&reliefs=777&daysClaimedAfter=50&isClaimingPRR=Yes"
     }
 
     "return a string from the improvements with a rebased value and claiming improvements with an empty field" in {
@@ -156,7 +156,7 @@ class CalculateRequestConstructorSpec extends UnitSpec {
     }
 
     "return a string from privateResidenceReliefFlat with an acquisition date before tax start date, a rebased value and disposal date after the 18 month period" in {
-      CalculateRequestConstructor.privateResidenceReliefFlat(TestModels.summaryIndividualPRRAcqDateAfterAndDisposalDateAfter) shouldEqual "&daysClaimed=150"
+      CalculateRequestConstructor.privateResidenceReliefFlat(TestModels.summaryIndividualPRRAcqDateAfterAndDisposalDateAfter) shouldEqual "&daysClaimed=100"
     }
 
     "return an empty string from privateResidenceReliefFlat with an answer of no to PRR" in {
@@ -164,7 +164,7 @@ class CalculateRequestConstructorSpec extends UnitSpec {
     }
 
     "return a string from privateResidenceReliefTA with an acquisition date before tax start date, a rebased value and disposal date after the 18 month period" in {
-      CalculateRequestConstructor.privateResidenceReliefTA(TestModels.summaryIndividualPRRAcqDateAfterAndDisposalDateBeforeWithRebased) shouldEqual "&daysClaimed=100"
+      CalculateRequestConstructor.privateResidenceReliefTA(TestModels.summaryIndividualPRRAcqDateAfterAndDisposalDateAfterWithRebased) shouldEqual "&daysClaimedAfter=50"
     }
 
     "return an empty string from privateResidenceReliefTA with an answer of no to PRR" in {
@@ -172,11 +172,7 @@ class CalculateRequestConstructorSpec extends UnitSpec {
     }
 
     "return a string from privateResidenceReliefRebased with a Rebased Value and a disposal date after 18 month period with no acqDate" in {
-      CalculateRequestConstructor.privateResidenceReliefRebased(TestModels.summaryIndividualPRRNoAcqDateAndDisposalDateAfterWithRebased) shouldEqual "&daysClaimedAfter=100"
-    }
-
-    "return an empty string from privateResidenceReliefRebased with a Rebased Value and a disposal date after 18 month period with an acqDate after the start" in {
-      CalculateRequestConstructor.privateResidenceReliefRebased(TestModels.summaryIndividualPRRAcqDateAfterAndDisposalDateAfterWithRebased) shouldEqual ""
+      CalculateRequestConstructor.privateResidenceReliefRebased(TestModels.summaryIndividualPRRNoAcqDateAndDisposalDateAfterWithRebased) shouldEqual "&daysClaimedAfter=50"
     }
 
     "return a string from privateResidenceReliefRebased with a Rebased Value and a disposal date after 18 month period with an acqDate before the start" in {
@@ -185,10 +181,6 @@ class CalculateRequestConstructorSpec extends UnitSpec {
 
     "return an empty string from privateResidenceReliefRebased with no Rebased PRR" in {
       CalculateRequestConstructor.privateResidenceReliefRebased(TestModels.summaryIndividualFlatWithAEA) shouldEqual ""
-    }
-
-    "return a string with default zero values where Nones are found in daysClaimedAcquisitionBeforeStart" in {
-      CalculateRequestConstructor.daysClaimedAcquisitionBeforeStart(TestModels.summaryIndividualPRRAcqDateAfterAndDisposalDateAfter, None, None) shouldEqual "&daysClaimed=0"
     }
 
   }

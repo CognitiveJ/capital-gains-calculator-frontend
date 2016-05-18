@@ -761,7 +761,7 @@ object TestModels {
     Some(RebasedValueModel("Yes", Some(1000))),
     Some(RebasedCostsModel("Yes", Some(500))),
     ImprovementsModel("Yes", Some(8000)),
-    DisposalDateModel(10, 10, 2010),
+    DisposalDateModel(10, 10, 2018),
     DisposalValueModel(150000),
     AcquisitionCostsModel(Some(300)),
     DisposalCostsModel(Some(600)),
