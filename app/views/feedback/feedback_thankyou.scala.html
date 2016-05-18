@@ -20,5 +20,5 @@
 
 @main_template(Messages("feedback.thankyou.title")) {
     @cachedStaticHtmlPartialRetriever.getPartialContent(partialUrl)
-    <a id="Start" href='@redirectUrl' role="button" tabindex="0" data-journey-click="checkmystatepension:feedback:return" class="button">@Messages("feedback.thankyou.back")</a>
+    <a id="back" href='@redirectUrl' role="button" tabindex="0" class="button">@Messages("calc.base.back")</a>
 }

@@ -2,7 +2,6 @@
 calc.base.pageHeading = Calculate your Capital Gains Tax
 calc.base.continue = Continue
 calc.base.taxStart = 6 April 2015
-calc.base.back = Back
 calc.base.calculate.tax.heading = Calculate your Capital Gains Tax
 calc.base.percentage.comp = complete
 calc.base.button.continue = Continue
@@ -19,7 +18,6 @@ feedback.title = Feedback
 
 ## Feedback Thank You ##
 feedback.thankyou.title = Feedback received
-feedback.thankyou.back = Back
 
 ## Common date Messages ##
 ## Use common messages if some but not all pages use these messages. ##
