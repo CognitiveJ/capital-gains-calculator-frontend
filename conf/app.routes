@@ -101,6 +101,7 @@ POST        /other-reliefs-rebased              controllers.CalculationControlle
 #Summary screen route
 ########################################################
 GET         /summary                 controllers.CalculationController.summary
+GET         /restart                 controllers.CalculationController.restart
 
 #Feedback routes
 GET         /feedback               controllers.FeedbackController.show
