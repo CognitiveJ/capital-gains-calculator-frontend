@@ -26,6 +26,7 @@ import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import play.api.i18n.Messages
 import play.api.libs.json.Json
+import play.api.mvc.{Result, AnyContentAsFormUrlEncoded}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.cache.client.CacheMap
@@ -635,16 +636,58 @@ class PrivateResidenceReliefSpec extends UnitSpec with WithFakeApplication with 
   //POST Tests
   "In CalculationController calling the .submitPrivateResidenceRelief action " should {
 
-    lazy val fakeRequest = FakeRequest("POST", "/calculate-your-capital-gains/private-residence-relief").withSession(SessionKeys.sessionId -> "12345")
-    val target = setupTarget(None, None)
-    lazy val result = target.submitPrivateResidenceRelief(fakeRequest)
+    def buildRequest(body: (String, String)*): FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest("POST", "/calculate-your-capital-gains/private-residence-relief")
+      .withSession(SessionKeys.sessionId -> "12345")
+      .withFormUrlEncodedBody(body: _*)
 
-    "return a 303" in {
-      status(result) shouldBe 303
+    def executeTargetWithMockData
+    (
+      selection: String,
+      daysClaimed: String,
+      daysClaimedAfter: String,
+      disposalDateData: Option[DisposalDateModel] = None,
+      acquisitionDateData: Option[AcquisitionDateModel] = None,
+      rebasedValueData: Option[RebasedValueModel] = None
+    ): Future[Result] = {
+      lazy val fakeRequest = buildRequest(
+        ("isClaimingPRR", selection),
+        ("daysClaimed", daysClaimed),
+        ("daysClaimedAfter",daysClaimedAfter)
+      )
+      val numeric = "(0-9*)".r
+      val daysClaimedValue: BigDecimal = daysClaimed match {
+        case numeric(data) => BigDecimal(data)
+        case _ => 0
+      }
+      val daysClaimedAfterValue: BigDecimal = daysClaimedAfter match {
+        case numeric(data) => BigDecimal(data)
+        case _ => 0
+      }
+      val mockData = Some(PrivateResidenceReliefModel(selection, Some(daysClaimedValue), Some(daysClaimedAfterValue)))
+      val target = setupTarget(None, mockData, disposalDateData, acquisitionDateData, rebasedValueData)
+      target.submitPrivateResidenceRelief(fakeRequest)
     }
 
-    s"redirect to ${routes.CalculationController.entrepreneursRelief()}" in {
-      redirectLocation(result) shouldBe Some(s"${routes.CalculationController.entrepreneursRelief()}")
+    "when supplied with a valid model" should {
+
+      lazy val result = executeTargetWithMockData("Yes", "", "")
+
+      "return a 303" in {
+        status(result) shouldBe 303
+      }
+
+      s"redirect to ${routes.CalculationController.entrepreneursRelief()}" in {
+        redirectLocation(result) shouldBe Some(s"${routes.CalculationController.entrepreneursRelief()}")
+      }
+    }
+
+    "when supplied with an invalid model" should {
+
+      lazy val result = executeTargetWithMockData("", "", "")
+
+      "return a 400" in {
+        status(result) shouldBe 400
+      }
     }
   }
 }
