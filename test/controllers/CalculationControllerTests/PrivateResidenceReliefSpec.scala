@@ -640,7 +640,10 @@ class PrivateResidenceReliefSpec extends UnitSpec with WithFakeApplication with 
       .withSession(SessionKeys.sessionId -> "12345")
       .withFormUrlEncodedBody(body: _*)
 
-    def executeTargetWithMockData(selection: String, daysClaimed: String, daysClaimedAfter: String): Future[Result] = {
+    def executeTargetWithMockData(selection: String, daysClaimed: String, daysClaimedAfter: String,
+                                  disposalDateData: Option[DisposalDateModel] = None,
+                                  acquisitionDateData: Option[AcquisitionDateModel] = None,
+                                  rebasedValueData: Option[RebasedValueModel]= None): Future[Result] = {
       lazy val fakeRequest = buildRequest(("isClaimingPRR", selection), ("daysClaimed", daysClaimed), ("daysClaimedAfter", daysClaimedAfter))
       val mockData = (daysClaimed, daysClaimedAfter) match {
         case ("", "") => PrivateResidenceReliefModel(selection, None, None)
@@ -650,9 +653,13 @@ class PrivateResidenceReliefSpec extends UnitSpec with WithFakeApplication with 
         case (claimed, after) => PrivateResidenceReliefModel(selection, Some(BigDecimal(claimed)), Some(BigDecimal(after)))
         case _ => PrivateResidenceReliefModel(selection, None, None)
       }
-      val target = setupTarget(None, Some(mockData))
+      val target = setupTarget(None, Some(mockData), disposalDateData, acquisitionDateData, rebasedValueData)
       target.submitPrivateResidenceRelief(fakeRequest)
     }
+
+    val testDisposalDate = Some(DisposalDateModel(10, 10, 2018))
+    val testRebasedValue = Some(RebasedValueModel("Yes", Some(10000)))
+    val testAcquisitionDate = Some(AcquisitionDateModel("Yes", Some(9), Some(9), Some(1990)))
 
     "submitting a valid result of 'No'" should {
       lazy val result = executeTargetWithMockData("No", "", "")
@@ -695,12 +702,12 @@ class PrivateResidenceReliefSpec extends UnitSpec with WithFakeApplication with 
       }
 
       "return HTML that displays the error message " in {
-        document.select("div#hidden span.error-notification").text shouldEqual Messages("calc.privateResidenceRelief.error.noValueProvided")
+        document.select("span.error-notification").text shouldEqual "This field is required"
       }
     }
 
     "submitting an invalid result with an answer 'Yes' but no data" should {
-      lazy val result = executeTargetWithMockData("Yes", "", "")
+      lazy val result = executeTargetWithMockData("Yes", "", "", testDisposalDate, testAcquisitionDate, testRebasedValue)
       lazy val document = Jsoup.parse(bodyOf(result))
 
       "return a 400 code" in {
@@ -708,12 +715,12 @@ class PrivateResidenceReliefSpec extends UnitSpec with WithFakeApplication with 
       }
 
       "return HTML that displays the error message " in {
-        document.select("div#hidden span.error-notification").text shouldEqual Messages("calc.privateResidenceRelief.error.noValueProvided")
+        document.select("span.error-notification").text shouldEqual Messages("calc.privateResidenceRelief.error.noValueProvided")
       }
     }
 
     "submitting an invalid result with an answer 'Yes' but negative value data" should {
-      lazy val result = executeTargetWithMockData("Yes", "-1000", "")
+      lazy val result = executeTargetWithMockData("Yes", "-1000", "", testDisposalDate, testAcquisitionDate, testRebasedValue)
       lazy val document = Jsoup.parse(bodyOf(result))
 
       "return a 400 code" in {
@@ -721,12 +728,12 @@ class PrivateResidenceReliefSpec extends UnitSpec with WithFakeApplication with 
       }
 
       "return HTML that displays the error message " in {
-        document.select("div#hidden span.error-notification").text shouldEqual Messages("calc.privateResidenceRelief.error.errorNegative")
+        document.select("span.error-notification").text shouldEqual Messages("calc.privateResidenceRelief.error.errorNegative")
       }
     }
 
     "submitting an invalid result with an answer 'Yes' but fractional value data" should {
-      lazy val result = executeTargetWithMockData("Yes", "", "50.1")
+      lazy val result = executeTargetWithMockData("Yes", "", "50.1", testDisposalDate, testAcquisitionDate, testRebasedValue)
       lazy val document = Jsoup.parse(bodyOf(result))
 
       "return a 400 code" in {
@@ -734,12 +741,12 @@ class PrivateResidenceReliefSpec extends UnitSpec with WithFakeApplication with 
       }
 
       "return HTML that displays the error message " in {
-        document.select("div#hidden span.error-notification").text shouldEqual Messages("calc.privateResidenceRelief.error.errorDecimalPlaces")
+        document.select("span.error-notification").text shouldEqual Messages("calc.privateResidenceRelief.error.errorDecimalPlaces")
       }
     }
 
     "submitting an invalid result with an answer 'Yes' but data which is not a number" should {
-      lazy val result = executeTargetWithMockData("Yes", "ghwhghw", "100")
+      lazy val result = executeTargetWithMockData("Yes", "ghwhghw", "100", testDisposalDate, testAcquisitionDate, testRebasedValue)
       lazy val document = Jsoup.parse(bodyOf(result))
 
       "return a 400 code" in {
@@ -747,62 +754,7 @@ class PrivateResidenceReliefSpec extends UnitSpec with WithFakeApplication with 
       }
 
       "return HTML that displays the error message " in {
-        document.select("div#hidden span.error-notification").text shouldEqual "Real number value expected"
-        //=======
-        //    def buildRequest(body: (String, String)*): FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest("POST", "/calculate-your-capital-gains/private-residence-relief")
-        //      .withSession(SessionKeys.sessionId -> "12345")
-        //      .withFormUrlEncodedBody(body: _*)
-        //
-        //    def executeTargetWithMockData
-        //    (
-        //      selection: String,
-        //      daysClaimed: String,
-        //      daysClaimedAfter: String,
-        //      disposalDateData: Option[DisposalDateModel] = None,
-        //      acquisitionDateData: Option[AcquisitionDateModel] = None,
-        //      rebasedValueData: Option[RebasedValueModel] = None
-        //    ): Future[Result] = {
-        //      lazy val fakeRequest = buildRequest(
-        //        ("isClaimingPRR", selection),
-        //        ("daysClaimed", daysClaimed),
-        //        ("daysClaimedAfter",daysClaimedAfter)
-        //      )
-        //      val numeric = "(0-9*)".r
-        //      val daysClaimedValue: BigDecimal = daysClaimed match {
-        //        case numeric(data) => BigDecimal(data)
-        //        case _ => 0
-        //      }
-        //      val daysClaimedAfterValue: BigDecimal = daysClaimedAfter match {
-        //        case numeric(data) => BigDecimal(data)
-        //        case _ => 0
-        //      }
-        //      val mockData = Some(PrivateResidenceReliefModel(selection, Some(daysClaimedValue), Some(daysClaimedAfterValue)))
-        //      val target = setupTarget(None, mockData, disposalDateData, acquisitionDateData, rebasedValueData)
-        //      target.submitPrivateResidenceRelief(fakeRequest)
-        //    }
-        //
-        //    "when supplied with a valid model" should {
-        //
-        //      lazy val result = executeTargetWithMockData("Yes", "", "")
-        //
-        //      "return a 303" in {
-        //        status(result) shouldBe 303
-        //      }
-        //
-        //      s"redirect to ${routes.CalculationController.entrepreneursRelief()}" in {
-        //        redirectLocation(result) shouldBe Some(s"${routes.CalculationController.entrepreneursRelief()}")
-        //      }
-        //    }
-        //
-        //    "when supplied with an invalid model" should {
-        //
-        //      lazy val result = executeTargetWithMockData("", "", "")
-        //
-        //      "return a 400" in {
-        //        status(result) shouldBe 400
-        //>>>>>>> master
-        //      }
-        //    }
+        document.select("span.error-notification").text shouldEqual "Real number value expected"
       }
     }
   }
