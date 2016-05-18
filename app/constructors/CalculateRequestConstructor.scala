@@ -93,7 +93,7 @@ object CalculateRequestConstructor {
     }&reliefs=${
       input.otherReliefsModelRebased.otherReliefs.getOrElse(0)
     }${privateResidenceReliefRebased(input)
-    }&claimingPRR=${input.privateResidenceReliefModel match {
+    }&isClaimingPRR=${input.privateResidenceReliefModel match {
       case Some(PrivateResidenceReliefModel("Yes", claimed, after)) => "Yes"
       case _ => "No"
     }}"
@@ -155,14 +155,14 @@ object CalculateRequestConstructor {
   }
 
   def daysClaimedDisposalAfter18Months(input: SummaryModel, claimed: Option[BigDecimal], after: Option[BigDecimal]) = {
-    if (input.acquisitionDateModel.hasAcquisitionDate == "No") s"&daysClaimed=${claimed.get}"
+    if (input.acquisitionDateModel.hasAcquisitionDate == "No") s"&daysClaimedAfter=${claimed.get}"
     else if (!Dates.dateAfterStart(input.acquisitionDateModel.day.get, input.acquisitionDateModel.month.get, input.acquisitionDateModel.year.get)) {
-      s"&daysClaimed=${after.getOrElse(0)}"
+      s"&daysClaimedAfter=${after.getOrElse(0)}"
     }
     else ""
   }
 
-  def isClaimingPRR (input: SummaryModel) = s"&claimingPRR=${
+  def isClaimingPRR (input: SummaryModel) = s"&isClaimingPRR=${
     (input.acquisitionDateModel, input.privateResidenceReliefModel) match {
       case (AcquisitionDateModel("Yes", day, month, year), Some(PrivateResidenceReliefModel("Yes", claimed, after))) => "Yes"
       case _ => "No"
