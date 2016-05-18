@@ -6,7 +6,8 @@
 @(disposalValueForm: Form[DisposalValueModel])(implicit request: Request[_])
 
 @main_template(Messages("calc.disposalValue.question")) {
-    <a id="back-link" class="back-link" href="@routes.CalculationController.improvements">@Messages("calc.base.back")</a>
+
+    <a id="back-link" class="back-link" href="@routes.CalculationController.disposalDate">@Messages("calc.base.back")</a>
 
     @govHelpers.errorSummary(Messages("calc.error.summary.heading"), disposalValueForm)
 

@@ -32,7 +32,7 @@ import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import org.jsoup._
 import org.scalatest.mock.MockitoSugar
 import scala.concurrent.Future
-import controllers.CalculationController
+import controllers.{routes, CalculationController}
 import play.api.mvc.Result
 
 class RebasedCostsSpec extends UnitSpec with WithFakeApplication with MockitoSugar {
@@ -99,8 +99,9 @@ class RebasedCostsSpec extends UnitSpec with WithFakeApplication with MockitoSug
           document.body.getElementById("hidden").html should include ("input")
         }
 
-        "have a back link" in {
-          document.getElementById("back-link").tagName() shouldBe "a"
+        s"have a 'Back' link to ${routes.CalculationController.rebasedValue}" in {
+          document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+          document.body.getElementById("back-link").attr("href") shouldEqual routes.CalculationController.rebasedValue.toString()
         }
 
         "have a continue button" in {

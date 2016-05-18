@@ -86,8 +86,9 @@ class AllowableLossesSpec extends UnitSpec with WithFakeApplication with Mockito
           charset(result) shouldBe Some("utf-8")
         }
 
-        "have a back button" in {
+        s"have a 'Back' link to ${routes.CalculationController.entrepreneursRelief}" in {
           document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+          document.body.getElementById("back-link").attr("href") shouldEqual routes.CalculationController.entrepreneursRelief.toString()
         }
 
         "have the title 'Are you claiming any allowable losses?'" in {
@@ -291,6 +292,19 @@ class AllowableLossesSpec extends UnitSpec with WithFakeApplication with Mockito
 
       "redirect to the calculation election view" in {
         redirectLocation(result) shouldBe Some(s"${routes.CalculationController.calculationElection()}")
+      }
+    }
+
+    "submitting a valid form when an invalid Acquisition Date Model has been supplied and no property was revalued" should {
+      val invalidDate = AcquisitionDateModel("invalid", None, None, None)
+      lazy val result = executeTargetWithMockData("No", "", invalidDate)
+
+      "return a 303" in {
+        status(result) shouldBe 303
+      }
+
+      s"redirect to ${routes.CalculationController.otherReliefs()}" in {
+        redirectLocation(result) shouldBe Some(s"${routes.CalculationController.otherReliefs()}")
       }
     }
   }

@@ -5,7 +5,8 @@
 @(disposalCostsForm: Form[DisposalCostsModel])(implicit request: Request[_])
 
 @main_template(Messages("calc.disposalCosts.question")) {
-    <a id="back-link" class="back-link" href="@routes.CalculationController.otherProperties">Back</a>
+
+    <a id="back-link" class="back-link" href="@routes.CalculationController.acquisitionCosts">Back</a>
 
     @govHelpers.errorSummary(Messages("calc.error.summary.heading"), disposalCostsForm)
 

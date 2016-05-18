@@ -88,8 +88,9 @@ class PersonalAllowanceSpec extends UnitSpec with WithFakeApplication with Mocki
           document.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
         }
 
-        "have a 'Back' link " in {
+        s"have a 'Back' link to ${routes.CalculationController.currentIncome}" in {
           document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+          document.body.getElementById("back-link").attr("href") shouldEqual routes.CalculationController.currentIncome.toString()
         }
 
         "have the question 'In the tax year when you stopped owning the property, what was your UK Personal Allowance?' as the label of the input" in {

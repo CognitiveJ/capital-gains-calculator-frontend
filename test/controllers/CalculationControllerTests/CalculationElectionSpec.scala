@@ -108,8 +108,9 @@ class CalculationElectionSpec extends UnitSpec with WithFakeApplication with Moc
           document.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
         }
 
-        "have a 'Back' link " in {
+        s"have a 'Back' link to ${routes.CalculationController.allowableLosses}" in {
           document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+          document.body.getElementById("back-link").attr("href") shouldEqual routes.CalculationController.allowableLosses.toString()
         }
 
         "have the paragraph You can decide what to base your Capital Gains Tax on. It affects how much you'll pay." in {
