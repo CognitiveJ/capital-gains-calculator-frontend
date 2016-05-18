@@ -94,8 +94,9 @@ class AcquisitionValueSpec extends UnitSpec with WithFakeApplication with Mockit
           document.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
         }
 
-        "have a 'Back' link " in {
+        s"have a 'Back' link to ${routes.CalculationController.acquisitionDate}" in {
           document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+          document.body.getElementById("back-link").attr("href") shouldEqual routes.CalculationController.acquisitionDate.toString()
         }
 
         "have the question 'How much did you pay for the property?'" in {

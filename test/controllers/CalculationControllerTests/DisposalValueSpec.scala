@@ -88,8 +88,9 @@ class DisposalValueSpec extends UnitSpec with WithFakeApplication with MockitoSu
           document.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
         }
 
-        "have a 'Back' link " in {
+        s"have a 'Back' link to ${routes.CalculationController.disposalDate}" in {
           document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+          document.body.getElementById("back-link").attr("href") shouldEqual routes.CalculationController.disposalDate.toString()
         }
 
         "have the question 'How much did you sell or give away the property for?' as the legend of the input" in {

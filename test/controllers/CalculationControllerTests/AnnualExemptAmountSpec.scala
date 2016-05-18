@@ -32,7 +32,7 @@ import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import org.jsoup._
 import org.scalatest.mock.MockitoSugar
 import scala.concurrent.Future
-import controllers.CalculationController
+import controllers.{routes, CalculationController}
 import play.api.mvc.Result
 
 class AnnualExemptAmountSpec extends UnitSpec with WithFakeApplication with MockitoSugar {
@@ -98,8 +98,9 @@ class AnnualExemptAmountSpec extends UnitSpec with WithFakeApplication with Mock
           document.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
         }
 
-        "have a 'Back' link " in {
+        s"have a 'Back' link to ${routes.CalculationController.otherProperties}" in {
           document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+          document.body.getElementById("back-link").attr("href") shouldEqual routes.CalculationController.otherProperties.toString()
         }
 
         "have the question 'How much of your Capital Gains Tax allowance have you got left?' as the legend of the input" in {

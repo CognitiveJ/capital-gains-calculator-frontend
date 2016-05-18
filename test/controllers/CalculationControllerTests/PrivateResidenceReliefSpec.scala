@@ -203,7 +203,7 @@ class PrivateResidenceReliefSpec extends UnitSpec with WithFakeApplication with 
       }
 
       "when disposal date is >= 6 October 2016 and no rebased value" should {
-      //This is an impossible scenario, as the Private Residence Relief screen would not be routed to, included for completenetss
+        //This is an impossible scenario, as the Private Residence Relief screen would not be routed to, included for completenetss
 
         lazy val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/private-residence-relief").withSession(SessionKeys.sessionId -> "12345")
         val target = setupTarget(
@@ -366,247 +366,252 @@ class PrivateResidenceReliefSpec extends UnitSpec with WithFakeApplication with 
             document.body.getElementById("daysClaimedAfter") shouldEqual null
           }
         }
-      }
 
-      "when disposal date is < 6 October 2016, no acquisition date with rebased value" should {
-
-        lazy val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/private-residence-relief").withSession(SessionKeys.sessionId -> "12345")
-        val target = setupTarget(
-          Some(PrivateResidenceReliefModel("Yes", None, None)),
-          None,
-          Some(DisposalDateModel(5, 10, 2016)),
-          Some(AcquisitionDateModel("No", None, None, None)),
-          Some(RebasedValueModel("Yes",Some(455)))
-        )
-        lazy val result = target.privateResidenceRelief(fakeRequest)
-        lazy val document = Jsoup.parse(bodyOf(result))
-
-        "return a 200" in {
-          status(result) shouldBe 200
+        s"have a 'Back' link to ${routes.CalculationController.disposalCosts}" in {
+          document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+          document.body.getElementById("back-link").attr("href") shouldEqual routes.CalculationController.disposalCosts.toString()
         }
 
-        "return some HTML that" should {
+        "when disposal date is < 6 October 2016, no acquisition date with rebased value" should {
 
-          "have the `Yes` option of the radio button checked" in {
-            document.body.getElementById("isClaimingPRR-yes").attr("checked") shouldEqual "checked"
+          lazy val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/private-residence-relief").withSession(SessionKeys.sessionId -> "12345")
+          val target = setupTarget(
+            Some(PrivateResidenceReliefModel("Yes", None, None)),
+            None,
+            Some(DisposalDateModel(5, 10, 2016)),
+            Some(AcquisitionDateModel("No", None, None, None)),
+            Some(RebasedValueModel("Yes", Some(455)))
+          )
+          lazy val result = target.privateResidenceRelief(fakeRequest)
+          lazy val document = Jsoup.parse(bodyOf(result))
+
+          "return a 200" in {
+            status(result) shouldBe 200
           }
 
-          "Not show the Days Between question" in {
-            document.body.getElementById("daysClaimedAfter") shouldEqual null
-          }
+          "return some HTML that" should {
 
-          "Not show the Days Before question" in {
-            document.body.getElementById("daysClaimed") shouldEqual null
-          }
-        }
-      }
+            "have the `Yes` option of the radio button checked" in {
+              document.body.getElementById("isClaimingPRR-yes").attr("checked") shouldEqual "checked"
+            }
 
-      "when disposal date is < 6 October 2016 with rebased value" should {
+            "Not show the Days Between question" in {
+              document.body.getElementById("daysClaimedAfter") shouldEqual null
+            }
 
-        lazy val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/private-residence-relief").withSession(SessionKeys.sessionId -> "12345")
-        val target = setupTarget(
-          Some(PrivateResidenceReliefModel("Yes", None, None)),
-          None,
-          Some(DisposalDateModel(5, 10, 2016)),
-          None,
-          Some(RebasedValueModel("Yes",Some(455)))
-        )
-        lazy val result = target.privateResidenceRelief(fakeRequest)
-        lazy val document = Jsoup.parse(bodyOf(result))
-
-        "return a 200" in {
-          status(result) shouldBe 200
-        }
-
-        "return some HTML that" should {
-
-          "have the `Yes` option of the radio button checked" in {
-            document.body.getElementById("isClaimingPRR-yes").attr("checked") shouldEqual "checked"
-          }
-
-          "Not show the Days Between question" in {
-            document.body.getElementById("daysClaimedAfter") shouldEqual null
-          }
-
-          "Not show the Days Before question" in {
-            document.body.getElementById("daysClaimed") shouldEqual null
+            "Not show the Days Before question" in {
+              document.body.getElementById("daysClaimed") shouldEqual null
+            }
           }
         }
-      }
 
-      "when disposal date is < 6 October 2016, no acquisition date with no rebased value" should {
+        "when disposal date is < 6 October 2016 with rebased value" should {
 
-        lazy val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/private-residence-relief").withSession(SessionKeys.sessionId -> "12345")
-        val target = setupTarget(
-          Some(PrivateResidenceReliefModel("Yes", None, None)),
-          None,
-          Some(DisposalDateModel(5, 10, 2016)),
-          None,
-          Some(RebasedValueModel("No", None))
-        )
-        lazy val result = target.privateResidenceRelief(fakeRequest)
-        lazy val document = Jsoup.parse(bodyOf(result))
+          lazy val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/private-residence-relief").withSession(SessionKeys.sessionId -> "12345")
+          val target = setupTarget(
+            Some(PrivateResidenceReliefModel("Yes", None, None)),
+            None,
+            Some(DisposalDateModel(5, 10, 2016)),
+            None,
+            Some(RebasedValueModel("Yes", Some(455)))
+          )
+          lazy val result = target.privateResidenceRelief(fakeRequest)
+          lazy val document = Jsoup.parse(bodyOf(result))
 
-        "return a 200" in {
-          status(result) shouldBe 200
-        }
-
-        "return some HTML that" should {
-
-          "have the `Yes` option of the radio button checked" in {
-            document.body.getElementById("isClaimingPRR-yes").attr("checked") shouldEqual "checked"
+          "return a 200" in {
+            status(result) shouldBe 200
           }
 
-          "Not show the Days Between question" in {
-            document.body.getElementById("daysClaimedAfter") shouldEqual null
-          }
+          "return some HTML that" should {
 
-          "Not show the Days Before question" in {
-            document.body.getElementById("daysClaimed") shouldEqual null
-          }
-        }
-      }
+            "have the `Yes` option of the radio button checked" in {
+              document.body.getElementById("isClaimingPRR-yes").attr("checked") shouldEqual "checked"
+            }
 
-      "when disposal date is < 6 October 2016, acquisition date < 6 April 15 with rebased value" should {
+            "Not show the Days Between question" in {
+              document.body.getElementById("daysClaimedAfter") shouldEqual null
+            }
 
-        lazy val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/private-residence-relief").withSession(SessionKeys.sessionId -> "12345")
-        val target = setupTarget(
-          Some(PrivateResidenceReliefModel("Yes", Some(23), None)),
-          None,
-          Some(DisposalDateModel(5, 10, 2016)),
-          Some(AcquisitionDateModel("Yes", Some(5), Some(4), Some(2015))),
-          Some(RebasedValueModel("Yes",Some(455)))
-        )
-        lazy val result = target.privateResidenceRelief(fakeRequest)
-        lazy val document = Jsoup.parse(bodyOf(result))
-
-        "return a 200" in {
-          status(result) shouldBe 200
-        }
-
-        "return some HTML that" should {
-
-          "have the `Yes` option of the radio button checked" in {
-            document.body.getElementById("isClaimingPRR-yes").attr("checked") shouldEqual "checked"
-          }
-
-          "Not show the Days Between question" in {
-            document.body.getElementById("daysClaimedAfter") shouldEqual null
-          }
-
-          "have an input with question 'How many days before 5 April 2015 are you claiming relief for'" in {
-            document.body.getElementById("daysClaimed").tagName shouldEqual "input"
-            document.select("label[for=daysClaimed]").text should include(Messages("calc.privateResidenceRelief.questionBefore.partOne"))
-            document.select("label[for=daysClaimed]").text should include(Messages("calc.privateResidenceRelief.questionBefore.partTwo"))
-          }
-
-          "have 23 days in the input field for days claimed" in {
-            document.body.getElementById("daysClaimed").attr("value") shouldEqual "23"
+            "Not show the Days Before question" in {
+              document.body.getElementById("daysClaimed") shouldEqual null
+            }
           }
         }
-      }
 
-      "when disposal date is < 6 October 2016, acquisition date < 6 April 15 with no rebased value" should {
+        "when disposal date is < 6 October 2016, no acquisition date with no rebased value" should {
 
-        lazy val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/private-residence-relief").withSession(SessionKeys.sessionId -> "12345")
-        val target = setupTarget(
-          Some(PrivateResidenceReliefModel("Yes", Some(23), None)),
-          None,
-          Some(DisposalDateModel(5, 10, 2016)),
-          Some(AcquisitionDateModel("Yes", Some(5), Some(4), Some(2015))),
-          Some(RebasedValueModel("No", None))
-        )
-        lazy val result = target.privateResidenceRelief(fakeRequest)
-        lazy val document = Jsoup.parse(bodyOf(result))
+          lazy val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/private-residence-relief").withSession(SessionKeys.sessionId -> "12345")
+          val target = setupTarget(
+            Some(PrivateResidenceReliefModel("Yes", None, None)),
+            None,
+            Some(DisposalDateModel(5, 10, 2016)),
+            None,
+            Some(RebasedValueModel("No", None))
+          )
+          lazy val result = target.privateResidenceRelief(fakeRequest)
+          lazy val document = Jsoup.parse(bodyOf(result))
 
-        "return a 200" in {
-          status(result) shouldBe 200
-        }
-
-        "return some HTML that" should {
-
-          "have the `Yes` option of the radio button checked" in {
-            document.body.getElementById("isClaimingPRR-yes").attr("checked") shouldEqual "checked"
+          "return a 200" in {
+            status(result) shouldBe 200
           }
 
-          "Not show the Days Between question" in {
-            document.body.getElementById("daysClaimedAfter") shouldEqual null
-          }
+          "return some HTML that" should {
 
-          "have an input with question 'How many days before 5 April 2015 are you claiming relief for'" in {
-            document.body.getElementById("daysClaimed").tagName shouldEqual "input"
-            document.select("label[for=daysClaimed]").text should include(Messages("calc.privateResidenceRelief.questionBefore.partOne"))
-            document.select("label[for=daysClaimed]").text should include(Messages("calc.privateResidenceRelief.questionBefore.partTwo"))
-          }
+            "have the `Yes` option of the radio button checked" in {
+              document.body.getElementById("isClaimingPRR-yes").attr("checked") shouldEqual "checked"
+            }
 
-          "have 23 days in the input field for days claimed" in {
-            document.body.getElementById("daysClaimed").attr("value") shouldEqual "23"
+            "Not show the Days Between question" in {
+              document.body.getElementById("daysClaimedAfter") shouldEqual null
+            }
+
+            "Not show the Days Before question" in {
+              document.body.getElementById("daysClaimed") shouldEqual null
+            }
           }
         }
-      }
 
-      "when disposal date is < 6 October 2016, acquisition date >= 6 April 15 with rebased value" should {
+        "when disposal date is < 6 October 2016, acquisition date < 6 April 15 with rebased value" should {
 
-        lazy val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/private-residence-relief").withSession(SessionKeys.sessionId -> "12345")
-        val target = setupTarget(
-          Some(PrivateResidenceReliefModel("Yes", None, None)),
-          None,
-          Some(DisposalDateModel(5, 10, 2016)),
-          Some(AcquisitionDateModel("Yes", Some(6), Some(4), Some(2015))),
-          Some(RebasedValueModel("Yes", Some(400)))
-        )
-        lazy val result = target.privateResidenceRelief(fakeRequest)
-        lazy val document = Jsoup.parse(bodyOf(result))
+          lazy val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/private-residence-relief").withSession(SessionKeys.sessionId -> "12345")
+          val target = setupTarget(
+            Some(PrivateResidenceReliefModel("Yes", Some(23), None)),
+            None,
+            Some(DisposalDateModel(5, 10, 2016)),
+            Some(AcquisitionDateModel("Yes", Some(5), Some(4), Some(2015))),
+            Some(RebasedValueModel("Yes", Some(455)))
+          )
+          lazy val result = target.privateResidenceRelief(fakeRequest)
+          lazy val document = Jsoup.parse(bodyOf(result))
 
-        "return a 200" in {
-          status(result) shouldBe 200
+          "return a 200" in {
+            status(result) shouldBe 200
+          }
+
+          "return some HTML that" should {
+
+            "have the `Yes` option of the radio button checked" in {
+              document.body.getElementById("isClaimingPRR-yes").attr("checked") shouldEqual "checked"
+            }
+
+            "Not show the Days Between question" in {
+              document.body.getElementById("daysClaimedAfter") shouldEqual null
+            }
+
+            "have an input with question 'How many days before 5 April 2015 are you claiming relief for'" in {
+              document.body.getElementById("daysClaimed").tagName shouldEqual "input"
+              document.select("label[for=daysClaimed]").text should include(Messages("calc.privateResidenceRelief.questionBefore.partOne"))
+              document.select("label[for=daysClaimed]").text should include(Messages("calc.privateResidenceRelief.questionBefore.partTwo"))
+            }
+
+            "have 23 days in the input field for days claimed" in {
+              document.body.getElementById("daysClaimed").attr("value") shouldEqual "23"
+            }
+          }
         }
 
-        "return some HTML that" should {
+        "when disposal date is < 6 October 2016, acquisition date < 6 April 15 with no rebased value" should {
 
-          "have the `Yes` option of the radio button checked" in {
-            document.body.getElementById("isClaimingPRR-yes").attr("checked") shouldEqual "checked"
+          lazy val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/private-residence-relief").withSession(SessionKeys.sessionId -> "12345")
+          val target = setupTarget(
+            Some(PrivateResidenceReliefModel("Yes", Some(23), None)),
+            None,
+            Some(DisposalDateModel(5, 10, 2016)),
+            Some(AcquisitionDateModel("Yes", Some(5), Some(4), Some(2015))),
+            Some(RebasedValueModel("No", None))
+          )
+          lazy val result = target.privateResidenceRelief(fakeRequest)
+          lazy val document = Jsoup.parse(bodyOf(result))
+
+          "return a 200" in {
+            status(result) shouldBe 200
           }
 
-          "Not show the Days Between question" in {
-            document.body.getElementById("daysClaimedAfter") shouldEqual null
-          }
+          "return some HTML that" should {
 
-          "Not show the Days Before question" in {
-            document.body.getElementById("daysClaimed") shouldEqual null
+            "have the `Yes` option of the radio button checked" in {
+              document.body.getElementById("isClaimingPRR-yes").attr("checked") shouldEqual "checked"
+            }
+
+            "Not show the Days Between question" in {
+              document.body.getElementById("daysClaimedAfter") shouldEqual null
+            }
+
+            "have an input with question 'How many days before 5 April 2015 are you claiming relief for'" in {
+              document.body.getElementById("daysClaimed").tagName shouldEqual "input"
+              document.select("label[for=daysClaimed]").text should include(Messages("calc.privateResidenceRelief.questionBefore.partOne"))
+              document.select("label[for=daysClaimed]").text should include(Messages("calc.privateResidenceRelief.questionBefore.partTwo"))
+            }
+
+            "have 23 days in the input field for days claimed" in {
+              document.body.getElementById("daysClaimed").attr("value") shouldEqual "23"
+            }
           }
         }
-      }
 
-      "when disposal date is < 6 October 2016, acquisition date >= 6 April 15 with no rebased value" should {
+        "when disposal date is < 6 October 2016, acquisition date >= 6 April 15 with rebased value" should {
 
-        lazy val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/private-residence-relief").withSession(SessionKeys.sessionId -> "12345")
-        val target = setupTarget(
-          Some(PrivateResidenceReliefModel("Yes", None, None)),
-          None,
-          Some(DisposalDateModel(5, 10, 2016)),
-          Some(AcquisitionDateModel("Yes", Some(6), Some(4), Some(2015))),
-          Some(RebasedValueModel("No", None))
-        )
-        lazy val result = target.privateResidenceRelief(fakeRequest)
-        lazy val document = Jsoup.parse(bodyOf(result))
+          lazy val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/private-residence-relief").withSession(SessionKeys.sessionId -> "12345")
+          val target = setupTarget(
+            Some(PrivateResidenceReliefModel("Yes", None, None)),
+            None,
+            Some(DisposalDateModel(5, 10, 2016)),
+            Some(AcquisitionDateModel("Yes", Some(6), Some(4), Some(2015))),
+            Some(RebasedValueModel("Yes", Some(400)))
+          )
+          lazy val result = target.privateResidenceRelief(fakeRequest)
+          lazy val document = Jsoup.parse(bodyOf(result))
 
-        "return a 200" in {
-          status(result) shouldBe 200
+          "return a 200" in {
+            status(result) shouldBe 200
+          }
+
+          "return some HTML that" should {
+
+            "have the `Yes` option of the radio button checked" in {
+              document.body.getElementById("isClaimingPRR-yes").attr("checked") shouldEqual "checked"
+            }
+
+            "Not show the Days Between question" in {
+              document.body.getElementById("daysClaimedAfter") shouldEqual null
+            }
+
+            "Not show the Days Before question" in {
+              document.body.getElementById("daysClaimed") shouldEqual null
+            }
+          }
         }
 
-        "return some HTML that" should {
+        "when disposal date is < 6 October 2016, acquisition date >= 6 April 15 with no rebased value" should {
 
-          "have the `Yes` option of the radio button checked" in {
-            document.body.getElementById("isClaimingPRR-yes").attr("checked") shouldEqual "checked"
+          lazy val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/private-residence-relief").withSession(SessionKeys.sessionId -> "12345")
+          val target = setupTarget(
+            Some(PrivateResidenceReliefModel("Yes", None, None)),
+            None,
+            Some(DisposalDateModel(5, 10, 2016)),
+            Some(AcquisitionDateModel("Yes", Some(6), Some(4), Some(2015))),
+            Some(RebasedValueModel("No", None))
+          )
+          lazy val result = target.privateResidenceRelief(fakeRequest)
+          lazy val document = Jsoup.parse(bodyOf(result))
+
+          "return a 200" in {
+            status(result) shouldBe 200
           }
 
-          "Not show the Days Between question" in {
-            document.body.getElementById("daysClaimedAfter") shouldEqual null
-          }
+          "return some HTML that" should {
 
-          "Not show the Days Before question" in {
-            document.body.getElementById("daysClaimed") shouldEqual null
+            "have the `Yes` option of the radio button checked" in {
+              document.body.getElementById("isClaimingPRR-yes").attr("checked") shouldEqual "checked"
+            }
+
+            "Not show the Days Between question" in {
+              document.body.getElementById("daysClaimedAfter") shouldEqual null
+            }
+
+            "Not show the Days Before question" in {
+              document.body.getElementById("daysClaimed") shouldEqual null
+            }
           }
         }
       }
