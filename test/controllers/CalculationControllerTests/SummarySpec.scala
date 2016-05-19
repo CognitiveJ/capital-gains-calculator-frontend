@@ -16,11 +16,12 @@
 
 package controllers.CalculationControllerTests
 
-import common.TestModels
+import common.DefaultRoutes._
+import common.{KeystoreKeys, TestModels}
 import connectors.CalculatorConnector
 import constructors.CalculationElectionConstructor
 import controllers.{routes, CalculationController}
-import models.{CalculationResultModel, SummaryModel}
+import models.{AcquisitionDateModel, RebasedValueModel, CalculationResultModel, SummaryModel}
 import org.jsoup.Jsoup
 import org.mockito.Matchers
 import org.mockito.Mockito._
@@ -37,11 +38,19 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
   implicit val hc = new HeaderCarrier()
   def setupTarget(
                    summary: SummaryModel,
-                   result: CalculationResultModel
+                   result: CalculationResultModel,
+                   acquisitionDateData: Option[AcquisitionDateModel],
+                   rebasedValueData: Option[RebasedValueModel]
                  ): CalculationController = {
 
     val mockCalcConnector = mock[CalculatorConnector]
     val mockCalcElectionConstructor = mock[CalculationElectionConstructor]
+
+    when(mockCalcConnector.fetchAndGetFormData[RebasedValueModel](Matchers.eq(KeystoreKeys.rebasedValue))(Matchers.any(), Matchers.any()))
+      .thenReturn(Future.successful(rebasedValueData))
+
+    when(mockCalcConnector.fetchAndGetFormData[AcquisitionDateModel](Matchers.eq(KeystoreKeys.acquisitionDate))(Matchers.any(), Matchers.any()))
+      .thenReturn(Future.successful(acquisitionDateData))
 
     when(mockCalcConnector.createSummary(Matchers.any()))
       .thenReturn(Future.successful(summary))
@@ -64,10 +73,114 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
   "In CalculationController calling the .summary action" when {
     lazy val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/summary").withSession(SessionKeys.sessionId -> "12345")
 
+    "Testing the back links for all user types" when {
+
+      "Acquisition Date is > 5 April 2015" should {
+        val target = setupTarget(
+          TestModels.summaryIndividualFlatWithAEA,
+          TestModels.calcModelTwoRates,
+          Some(AcquisitionDateModel("Yes", Some(1), Some(1), Some(2017))),
+          None
+        )
+        lazy val result = target.summary()(fakeRequest)
+        lazy val document = Jsoup.parse(bodyOf(result))
+
+        s"have a 'Back' link to ${routes.CalculationController.otherReliefs().url}" in {
+          document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+          document.body.getElementById("back-link").attr("href") shouldEqual routes.CalculationController.otherReliefs().url
+        }
+      }
+
+      "Acquisition Date is not supplied and no rebased value has been supplied" should {
+        val target = setupTarget(
+          TestModels.summaryIndividualFlatWithAEA,
+          TestModels.calcModelTwoRates,
+          Some(AcquisitionDateModel("No", None,None,None)),
+          Some(RebasedValueModel("No", None))
+        )
+        lazy val result = target.summary()(fakeRequest)
+        lazy val document = Jsoup.parse(bodyOf(result))
+
+        s"have a 'Back' link to ${routes.CalculationController.otherReliefs().url}" in {
+          document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+          document.body.getElementById("back-link").attr("href") shouldEqual routes.CalculationController.otherReliefs().url
+        }
+      }
+
+      "Acquisition Date is not supplied and rebased value is supplied" should {
+        val target = setupTarget(
+          TestModels.summaryIndividualFlatWithAEA,
+          TestModels.calcModelTwoRates,
+          Some(AcquisitionDateModel("No", None,None,None)),
+          Some(RebasedValueModel("Yes", Some(500)))
+        )
+        lazy val result = target.summary()(fakeRequest)
+        lazy val document = Jsoup.parse(bodyOf(result))
+
+        s"have a 'Back' link to ${routes.CalculationController.calculationElection().url}" in {
+          document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+          document.body.getElementById("back-link").attr("href") shouldEqual routes.CalculationController.calculationElection().url
+        }
+      }
+
+      "Acquisition Date <= 5 April 2015" should {
+        val target = setupTarget(
+          TestModels.summaryIndividualFlatWithAEA,
+          TestModels.calcModelTwoRates,
+          Some(AcquisitionDateModel("Yes", Some(1),Some(1),Some(2014))),
+          Some(RebasedValueModel("Yes", Some(500)))
+        )
+        lazy val result = target.summary()(fakeRequest)
+        lazy val document = Jsoup.parse(bodyOf(result))
+
+        s"have a 'Back' link to ${routes.CalculationController.calculationElection().url}" in {
+          document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+          document.body.getElementById("back-link").attr("href") shouldEqual routes.CalculationController.calculationElection().url
+        }
+      }
+
+      "Acquisition Date Model is not supplied" should {
+        val target = setupTarget(
+          TestModels.summaryIndividualFlatWithAEA,
+          TestModels.calcModelTwoRates,
+          None,
+          Some(RebasedValueModel("Yes", Some(500)))
+        )
+        lazy val result = target.summary()(fakeRequest)
+        lazy val document = Jsoup.parse(bodyOf(result))
+
+        s"have a 'Back' link to ${missingDataRoute} " in {
+          document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+          document.body.getElementById("back-link").attr("href") shouldEqual missingDataRoute
+        }
+      }
+
+      "Acquisition Date Model is supplied with no date but Rebased Value Model is not" should {
+        val target = setupTarget(
+          TestModels.summaryIndividualFlatWithAEA,
+          TestModels.calcModelTwoRates,
+          Some(AcquisitionDateModel("No", None,None,None)),
+          None
+        )
+        lazy val result = target.summary()(fakeRequest)
+        lazy val document = Jsoup.parse(bodyOf(result))
+
+        s"have a 'Back' link to ${missingDataRoute} " in {
+          document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+          document.body.getElementById("back-link").attr("href") shouldEqual missingDataRoute
+        }
+      }
+    }
+
     "individual is chosen with a flat calculation" when {
 
       "the user has provided a value for the AEA" should {
-        val target = setupTarget(TestModels.summaryIndividualFlatWithAEA, TestModels.calcModelTwoRates)
+        val target = setupTarget(
+          TestModels.summaryIndividualFlatWithAEA,
+          TestModels.calcModelTwoRates,
+          Some(AcquisitionDateModel("Yes", Some(1), Some(1), Some(2017))),
+          None
+        )
         lazy val result = target.summary()(fakeRequest)
         lazy val document = Jsoup.parse(bodyOf(result))
 
@@ -319,7 +432,12 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
       }
 
       "the user has provided no value for the AEA" should {
-        val target = setupTarget(TestModels.summaryIndividualFlatWithoutAEA, TestModels.calcModelOneRate)
+        val target = setupTarget(
+          TestModels.summaryIndividualFlatWithoutAEA,
+          TestModels.calcModelOneRate,
+          Some(AcquisitionDateModel("Yes", Some(1), Some(1), Some(2017))),
+          None
+        )
         lazy val result = target.summary()(fakeRequest)
         lazy val document = Jsoup.parse(bodyOf(result))
 
@@ -357,7 +475,12 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
       }
 
       "users calculation results in a loss" should {
-        val target = setupTarget(TestModels.summaryIndividualFlatLoss, TestModels.calcModelLoss)
+        val target = setupTarget(
+          TestModels.summaryIndividualFlatLoss,
+          TestModels.calcModelLoss,
+          Some(AcquisitionDateModel("Yes", Some(1), Some(1), Some(2017))),
+          None
+        )
         lazy val result = target.summary()(fakeRequest)
         lazy val document = Jsoup.parse(bodyOf(result))
 
@@ -374,7 +497,12 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
     "regular trustee is chosen with a time apportioned calculation" when {
 
       "the user has provided a value for the AEA" should {
-        val target = setupTarget(TestModels.summaryTrusteeTAWithAEA, TestModels.calcModelOneRate)
+        val target = setupTarget(
+          TestModels.summaryTrusteeTAWithAEA,
+          TestModels.calcModelOneRate,
+          Some(AcquisitionDateModel("Yes", Some(1), Some(1), Some(2017))),
+          None
+        )
         lazy val result = target.summary()(fakeRequest)
         lazy val document = Jsoup.parse(bodyOf(result))
 
@@ -408,7 +536,12 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
       }
 
       "the user has provided no value for the AEA" should {
-        val target = setupTarget(TestModels.summaryTrusteeTAWithoutAEA, TestModels.calcModelTwoRates)
+        val target = setupTarget(
+          TestModels.summaryTrusteeTAWithoutAEA,
+          TestModels.calcModelTwoRates,
+          Some(AcquisitionDateModel("Yes", Some(1), Some(1), Some(2017))),
+          None
+        )
         lazy val result = target.summary()(fakeRequest)
         lazy val document = Jsoup.parse(bodyOf(result))
 
@@ -425,7 +558,12 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
     "disabled trustee is chosen with a time apportioned calculation" when {
 
       "the user has provided a value for the AEA" should {
-        val target = setupTarget(TestModels.summaryDisabledTrusteeTAWithAEA, TestModels.calcModelTwoRates)
+        val target = setupTarget(
+          TestModels.summaryDisabledTrusteeTAWithAEA,
+          TestModels.calcModelTwoRates,
+          Some(AcquisitionDateModel("Yes", Some(1), Some(1), Some(2017))),
+          None
+        )
         lazy val result = target.summary()(fakeRequest)
         lazy val document = Jsoup.parse(bodyOf(result))
 
@@ -439,7 +577,12 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
       }
 
       "the user has provided no value for the AEA" should {
-        val target = setupTarget(TestModels.summaryDisabledTrusteeTAWithoutAEA, TestModels.calcModelTwoRates)
+        val target = setupTarget(
+          TestModels.summaryDisabledTrusteeTAWithoutAEA,
+          TestModels.calcModelTwoRates,
+          Some(AcquisitionDateModel("Yes", Some(1), Some(1), Some(2017))),
+          None
+        )
         lazy val result = target.summary()(fakeRequest)
         lazy val document = Jsoup.parse(bodyOf(result))
 
@@ -456,7 +599,12 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
     "personal representative is chosen with a flat calculation" when {
 
       "the user has provided a value for the AEA" should {
-        val target = setupTarget(TestModels.summaryRepresentativeFlatWithAEA, TestModels.calcModelTwoRates)
+        val target = setupTarget(
+          TestModels.summaryRepresentativeFlatWithAEA,
+          TestModels.calcModelTwoRates,
+          Some(AcquisitionDateModel("Yes", Some(1), Some(1), Some(2017))),
+          None
+        )
         lazy val result = target.summary()(fakeRequest)
         lazy val document = Jsoup.parse(bodyOf(result))
 
@@ -474,7 +622,12 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
       }
 
       "the user has provided no value for the AEA" should {
-        val target = setupTarget(TestModels.summaryRepresentativeFlatWithoutAEA, TestModels.calcModelTwoRates)
+        val target = setupTarget(
+          TestModels.summaryRepresentativeFlatWithoutAEA,
+          TestModels.calcModelTwoRates,
+          Some(AcquisitionDateModel("Yes", Some(1), Some(1), Some(2017))),
+          None
+        )
         lazy val result = target.summary()(fakeRequest)
         lazy val document = Jsoup.parse(bodyOf(result))
 
@@ -488,10 +641,16 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
       }
 
     }
+    
     "individual is chosen with a rebased calculation" when {
 
       "user provides no acquisition date and has two tax rates" should {
-        val target = setupTarget(TestModels.summaryIndividualRebased, TestModels.calcModelTwoRates)
+        val target = setupTarget(
+          TestModels.summaryIndividualRebased,
+          TestModels.calcModelTwoRates,
+          Some(AcquisitionDateModel("Yes", Some(1), Some(1), Some(2017))),
+          None
+        )
         lazy val result = target.summary()(fakeRequest)
         lazy val document = Jsoup.parse(bodyOf(result))
 
@@ -539,7 +698,12 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
       }
 
       "user provides no acquisition date and has one tax rate" should {
-        val target = setupTarget(TestModels.summaryIndividualRebasedNoAcqDate, TestModels.calcModelOneRate)
+        val target = setupTarget(
+          TestModels.summaryIndividualRebasedNoAcqDate,
+          TestModels.calcModelOneRate,
+          Some(AcquisitionDateModel("Yes", Some(1), Some(1), Some(2017))),
+          None
+        )
         lazy val result = target.summary()(fakeRequest)
         lazy val document = Jsoup.parse(bodyOf(result))
 
@@ -557,7 +721,12 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
       }
 
       "user provides acquisition date and no rebased costs" should {
-        val target = setupTarget(TestModels.summaryIndividualRebasedNoRebasedCosts, TestModels.calcModelOneRate)
+        val target = setupTarget(
+          TestModels.summaryIndividualRebasedNoRebasedCosts,
+          TestModels.calcModelOneRate,
+          Some(AcquisitionDateModel("Yes", Some(1), Some(1), Some(2017))),
+          None
+        )
         lazy val result = target.summary()(fakeRequest)
         lazy val document = Jsoup.parse(bodyOf(result))
 
@@ -567,7 +736,12 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
       }
 
       "user provides no acquisition date and no rebased costs" should {
-        val target = setupTarget(TestModels.summaryIndividualRebasedNoAcqDateOrRebasedCosts, TestModels.calcModelOneRate)
+        val target = setupTarget(
+          TestModels.summaryIndividualRebasedNoAcqDateOrRebasedCosts,
+          TestModels.calcModelOneRate,
+          Some(AcquisitionDateModel("Yes", Some(1), Some(1), Some(2017))),
+          None
+        )
         lazy val result = target.summary()(fakeRequest)
         lazy val document = Jsoup.parse(bodyOf(result))
 
@@ -580,7 +754,12 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
 
   "calling the .restart action" should {
     lazy val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/restart").withSession(SessionKeys.sessionId -> "12345")
-    val target = setupTarget(TestModels.summaryIndividualFlatWithAEA, TestModels.calcModelTwoRates)
+    val target = setupTarget(
+      TestModels.summaryIndividualFlatWithAEA,
+      TestModels.calcModelTwoRates,
+      Some(AcquisitionDateModel("Yes", Some(1), Some(1), Some(2017))),
+      None
+    )
     lazy val result = target.restart()(fakeRequest)
     lazy val document = Jsoup.parse(bodyOf(result))
 
@@ -588,5 +767,4 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
       status(result) shouldBe 303
     }
   }
-
 }

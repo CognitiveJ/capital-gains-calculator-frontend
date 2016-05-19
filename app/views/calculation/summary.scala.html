@@ -1,4 +1,4 @@
-@(summary: SummaryModel, result: CalculationResultModel)(implicit request: Request[_])
+@(summary: SummaryModel, result: CalculationResultModel, backUrl: String)(implicit request: Request[_])
 
 @import views.html.helpers._
 @import org.apache.commons.lang3.text.WordUtils
@@ -9,7 +9,7 @@
 
 @main_template(Messages("calc.summary.title"), articleLayout = false) {
 
-    <a id="back-link" class="back-link" href="#">@Messages("calc.base.back")</a>
+    <a id="back-link" class="back-link" href="@backUrl">@Messages("calc.base.back")</a>
 
     @*
     *  Calculated Tax Owed

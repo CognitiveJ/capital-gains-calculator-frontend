@@ -1,4 +1,4 @@
-@(entrepreneursReliefForm: Form[EntrepreneursReliefModel])(implicit request: Request[_])
+@(entrepreneursReliefForm: Form[EntrepreneursReliefModel], backUrl: String)(implicit request: Request[_])
 
 @import models.OtherPropertiesModel
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
@@ -10,7 +10,7 @@
 
 @main_template(Messages("calc.entrepreneursRelief.question"), sidebarLinks = Some(sidebar)) {
 
-    <a id="back-link" class="back-link" href="#">@Messages("calc.base.back")</a>
+    <a id="back-link" class="back-link" href="@backUrl">@Messages("calc.base.back")</a>
 
     @govHelpers.errorSummary(Messages("calc.error.summary.heading"), entrepreneursReliefForm)
 

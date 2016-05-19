@@ -16,6 +16,8 @@
 
 package controllers.CalculationControllerTests
 
+import common.DefaultRoutes._
+import common.KeystoreKeys
 import constructors.CalculationElectionConstructor
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.cache.client.CacheMap
@@ -41,6 +43,7 @@ class ImprovementsSpec extends UnitSpec with WithFakeApplication with MockitoSug
 
   def setupTarget(getData: Option[ImprovementsModel],
                   postData: Option[ImprovementsModel],
+                  acquisitionDateData: Option[AcquisitionDateModel],
                   rebasedValueData: Option[RebasedValueModel] = None
                  ): CalculationController = {
 
@@ -50,8 +53,11 @@ class ImprovementsSpec extends UnitSpec with WithFakeApplication with MockitoSug
     when(mockCalcConnector.fetchAndGetFormData[ImprovementsModel](Matchers.any())(Matchers.any(), Matchers.any()))
       .thenReturn(Future.successful(getData))
 
-    when(mockCalcConnector.fetchAndGetFormData[RebasedValueModel](Matchers.eq("rebasedValue"))(Matchers.any(), Matchers.any()))
+    when(mockCalcConnector.fetchAndGetFormData[RebasedValueModel](Matchers.eq(KeystoreKeys.rebasedValue))(Matchers.any(), Matchers.any()))
       .thenReturn(Future.successful(rebasedValueData))
+
+    when(mockCalcConnector.fetchAndGetFormData[AcquisitionDateModel](Matchers.eq(KeystoreKeys.acquisitionDate))(Matchers.any(), Matchers.any()))
+      .thenReturn(Future.successful(acquisitionDateData))
 
     lazy val data = CacheMap("form-id", Map("data" -> Json.toJson(postData.getOrElse(ImprovementsModel("",None,None)))))
     when(mockCalcConnector.saveFormData[ImprovementsModel](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
@@ -69,46 +75,124 @@ class ImprovementsSpec extends UnitSpec with WithFakeApplication with MockitoSug
 
     "not supplied with a pre-existing stored model" should {
 
-      val target = setupTarget(None,None)
-      lazy val result = target.improvements(fakeRequest)
-      lazy val document = Jsoup.parse(bodyOf(result))
+      "when Acquisition Date is supplied and > 5 April 2016" should {
 
-      "return a 200" in {
-        status(result) shouldBe 200
+        val target = setupTarget(None, None, Some(AcquisitionDateModel("Yes", Some(1), Some(1), Some(2017))))
+        lazy val result = target.improvements(fakeRequest)
+        lazy val document = Jsoup.parse(bodyOf(result))
+
+        "return a 200" in {
+          status(result) shouldBe 200
+        }
+
+        "return some HTML that" should {
+
+          "contain some text and use the character set utf-8" in {
+            contentType(result) shouldBe Some("text/html")
+            charset(result) shouldBe Some("utf-8")
+          }
+
+          "have the title 'Who owned the property?'" in {
+            document.title shouldEqual Messages("calc.improvements.question")
+          }
+
+          "have the heading Calculate your tax (non-residents)" in {
+            document.body.getElementsByTag("H1").text shouldEqual Messages("calc.base.pageHeading")
+          }
+
+          "display the correct wording for radio option `yes`" in {
+            document.body.getElementById("isClaimingImprovements-yes").parent.text shouldEqual Messages("calc.base.yes")
+          }
+
+          "display the correct wording for radio option `no`" in {
+            document.body.getElementById("isClaimingImprovements-no").parent.text shouldEqual Messages("calc.base.no")
+          }
+
+          "contain a hidden component with an input box" in {
+            document.body.getElementById("hidden").html should include("input")
+          }
+
+          s"have a 'Back' link to ${routes.CalculationController.acquisitionValue().url} " in {
+            document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+            document.body.getElementById("back-link").attr("href") shouldEqual routes.CalculationController.acquisitionValue().url
+          }
+        }
       }
 
-      "return some HTML that" should {
+      "when Acquisition Date is supplied and <= 5 April 2016" +
+        "and a rebased value is supplied" should {
 
-        "contain some text and use the character set utf-8" in {
-          contentType(result) shouldBe Some("text/html")
-          charset(result) shouldBe Some("utf-8")
+        val target = setupTarget(
+          None,
+          None,
+          Some(AcquisitionDateModel("Yes", Some(1), Some(1), Some(2014))),
+          Some(RebasedValueModel("Yes", Some(500)))
+        )
+        lazy val result = target.improvements(fakeRequest)
+        lazy val document = Jsoup.parse(bodyOf(result))
+
+        s"have a 'Back' link to ${routes.CalculationController.rebasedCosts().url} " in {
+          document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+          document.body.getElementById("back-link").attr("href") shouldEqual routes.CalculationController.rebasedCosts().url
         }
+      }
 
-        "have the title 'Who owned the property?'" in {
-          document.title shouldEqual Messages("calc.improvements.question")
+
+      "when Acquisition Date is supplied and <= 5 April 2016" +
+        "and no rebased value is supplied" should {
+
+        val target = setupTarget(
+          None,
+          None,
+          Some(AcquisitionDateModel("Yes", Some(1), Some(1), Some(2014))),
+          Some(RebasedValueModel("No", None))
+        )
+        lazy val result = target.improvements(fakeRequest)
+        lazy val document = Jsoup.parse(bodyOf(result))
+
+        s"have a 'Back' link to ${routes.CalculationController.rebasedValue().url} " in {
+          document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+          document.body.getElementById("back-link").attr("href") shouldEqual routes.CalculationController.rebasedValue().url
         }
+      }
 
-        "have the heading Calculate your tax (non-residents)" in {
-          document.body.getElementsByTag("H1").text shouldEqual Messages("calc.base.pageHeading")
+      "when no Acquisition Date Model is supplied" should {
+
+        val target = setupTarget(
+          None,
+          None,
+          None
+        )
+        lazy val result = target.improvements(fakeRequest)
+        lazy val document = Jsoup.parse(bodyOf(result))
+
+        s"have a 'Back' link to ${missingDataRoute} " in {
+          document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+          document.body.getElementById("back-link").attr("href") shouldEqual missingDataRoute
         }
+      }
 
-        "display the correct wording for radio option `yes`" in {
-          document.body.getElementById("isClaimingImprovements-yes").parent.text shouldEqual Messages("calc.base.yes")
-        }
+      "when Acquisition Date <= 5 April and no rebased model is supplied" should {
 
-        "display the correct wording for radio option `no`" in {
-          document.body.getElementById("isClaimingImprovements-no").parent.text shouldEqual Messages("calc.base.no")
-        }
+        val target = setupTarget(
+          None,
+          None,
+          Some(AcquisitionDateModel("Yes", Some(1), Some(1), Some(2014))),
+          None
+        )
+        lazy val result = target.improvements(fakeRequest)
+        lazy val document = Jsoup.parse(bodyOf(result))
 
-        "contain a hidden component with an input box" in {
-          document.body.getElementById("hidden").html should include ("input")
+        s"have a 'Back' link to ${missingDataRoute} " in {
+          document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+          document.body.getElementById("back-link").attr("href") shouldEqual missingDataRoute
         }
       }
     }
 
     "supplied with a pre-existing model with 'Yes' checked and value already entered" should {
 
-      val target = setupTarget(Some(ImprovementsModel("Yes", Some(10000))), None)
+      val target = setupTarget(Some(ImprovementsModel("Yes", Some(10000))), None, Some(AcquisitionDateModel("Yes", Some(1), Some(1),Some(2017))))
       lazy val result = target.improvements(fakeRequest)
       lazy val document = Jsoup.parse(bodyOf(result))
 
@@ -127,7 +211,7 @@ class ImprovementsSpec extends UnitSpec with WithFakeApplication with MockitoSug
 
     "supplied with a pre-existing model with 'No' checked and value already entered" should {
 
-      val target = setupTarget(Some(ImprovementsModel("No", Some(0))), None)
+      val target = setupTarget(Some(ImprovementsModel("No", Some(0))), None, Some(AcquisitionDateModel("Yes", Some(1), Some(1),Some(2017))))
       lazy val result = target.improvements(fakeRequest)
       lazy val document = Jsoup.parse(bodyOf(result))
 
@@ -146,7 +230,7 @@ class ImprovementsSpec extends UnitSpec with WithFakeApplication with MockitoSug
 
     "not supplied with a pre-existing stored model but with a rebased value" should {
 
-      val target = setupTarget(None,None,Some(RebasedValueModel("Yes", Some(1000))))
+      val target = setupTarget(None,None,Some(AcquisitionDateModel("Yes", Some(1), Some(1),Some(2017))),Some(RebasedValueModel("Yes", Some(1000))))
       lazy val result = target.improvements(fakeRequest)
       lazy val document = Jsoup.parse(bodyOf(result))
 
@@ -158,7 +242,7 @@ class ImprovementsSpec extends UnitSpec with WithFakeApplication with MockitoSug
 
     "not supplied with a pre-existing stored model and with no rebased value model" should {
 
-      val target = setupTarget(None, None)
+      val target = setupTarget(None, None, Some(AcquisitionDateModel("Yes", Some(1), Some(1),Some(2017))))
       lazy val result = target.improvements(fakeRequest)
       lazy val document = Jsoup.parse(bodyOf(result))
 
@@ -183,7 +267,7 @@ class ImprovementsSpec extends UnitSpec with WithFakeApplication with MockitoSug
         case "fhu39awd8" => ImprovementsModel(selection, None) // required for real number test ONLY
         case _ => ImprovementsModel(selection, Some(BigDecimal(amount)))
       }
-      val target = setupTarget(None, Some(mockData))
+      val target = setupTarget(None, Some(mockData), Some(AcquisitionDateModel("Yes", Some(1), Some(1),Some(2017))))
       target.submitImprovements(fakeRequest)
     }
 
