@@ -438,6 +438,17 @@ object SummaryConstructor {
               case None => "0.00"
             }),
             Some(routes.CalculationController.otherReliefs().toString())
+          ),
+          SummaryDataItemModel(
+            Messages("calc.privateResidenceRelief.question"),
+            result.simplePRR match {
+              case Some(data) => "&pound;" + data.setScale(2)
+              case None => summary.privateResidenceReliefModel match {
+                case Some(data) => data.isClaimingPRR
+                case _ => "No"
+              }
+            },
+            Some(routes.CalculationController.privateResidenceRelief().toString())
           )
         )
         case "time" => Array(
@@ -461,6 +472,17 @@ object SummaryConstructor {
               case None => "0.00"
             }),
             Some(routes.CalculationController.otherReliefsTA().toString())
+          ),
+          SummaryDataItemModel(
+            Messages("calc.privateResidenceRelief.question"),
+            result.simplePRR match {
+              case Some(data) => "&pound;" + data.setScale(2)
+              case None => summary.privateResidenceReliefModel match {
+                case Some(data) => data.isClaimingPRR
+                case _ => "No"
+              }
+            },
+            Some(routes.CalculationController.privateResidenceRelief().toString())
           )
         )
         case "rebased" => Array(
