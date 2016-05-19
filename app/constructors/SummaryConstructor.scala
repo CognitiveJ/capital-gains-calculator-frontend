@@ -135,12 +135,9 @@ object SummaryConstructor {
               Some(routes.CalculationController.disabledTrustee().toString())
             ),
             SummaryDataItemModel(
-              Messages("calc.annualExemptAmount.question"),
-              "&pound;" + (summary.disabledTrusteeModel.get.isVulnerable match {
-                case "Yes" => "11100.00"
-                case "No" => "5050.00"
-              }),
-              Some(routes.CalculationController.annualExemptAmount().toString())
+              Messages("calc.otherProperties.question"),
+              summary.otherPropertiesModel.otherProperties.toString,
+              Some(routes.CalculationController.otherProperties().toString())
             )
           )
         }
@@ -189,9 +186,9 @@ object SummaryConstructor {
               Some(routes.CalculationController.personalAllowance().toString())
             ),
             SummaryDataItemModel(
-              Messages("calc.annualExemptAmount.question"),
-              "&pound;" + "11100.00",
-              Some(routes.CalculationController.annualExemptAmount().toString())
+              Messages("calc.otherProperties.question"),
+              summary.otherPropertiesModel.otherProperties.toString,
+              Some(routes.CalculationController.otherProperties().toString())
             )
           )
         }
@@ -220,9 +217,9 @@ object SummaryConstructor {
               Some(routes.CalculationController.customerType().toString())
             ),
             SummaryDataItemModel(
-              Messages("calc.annualExemptAmount.question"),
-              "&pound;" + "11100.00",
-              Some(routes.CalculationController.annualExemptAmount().toString())
+              Messages("calc.otherProperties.question"),
+              summary.otherPropertiesModel.otherProperties.toString,
+              Some(routes.CalculationController.otherProperties().toString())
             )
           )
         }
