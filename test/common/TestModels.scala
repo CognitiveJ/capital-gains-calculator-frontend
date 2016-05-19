@@ -103,6 +103,7 @@ object TestModels {
   val calcModelNegativeTaxable = CalculationResultModel(0, 50000, -10000, 0, None, None, None)
   val calcModelZeroTaxable = CalculationResultModel(0, 50000, 0, 0, None, None, None)
   val calcModelZeroTotal = CalculationResultModel(0, 0, 0, 0, None, None, None)
+  val calcModelSomePRR = CalculationResultModel(0, 0, 0, 0, None, None, Some(10000))
 
 
   val summaryIndividualFlatLoss = SummaryModel (

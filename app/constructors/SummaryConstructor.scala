@@ -17,7 +17,7 @@
 package constructors
 
 import controllers.routes
-import models.{SummaryDataItemModel, RebasedValueModel, SummaryModel, CalculationResultModel}
+import models._
 import org.apache.commons.lang3.text.WordUtils
 import play.api.i18n.Messages
 import play.twirl.api.Html
@@ -32,6 +32,19 @@ object SummaryConstructor {
       case "flat" => Messages("calc.summary.calculation.details.flatCalculation")
       case "time" => Messages("calc.summary.calculation.details.timeCalculation")
       case "rebased" => Messages("calc.summary.calculation.details.rebasedCalculation")
+    }
+  }
+
+  def simplePRRResult (simplePRR: Option[BigDecimal], privateResidenceReliefModel: Option[PrivateResidenceReliefModel]) = {
+    simplePRR match {
+      case Some(data) => "&pound;" + data.setScale(2)
+      case None => privateResidenceReliefModel match {
+        case Some(data) => data.isClaimingPRR match {
+          case "Yes" => "&pound;0.00"
+          case "No" => data.isClaimingPRR
+        }
+        case _ => "No"
+      }
     }
   }
 
@@ -441,13 +454,7 @@ object SummaryConstructor {
           ),
           SummaryDataItemModel(
             Messages("calc.privateResidenceRelief.question"),
-            result.simplePRR match {
-              case Some(data) => "&pound;" + data.setScale(2)
-              case None => summary.privateResidenceReliefModel match {
-                case Some(data) => data.isClaimingPRR
-                case _ => "No"
-              }
-            },
+            simplePRRResult(result.simplePRR, summary.privateResidenceReliefModel),
             Some(routes.CalculationController.privateResidenceRelief().toString())
           )
         )
@@ -475,13 +482,7 @@ object SummaryConstructor {
           ),
           SummaryDataItemModel(
             Messages("calc.privateResidenceRelief.question"),
-            result.simplePRR match {
-              case Some(data) => "&pound;" + data.setScale(2)
-              case None => summary.privateResidenceReliefModel match {
-                case Some(data) => data.isClaimingPRR
-                case _ => "No"
-              }
-            },
+            simplePRRResult(result.simplePRR, summary.privateResidenceReliefModel),
             Some(routes.CalculationController.privateResidenceRelief().toString())
           )
         )
@@ -509,13 +510,7 @@ object SummaryConstructor {
           ),
           SummaryDataItemModel(
             Messages("calc.privateResidenceRelief.question"),
-            result.simplePRR match {
-              case Some(data) => "&pound;" + data.setScale(2)
-              case None => summary.privateResidenceReliefModel match {
-                case Some(data) => data.isClaimingPRR
-                case _ => "No"
-              }
-            },
+            simplePRRResult(result.simplePRR, summary.privateResidenceReliefModel),
             Some(routes.CalculationController.privateResidenceRelief().toString())
           )
         )

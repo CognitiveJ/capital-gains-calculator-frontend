@@ -406,6 +406,15 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
               document.body().getElementById("deductions(2)").attr("href") shouldEqual routes.CalculationController.otherReliefs().toString()
             }
 
+            "include the question 'Are you claiming private residence relief'" in {
+              document.select("#deductions").text should include(Messages("calc.privateResidenceRelief.question"))
+            }
+
+            "the PRR claimed question's answer should be 'No' and be a link to the PRR page" in {
+              document.body().getElementById("deductions(3)").text shouldBe "No"
+              document.body().getElementById("deductions(3)").attr("href") shouldEqual routes.CalculationController.privateResidenceRelief().toString()
+            }
+
           }
 
           "have a 'What to do next' section that" should {
@@ -782,6 +791,26 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
         document.body.getElementById("calcDetails(1)").text() shouldBe "£0.00"
       }
     }
+
+    "a value with some PRR is returned" should {
+      val target = setupTarget(TestModels.summaryIndividualFlatWithAEA, TestModels.calcModelSomePRR, None, None)
+      lazy val result = target.summary()(fakeRequest)
+      lazy val document = Jsoup.parse(bodyOf(result))
+
+      "return a value of £10000 for the simple PRR" in {
+        document.body.getElementById("deductions(3)").text() shouldBe "£10000.00"
+      }
+    }
+
+    "a value with PRR claimed but no value" should {
+      val target = setupTarget(TestModels.summaryIndividualWithAllOptions, TestModels.calcModelOneRate, None, None)
+      lazy val result = target.summary()(fakeRequest)
+      lazy val document = Jsoup.parse(bodyOf(result))
+
+      "return a value of £10000 for the simple PRR" in {
+        document.body.getElementById("deductions(3)").text() shouldBe "£0.00"
+      }
+    }
   }
 
   "calling the .restart action" should {
@@ -799,4 +828,5 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
       status(result) shouldBe 303
     }
   }
+
 }
