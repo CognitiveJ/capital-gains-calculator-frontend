@@ -751,4 +751,15 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
     }
   }
 
+  "calling the .restart action" should {
+    lazy val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/restart").withSession(SessionKeys.sessionId -> "12345")
+    val target = setupTarget(TestModels.summaryIndividualFlatWithAEA, TestModels.calcModelTwoRates)
+    lazy val result = target.restart()(fakeRequest)
+    lazy val document = Jsoup.parse(bodyOf(result))
+
+    "return a 303" in {
+      status(result) shouldBe 303
+    }
+  }
+
 }

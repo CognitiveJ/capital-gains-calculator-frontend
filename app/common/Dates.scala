@@ -17,7 +17,7 @@
 package common
 
 import java.text.SimpleDateFormat
-import java.util.Date
+import java.util.{Calendar, Date}
 
 object Dates {
 
@@ -34,12 +34,27 @@ object Dates {
     constructDate(day, month, year).after(taxStartDate)
   }
 
+  def dateAfter18Months (day: Int, month: Int, year: Int): Boolean = {
+    constructDate(day, month, year).after(taxStartDatePlus18Months)
+  }
+
   def dateAfterStart (date: Date): Boolean = {
     date.after(taxStartDate)
   }
 
   def dateAfterOctober (date: Date): Boolean = {
     date.after(taxStartDatePlus18Months)
+  }
+
+  def dateMinusMonths(date: Option[Date], months: Int): String = {
+    date match {
+      case Some(date) =>
+        val cal = Calendar.getInstance()
+        cal.setTime(date)
+        cal.add(Calendar.MONTH, months * -1)
+        new SimpleDateFormat("d MMMMM yyyy").format(cal.getTime)
+      case _ => ""
+    }
   }
 }
 
