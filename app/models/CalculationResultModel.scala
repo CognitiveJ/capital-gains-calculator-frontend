@@ -23,7 +23,8 @@ case class CalculationResultModel(taxOwed: BigDecimal,
                                   baseTaxGain: BigDecimal,
                                   baseTaxRate: Int,
                                   upperTaxGain: Option[BigDecimal],
-                                  upperTaxRate: Option[Int]) {
+                                  upperTaxRate: Option[Int],
+                                  simplePRR: Option[BigDecimal]) {
 
   val taxableGain: BigDecimal = baseTaxGain + upperTaxGain.getOrElse(0)
 }
