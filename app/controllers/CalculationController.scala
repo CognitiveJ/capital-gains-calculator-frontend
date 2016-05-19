@@ -774,4 +774,9 @@ trait CalculationController extends FrontendController {
     }
     )
   }
+
+  def restart() = Action.async { implicit request =>
+    calcConnector.clearKeystore()
+    Future.successful(Redirect(routes.IntroductionController.introduction()))
+  }
 }

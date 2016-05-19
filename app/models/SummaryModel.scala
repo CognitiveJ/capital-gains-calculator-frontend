@@ -40,7 +40,7 @@ case class SummaryModel (
                           otherReliefsModelFlat : OtherReliefsModel,
                           otherReliefsModelTA: OtherReliefsModel,
                           otherReliefsModelRebased: OtherReliefsModel,
-                          privateResidenceReliefModel: PrivateResidenceReliefModel
+                          privateResidenceReliefModel: Option[PrivateResidenceReliefModel]
                         )
 
 

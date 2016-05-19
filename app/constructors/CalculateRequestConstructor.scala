@@ -16,7 +16,8 @@
 
 package constructors
 
-import models.SummaryModel
+import common.Dates
+import models.{PrivateResidenceReliefModel, AcquisitionDateModel, RebasedValueModel, SummaryModel}
 
 object CalculateRequestConstructor {
 
@@ -62,7 +63,8 @@ object CalculateRequestConstructor {
     }${acquisition(input)
     }&reliefs=${
       input.otherReliefsModelFlat.otherReliefs.getOrElse(0)
-    }"
+    }${privateResidenceReliefFlat(input)
+    }${isClaimingPRR(input)}"
   }
 
   def taCalcUrlExtra(input: SummaryModel): String = {
@@ -74,7 +76,8 @@ object CalculateRequestConstructor {
     }${acquisition(input)
     }&reliefs=${
       input.otherReliefsModelTA.otherReliefs.getOrElse(0)
-    }"
+    }${privateResidenceReliefTA(input)
+    }${isClaimingPRR(input)}"
   }
 
   def rebasedCalcUrlExtra(input: SummaryModel): String = {
@@ -89,7 +92,11 @@ object CalculateRequestConstructor {
     }
     }&reliefs=${
       input.otherReliefsModelRebased.otherReliefs.getOrElse(0)
-    }"
+    }${privateResidenceReliefRebased(input)
+    }&isClaimingPRR=${input.privateResidenceReliefModel match {
+      case Some(PrivateResidenceReliefModel("Yes", claimed, after)) => "Yes"
+      case _ => "No"
+    }}"
   }
 
   def improvements (input: SummaryModel) = s"&improvementsAmt=${
@@ -104,6 +111,40 @@ object CalculateRequestConstructor {
         }
       }
       case "No" => 0
+    }
+  }"
+
+  def privateResidenceReliefFlat (input: SummaryModel) = s"${
+    (input.acquisitionDateModel, input.privateResidenceReliefModel) match {
+      case (AcquisitionDateModel("Yes", day, month, year), Some(PrivateResidenceReliefModel("Yes", claimed, after))) if claimed.isDefined =>
+        s"&daysClaimed=${claimed.get}"
+      case _ => ""
+    }
+  }"
+
+  def privateResidenceReliefTA (input: SummaryModel) = s"${
+    (input.acquisitionDateModel, input.privateResidenceReliefModel) match {
+      case (AcquisitionDateModel("Yes", day, month, year), Some(PrivateResidenceReliefModel("Yes", claimed, after)))
+        if Dates.dateAfter18Months(input.disposalDateModel.day, input.disposalDateModel.month, input.disposalDateModel.year) && after.isDefined =>
+        s"&daysClaimedAfter=${after.get}"
+
+      case _ => ""
+    }
+  }"
+
+  def privateResidenceReliefRebased (input: SummaryModel) = s"${
+    (input.rebasedValueModel, input.privateResidenceReliefModel) match {
+      case (Some(RebasedValueModel("Yes", rebasedValue)), Some(PrivateResidenceReliefModel("Yes", claimed, after)))
+        if Dates.dateAfter18Months(input.disposalDateModel.day, input.disposalDateModel.month, input.disposalDateModel.year) && after.isDefined =>
+        s"&daysClaimedAfter=${after.get}"
+      case _ => ""
+    }
+  }"
+
+  def isClaimingPRR (input: SummaryModel) = s"&isClaimingPRR=${
+    (input.acquisitionDateModel, input.privateResidenceReliefModel) match {
+      case (AcquisitionDateModel("Yes", day, month, year), Some(PrivateResidenceReliefModel("Yes", claimed, after))) => "Yes"
+      case _ => "No"
     }
   }"
 

@@ -19,8 +19,31 @@ package forms
 import play.api.data._
 import play.api.data.Forms._
 import models._
+import common.Validation._
+import play.api.i18n.Messages
 
 object PrivateResidenceReliefForm {
+
+  def verifyAmountSupplied(data: PrivateResidenceReliefModel): Boolean = {
+    data.isClaimingPRR match {
+      case "Yes" => data.daysClaimed.isDefined || data.daysClaimedAfter.isDefined
+      case "No" => true
+    }
+  }
+
+  def verifyPositive (data: PrivateResidenceReliefModel): Boolean = {
+    data.isClaimingPRR match {
+      case "Yes" => isPositive(data.daysClaimed.getOrElse(0)) && isPositive(data.daysClaimedAfter.getOrElse(0))
+      case "No" => true
+    }
+  }
+
+  def verifyNoDecimalPlaces (data: PrivateResidenceReliefModel): Boolean = {
+    data.isClaimingPRR match {
+      case "Yes" => hasNoDecimalPlaces(data.daysClaimed.getOrElse(0)) && hasNoDecimalPlaces(data.daysClaimedAfter.getOrElse(0))
+      case "No" => true
+    }
+  }
 
   val privateResidenceReliefForm = Form(
     mapping(
@@ -28,5 +51,8 @@ object PrivateResidenceReliefForm {
       "daysClaimed" -> optional(bigDecimal),
       "daysClaimedAfter" -> optional(bigDecimal)
     )(PrivateResidenceReliefModel.apply)(PrivateResidenceReliefModel.unapply)
+      .verifying(Messages("calc.privateResidenceRelief.error.noValueProvided"), improvementsForm => verifyAmountSupplied(improvementsForm))
+      .verifying(Messages("calc.privateResidenceRelief.error.errorNegative"), improvementsForm => verifyPositive(improvementsForm))
+      .verifying(Messages("calc.privateResidenceRelief.error.errorDecimalPlaces"), improvementsForm => verifyNoDecimalPlaces(improvementsForm))
   )
 }

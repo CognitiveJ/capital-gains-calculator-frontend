@@ -38,6 +38,13 @@ object Validation {
     }
   }
 
+  def hasNoDecimalPlaces (amount: BigDecimal): Boolean = {
+    amount match {
+      case value if amount.scale <= 0 => true
+      case _ => false
+    }
+  }
+
   def isPositive(amount: BigDecimal): Boolean = {
     amount match {
       case amount if amount < 0 => false

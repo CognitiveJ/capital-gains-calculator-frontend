@@ -34,6 +34,10 @@ object Dates {
     constructDate(day, month, year).after(taxStartDate)
   }
 
+  def dateAfter18Months (day: Int, month: Int, year: Int): Boolean = {
+    constructDate(day, month, year).after(taxStartDatePlus18Months)
+  }
+
   def dateAfterStart (date: Date): Boolean = {
     date.after(taxStartDate)
   }
