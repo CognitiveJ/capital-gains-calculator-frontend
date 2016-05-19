@@ -55,6 +55,8 @@ object CalculateRequestConstructor {
       }
     }&entReliefClaimed=${
       input.entrepreneursReliefModel.entReliefClaimed
+    }&disposalDate=${
+      input.disposalDateModel.year}-${input.disposalDateModel.month}-${input.disposalDateModel.day
     }"
   }
 
@@ -64,20 +66,25 @@ object CalculateRequestConstructor {
     }&reliefs=${
       input.otherReliefsModelFlat.otherReliefs.getOrElse(0)
     }${privateResidenceReliefFlat(input)
-    }${isClaimingPRR(input)}"
+    }${isClaimingPRR(input)
+    }${isClaimingPRR(input) match {
+      case "&isClaimingPRR=Yes" => s"&acquisitionDate=${
+        input.acquisitionDateModel.year.get}-${input.acquisitionDateModel.month.get}-${input.acquisitionDateModel.day.get
+      }"
+      case "&isClaimingPRR=No" => ""
+    }}"
   }
 
   def taCalcUrlExtra(input: SummaryModel): String = {
     s"${improvements(input)
-    }&disposalDate=${
-      input.disposalDateModel.year}-${input.disposalDateModel.month}-${input.disposalDateModel.day
     }&acquisitionDate=${
       input.acquisitionDateModel.year.get}-${input.acquisitionDateModel.month.get}-${input.acquisitionDateModel.day.get
     }${acquisition(input)
     }&reliefs=${
       input.otherReliefsModelTA.otherReliefs.getOrElse(0)
     }${privateResidenceReliefTA(input)
-    }${isClaimingPRR(input)}"
+    }${isClaimingPRR(input)
+    }"
   }
 
   def rebasedCalcUrlExtra(input: SummaryModel): String = {
