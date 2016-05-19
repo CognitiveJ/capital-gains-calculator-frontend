@@ -43,7 +43,6 @@ import forms.RebasedCostsForm._
 import forms.PrivateResidenceReliefForm._
 import models._
 import java.util.{Calendar, Date}
-import play.api.Logger
 import play.api.mvc.{Result, AnyContent, Action}
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -151,12 +150,9 @@ trait CalculationController extends FrontendController {
   val otherProperties = Action.async { implicit request =>
 
     def routeRequest(backUrl: String): Future[Result] = {
-      backUrl match {
-        case "" => Future.successful(InternalServerError)
-        case _ => calcConnector.fetchAndGetFormData[OtherPropertiesModel](KeystoreKeys.otherProperties).map {
-          case Some(data) => Ok(calculation.otherProperties(otherPropertiesForm.fill(data), backUrl))
-          case _ => Ok(calculation.otherProperties(otherPropertiesForm, backUrl))
-        }
+      calcConnector.fetchAndGetFormData[OtherPropertiesModel](KeystoreKeys.otherProperties).map {
+        case Some(data) => Ok(calculation.otherProperties(otherPropertiesForm.fill(data), backUrl))
+        case _ => Ok(calculation.otherProperties(otherPropertiesForm, backUrl))
       }
     }
 
@@ -169,25 +165,22 @@ trait CalculationController extends FrontendController {
   val submitOtherProperties = Action.async { implicit request =>
 
     def routeRequest(backUrl: String): Future[Result] = {
-      backUrl match {
-        case "" => Future.successful(InternalServerError)
-        case _ => otherPropertiesForm.bindFromRequest.fold(
-          errors =>
-            Future.successful(BadRequest(calculation.otherProperties(errors, backUrl))),
-          success => {
-            calcConnector.saveFormData(KeystoreKeys.otherProperties, success)
-            success.otherProperties match {
-              case "Yes" =>
-                success.otherPropertiesAmt match {
-                  case Some(data) if data.equals(BigDecimal(0)) => Future.successful(Redirect(routes.CalculationController.annualExemptAmount()))
-                  case _ => calcConnector.saveFormData("annualExemptAmount", AnnualExemptAmountModel(0))
-                    Future.successful(Redirect(routes.CalculationController.acquisitionDate()))
-                }
-              case "No" => Future.successful(Redirect(routes.CalculationController.acquisitionDate()))
-            }
+      otherPropertiesForm.bindFromRequest.fold(
+        errors =>
+          Future.successful(BadRequest(calculation.otherProperties(errors, backUrl))),
+        success => {
+          calcConnector.saveFormData(KeystoreKeys.otherProperties, success)
+          success.otherProperties match {
+            case "Yes" =>
+              success.otherPropertiesAmt match {
+                case Some(data) if data.equals(BigDecimal(0)) => Future.successful(Redirect(routes.CalculationController.annualExemptAmount()))
+                case _ => calcConnector.saveFormData("annualExemptAmount", AnnualExemptAmountModel(0))
+                  Future.successful(Redirect(routes.CalculationController.acquisitionDate()))
+              }
+            case "No" => Future.successful(Redirect(routes.CalculationController.acquisitionDate()))
           }
-        )
-      }
+        }
+      )
     }
     for {
       backUrl <- otherPropertiesBackUrl
@@ -253,12 +246,9 @@ trait CalculationController extends FrontendController {
   val acquisitionDate = Action.async { implicit request =>
 
     def routeRequest(backUrl: String): Future[Result] = {
-      backUrl match {
-        case "" => Future.successful(InternalServerError)
-        case _ => calcConnector.fetchAndGetFormData[AcquisitionDateModel](KeystoreKeys.acquisitionDate).map {
-          case Some(data) => Ok(calculation.acquisitionDate(acquisitionDateForm.fill(data), backUrl))
-          case None => Ok(calculation.acquisitionDate(acquisitionDateForm, backUrl))
-        }
+      calcConnector.fetchAndGetFormData[AcquisitionDateModel](KeystoreKeys.acquisitionDate).map {
+        case Some(data) => Ok(calculation.acquisitionDate(acquisitionDateForm.fill(data), backUrl))
+        case None => Ok(calculation.acquisitionDate(acquisitionDateForm, backUrl))
       }
     }
 
@@ -271,16 +261,13 @@ trait CalculationController extends FrontendController {
   val submitAcquisitionDate = Action.async { implicit request =>
 
     def routeRequest(backUrl: String): Future[Result] = {
-      backUrl match {
-        case "" => Future.successful(InternalServerError)
-        case _ => acquisitionDateForm.bindFromRequest.fold(
-          errors => Future.successful(BadRequest(calculation.acquisitionDate(errors, backUrl))),
-          success => {
-            calcConnector.saveFormData(KeystoreKeys.acquisitionDate, success)
-            Future.successful(Redirect(routes.CalculationController.acquisitionValue()))
-          }
-        )
-      }
+      acquisitionDateForm.bindFromRequest.fold(
+        errors => Future.successful(BadRequest(calculation.acquisitionDate(errors, backUrl))),
+        success => {
+          calcConnector.saveFormData(KeystoreKeys.acquisitionDate, success)
+          Future.successful(Redirect(routes.CalculationController.acquisitionValue()))
+        }
+      )
     }
 
     for {
@@ -386,18 +373,14 @@ trait CalculationController extends FrontendController {
   val improvements = Action.async { implicit request =>
 
     def routeRequest(backUrl: String): Future[Result] = {
-      backUrl match {
-        case "" => Future.successful(InternalServerError)
-        case _ =>
-          calcConnector.fetchAndGetFormData[RebasedValueModel](KeystoreKeys.rebasedValue).flatMap(rebasedValueModel =>
-            calcConnector.fetchAndGetFormData[ImprovementsModel](KeystoreKeys.improvements).map {
-              case Some(data) =>
-                Ok(calculation.improvements(improvementsForm.fill(data), rebasedValueModel.getOrElse(RebasedValueModel("No", None)).hasRebasedValue, backUrl))
-              case None =>
-                Ok(calculation.improvements(improvementsForm, rebasedValueModel.getOrElse(RebasedValueModel("No", None)).hasRebasedValue, backUrl))
-            }
-          )
-      }
+      calcConnector.fetchAndGetFormData[RebasedValueModel](KeystoreKeys.rebasedValue).flatMap(rebasedValueModel =>
+        calcConnector.fetchAndGetFormData[ImprovementsModel](KeystoreKeys.improvements).map {
+          case Some(data) =>
+            Ok(calculation.improvements(improvementsForm.fill(data), rebasedValueModel.getOrElse(RebasedValueModel("No", None)).hasRebasedValue, backUrl))
+          case None =>
+            Ok(calculation.improvements(improvementsForm, rebasedValueModel.getOrElse(RebasedValueModel("No", None)).hasRebasedValue, backUrl))
+        }
+      )
     }
 
     for {
@@ -409,20 +392,16 @@ trait CalculationController extends FrontendController {
   val submitImprovements = Action.async { implicit request =>
 
     def routeRequest(backUrl: String): Future[Result] = {
-      backUrl match {
-        case "" => Future.successful(InternalServerError)
-        case _ =>
-          improvementsForm.bindFromRequest.fold(
-            errors => {
-              calcConnector.fetchAndGetFormData[RebasedValueModel](KeystoreKeys.rebasedValue).flatMap(rebasedValueModel =>
-                Future.successful(BadRequest(calculation.improvements(errors, rebasedValueModel.getOrElse(RebasedValueModel("No", None)).hasRebasedValue, backUrl))))
-            },
-            success => {
-              calcConnector.saveFormData(KeystoreKeys.improvements, success)
-              Future.successful(Redirect(routes.CalculationController.disposalDate()))
-            }
-          )
-      }
+      improvementsForm.bindFromRequest.fold(
+        errors => {
+          calcConnector.fetchAndGetFormData[RebasedValueModel](KeystoreKeys.rebasedValue).flatMap(rebasedValueModel =>
+            Future.successful(BadRequest(calculation.improvements(errors, rebasedValueModel.getOrElse(RebasedValueModel("No", None)).hasRebasedValue, backUrl))))
+        },
+        success => {
+          calcConnector.saveFormData(KeystoreKeys.improvements, success)
+          Future.successful(Redirect(routes.CalculationController.disposalDate()))
+        }
+      )
     }
 
     for {
@@ -630,13 +609,9 @@ trait CalculationController extends FrontendController {
 
   val entrepreneursRelief = Action.async { implicit request =>
     def routeRequest(backUrl: String) = {
-      backUrl match {
-        case "" => Future.successful(InternalServerError)
-        case _ =>
-          calcConnector.fetchAndGetFormData[EntrepreneursReliefModel](KeystoreKeys.entrepreneursRelief).map {
-            case Some(data) => Ok(calculation.entrepreneursRelief(entrepreneursReliefForm.fill(data), backUrl))
-            case _ => Ok(calculation.entrepreneursRelief(entrepreneursReliefForm, backUrl))
-          }
+      calcConnector.fetchAndGetFormData[EntrepreneursReliefModel](KeystoreKeys.entrepreneursRelief).map {
+        case Some(data) => Ok(calculation.entrepreneursRelief(entrepreneursReliefForm.fill(data), backUrl))
+        case _ => Ok(calculation.entrepreneursRelief(entrepreneursReliefForm, backUrl))
       }
     }
 
@@ -649,17 +624,13 @@ trait CalculationController extends FrontendController {
   val submitEntrepreneursRelief = Action.async { implicit request =>
 
     def routeRequest(backUrl: String) = {
-      backUrl match {
-        case "" => Future.successful(InternalServerError)
-        case _ =>
-          entrepreneursReliefForm.bindFromRequest.fold(
-            errors => Future.successful(BadRequest(calculation.entrepreneursRelief(errors,backUrl))),
-            success => {
-              calcConnector.saveFormData(KeystoreKeys.entrepreneursRelief, success)
-              Future.successful(Redirect(routes.CalculationController.allowableLosses()))
-            }
-          )
-      }
+      entrepreneursReliefForm.bindFromRequest.fold(
+        errors => Future.successful(BadRequest(calculation.entrepreneursRelief(errors, backUrl))),
+        success => {
+          calcConnector.saveFormData(KeystoreKeys.entrepreneursRelief, success)
+          Future.successful(Redirect(routes.CalculationController.allowableLosses()))
+        }
+      )
     }
 
     for {
@@ -820,12 +791,9 @@ trait CalculationController extends FrontendController {
   val otherReliefs = Action.async { implicit request =>
 
     def action (dataResult: Option[CalculationResultModel], backUrl: String) = {
-      backUrl match {
-        case "" => Future.successful(InternalServerError)
-        case _ => calcConnector.fetchAndGetFormData[OtherReliefsModel](KeystoreKeys.otherReliefsFlat).map {
-          case Some(data) => Ok(calculation.otherReliefs(otherReliefsForm.fill(data), dataResult.get, backUrl))
-          case None => Ok(calculation.otherReliefs(otherReliefsForm, dataResult.get, backUrl))
-        }
+      calcConnector.fetchAndGetFormData[OtherReliefsModel](KeystoreKeys.otherReliefsFlat).map {
+        case Some(data) => Ok(calculation.otherReliefs(otherReliefsForm.fill(data), dataResult.get, backUrl))
+        case None => Ok(calculation.otherReliefs(otherReliefsForm, dataResult.get, backUrl))
       }
     }
 
@@ -953,22 +921,18 @@ trait CalculationController extends FrontendController {
   val summary = Action.async { implicit request =>
 
     def routeRequest(backUrl: String) = {
-      backUrl match {
-        case "" => Future.successful(InternalServerError)
-        case _ =>
-          calcConnector.createSummary(hc).flatMap(summaryData =>
-            summaryData.calculationElectionModel.calculationType match {
-              case "flat" =>
-                calcConnector.calculateFlat(summaryData).map(result =>
-                  Ok(calculation.summary(summaryData, result.get, backUrl)))
-              case "time" =>
-                calcConnector.calculateTA(summaryData).map(result =>
-                  Ok(calculation.summary(summaryData, result.get, backUrl)))
-              case "rebased" =>
-                calcConnector.calculateRebased(summaryData).map(result =>
-                  Ok(calculation.summary(summaryData, result.get, backUrl)))
-            })
-      }
+      calcConnector.createSummary(hc).flatMap(summaryData =>
+        summaryData.calculationElectionModel.calculationType match {
+          case "flat" =>
+            calcConnector.calculateFlat(summaryData).map(result =>
+              Ok(calculation.summary(summaryData, result.get, backUrl)))
+          case "time" =>
+            calcConnector.calculateTA(summaryData).map(result =>
+              Ok(calculation.summary(summaryData, result.get, backUrl)))
+          case "rebased" =>
+            calcConnector.calculateRebased(summaryData).map(result =>
+              Ok(calculation.summary(summaryData, result.get, backUrl)))
+        })
     }
 
     for {

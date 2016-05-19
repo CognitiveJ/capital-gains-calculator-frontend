@@ -641,6 +641,7 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
       }
 
     }
+    
     "individual is chosen with a rebased calculation" when {
 
       "user provides no acquisition date and has two tax rates" should {
@@ -753,7 +754,12 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
 
   "calling the .restart action" should {
     lazy val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/restart").withSession(SessionKeys.sessionId -> "12345")
-    val target = setupTarget(TestModels.summaryIndividualFlatWithAEA, TestModels.calcModelTwoRates)
+    val target = setupTarget(
+      TestModels.summaryIndividualFlatWithAEA,
+      TestModels.calcModelTwoRates,
+      Some(AcquisitionDateModel("Yes", Some(1), Some(1), Some(2017))),
+      None
+    )
     lazy val result = target.restart()(fakeRequest)
     lazy val document = Jsoup.parse(bodyOf(result))
 
@@ -761,5 +767,4 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
       status(result) shouldBe 303
     }
   }
-
 }
