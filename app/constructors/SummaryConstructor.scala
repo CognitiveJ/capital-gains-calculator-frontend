@@ -35,12 +35,6 @@ object SummaryConstructor {
     }
   }
 
-  def outsideTaxYear (day: Int, month: Int, year: Int) = {
-    if (Dates.dateInsideTaxYear(day, month, year)) {""}
-    else {
-
-    }
-  }
 
   //scalastyle:off
 
