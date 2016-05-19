@@ -740,7 +740,7 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
     }
 
     "only an upper rate result is returned" should {
-      val target = setupTarget(TestModels.summaryIndividualFlatWithAEA, TestModels.calcModelUpperRate)
+      val target = setupTarget(TestModels.summaryIndividualFlatWithAEA, TestModels.calcModelUpperRate, None, None)
       lazy val result = target.summary()(fakeRequest)
       lazy val document = Jsoup.parse(bodyOf(result))
 
@@ -750,7 +750,7 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
     }
 
     "a negative taxable gain is returned" should {
-      val target = setupTarget(TestModels.summaryIndividualFlatWithAEA, TestModels.calcModelNegativeTaxable)
+      val target = setupTarget(TestModels.summaryIndividualFlatWithAEA, TestModels.calcModelNegativeTaxable, None, None)
       lazy val result = target.summary()(fakeRequest)
       lazy val document = Jsoup.parse(bodyOf(result))
 
@@ -764,7 +764,7 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
     }
 
     "a zero taxable gain is returned" should {
-      val target = setupTarget(TestModels.summaryIndividualFlatWithAEA, TestModels.calcModelZeroTaxable)
+      val target = setupTarget(TestModels.summaryIndividualFlatWithAEA, TestModels.calcModelZeroTaxable, None, None)
       lazy val result = target.summary()(fakeRequest)
       lazy val document = Jsoup.parse(bodyOf(result))
 
@@ -774,7 +774,7 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
     }
 
     "a total gain of zero is returned" should {
-      val target = setupTarget(TestModels.summaryIndividualFlatWithAEA, TestModels.calcModelZeroTotal)
+      val target = setupTarget(TestModels.summaryIndividualFlatWithAEA, TestModels.calcModelZeroTotal, None, None)
       lazy val result = target.summary()(fakeRequest)
       lazy val document = Jsoup.parse(bodyOf(result))
 
