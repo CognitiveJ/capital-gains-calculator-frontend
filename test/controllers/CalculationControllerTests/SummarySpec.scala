@@ -323,8 +323,8 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
         lazy val result = target.summary()(fakeRequest)
         lazy val document = Jsoup.parse(bodyOf(result))
 
-        "have a remaining CGT Allowance of £11100" in {
-          document.body().getElementById("personalDetails(3)").text() shouldBe "£11100.00"
+        "have the answer for Previous Disposals (Other Properties) of 'No'" in {
+          document.body().getElementById("personalDetails(3)").text() shouldBe "No"
         }
 
         "the answer to the improvements question should be Yes" in {
@@ -416,8 +416,8 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
          document.getElementById("personalDetails(1)").text() shouldBe "No"
         }
 
-        "have a remaining CGT Allowance of £5050" in {
-         document.getElementById("personalDetails(2)").text() shouldBe "£5050.00"
+        "have the answer for Previous Disposals (Other Properties) of 'No'" in {
+          document.body().getElementById("personalDetails(2)").text() shouldBe "No"
         }
       }
     }
@@ -447,8 +447,8 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
           document.body().getElementById("personalDetails(1)").text() shouldBe "Yes"
         }
 
-        "have a remaining CGT Allowance of £11100" in {
-          document.body().getElementById("personalDetails(2)").text() shouldBe "£11100.00"
+        "have the answer for Previous Disposals (Other Properties) of 'No'" in {
+          document.body().getElementById("personalDetails(2)").text() shouldBe "No"
         }
       }
     }
@@ -482,8 +482,8 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
           document.body().getElementById("personalDetails(0)").text() shouldBe "Personal Representative"
         }
 
-        "have a remaining CGT Allowance of £11100" in {
-          document.body().getElementById("personalDetails(1)").text() shouldBe "£11100.00"
+        "have the answer for Previous Disposals (Other Properties) of 'No'" in {
+          document.body().getElementById("personalDetails(1)").text() shouldBe "No"
         }
       }
 
