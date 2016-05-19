@@ -16,6 +16,8 @@
 
 package controllers.CalculationControllerTests
 
+import common.DefaultRoutes._
+import common.KeystoreKeys
 import constructors.CalculationElectionConstructor
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.cache.client.CacheMap
@@ -39,13 +41,18 @@ class OtherPropertiesSpec extends UnitSpec with WithFakeApplication with Mockito
 
   implicit val hc = new HeaderCarrier()
 
-  def setupTarget(getData: Option[OtherPropertiesModel], postData: Option[OtherPropertiesModel]): CalculationController = {
+  def setupTarget(getData: Option[OtherPropertiesModel],
+                  postData: Option[OtherPropertiesModel],
+                  customerTypeData: Option[CustomerTypeModel]): CalculationController = {
 
     val mockCalcConnector = mock[CalculatorConnector]
     val mockCalcElectionConstructor = mock[CalculationElectionConstructor]
 
     when(mockCalcConnector.fetchAndGetFormData[OtherPropertiesModel](Matchers.anyString())(Matchers.any(), Matchers.any()))
       .thenReturn(Future.successful(getData))
+
+    when(mockCalcConnector.fetchAndGetFormData[CustomerTypeModel](Matchers.eq(KeystoreKeys.customerType))(Matchers.any(), Matchers.any()))
+      .thenReturn(Future.successful(customerTypeData))
 
     lazy val data = CacheMap("form-id", Map("data" -> Json.toJson(postData.getOrElse(OtherPropertiesModel("", Some(0))))))
     when(mockCalcConnector.saveFormData[OtherPropertiesModel](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
@@ -64,54 +71,93 @@ class OtherPropertiesSpec extends UnitSpec with WithFakeApplication with Mockito
 
     "not supplied with a pre-existing stored model" should {
 
-      val target = setupTarget(None, None)
-      lazy val result = target.otherProperties(fakeRequest)
-      lazy val document = Jsoup.parse(bodyOf(result))
+      "for a customer type of Individual" should {
 
-      "return a 200" in {
-        status(result) shouldBe 200
+        val target = setupTarget(None, None, Some(CustomerTypeModel("individual")))
+        lazy val result = target.otherProperties(fakeRequest)
+        lazy val document = Jsoup.parse(bodyOf(result))
+
+        "return a 200" in {
+          status(result) shouldBe 200
+        }
+
+        "return some HTML that" should {
+
+          "contain some text and use the character set utf-8" in {
+            contentType(result) shouldBe Some("text/html")
+            charset(result) shouldBe Some("utf-8")
+          }
+
+          "have the title 'Did you sell or give away any other properties in that tax year?'" in {
+            document.title shouldEqual Messages("calc.otherProperties.question")
+          }
+
+          "have the heading Calculate your tax (non-residents) " in {
+            document.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+          }
+
+          s"have a 'Back' link to ${routes.CalculationController.personalAllowance().url}" in {
+            document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+            document.body.getElementById("back-link").attr("href") shouldEqual routes.CalculationController.personalAllowance().url
+          }
+
+          "have the question 'Did you sell or give away any other properties in that tax year?' as the legend of the input" in {
+            document.body.getElementsByTag("legend").text shouldEqual Messages("calc.otherProperties.question")
+          }
+
+          "display a radio button with the option `Yes`" in {
+            document.body.getElementById("otherProperties-yes").parent.text shouldEqual Messages("calc.base.yes")
+          }
+
+          "display a radio button with the option `No`" in {
+            document.body.getElementById("otherProperties-no").parent.text shouldEqual Messages("calc.base.no")
+          }
+
+          "display a 'Continue' button " in {
+            document.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+          }
+        }
       }
 
-      "return some HTML that" should {
+      "for a Customer Type of Trustee" should {
 
-        "contain some text and use the character set utf-8" in {
-          contentType(result) shouldBe Some("text/html")
-          charset(result) shouldBe Some("utf-8")
-        }
+        val target = setupTarget(None, None, Some(CustomerTypeModel("trustee")))
+        lazy val result = target.otherProperties(fakeRequest)
+        lazy val document = Jsoup.parse(bodyOf(result))
 
-        "have the title 'Did you sell or give away any other properties in that tax year?'" in {
-          document.title shouldEqual Messages("calc.otherProperties.question")
-        }
-
-        "have the heading Calculate your tax (non-residents) " in {
-          document.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
-        }
-
-        "have a 'Back' link " in {
+        s"have a 'Back' link to ${routes.CalculationController.disabledTrustee().url}" in {
           document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+          document.body.getElementById("back-link").attr("href") shouldEqual routes.CalculationController.disabledTrustee().url
         }
+      }
 
-        "have the question 'Did you sell or give away any other properties in that tax year?' as the legend of the input" in {
-          document.body.getElementsByTag("legend").text shouldEqual Messages("calc.otherProperties.question")
+      "for a Customer Type of Personal Rep" should {
+
+        val target = setupTarget(None, None, Some(CustomerTypeModel("personalRep")))
+        lazy val result = target.otherProperties(fakeRequest)
+        lazy val document = Jsoup.parse(bodyOf(result))
+
+        s"have a 'Back' link to ${routes.CalculationController.customerType().url}" in {
+          document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+          document.body.getElementById("back-link").attr("href") shouldEqual routes.CalculationController.customerType().url
         }
+      }
 
-        "display a radio button with the option `Yes`" in {
-          document.body.getElementById("otherProperties-yes").parent.text shouldEqual Messages("calc.base.yes")
-        }
+      "if no customer type model exists" should {
+        val target = setupTarget(None, None, None)
+        lazy val result = target.otherProperties(fakeRequest)
+        lazy val document = Jsoup.parse(bodyOf(result))
 
-        "display a radio button with the option `No`" in {
-          document.body.getElementById("otherProperties-no").parent.text shouldEqual Messages("calc.base.no")
-        }
-
-        "display a 'Continue' button " in {
-          document.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+        s"have a 'Back' link to ${missingDataRoute} " in {
+          document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+          document.body.getElementById("back-link").attr("href") shouldEqual missingDataRoute
         }
       }
     }
 
     "supplied with a model that already contains data" should {
 
-      val target = setupTarget(Some(OtherPropertiesModel("Yes", Some(2100))), None)
+      val target = setupTarget(Some(OtherPropertiesModel("Yes", Some(2100))), None, Some(CustomerTypeModel("individual")))
       lazy val result = target.otherProperties(fakeRequest)
       lazy val document = Jsoup.parse(bodyOf(result))
 
@@ -149,7 +195,7 @@ class OtherPropertiesSpec extends UnitSpec with WithFakeApplication with Mockito
         case "" => OtherPropertiesModel(selection, None)
         case _ => OtherPropertiesModel(selection, Some(BigDecimal(amount)))
       }
-      val target = setupTarget(None, Some(mockData))
+      val target = setupTarget(None, Some(mockData), Some(CustomerTypeModel("individual")))
       target.submitOtherProperties(fakeRequest)
     }
 

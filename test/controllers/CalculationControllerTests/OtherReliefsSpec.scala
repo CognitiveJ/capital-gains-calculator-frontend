@@ -16,11 +16,12 @@
 
 package controllers.CalculationControllerTests
 
-import common.TestModels
+import common.DefaultRoutes._
+import common.{KeystoreKeys, TestModels}
 import connectors.CalculatorConnector
 import constructors.CalculationElectionConstructor
-import controllers.CalculationController
-import models.{CalculationResultModel, SummaryModel, OtherReliefsModel}
+import controllers.{routes, CalculationController}
+import models._
 import org.jsoup.Jsoup
 import org.mockito.Matchers
 import org.mockito.Mockito._
@@ -43,7 +44,9 @@ class OtherReliefsSpec extends UnitSpec with WithFakeApplication with MockitoSug
                    getData: Option[OtherReliefsModel],
                    postData: Option[OtherReliefsModel],
                    summary: SummaryModel,
-                   result: CalculationResultModel
+                   result: CalculationResultModel,
+                   acquisitionDateData: Option[AcquisitionDateModel],
+                   rebasedValueData: Option[RebasedValueModel]
                  ): CalculationController = {
 
     val mockCalcConnector = mock[CalculatorConnector]
@@ -51,6 +54,12 @@ class OtherReliefsSpec extends UnitSpec with WithFakeApplication with MockitoSug
 
     when(mockCalcConnector.fetchAndGetFormData[OtherReliefsModel](Matchers.any())(Matchers.any(), Matchers.any()))
       .thenReturn(Future.successful(getData))
+
+    when(mockCalcConnector.fetchAndGetFormData[RebasedValueModel](Matchers.eq(KeystoreKeys.rebasedValue))(Matchers.any(), Matchers.any()))
+      .thenReturn(Future.successful(rebasedValueData))
+
+    when(mockCalcConnector.fetchAndGetFormData[AcquisitionDateModel](Matchers.eq(KeystoreKeys.acquisitionDate))(Matchers.any(), Matchers.any()))
+      .thenReturn(Future.successful(acquisitionDateData))
 
     when(mockCalcConnector.createSummary(Matchers.any()))
       .thenReturn(Future.successful(summary))
@@ -72,60 +81,177 @@ class OtherReliefsSpec extends UnitSpec with WithFakeApplication with MockitoSug
     lazy val fakeRequest = FakeRequest("GET", "/calculate-your-capital-gains/other-reliefs").withSession(SessionKeys.sessionId -> "12345")
 
     "not supplied with a pre-existing stored model" should {
-      val target = setupTarget(None, None, TestModels.summaryIndividualFlatWithoutAEA, TestModels.calcModelTwoRates)
-      lazy val result = target.otherReliefs(fakeRequest)
-      lazy val document = Jsoup.parse(bodyOf(result))
 
-      "return a 200 with a valid calculation result" in {
-        status(result) shouldBe 200
+      "when Acquisition Date > 5 April 2015" should {
+
+        val target = setupTarget(
+          None,
+          None,
+          TestModels.summaryIndividualFlatWithoutAEA,
+          TestModels.calcModelTwoRates,
+          Some(AcquisitionDateModel("Yes", Some(1), Some(1), Some(2017))),
+          None
+        )
+        lazy val result = target.otherReliefs(fakeRequest)
+        lazy val document = Jsoup.parse(bodyOf(result))
+
+        "return a 200 with a valid calculation result" in {
+          status(result) shouldBe 200
+        }
+
+        "return some HTML that" should {
+
+          "contain some text and use the character set utf-8" in {
+            contentType(result) shouldBe Some("text/html")
+            charset(result) shouldBe Some("utf-8")
+          }
+          "have the title 'How much extra tax relief are you claiming?'" in {
+            document.title shouldEqual Messages("calc.otherReliefs.question")
+          }
+
+          "have the heading Calculate your tax (non-residents) " in {
+            document.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+          }
+
+          s"have a 'Back' link to ${routes.CalculationController.allowableLosses().url}" in {
+            document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+            document.body.getElementById("back-link").attr("href") shouldEqual routes.CalculationController.allowableLosses().url
+          }
+
+          "have the question 'How much extra tax relief are you claiming?' as the legend of the input" in {
+            document.body.getElementsByTag("label").text should include(Messages("calc.otherReliefs.question"))
+          }
+
+          "have a value for your gain" in {
+            document.getElementById("totalGain").text() shouldBe "£40000.00 Total gain"
+          }
+
+          "display an input box for the Other Tax Reliefs" in {
+            document.body.getElementById("otherReliefs").tagName() shouldEqual "input"
+          }
+
+          "display an 'Add relief' button " in {
+            document.body.getElementById("add-relief-button").text shouldEqual Messages("calc.otherReliefs.button.addRelief")
+          }
+
+          "include helptext for 'Total gain'" in {
+            document.body.getElementById("totalGain").text should include(Messages("calc.otherReliefs.totalGain"))
+          }
+
+          "include helptext for 'Taxable gain'" in {
+            document.body.getElementById("taxableGain").text should include(Messages("calc.otherReliefs.taxableGain"))
+          }
+        }
       }
 
-      "return some HTML that" should {
+      "when Acquisition Date <= 5 April 2015" should {
 
-        "contain some text and use the character set utf-8" in {
-          contentType(result) shouldBe Some("text/html")
-          charset(result) shouldBe Some("utf-8")
-        }
-        "have the title 'How much extra tax relief are you claiming?'" in {
-          document.title shouldEqual Messages("calc.otherReliefs.question")
-        }
+        val target = setupTarget(
+          None,
+          None,
+          TestModels.summaryIndividualFlatWithoutAEA,
+          TestModels.calcModelTwoRates,
+          Some(AcquisitionDateModel("Yes", Some(1), Some(1), Some(2014))),
+          None
+        )
+        lazy val result = target.otherReliefs(fakeRequest)
+        lazy val document = Jsoup.parse(bodyOf(result))
 
-        "have the heading Calculate your tax (non-residents) " in {
-          document.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
-        }
-
-        "have a 'Back' link " in {
+        s"have a 'Back' link to ${routes.CalculationController.calculationElection().url}" in {
           document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
-        }
-
-        "have the question 'How much extra tax relief are you claiming?' as the legend of the input" in {
-          document.body.getElementsByTag("label").text should include (Messages("calc.otherReliefs.question"))
-        }
-
-        "have a value for your gain" in {
-          document.getElementById("totalGain").text() shouldBe "£40000.00 Total gain"
-        }
-
-        "display an input box for the Other Tax Reliefs" in {
-          document.body.getElementById("otherReliefs").tagName() shouldEqual "input"
-        }
-
-        "display an 'Add relief' button " in {
-          document.body.getElementById("add-relief-button").text shouldEqual Messages("calc.otherReliefs.button.addRelief")
-        }
-
-        "include helptext for 'Total gain'" in {
-          document.body.getElementById("totalGain").text should include (Messages("calc.otherReliefs.totalGain"))
-        }
-
-        "include helptext for 'Taxable gain'" in {
-          document.body.getElementById("taxableGain").text should include (Messages("calc.otherReliefs.taxableGain"))
+          document.body.getElementById("back-link").attr("href") shouldEqual routes.CalculationController.calculationElection().url
         }
       }
+
+      "when Acquisition Date is not supplied and " +
+        "rebased value is not supplied" should {
+
+        val target = setupTarget(
+          None,
+          None,
+          TestModels.summaryIndividualFlatWithoutAEA,
+          TestModels.calcModelTwoRates,
+          Some(AcquisitionDateModel("No", None,None,None)),
+          Some(RebasedValueModel("No", None))
+        )
+        lazy val result = target.otherReliefs(fakeRequest)
+        lazy val document = Jsoup.parse(bodyOf(result))
+
+        s"have a 'Back' link to ${routes.CalculationController.allowableLosses().url}" in {
+          document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+          document.body.getElementById("back-link").attr("href") shouldEqual routes.CalculationController.allowableLosses().url
+        }
+      }
+
+      "when Acquisition Date is not supplied and " +
+        "rebased value is supplied" should {
+
+        val target = setupTarget(
+          None,
+          None,
+          TestModels.summaryIndividualFlatWithoutAEA,
+          TestModels.calcModelTwoRates,
+          Some(AcquisitionDateModel("No", None,None,None)),
+          Some(RebasedValueModel("Yes", Some(500)))
+        )
+        lazy val result = target.otherReliefs(fakeRequest)
+        lazy val document = Jsoup.parse(bodyOf(result))
+
+        s"have a 'Back' link to ${routes.CalculationController.calculationElection().url}" in {
+          document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+          document.body.getElementById("back-link").attr("href") shouldEqual routes.CalculationController.calculationElection().url
+        }
+      }
+
+      "when Acquisition Date model is not supplied" should {
+
+        val target = setupTarget(
+          None,
+          None,
+          TestModels.summaryIndividualFlatWithoutAEA,
+          TestModels.calcModelTwoRates,
+          None,
+          Some(RebasedValueModel("Yes", Some(500)))
+        )
+        lazy val result = target.otherReliefs(fakeRequest)
+        lazy val document = Jsoup.parse(bodyOf(result))
+
+        s"have a 'Back' link to ${missingDataRoute} " in {
+          document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+          document.body.getElementById("back-link").attr("href") shouldEqual missingDataRoute
+        }
+      }
+
+      "when Rebased Value Model is not supplied" should {
+
+        val target = setupTarget(
+          None,
+          None,
+          TestModels.summaryIndividualFlatWithoutAEA,
+          TestModels.calcModelTwoRates,
+          Some(AcquisitionDateModel("No", None,None,None)),
+          None
+        )
+        lazy val result = target.otherReliefs(fakeRequest)
+        lazy val document = Jsoup.parse(bodyOf(result))
+
+        s"have a 'Back' link to ${missingDataRoute} " in {
+          document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+          document.body.getElementById("back-link").attr("href") shouldEqual missingDataRoute
+        }
+      }
+
     }
     "supplied with a pre-existing stored model and a loss" should {
       val testOtherReliefsModel = OtherReliefsModel(Some(5000))
-      val target = setupTarget(Some(testOtherReliefsModel), None, TestModels.summaryIndividualFlatWithoutAEA, TestModels.calcModelLoss)
+      val target = setupTarget(
+        Some(testOtherReliefsModel),
+        None,
+        TestModels.summaryIndividualFlatWithoutAEA,
+        TestModels.calcModelLoss,
+        Some(AcquisitionDateModel("Yes",Some(1),Some(1),Some(2017))),
+        None
+      )
       lazy val result = target.otherReliefs(fakeRequest)
       lazy val document = Jsoup.parse(bodyOf(result))
 
@@ -163,7 +289,14 @@ class OtherReliefsSpec extends UnitSpec with WithFakeApplication with MockitoSug
         case numeric(money) => OtherReliefsModel(Some(BigDecimal(money)))
         case _ => OtherReliefsModel(None)
       }
-      val target = setupTarget(None, Some(mockData), summary, TestModels.calcModelOneRate)
+      val target = setupTarget(
+        None,
+        Some(mockData),
+        summary,
+        TestModels.calcModelOneRate,
+        Some(AcquisitionDateModel("Yes",Some(1),Some(1),Some(2017))),
+        None
+      )
       target.submitOtherReliefs(fakeRequest)
     }
 
