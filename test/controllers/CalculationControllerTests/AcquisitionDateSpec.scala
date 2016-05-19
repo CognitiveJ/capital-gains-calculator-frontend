@@ -16,6 +16,8 @@
 
 package controllers.CalculationControllerTests
 
+import common.KeystoreKeys
+import common.DefaultRoutes._
 import constructors.CalculationElectionConstructor
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.cache.client.CacheMap
@@ -39,13 +41,19 @@ class AcquisitionDateSpec extends UnitSpec with WithFakeApplication with Mockito
 
   implicit val hc = new HeaderCarrier()
 
-  def setupTarget(getData: Option[AcquisitionDateModel], postData: Option[AcquisitionDateModel]): CalculationController = {
+  def setupTarget(getData: Option[AcquisitionDateModel],
+                  postData: Option[AcquisitionDateModel],
+                  otherPropertiesData: Option[OtherPropertiesModel]
+                 ): CalculationController = {
 
     val mockCalcConnector = mock[CalculatorConnector]
     val mockCalcElectionConstructor = mock[CalculationElectionConstructor]
 
     when(mockCalcConnector.fetchAndGetFormData[AcquisitionDateModel](Matchers.anyString())(Matchers.any(), Matchers.any()))
     .thenReturn(Future.successful(getData))
+
+    when(mockCalcConnector.fetchAndGetFormData[OtherPropertiesModel](Matchers.eq(KeystoreKeys.otherProperties))(Matchers.any(), Matchers.any()))
+      .thenReturn(Future.successful(otherPropertiesData))
 
     lazy val data = CacheMap("form-id", Map("data" -> Json.toJson(postData.getOrElse(AcquisitionDateModel("",None,None,None)))))
     when(mockCalcConnector.saveFormData[AcquisitionDateModel](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
@@ -63,57 +71,97 @@ class AcquisitionDateSpec extends UnitSpec with WithFakeApplication with Mockito
     
     "not supplied with a pre-existing model" should {
 
-      val target = setupTarget(None, None)
-      lazy val result = target.acquisitionDate(fakeRequest)
-      lazy val document = Jsoup.parse(bodyOf(result))
-      
-      "return a 200" in {
-        status(result) shouldBe 200
+      "when Previous Taxable Gains is 'No'" should {
+
+        val target = setupTarget(None, None, Some(OtherPropertiesModel("No", None)))
+        lazy val result = target.acquisitionDate(fakeRequest)
+        lazy val document = Jsoup.parse(bodyOf(result))
+
+        "return a 200" in {
+          status(result) shouldBe 200
+        }
+
+        "return some HTML that" should {
+
+          "contain some text and use the character set utf-8" in {
+            contentType(result) shouldBe Some("text/html")
+            charset(result) shouldBe Some("utf-8")
+          }
+
+          s"have the title '${Messages("calc.acquisitionDate.question")}'" in {
+            document.title shouldEqual Messages("calc.acquisitionDate.question")
+          }
+
+          "have the heading Calculate your tax (non-residents) " in {
+            document.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+          }
+
+          s"have a 'Back' link to ${routes.CalculationController.otherProperties().url} " in {
+            document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+            document.body.getElementById("back-link").attr("href") shouldEqual routes.CalculationController.otherProperties().url
+          }
+
+          s"have the question '${Messages("calc.acquisitionDate.question")}" in {
+            document.body.getElementsByTag("legend").text should include(Messages("calc.acquisitionDate.question"))
+          }
+
+          "display the correct wording for radio option `yes`" in {
+            document.body.getElementById("hasAcquisitionDate-yes").parent.text shouldEqual Messages("calc.base.yes")
+          }
+
+          "display the correct wording for radio option `no`" in {
+            document.body.getElementById("hasAcquisitionDate-no").parent.text shouldEqual Messages("calc.base.no")
+          }
+
+          "contain a hidden component with an input box" in {
+            document.body.getElementById("hidden").html should include("input")
+          }
+
+          "display three input boxes with labels Day, Month and Year respectively" in {
+            document.select("label[for=acquisitionDate.day]").text shouldEqual Messages("calc.common.date.fields.day")
+            document.select("label[for=acquisitionDate.month]").text shouldEqual Messages("calc.common.date.fields.month")
+            document.select("label[for=acquisitionDate.year]").text shouldEqual Messages("calc.common.date.fields.year")
+          }
+
+          "display a 'Continue' button " in {
+            document.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+          }
+        }
       }
 
-      "return some HTML that" should {
+      "when Previous Taxable Gains is 'Yes' and amount is 0.00" should {
 
-        "contain some text and use the character set utf-8" in {
-          contentType(result) shouldBe Some("text/html")
-          charset(result) shouldBe Some("utf-8")
-        }
+        val target = setupTarget(None, None, Some(OtherPropertiesModel("Yes", Some(0))))
+        lazy val result = target.acquisitionDate(fakeRequest)
+        lazy val document = Jsoup.parse(bodyOf(result))
 
-        s"have the title '${Messages("calc.acquisitionDate.question")}'" in {
-          document.title shouldEqual Messages("calc.acquisitionDate.question")
-        }
-
-        "have the heading Calculate your tax (non-residents) " in {
-          document.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
-        }
-
-        "have a 'Back' link " in {
+        s"have a 'Back' link to ${routes.CalculationController.annualExemptAmount().url} " in {
           document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+          document.body.getElementById("back-link").attr("href") shouldEqual routes.CalculationController.annualExemptAmount().url
         }
+      }
 
-        s"have the question '${Messages("calc.acquisitionDate.question")}" in {
-          document.body.getElementsByTag("legend").text should include(Messages("calc.acquisitionDate.question"))
+      "when Previous Taxable Gains is 'Yes' and amount is > 0.00" should {
+
+        val target = setupTarget(None, None, Some(OtherPropertiesModel("Yes", Some(0.01))))
+        lazy val result = target.acquisitionDate(fakeRequest)
+        lazy val document = Jsoup.parse(bodyOf(result))
+
+        s"have a 'Back' link to ${routes.CalculationController.otherProperties().url} " in {
+          document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+          document.body.getElementById("back-link").attr("href") shouldEqual routes.CalculationController.otherProperties().url
         }
+      }
 
-        "display the correct wording for radio option `yes`" in {
-          document.body.getElementById("hasAcquisitionDate-yes").parent.text shouldEqual Messages("calc.base.yes")
-        }
+      "when there is no Previous Taxable Gains model" should {
 
-        "display the correct wording for radio option `no`" in {
-          document.body.getElementById("hasAcquisitionDate-no").parent.text shouldEqual Messages("calc.base.no")
-        }
+        val target = setupTarget(None, None, None)
+        lazy val result = target.acquisitionDate(fakeRequest)
+        lazy val document = Jsoup.parse(bodyOf(result))
 
-        "contain a hidden component with an input box" in {
-          document.body.getElementById("hidden").html should include("input")
-        }
-
-        "display three input boxes with labels Day, Month and Year respectively" in {
-          document.select("label[for=acquisitionDate.day]").text shouldEqual Messages("calc.common.date.fields.day")
-          document.select("label[for=acquisitionDate.month]").text shouldEqual Messages("calc.common.date.fields.month")
-          document.select("label[for=acquisitionDate.year]").text shouldEqual Messages("calc.common.date.fields.year")
-        }
-
-        "display a 'Continue' button " in {
-          document.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+        s"have a 'Back' link to ${missingDataRoute} " in {
+          document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+          document.body.getElementById("back-link").attr("href") shouldEqual missingDataRoute
         }
       }
     }
@@ -121,7 +169,7 @@ class AcquisitionDateSpec extends UnitSpec with WithFakeApplication with Mockito
     "supplied with a model already filled with data" should {
 
       val testAcquisitionDateModel = new AcquisitionDateModel("Yes", Some(10), Some(12), Some(2016))
-      val target = setupTarget(Some(testAcquisitionDateModel), None)
+      val target = setupTarget(Some(testAcquisitionDateModel), None, Some(OtherPropertiesModel("No",None)))
       lazy val result = target.acquisitionDate(fakeRequest)
       lazy val document = Jsoup.parse(bodyOf(result))
 
@@ -163,7 +211,7 @@ class AcquisitionDateSpec extends UnitSpec with WithFakeApplication with Mockito
         ("acquisitionDate.month", month.getOrElse("").toString),
         ("acquisitionDate.year", year.getOrElse("").toString))
       val mockData = new AcquisitionDateModel("Yes",day,month,year)
-      val target = setupTarget(None, Some(mockData))
+      val target = setupTarget(None, Some(mockData), Some(OtherPropertiesModel("No",None)))
       target.submitAcquisitionDate(fakeRequest)
     }
 

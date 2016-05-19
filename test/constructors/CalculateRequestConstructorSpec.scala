@@ -50,7 +50,7 @@ class CalculateRequestConstructorSpec extends UnitSpec {
   "CalculateRequest Constructor" should {
     "return a string from the baseCalcUrl as an individual with no prior disposal" in {
       CalculateRequestConstructor.baseCalcUrl(sumModel) shouldEqual "customerType=individual&priorDisposal=No&currentIncome=1000" +
-        "&personalAllowanceAmt=11100&disposalValue=150000&disposalCosts=0&allowableLossesAmt=0&entReliefClaimed=No"
+        "&personalAllowanceAmt=11100&disposalValue=150000&disposalCosts=0&allowableLossesAmt=0&entReliefClaimed=No&disposalDate=2010-10-10"
     }
 
     "return a string from the baseCalcUrl as a trustee with a prior disposal" in {
@@ -81,7 +81,7 @@ class CalculateRequestConstructorSpec extends UnitSpec {
 
       CalculateRequestConstructor.baseCalcUrl(sumModelTrustee) shouldEqual "customerType=trustee&priorDisposal=Yes&annualExemptAmount=5000" +
         "&otherPropertiesAmt=6100&isVulnerable=No" +
-        "&disposalValue=150000&disposalCosts=0&allowableLossesAmt=1000&entReliefClaimed=No"
+        "&disposalValue=150000&disposalCosts=0&allowableLossesAmt=1000&entReliefClaimed=No&disposalDate=2010-10-10"
     }
 
     "return a string from the flatCalcUrlExtra with no improvements" in {
@@ -102,31 +102,31 @@ class CalculateRequestConstructorSpec extends UnitSpec {
 
     "return a string from the flatCalcUrlExtra with PRR claimed" in {
       CalculateRequestConstructor.flatCalcUrlExtra(TestModels.summaryIndividualWithAllOptions) shouldEqual "&improvementsAmt=8000&acquisitionValueAmt=100000&acquisitionCostsAmt=300" +
-        "&reliefs=999&daysClaimed=100&isClaimingPRR=Yes"
+        "&reliefs=999&daysClaimed=100&isClaimingPRR=Yes&acquisitionDate=1999-9-9"
     }
 
     "return a string from the taCalcUrlExtra with no improvements" in {
-      CalculateRequestConstructor.taCalcUrlExtra(sumModel) shouldEqual "&improvementsAmt=0&disposalDate=2010-10-10" +
+      CalculateRequestConstructor.taCalcUrlExtra(sumModel) shouldEqual "&improvementsAmt=0" +
         "&acquisitionDate=1990-9-9&acquisitionValueAmt=100000&acquisitionCostsAmt=0&reliefs=0&isClaimingPRR=No"
     }
 
     "return a string from the taCalcUrlExtra with improvements and no rebased value model" in {
-      CalculateRequestConstructor.taCalcUrlExtra(TestModels.summaryIndividualImprovementsNoRebasedModel) shouldEqual "&improvementsAmt=8000&disposalDate=2010-10-10" +
+      CalculateRequestConstructor.taCalcUrlExtra(TestModels.summaryIndividualImprovementsNoRebasedModel) shouldEqual "&improvementsAmt=8000" +
         "&acquisitionDate=1999-9-9&acquisitionValueAmt=100000&acquisitionCostsAmt=300&reliefs=888&isClaimingPRR=No"
     }
 
     "return a string from the taCalcUrlExtra with improvements and a rebased value model with no improvements after" in {
-      CalculateRequestConstructor.taCalcUrlExtra(TestModels.summaryTrusteeTAWithoutAEA) shouldEqual "&improvementsAmt=8000&disposalDate=2010-10-10" +
+      CalculateRequestConstructor.taCalcUrlExtra(TestModels.summaryTrusteeTAWithoutAEA) shouldEqual "&improvementsAmt=8000" +
         "&acquisitionDate=1999-9-9&acquisitionValueAmt=100000&acquisitionCostsAmt=300&reliefs=888&isClaimingPRR=No"
     }
 
     "return a string from the taCalcUrlExtra with improvements and a rebased value model with improvements after" in {
-      CalculateRequestConstructor.taCalcUrlExtra(TestModels.summaryIndividualImprovementsWithRebasedModel) shouldEqual "&improvementsAmt=9000&disposalDate=2010-10-10" +
+      CalculateRequestConstructor.taCalcUrlExtra(TestModels.summaryIndividualImprovementsWithRebasedModel) shouldEqual "&improvementsAmt=9000" +
         "&acquisitionDate=1999-9-9&acquisitionValueAmt=100000&acquisitionCostsAmt=300&reliefs=888&isClaimingPRR=No"
     }
 
     "return a string from the taCalcUrlExtra with PRR" in {
-      CalculateRequestConstructor.taCalcUrlExtra(TestModels.summaryIndividualWithAllOptions) shouldEqual "&improvementsAmt=8000&disposalDate=2018-10-10" +
+      CalculateRequestConstructor.taCalcUrlExtra(TestModels.summaryIndividualWithAllOptions) shouldEqual "&improvementsAmt=8000" +
         "&acquisitionDate=1999-9-9&acquisitionValueAmt=100000&acquisitionCostsAmt=300&reliefs=888&daysClaimedAfter=50&isClaimingPRR=Yes"
     }
 

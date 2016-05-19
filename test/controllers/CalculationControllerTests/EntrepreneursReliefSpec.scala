@@ -16,6 +16,7 @@
 
 package controllers.CalculationControllerTests
 
+import common.KeystoreKeys
 import constructors.CalculationElectionConstructor
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.cache.client.CacheMap
@@ -40,13 +41,23 @@ class EntrepreneursReliefSpec extends UnitSpec with WithFakeApplication with Moc
 
   implicit val hc = new HeaderCarrier()
 
-  def setupTarget(getData: Option[EntrepreneursReliefModel],postData: Option[EntrepreneursReliefModel]): CalculationController = {
+  def setupTarget(getData: Option[EntrepreneursReliefModel],
+                  postData: Option[EntrepreneursReliefModel],
+                  acquisitionDateData: Option[AcquisitionDateModel] = None,
+                  rebasedValueData: Option[RebasedValueModel] = None
+                 ): CalculationController = {
 
     val mockCalcConnector = mock[CalculatorConnector]
     val mockCalcElectionConstructor = mock[CalculationElectionConstructor]
 
     when(mockCalcConnector.fetchAndGetFormData[EntrepreneursReliefModel](Matchers.anyString())(Matchers.any(), Matchers.any()))
       .thenReturn(Future.successful(getData))
+
+    when(mockCalcConnector.fetchAndGetFormData[RebasedValueModel](Matchers.eq(KeystoreKeys.rebasedValue))(Matchers.any(), Matchers.any()))
+      .thenReturn(Future.successful(rebasedValueData))
+
+    when(mockCalcConnector.fetchAndGetFormData[AcquisitionDateModel](Matchers.eq(KeystoreKeys.acquisitionDate))(Matchers.any(), Matchers.any()))
+      .thenReturn(Future.successful(acquisitionDateData))
 
     lazy val data = CacheMap("form-id", Map("data" -> Json.toJson(postData.getOrElse(EntrepreneursReliefModel("")))))
     when(mockCalcConnector.saveFormData[EntrepreneursReliefModel](Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
@@ -65,43 +76,71 @@ class EntrepreneursReliefSpec extends UnitSpec with WithFakeApplication with Moc
 
     "not supplied with a pre-existing stored model" should {
 
-      val target = setupTarget(None, None)
-      lazy val result = target.entrepreneursRelief(fakeRequest)
-      lazy val document = Jsoup.parse(bodyOf(result))
+      "when no acquisition date supplied and no rebased value supplied" should {
 
-      "return a 200" in {
-        status(result) shouldBe 200
+        val target = setupTarget(None, None)
+        lazy val result = target.entrepreneursRelief(fakeRequest)
+        lazy val document = Jsoup.parse(bodyOf(result))
+
+        "return a 200" in {
+          status(result) shouldBe 200
+        }
+
+        "return some HTML that" should {
+
+          "contain some text and use the character set utf-8" in {
+            contentType(result) shouldBe Some("text/html")
+            charset(result) shouldBe Some("utf-8")
+          }
+
+          "have the title 'Are you claiming Entrepreneurs Relief?'" in {
+            document.title shouldEqual Messages("calc.entrepreneursRelief.question")
+          }
+
+          "have the heading Calculate your tax (non-residents) " in {
+            document.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
+          }
+
+          s"have a 'Back' link to ${routes.CalculationController.disposalCosts().url} " in {
+            document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+            document.body.getElementById("back-link").attr("href") shouldEqual routes.CalculationController.disposalCosts().url
+          }
+
+          "have the question 'Are you claiming Entrepreneurs Relief?' as the legend of the input" in {
+            document.body.getElementsByTag("legend").text shouldEqual Messages("calc.entrepreneursRelief.question")
+          }
+
+          "display a 'Continue' button " in {
+            document.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
+          }
+
+          "have a sidebar with additional links" in {
+            document.body.getElementsByClass("sidebar")
+          }
+        }
       }
 
-      "return some HTML that" should {
+      "when acquisition date supplied and no rebased value supplied" should {
 
-        "contain some text and use the character set utf-8" in {
-          contentType(result) shouldBe Some("text/html")
-          charset(result) shouldBe Some("utf-8")
-        }
+        val target = setupTarget(None, None, Some(AcquisitionDateModel("Yes", Some(1), Some(1), Some(2016))))
+        lazy val result = target.entrepreneursRelief(fakeRequest)
+        lazy val document = Jsoup.parse(bodyOf(result))
 
-        "have the title 'Are you claiming Entrepreneurs Relief?'" in {
-          document.title shouldEqual Messages("calc.entrepreneursRelief.question")
-        }
-
-        "have the heading Calculate your tax (non-residents) " in {
-          document.body.getElementsByTag("h1").text shouldEqual Messages("calc.base.pageHeading")
-        }
-
-        "have a 'Back' link " in {
+        s"have a 'Back' link to ${routes.CalculationController.privateResidenceRelief().url} " in {
           document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+          document.body.getElementById("back-link").attr("href") shouldEqual routes.CalculationController.privateResidenceRelief().url
         }
+      }
 
-        "have the question 'Are you claiming Entrepreneurs Relief?' as the legend of the input" in {
-          document.body.getElementsByTag("legend").text shouldEqual Messages("calc.entrepreneursRelief.question")
-        }
+      "when no acquisition date supplied but a rebased value is supplied" should {
 
-        "display a 'Continue' button " in {
-          document.body.getElementById("continue-button").text shouldEqual Messages("calc.base.continue")
-        }
+        val target = setupTarget(None, None, None, Some(RebasedValueModel("Yes",Some(500))))
+        lazy val result = target.entrepreneursRelief(fakeRequest)
+        lazy val document = Jsoup.parse(bodyOf(result))
 
-        "have a sidebar with additional links" in {
-          document.body.getElementsByClass("sidebar")
+        s"have a 'Back' link to ${routes.CalculationController.privateResidenceRelief().url} " in {
+          document.body.getElementById("back-link").text shouldEqual Messages("calc.base.back")
+          document.body.getElementById("back-link").attr("href") shouldEqual routes.CalculationController.privateResidenceRelief().url
         }
       }
     }
