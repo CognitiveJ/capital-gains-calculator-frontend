@@ -95,9 +95,9 @@ object TestModels {
     PrivateResidenceReliefModel("No", None, None)
   )
 
-  val calcModelTwoRates = CalculationResultModel(8000, 40000, 32000, 18, Some(8000), Some(28))
-  val calcModelOneRate = CalculationResultModel(8000, 40000, 32000, 20, None, None)
-  val calcModelLoss = CalculationResultModel(0, -10000, 0, 18, None, None)
+  val calcModelTwoRates = CalculationResultModel(8000, 40000, 32000, 18, Some(8000), Some(28), None)
+  val calcModelOneRate = CalculationResultModel(8000, 40000, 32000, 20, None, None, None)
+  val calcModelLoss = CalculationResultModel(0, -10000, 0, 18, None, None, None)
 
   val summaryIndividualFlatLoss = SummaryModel (
     CustomerTypeModel("individual"),

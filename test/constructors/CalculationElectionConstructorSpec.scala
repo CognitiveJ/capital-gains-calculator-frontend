@@ -36,13 +36,13 @@ class CalculationElectionConstructorSpec extends UnitSpec with MockitoSugar {
   implicit val hc = new HeaderCarrier()
   val mockCalcConnector = mock[CalculatorConnector]
   def mockFlatCalc = when(mockCalcConnector.calculateFlat(Matchers.any())(Matchers.any()))
-    .thenReturn(Future.successful(Some(CalculationResultModel(8000, 10000, 6000, 20, None, None))))
+    .thenReturn(Future.successful(Some(CalculationResultModel(8000, 10000, 6000, 20, None, None, None))))
 
   def mockTimeCalc = when(mockCalcConnector.calculateTA(Matchers.any())(Matchers.any()))
-    .thenReturn(Future.successful(Some(CalculationResultModel(8000, 10000, 6000, 20, None, None))))
+    .thenReturn(Future.successful(Some(CalculationResultModel(8000, 10000, 6000, 20, None, None, None))))
 
   def mockRebasedCalc = when(mockCalcConnector.calculateRebased(Matchers.any())(Matchers.any()))
-    .thenReturn(Future.successful(Some(CalculationResultModel(8000, 10000, 6000, 20, None, None))))
+    .thenReturn(Future.successful(Some(CalculationResultModel(8000, 10000, 6000, 20, None, None, None))))
 
   "Calling generateElection" should {
 

@@ -238,7 +238,7 @@ class CalculatorConnectorSpec extends UnitSpec with MockitoSugar {
 
   "Calling calculateFlat" should {
 
-    val validResponse = CalculationResultModel(8000, 40000, 32000, 18, Some(8000), Some(28))
+    val validResponse = CalculationResultModel(8000, 40000, 32000, 18, Some(8000), Some(28), None)
     when(mockHttp.GET[Option[CalculationResultModel]](Matchers.anyString())(Matchers.any(), Matchers.any()))
       .thenReturn(Future.successful(Some(validResponse)))
 
@@ -250,7 +250,7 @@ class CalculatorConnectorSpec extends UnitSpec with MockitoSugar {
   }
 
   "Calling calculateTA" should {
-    val validResponse = CalculationResultModel(8000, 40000, 32000, 18, Some(8000), Some(28))
+    val validResponse = CalculationResultModel(8000, 40000, 32000, 18, Some(8000), Some(28), None)
     when(mockHttp.GET[Option[CalculationResultModel]](Matchers.anyString())(Matchers.any(), Matchers.any()))
       .thenReturn(Future.successful(Some(validResponse)))
 
@@ -262,7 +262,7 @@ class CalculatorConnectorSpec extends UnitSpec with MockitoSugar {
   }
 
   "Calling calculateRebased" should {
-    val validResponse = CalculationResultModel(8000, 40000, 32000, 18, Some(8000), Some(28))
+    val validResponse = CalculationResultModel(8000, 40000, 32000, 18, Some(8000), Some(28), None)
     when(mockHttp.GET[Option[CalculationResultModel]](Matchers.anyString())(Matchers.any(), Matchers.any()))
       .thenReturn(Future.successful(Some(validResponse)))
 
