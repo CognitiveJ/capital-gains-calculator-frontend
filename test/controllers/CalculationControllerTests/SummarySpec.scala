@@ -127,12 +127,8 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
               document.select("#calcDetails").text should include(Messages("calc.summary.calculation.details.taxRate"))
             }
 
-            "have a base tax rate of £32000" in {
-              document.body().getElementById("calcDetails(3)").text() shouldBe "£32000.00 at 18%"
-            }
-
-            "have an upper tax rate of £8000" in {
-              document.body().getElementById("calcDetails(4)").text() shouldBe "£8000.00 at 28%"
+            "have a combined tax rate of £32000 and £8000" in {
+              document.body().getElementById("calcDetails(3)").text() shouldBe "£32000.00 at 18% £8000.00 at 28%"
             }
 
           }
@@ -515,20 +511,12 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
           document.body.getElementById("purchaseDetails(2)").text() shouldBe "£1000.00"
         }
 
-        "include the question for the improvements before" in {
-          document.select("#propertyDetails").text should include(Messages("calc.improvements.questionThree"))
-        }
-
-        "have a value for the improvements before" in {
-          document.body.getElementById("propertyDetails(1)").text() shouldBe "£2000.00"
-        }
-
         "include the question for the improvements after" in {
           document.select("#propertyDetails").text should include(Messages("calc.improvements.questionFour"))
         }
 
         "have a value for the improvements after" in {
-          document.body.getElementById("propertyDetails(2)").text() shouldBe "£3000.00"
+          document.body.getElementById("propertyDetails(1)").text() shouldBe "£3000.00"
         }
 
         "have a value for the other reliefs rebased" in {
@@ -574,6 +562,50 @@ class SummarySpec extends UnitSpec with WithFakeApplication with MockitoSugar {
         "have no value for the rebased costs" in {
           document.body.getElementById("purchaseDetails(1)").text() shouldBe "£0.00"
         }
+      }
+    }
+
+    "only an upper rate result is returned" should {
+      val target = setupTarget(TestModels.summaryIndividualFlatWithAEA, TestModels.calcModelUpperRate)
+      lazy val result = target.summary()(fakeRequest)
+      lazy val document = Jsoup.parse(bodyOf(result))
+
+      "return a value of 28% for the tax rate" in {
+        document.body.getElementById("calcDetails(3)").text() shouldBe "28%"
+      }
+    }
+
+    "a negative taxable gain is returned" should {
+      val target = setupTarget(TestModels.summaryIndividualFlatWithAEA, TestModels.calcModelNegativeTaxable)
+      lazy val result = target.summary()(fakeRequest)
+      lazy val document = Jsoup.parse(bodyOf(result))
+
+      "include 'Loss carried forward'" in {
+        document.select("#calcDetails").text should include(Messages("calc.summary.calculation.details.lossCarriedForward"))
+      }
+
+      "return a value of £10000 for loss carried forward" in {
+        document.body.getElementById("calcDetails(2)").text() shouldBe "£10000.00"
+      }
+    }
+
+    "a zero taxable gain is returned" should {
+      val target = setupTarget(TestModels.summaryIndividualFlatWithAEA, TestModels.calcModelZeroTaxable)
+      lazy val result = target.summary()(fakeRequest)
+      lazy val document = Jsoup.parse(bodyOf(result))
+
+      "return a value of £0.00 for taxable gain" in {
+        document.body.getElementById("calcDetails(2)").text() shouldBe "£0.00"
+      }
+    }
+
+    "a total gain of zero is returned" should {
+      val target = setupTarget(TestModels.summaryIndividualFlatWithAEA, TestModels.calcModelZeroTotal)
+      lazy val result = target.summary()(fakeRequest)
+      lazy val document = Jsoup.parse(bodyOf(result))
+
+      "return a value of £0.00 for total gain" in {
+        document.body.getElementById("calcDetails(1)").text() shouldBe "£0.00"
       }
     }
   }

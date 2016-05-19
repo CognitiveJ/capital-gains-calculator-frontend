@@ -98,6 +98,10 @@ object TestModels {
   val calcModelTwoRates = CalculationResultModel(8000, 40000, 32000, 18, Some(8000), Some(28))
   val calcModelOneRate = CalculationResultModel(8000, 40000, 32000, 20, None, None)
   val calcModelLoss = CalculationResultModel(0, -10000, 0, 18, None, None)
+  val calcModelUpperRate = CalculationResultModel(8000, 40000, 0, 0, Some(32000), Some(28))
+  val calcModelNegativeTaxable = CalculationResultModel(0, 50000, -10000, 0, None, None)
+  val calcModelZeroTaxable = CalculationResultModel(0, 50000, 0, 0, None, None)
+  val calcModelZeroTotal = CalculationResultModel(0, 0, 0, 0, None, None)
 
   val summaryIndividualFlatLoss = SummaryModel (
     CustomerTypeModel("individual"),
