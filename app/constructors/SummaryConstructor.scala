@@ -20,35 +20,34 @@ import controllers.routes
 import models.{SummaryDataItemModel, RebasedValueModel, SummaryModel, CalculationResultModel}
 import org.apache.commons.lang3.text.WordUtils
 import play.api.i18n.Messages
+import play.twirl.api.Html
 import views.html.helpers._
 import common._
+import Validation._
 
 object SummaryConstructor {
 
-  def lossOrGainWording(gain: BigDecimal): String = {
-    if (gain < 0) {
-      Messages("calc.summary.calculation.details.totalLoss")
-    } else {
-      Messages("calc.summary.calculation.details.totalGain")
+  def calcTypeMessage (calculationType: String) = {
+    calculationType match {
+      case "flat" => Messages("calc.summary.calculation.details.flatCalculation")
+      case "time" => Messages("calc.summary.calculation.details.timeCalculation")
+      case "rebased" => Messages("calc.summary.calculation.details.rebasedCalculation")
     }
   }
+
 
   //scalastyle:off
 
   def calculationDetails(result: CalculationResultModel, summary: SummaryModel) = summaryPageSection("calcDetails", Messages("calc.summary.calculation.details.title"),
-    result.upperTaxGain match {
-      case Some(data) => Array(
+    (result.totalGain, result.taxableGain) match {
+      case (totalGain, taxableGain) if isGreaterThanZero(totalGain) && isGreaterThanZero(taxableGain)=> Array(
         SummaryDataItemModel(
           Messages("calc.summary.calculation.details.calculationElection"),
-          summary.calculationElectionModel.calculationType match {
-            case "flat" => Messages("calc.summary.calculation.details.flatCalculation")
-            case "time" => Messages("calc.summary.calculation.details.timeCalculation")
-            case "rebased" => Messages("calc.summary.calculation.details.rebasedCalculation")
-          },
+          calcTypeMessage(summary.calculationElectionModel.calculationType),
           Some(routes.CalculationController.calculationElection().toString())
         ),
         SummaryDataItemModel(
-          lossOrGainWording(result.totalGain),
+          Messages("calc.summary.calculation.details.totalGain"),
           "&pound;" + result.totalGain.abs.setScale(2).toString,
           None
         ),
@@ -59,38 +58,76 @@ object SummaryConstructor {
         ),
         SummaryDataItemModel(
           Messages("calc.summary.calculation.details.taxRate"),
-          "&pound;" + result.baseTaxGain.setScale(2).toString + " at " + result.baseTaxRate + "%",
-          None
-        ),
-        SummaryDataItemModel(
-          "",
-          "&pound;" + result.upperTaxGain.get.setScale(2).toString + " at " + result.upperTaxRate.get.toString + "%",
+          (isGreaterThanZero(result.baseTaxGain), isGreaterThanZero(result.upperTaxGain.getOrElse(0))) match {
+            case (true, true)  =>
+              s"&pound;${result.baseTaxGain.setScale(2)} at ${result.baseTaxRate}%<br>&pound;${result.upperTaxGain.get.setScale(2)} at ${result.upperTaxRate.get}%"
+            case (false, true) =>
+              s"${result.upperTaxRate.get}%"
+            case _ =>
+              s"${result.baseTaxRate}%"
+          },
           None
         )
       )
-      case None => Array(
+
+      case (totalGain, taxableGain) if !isPositive(taxableGain) => Array(
         SummaryDataItemModel(
           Messages("calc.summary.calculation.details.calculationElection"),
-          summary.calculationElectionModel.calculationType match {
-            case "flat" => Messages("calc.summary.calculation.details.flatCalculation")
-            case "time" => Messages("calc.summary.calculation.details.timeCalculation")
-            case "rebased" => Messages("calc.summary.calculation.details.rebasedCalculation")
-          },
+          calcTypeMessage(summary.calculationElectionModel.calculationType),
           Some(routes.CalculationController.calculationElection().toString())
         ),
         SummaryDataItemModel(
-          lossOrGainWording(result.totalGain),
+          Messages("calc.summary.calculation.details.totalGain"),
+          "&pound;" + result.totalGain.abs.setScale(2).toString,
+          None
+        ),
+        SummaryDataItemModel(
+          Messages("calc.summary.calculation.details.lossCarriedForward"),
+          "&pound;" + result.taxableGain.abs.setScale(2).toString,
+          None
+        )
+      )
+
+      case (totalGain, taxableGain) if !isPositive(totalGain) => Array(
+        SummaryDataItemModel(
+          Messages("calc.summary.calculation.details.calculationElection"),
+          calcTypeMessage(summary.calculationElectionModel.calculationType),
+          Some(routes.CalculationController.calculationElection().toString())
+        ),
+        SummaryDataItemModel(
+          Messages("calc.summary.calculation.details.totalLoss"),
+          "&pound;" + result.totalGain.abs.setScale(2).toString,
+          None
+        )
+      )
+
+      case (totalGain, taxableGain) if isGreaterThanZero(totalGain) && isPositive(taxableGain) && !isGreaterThanZero(taxableGain) => Array(
+        SummaryDataItemModel(
+          Messages("calc.summary.calculation.details.calculationElection"),
+          calcTypeMessage(summary.calculationElectionModel.calculationType),
+          Some(routes.CalculationController.calculationElection().toString())
+        ),
+        SummaryDataItemModel(
+          Messages("calc.summary.calculation.details.totalGain"),
           "&pound;" + result.totalGain.abs.setScale(2).toString,
           None
         ),
         SummaryDataItemModel(
           Messages("calc.summary.calculation.details.taxableGain"),
-          "&pound;" + (result.baseTaxGain + result.upperTaxGain.getOrElse(0)).setScale(2).toString,
+          "&pound;" + result.taxableGain.setScale(2).toString,
           None
+        )
+      )
+
+      case (totalGain, taxableGain) if !isGreaterThanZero(totalGain) && isPositive(totalGain) => Array(
+        SummaryDataItemModel(
+          Messages("calc.summary.calculation.details.calculationElection"),
+          calcTypeMessage(summary.calculationElectionModel.calculationType),
+          Some(routes.CalculationController.calculationElection().toString())
         ),
         SummaryDataItemModel(
-          Messages("calc.summary.calculation.details.taxRate"),
-          result.baseTaxRate + "%",
+          Messages("calc.summary.calculation.details.totalGain"),
+          "&pound;" + result.totalGain.abs.setScale(2).toString,
           None
         )
       )
@@ -317,11 +354,6 @@ object SummaryConstructor {
             SummaryDataItemModel(
               Messages("calc.improvements.question"),
               summary.improvementsModel.isClaimingImprovements,
-              Some(routes.CalculationController.improvements().toString())
-            ),
-            SummaryDataItemModel(
-              Messages("calc.improvements.questionThree"),
-              "&pound;" + summary.improvementsModel.improvementsAmt.get.setScale(2),
               Some(routes.CalculationController.improvements().toString())
             ),
             SummaryDataItemModel(

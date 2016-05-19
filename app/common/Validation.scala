@@ -51,4 +51,9 @@ object Validation {
       case _ => true
     }
   }
+
+  def isGreaterThanZero (amount: BigDecimal): Boolean = {
+    if (amount > 0) true
+    else false
+  }
 }

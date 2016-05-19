@@ -25,6 +25,8 @@ object Dates {
   val datePageFormat = new SimpleDateFormat("dd MMMM yyyy")
   val taxStartDate = sf.parse("05/04/2015")
   val taxStartDatePlus18Months = sf.parse("05/10/2016")
+  val taxYearStartDate = sf.parse("05/04/2016")
+  val taxYearEndDate = sf.parse("06/04/2017")
 
   def constructDate (day: Int, month: Int, year: Int): Date = {
     sf.parse(s"$day/$month/$year")
@@ -55,6 +57,10 @@ object Dates {
         new SimpleDateFormat("d MMMMM yyyy").format(cal.getTime)
       case _ => ""
     }
+  }
+
+  def dateInsideTaxYear (day: Int, month: Int, year: Int): Boolean = {
+    constructDate(day, month, year).after(taxYearStartDate) && constructDate(day, month, year).before(taxYearEndDate)
   }
 }
 
