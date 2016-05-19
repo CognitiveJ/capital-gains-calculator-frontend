@@ -26,7 +26,7 @@ object Dates {
   val taxStartDate = sf.parse("05/04/2015")
   val taxStartDatePlus18Months = sf.parse("05/10/2016")
   val taxYearStartDate = sf.parse("05/04/2016")
-  val taxYearEndDate = sf.parse("05/04/2017")
+  val taxYearEndDate = sf.parse("06/04/2017")
 
   def constructDate (day: Int, month: Int, year: Int): Date = {
     sf.parse(s"$day/$month/$year")
